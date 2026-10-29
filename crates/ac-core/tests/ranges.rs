@@ -127,3 +127,21 @@ fn hip_twist_is_rotation() {
         "30 degrees of internal rotation: {a:?}"
     );
 }
+
+/// Past the narrow tip of the hip's ellipse (abduction 38.6, flexion 132.1) the distance to the
+/// region counts, not the band's vertical gap: 45 out and level is 45 - 38.6 = 6.4 past (the tip),
+/// straight forward at 140 is 140 - 132.1 = 7.9 past (the top).
+#[test]
+fn past_is_the_distance_to_the_region() {
+    let sk = rig();
+    let r = tables(&sk);
+    let hip = r.pair("hip_swing").expect("pair");
+    assert!((ranges::judge(hip, 45.0, 0.0).past_hard - 6.4).abs() < 1e-9);
+    assert!((ranges::judge(hip, 0.0, 140.0).past_hard - 7.9).abs() < 1e-9);
+    assert_eq!(ranges::judge(hip, 10.0, 60.0).past_hard, 0.0);
+    let far = ranges::judge(hip, 45.0, 120.0).past_hard;
+    assert!(
+        far > 6.4 && far < 60.0,
+        "45 out and 120 forward is some way past, not 120: {far}"
+    );
+}

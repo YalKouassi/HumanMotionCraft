@@ -258,12 +258,11 @@ fn closeness(v: f64, lo: f64, hi: f64) -> (f64, f64) {
 pub fn judge(spec: &PairSpec, x: f64, y: f64) -> Judged {
     let (h_lo, h_hi) = interp_band(&spec.hard, x).unwrap_or((-180.0, 180.0));
     let (t_lo, t_hi) = interp_band(&spec.typical, x).unwrap_or((h_lo, h_hi));
-    let (mut c, mut past) = closeness(y, h_lo, h_hi);
+    let (mut c, _) = closeness(y, h_lo, h_hi);
     if let Some([lo, hi]) = spec.x_hard {
-        let (cx, px) = closeness(x, lo, hi);
-        c = c.max(cx);
-        past = past.max(px);
+        c = c.max(closeness(x, lo, hi).0);
     }
+    let past = past_region(spec, x, y);
     let (tc, tp) = closeness(y, t_lo, t_hi);
     Judged {
         hard_lo: h_lo,
@@ -275,6 +274,58 @@ pub fn judge(spec: &PairSpec, x: f64, y: f64) -> Judged {
         past_hard: past,
         past_typical: tp,
     }
+}
+
+/// Degrees from `(x, y)` to the clinical region (0 inside): the band between `hard`'s lo and hi
+/// curves over `x_hard` (or every x). Distance, not the vertical gap: past the narrow tip of an
+/// ellipse the band shrinks to nothing, and a vertical gap there would count the whole other
+/// angle as past.
+fn past_region(spec: &PairSpec, x: f64, y: f64) -> f64 {
+    let (xl, xh) = spec
+        .x_hard
+        .map_or((f64::NEG_INFINITY, f64::INFINITY), |[l, h]| (l, h));
+    let band = |x: f64| interp_band(&spec.hard, x).unwrap_or((-180.0, 180.0));
+    if (xl..=xh).contains(&x) {
+        let (lo, hi) = band(x);
+        if (lo..=hi).contains(&y) {
+            return 0.0;
+        }
+        if !(xl.is_finite() && xh.is_finite()) {
+            return (lo - y).max(y - hi);
+        }
+    } else if !(xl.is_finite() && xh.is_finite()) {
+        let (lo, hi) = band(x);
+        return (lo - y).max(y - hi).max(0.0);
+    }
+    // The region's outline: the band's points inside [xl, xh] and its ends at xl and xh.
+    let mut xs: Vec<f64> = vec![xl, xh];
+    xs.extend(spec.hard.iter().map(|b| b.x).filter(|v| *v > xl && *v < xh));
+    xs.sort_by(f64::total_cmp);
+    let upper: Vec<(f64, f64)> = xs.iter().map(|&v| (v, band(v).1)).collect();
+    let lower: Vec<(f64, f64)> = xs.iter().map(|&v| (v, band(v).0)).collect();
+    let mut best = f64::INFINITY;
+    let mut seg = |a: (f64, f64), b: (f64, f64)| {
+        let (dx, dy) = (b.0 - a.0, b.1 - a.1);
+        let len2 = dx * dx + dy * dy;
+        let t = if len2 > 0.0 {
+            (((x - a.0) * dx + (y - a.1) * dy) / len2).clamp(0.0, 1.0)
+        } else {
+            0.0
+        };
+        best = best.min((x - a.0 - t * dx).hypot(y - a.1 - t * dy));
+    };
+    for w in upper.windows(2).chain(lower.windows(2)) {
+        if let [a, b] = w {
+            seg(*a, *b);
+        }
+    }
+    if let (Some(u0), Some(l0), Some(u1), Some(l1)) =
+        (upper.first(), lower.first(), upper.last(), lower.last())
+    {
+        seg(*l0, *u0);
+        seg(*l1, *u1);
+    }
+    if best.is_finite() { best } else { 0.0 }
 }
 
 fn r4(x: f64) -> f64 {
