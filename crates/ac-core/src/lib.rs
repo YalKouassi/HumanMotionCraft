@@ -12,6 +12,7 @@
 )]
 
 pub mod ai;
+pub mod anatomy;
 mod batch;
 pub mod clip;
 pub mod clipfile;
@@ -20,6 +21,7 @@ pub mod commands;
 pub mod critique;
 pub mod diff;
 pub mod document;
+pub mod ease;
 pub mod editor;
 pub mod edits;
 pub mod error;
@@ -40,6 +42,7 @@ pub mod posequery;
 pub mod problems;
 pub mod product;
 pub mod quat;
+pub mod ranges;
 pub mod retime;
 pub mod rig;
 pub mod session;

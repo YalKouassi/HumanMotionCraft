@@ -561,6 +561,47 @@ Outputs:
 | `id` | text | yes |  | the library id |
 | `length` | integer | yes |  | frames |
 
+### `clip.range`: Joint range of motion
+
+not undoable, icon `graph`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `pair` | one of hip_knee \| ankle_knee \| hip_swing \| shoulder_swing \| trunk_bend \| neck_bend |  |  | coupled joint pair (default: hip_knee) |
+| `side` | one of L \| R |  |  | left or right side on sided pairs (default: L) |
+| `from` | integer |  | 0 to 10000000 | first frame (default 0) |
+| `to` | integer |  | 0 to 10000000 | last frame (default: the last) |
+| `motion` | one of shown \| keys |  |  | what plays (the physics pass when it is on; default) or the keys alone |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `pair` | text | yes |  | the pair id |
+| `label` | text | yes |  | the pair's readable name |
+| `sided` | bool | yes |  | whether the pair has left and right sides |
+| `side` | text | yes |  | "L" or "R" (null on trunk_bend and neck_bend) |
+| `note` | text | yes |  | anatomical coupling note |
+| `limits_note` | text | yes |  | which source each clinical limit comes from, and what joining between them is ours |
+| `from` | integer | yes |  | first frame measured |
+| `to` | integer | yes |  | last frame measured |
+| `frames` | integer | yes |  | frames measured |
+| `motion` | one of shown \| keys | yes |  | the motion measured |
+| `x` | JSON | yes |  | {joint, component, label, hard: [lo, hi] or null} of the horizontal angle (degrees) |
+| `y` | JSON | yes |  | {joint, component, label, hard: null} of the vertical angle |
+| `hard` | JSON | yes |  | [{x, lo, hi}] clinical hard limit band (degrees) |
+| `typical` | JSON | yes |  | [{x, lo, hi, count}] 1st-99th percentile mocap envelope (degrees) |
+| `playhead` | JSON | yes |  | {frame, x, y, hard_lo, hard_hi, typical_lo, typical_hi, closeness, past_hard_deg, past_typical_deg} of the pose shown |
+| `path` | JSON | yes |  | per frame: [{frame, x, y, hard_lo, hard_hi, typical_lo, typical_hi, closeness, typical_closeness, past_hard_deg, past_typical_deg}] |
+| `max_closeness` | number | yes |  | highest closeness to the hard limit across the measured frames (1.0 = on the edge, > 1.0 = past it) |
+| `outside_hard` | JSON | yes |  | {frames, spans: [[a, b]], max_deg, worst_frame} past the clinical hard limit |
+| `outside_typical` | JSON | yes |  | {frames, spans: [[a, b]], max_deg, worst_frame} outside the mocap typical band |
+| `summary` | JSON | yes |  | every pair and side: [{pair, label, side, max_closeness, peak_frame, outside_hard_frames, outside_hard_spans, max_past_hard_deg, worst_frame}] |
+| `sources` | JSON | yes |  | [{id, title, url, note}] clinical and mocap reference sources |
+| `notes` | list of text | yes |  | what was not checked, and why |
+
 ### `clip.rename`: Rename animation
 
 undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `rename`.

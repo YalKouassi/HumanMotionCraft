@@ -1,25 +1,407 @@
 //! The panels around the viewport: library and inspector at the sides (either way round), the
-//! timeline below, each resizable, shown or hidden from View, their sizes saved; Ctrl+Space
-//! maximises the viewport. (craft-ui's docking was looked at and not used yet: it would re-host
-//! every panel while other work changes them; egui's resizable panels give sizes, sides and
-//! hiding now.)
+//! timeline below, and `craft_ui::docking` hosting the 3D viewport canvas alongside any dockable
+//! or pop-out tool panels (`Range`, `Picker`, `Joint`, `Layers`, `Physics`, `Scene`, `AI`,
+//! `Text`, `Pins`). With `craft-ui`'s `native-windows` feature, any floating panel opens in its
+//! own native OS window so it can be dragged onto a separate monitor and docked back by dragging
+//! its title bar into the main window (or clicking its header button).
+
+use craft_ui::docking::{
+    Action, Column, DockArea, DockContent, DockStyle, Group, HidePanels, Layout as DockLayout, Node,
+    PanelLimits, Permissions, Side as DockSide, Target, WindowKind, Workspace,
+};
+use craft_ui::layout::{SplitAxis, SplitSize};
+use serde::{Deserialize, Serialize};
 
 use super::super::App;
 use super::super::prefs::{Layout, Side};
+use crate::app::ui_ids::Tag;
+
+/// Every panel that `craft_ui::docking` can dock, tab, split or float onto a second monitor.
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Hash, Debug)]
+#[serde(rename_all = "snake_case")]
+pub enum DockPanel {
+    Viewport,
+    Range,
+    Picker,
+    Joint,
+    Layers,
+    Physics,
+    Scene,
+    Ai,
+    Text,
+    Pins,
+}
+
+impl DockPanel {
+    /// All tool panels (everything except the protected `Viewport` canvas).
+    pub const TOOL_PANELS: &[DockPanel] = &[
+        DockPanel::Range,
+        DockPanel::Picker,
+        DockPanel::Joint,
+        DockPanel::Layers,
+        DockPanel::Physics,
+        DockPanel::Scene,
+        DockPanel::Ai,
+        DockPanel::Text,
+        DockPanel::Pins,
+    ];
+
+    pub const fn id_str(self) -> &'static str {
+        match self {
+            DockPanel::Viewport => "viewport",
+            DockPanel::Range => "range",
+            DockPanel::Picker => "picker",
+            DockPanel::Joint => "joint",
+            DockPanel::Layers => "layers",
+            DockPanel::Physics => "physics",
+            DockPanel::Scene => "scene",
+            DockPanel::Ai => "ai",
+            DockPanel::Text => "text",
+            DockPanel::Pins => "pins",
+        }
+    }
+
+    pub const fn short_label(self) -> &'static str {
+        match self {
+            DockPanel::Viewport => "Viewport",
+            DockPanel::Range => "Range",
+            DockPanel::Picker => "Picker",
+            DockPanel::Joint => "Joint",
+            DockPanel::Layers => "Layers",
+            DockPanel::Physics => "Physics",
+            DockPanel::Scene => "Scene boxes",
+            DockPanel::Ai => "AI in-between",
+            DockPanel::Text => "Motion from text",
+            DockPanel::Pins => "Pins",
+        }
+    }
+
+    pub fn title(self, app: &App) -> String {
+        match self {
+            DockPanel::Viewport => "Viewport".into(),
+            DockPanel::Range => {
+                let n = app.panels.range.outside_frames;
+                if n > 0 {
+                    format!("Range ({n} past limit)")
+                } else {
+                    "Range".into()
+                }
+            }
+            DockPanel::Picker => "Picker".into(),
+            DockPanel::Joint => "Joint".into(),
+            DockPanel::Layers => {
+                format!("Layers ({})", app.session.document.clip.layers.len())
+            }
+            DockPanel::Physics => {
+                let n = app.panels.physics.marks.len();
+                if n > 0 {
+                    format!("Physics ({n} problems)")
+                } else {
+                    "Physics".into()
+                }
+            }
+            DockPanel::Scene => {
+                format!("Scene boxes ({})", app.session.document.clip.surfaces.len())
+            }
+            DockPanel::Ai => "AI in-between".into(),
+            DockPanel::Text => "Motion from text".into(),
+            DockPanel::Pins => "Pins".into(),
+        }
+    }
+}
+
+pub fn dock_permissions(panel: &DockPanel) -> Permissions {
+    match panel {
+        DockPanel::Viewport => Permissions {
+            accepts_splits: true,
+            ..Permissions::PROTECTED
+        },
+        _ => Permissions::default(),
+    }
+}
+
+/// Default docking workspace: `Viewport` is the stripless central canvas, and all tool panels have
+/// their home location in a right-hand dock column (`DockSide::End`), hidden until toggled on.
+pub fn default_dock_workspace() -> Workspace<DockPanel> {
+    let canvas = Node::Tabs {
+        panels: vec![DockPanel::Viewport],
+        active: 0,
+    };
+    let dock = Node::Dock {
+        side: DockSide::End,
+        columns: vec![Column::new(
+            vec![
+                Group::new(vec![DockPanel::Range], 0),
+                Group::new(vec![DockPanel::Picker], 0),
+                Group::new(
+                    vec![
+                        DockPanel::Joint,
+                        DockPanel::Layers,
+                        DockPanel::Physics,
+                        DockPanel::Scene,
+                        DockPanel::Ai,
+                        DockPanel::Text,
+                        DockPanel::Pins,
+                    ],
+                    0,
+                ),
+            ],
+            300.0,
+        )],
+    };
+    let layout = DockLayout {
+        root: Some(Node::Split {
+            axis: SplitAxis::Horizontal,
+            size: SplitSize::FixedSecond(300.0),
+            first: Box::new(canvas),
+            second: Box::new(dock),
+        }),
+        floating: Vec::new(),
+    };
+    let mut ws = Workspace::new(layout);
+    for &p in DockPanel::TOOL_PANELS {
+        let _ = ws.set_visible(p, false, None, dock_permissions);
+    }
+    ws
+}
+
+pub fn load_dock_workspace(json_str: &str) -> Workspace<DockPanel> {
+    let def = default_dock_workspace();
+    if json_str.trim().is_empty() {
+        return def;
+    }
+    match serde_json::from_str::<Workspace<DockPanel>>(json_str) {
+        Ok(mut ws) => {
+            ws.reconcile(|_| true, dock_permissions, &def);
+            ws
+        }
+        Err(_) => def,
+    }
+}
+
+struct DockAdapter<'a> {
+    app: &'a mut App,
+    to_float: Option<DockPanel>,
+    to_dock: Option<DockPanel>,
+    to_close: Option<DockPanel>,
+}
+
+impl DockContent<DockPanel> for DockAdapter<'_> {
+    fn body(&mut self, ui: &mut egui::Ui, panel: &DockPanel) {
+        match panel {
+            DockPanel::Viewport => {
+                let rect = self.app.viewport(ui);
+                self.app.shell.viewport_rect = Some(rect);
+            }
+            DockPanel::Range => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-range")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.range_panel(ui));
+            }
+            DockPanel::Picker => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-picker")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.picker_body(ui));
+            }
+            DockPanel::Joint => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-joint")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.joint_panel(ui));
+            }
+            DockPanel::Layers => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-layers")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.layers_panel(ui));
+            }
+            DockPanel::Physics => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-physics")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.physics_panel(ui));
+            }
+            DockPanel::Scene => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-scene")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.scene_panel(ui));
+            }
+            DockPanel::Ai => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-ai")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.ai_panel(ui));
+            }
+            DockPanel::Text => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-text")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.text_panel(ui));
+            }
+            DockPanel::Pins => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-pins")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.pins_panel(ui));
+            }
+        }
+    }
+
+    fn logical_label(&self, panel: &DockPanel) -> String {
+        panel.title(self.app)
+    }
+
+    fn permissions(&self, panel: &DockPanel) -> Permissions {
+        dock_permissions(panel)
+    }
+
+    fn limits(&self, panel: &DockPanel) -> PanelLimits {
+        match panel {
+            DockPanel::Viewport => PanelLimits {
+                min: egui::vec2(200.0, 160.0),
+                ..PanelLimits::default()
+            },
+            DockPanel::Picker => PanelLimits {
+                min: egui::vec2(200.0, 180.0),
+                ..PanelLimits::default()
+            },
+            _ => PanelLimits {
+                min: egui::vec2(220.0, 160.0),
+                ..PanelLimits::default()
+            },
+        }
+    }
+
+    fn floating_size(&self, panel: &DockPanel) -> Option<egui::Vec2> {
+        Some(match panel {
+            DockPanel::Range => egui::vec2(340.0, 440.0),
+            DockPanel::Picker => egui::vec2(220.0, 380.0),
+            _ => egui::vec2(300.0, 360.0),
+        })
+    }
+
+    fn window_kind(&self, _panel: &DockPanel) -> WindowKind {
+        WindowKind::Normal
+    }
+
+    fn group_header_width(
+        &self,
+        _panels: &[DockPanel],
+        active: &DockPanel,
+        _floating: bool,
+        _strip_width: f32,
+    ) -> f32 {
+        if *active == DockPanel::Viewport { 0.0 } else { 64.0 }
+    }
+
+    fn group_header(&mut self, ui: &mut egui::Ui, _panels: &[DockPanel], active: &DockPanel, floating: bool) {
+        if *active == DockPanel::Viewport {
+            return;
+        }
+        let id = active.id_str();
+        ui.horizontal(|ui| {
+            ui.spacing_mut().item_spacing.x = 3.0;
+            if floating {
+                if ui
+                    .small_button("Dock")
+                    .on_hover_text("Dock this panel back into the main window")
+                    .tag(format!("dock.header.dock.{id}"), "Dock")
+                    .clicked()
+                {
+                    self.to_dock = Some(*active);
+                }
+            } else if ui
+                .small_button("Pop")
+                .on_hover_text("Pop out into a floating OS window (can be dragged to a second monitor)")
+                .tag(format!("dock.header.float.{id}"), "Pop")
+                .clicked()
+            {
+                self.to_float = Some(*active);
+            }
+            if ui
+                .small_button("×")
+                .on_hover_text("Close this panel")
+                .tag(format!("dock.header.close.{id}"), "Close")
+                .clicked()
+            {
+                self.to_close = Some(*active);
+            }
+        });
+    }
+}
 
 impl App {
-    /// The panels and the viewport, laid out as the preferences say.
-    pub(in crate::app) fn panels(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+    /// Whether `panel` is currently open in the docking workspace (docked or floating).
+    pub(in crate::app) fn is_dock_panel_open(&self, panel: DockPanel) -> bool {
+        self.shell.dock.layout.contains(&panel)
+    }
+
+    /// Show or hide `panel` in the docking workspace and keep `view.range` / `view.picker` in sync.
+    pub(in crate::app) fn set_dock_panel(&mut self, panel: DockPanel, open: bool) {
+        let _ = self.shell.dock.set_visible(panel, open, None, dock_permissions);
+        self.sync_dock_flags();
+    }
+
+    /// Pop `panel` out into its own floating window (a native OS window on desktop).
+    pub(in crate::app) fn float_dock_panel(&mut self, panel: DockPanel) {
+        if !self.is_dock_panel_open(panel) {
+            let _ = self.shell.dock.set_visible(panel, true, None, dock_permissions);
+        }
+        let size = match panel {
+            DockPanel::Range => [340.0, 440.0],
+            DockPanel::Picker => [220.0, 380.0],
+            _ => [300.0, 360.0],
+        };
+        let _ = self.shell.dock.apply(
+            Action::MovePanel {
+                panel,
+                to: Target::Float {
+                    rect: Some([120.0, 90.0, size[0], size[1]]),
+                },
+            },
+            dock_permissions,
+        );
+        self.sync_dock_flags();
+    }
+
+    /// Dock a floating `panel` back into the right-hand dock column.
+    pub(in crate::app) fn dock_panel_home(&mut self, panel: DockPanel) {
+        let _ = self.shell.dock.apply(
+            Action::MovePanel {
+                panel,
+                to: Target::NewDock { side: DockSide::End },
+            },
+            dock_permissions,
+        );
+        self.sync_dock_flags();
+    }
+
+    pub(in crate::app) fn sync_dock_flags(&mut self) {
+        self.view.range = self.shell.dock.layout.contains(&DockPanel::Range);
+        self.view.picker = self.shell.dock.layout.contains(&DockPanel::Picker);
+        if !self.view.picker {
+            self.layout["picker"] = serde_json::Value::Null;
+        }
+    }
+
+    /// The panels and the viewport, laid out as the preferences and docking workspace say.
+    pub(in crate::app) fn panels(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
+        // Background panel work runs every frame whether the Inspector or a dock panel is open.
+        self.ai_poll();
+        self.text_poll(ui.ctx());
+        self.physics_refresh();
+        self.range_refresh();
+        self.sync_dock_flags();
+
         let l = self.shell.prefs.get().layout.clone();
         let full = self.shell.maximised;
         let g = self.shell.layout_gen;
         let id = |name: &'static str| (name, g, 0u32);
         let mut sizes = (None, None, None);
         if l.show_timeline && !full {
-            // Until the person drags its top edge the timeline fits its content exactly (the
-            // dope sheet makes it taller); after that it keeps their height and scrolls. The
-            // panel's id stays the same either way, so a drag on the timeline survives a change
-            // of its height.
             let natural = self.shell.timeline_natural;
             let manual = l.timeline_height > 0.0;
             if let Some(edge) = self.shell.timeline_rect {
@@ -54,7 +436,6 @@ impl App {
             if let Some((content, shown)) = inner {
                 self.shell.timeline_natural = content + (outer - shown).max(0.0);
             }
-            // the fitted height catches up with the content a frame later (agents wait for it)
             self.shell.layout_settling =
                 !manual && !resizing && (self.shell.timeline_natural - outer).abs() > 1.0;
             if manual || (resizing && (outer - natural).abs() > 2.0) {
@@ -98,11 +479,46 @@ impl App {
                 .show(ui, |ui| self.inspector(ui));
             sizes.2 = Some(r.response.rect.width());
         }
-        let r = egui::CentralPanel::default().show(ui, |ui| self.viewport(ui, frame));
-        self.shell.viewport_rect = Some(r.response.rect);
-        // sizes are saved once a resize ends
+
+        egui::CentralPanel::default().show(ui, |ui| {
+            let mut style = DockStyle::from_ui(ui);
+            style.drag_bar_width = 24.0;
+            let layout_snapshot = self.shell.dock.layout.clone();
+            let native_ok = self.screenshot.is_none() && self.control.is_none();
+            let hide = if full { HidePanels::All } else { HidePanels::None };
+            let mut adapter = DockAdapter {
+                app: self,
+                to_float: None,
+                to_dock: None,
+                to_close: None,
+            };
+            let out = DockArea::new(egui::Id::unique(("workspace-dock", g)))
+                .input_blocked(adapter.app.confirm.is_some())
+                .native_windows(native_ok)
+                .hide_panels(hide)
+                .show_content(ui, &layout_snapshot, &style, &mut adapter);
+            let to_float = adapter.to_float;
+            let to_dock = adapter.to_dock;
+            let to_close = adapter.to_close;
+            if !out.actions.is_empty() {
+                let _ = self.shell.dock.apply_all(out.actions, dock_permissions);
+                self.sync_dock_flags();
+            }
+            if let Some(p) = to_float {
+                self.float_dock_panel(p);
+            }
+            if let Some(p) = to_dock {
+                self.dock_panel_home(p);
+            }
+            if let Some(p) = to_close {
+                self.set_dock_panel(p, false);
+            }
+        });
+
+        // sizes and docking workspace are saved once a resize/drag ends
         if !ui.ctx().input(|i| i.pointer.any_down()) {
             self.shell.timeline_resizing = false;
+            let dock_json = serde_json::to_string(&self.shell.dock).unwrap_or_default();
             self.shell.prefs.update(|p| {
                 let near = |a: f32, b: f32| (a - b).abs() < 0.5;
                 if let Some(h) = sizes.0.filter(|h| !near(*h, p.layout.timeline_height)) {
@@ -114,12 +530,17 @@ impl App {
                 if let Some(w) = sizes.2.filter(|w| !near(*w, p.layout.inspector_width)) {
                     p.layout.inspector_width = w;
                 }
+                if p.layout.dock_json != dock_json {
+                    p.layout.dock_json = dock_json;
+                }
             });
         }
     }
 
-    /// View > Reset layout: default sizes and places, every panel shown.
+    /// View > Reset layout: default sizes and places, every panel returned to its default home.
     pub(in crate::app) fn reset_layout(&mut self, ctx: &egui::Context) {
+        self.shell.dock = default_dock_workspace();
+        self.sync_dock_flags();
         self.shell.prefs.update(|p| p.layout = Layout::default());
         self.shell.maximised = false;
         // new panel ids: egui forgets the sizes it kept for the old ones

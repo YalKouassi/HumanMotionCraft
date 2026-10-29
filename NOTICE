@@ -28,6 +28,15 @@ B. Hahne.)
 https://zenodo.org/record/8127870), licensed under CC BY 4.0
 (https://creativecommons.org/licenses/by/4.0/). Retargeted onto the rig and cut into 3-second clips.
 
+Open Motion Project by the Advanced Computing Center for the Arts and Design (ACCAD), The Ohio
+State University (https://accad.osu.edu/research/motion-lab/mocap-system-and-data), licensed under
+CC BY 3.0 Unported (https://creativecommons.org/licenses/by/3.0/). Retargeted onto the rig.
+
+AddBiomechanics Dataset 1.0 by Keenon Werling, Nicholas A. Bianco, Michael Raitor, Jon Stingel,
+ Jennifer L. Hicks, Steven H. Collins, Scott L. Delp and C. Karen Liu
+(https://addbiomechanics.org/download_data.html), licensed under CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/). Retargeted onto the rig.
+
 Motion from text (optional, installed separately from the app's Motion from text panel or by
 tools/textmotion/setup_textmotion.py), the
 85 built-in library clips we generated with it ("dataset": "kimodo"), and the generated motion in

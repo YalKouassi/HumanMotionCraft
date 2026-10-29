@@ -78,8 +78,8 @@ TYPES = [
 
 
 def classify(take: str):
-    # a generated take is "<type>_kimodo_<prompt name>": only its type says what it is
-    t = take.lower().split("_kimodo_")[0]
+    # a generated, ACCAD or AddBiomechanics take is "<type>_<set>_<stem>": only its type says what it is
+    t = re.split(r"_(?:kimodo|accad|addbiomechanics)_", take.lower())[0]
     for pattern, group, name in TYPES:
         if re.search(pattern, t):
             return group, name

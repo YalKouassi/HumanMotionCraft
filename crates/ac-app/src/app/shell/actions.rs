@@ -297,6 +297,12 @@ pub static ACTIONS: &[Action] = &[
         .check()
         .doc("the keyed pose behind the physics pass, the AI preview"),
     a("app.dope", "Dope sheet", "View", &[]).check(),
+    a("app.range", "Range panel", "View", &[])
+        .check()
+        .doc("coupled joint range-of-motion chart and clinical hard limits"),
+    a("app.picker", "Picker panel", "View", &[])
+        .check()
+        .doc("pick joints and body parts on a small figure"),
     a("app.library", "Library panel", "View", &[]).check(),
     a("app.inspector", "Inspector panel", "View", &[]).check(),
     a("app.timeline", "Timeline panel", "View", &[]).check(),
@@ -483,6 +489,8 @@ impl App {
             "app.overlay" => self.show_overlay,
             "app.ghost" => self.show_ghost,
             "app.dope" => self.timeline.dope,
+            "app.range" => self.is_dock_panel_open(super::DockPanel::Range),
+            "app.picker" => self.is_dock_panel_open(super::DockPanel::Picker),
             "app.library" => p.layout.show_library,
             "app.inspector" => p.layout.show_inspector,
             "app.timeline" => p.layout.show_timeline,
@@ -530,6 +538,14 @@ impl App {
             "app.overlay" => self.show_overlay = !self.show_overlay,
             "app.ghost" => self.show_ghost = !self.show_ghost,
             "app.dope" => self.timeline.dope = !self.timeline.dope,
+            "app.range" => {
+                let on = self.is_dock_panel_open(super::DockPanel::Range);
+                self.set_dock_panel(super::DockPanel::Range, !on);
+            }
+            "app.picker" => {
+                let on = self.is_dock_panel_open(super::DockPanel::Picker);
+                self.set_dock_panel(super::DockPanel::Picker, !on);
+            }
             "app.library" => {
                 self.shell
                     .prefs

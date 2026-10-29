@@ -189,8 +189,9 @@ impl crate::document::Document {
         })
     }
 
-    /// Fill between two manual keys (`None`: the ones around the playhead) with the model, then
-    /// plant the feet that stand still in both keys. Returns the span and the model label.
+    /// Fill between two manual keys (`None`: the ones around the playhead) with the model, ease it
+    /// through a key it shares with another filled span (`ease.rs`), then plant the feet that
+    /// stand still in both keys. Returns the span and the model label.
     pub fn ai_fill(&mut self, span: Option<(i64, i64)>) -> R<(i64, i64, String)> {
         let out = self.fill_clip(span)?;
         let f = self.frame;
@@ -219,6 +220,7 @@ impl crate::document::Document {
         if !note.is_empty() {
             return Err(note);
         }
+        self.ease_borders(a, b)?;
         self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
         Ok((a, b, filler.label()))
     }
@@ -347,6 +349,7 @@ impl crate::document::Document {
                 && !crate::edits::generated_in(&self.clip, a, b)
                 && crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?.is_empty()
             {
+                self.ease_borders(a, b)?;
                 self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
             }
         }

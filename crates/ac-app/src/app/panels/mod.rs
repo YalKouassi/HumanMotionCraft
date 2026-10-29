@@ -7,6 +7,7 @@ pub mod ai_worker;
 pub mod joint;
 pub mod layers;
 pub mod physics;
+pub mod range;
 pub mod scene;
 pub mod text;
 pub mod text_install;
@@ -17,6 +18,7 @@ pub struct Panels {
     pub joint: joint::JointState,
     pub ai: ai::AiState,
     pub physics: physics::PhysicsState,
+    pub range: range::RangeState,
     pub scene: scene::SceneState,
     pub layers: layers::LayersState,
     pub text: text::TextState,
@@ -45,6 +47,24 @@ impl super::App {
                 self.panels.layers.pick(i);
             }
             "prompt" => self.panels.text.prompt = value.to_string(),
+            "range_pair" => {
+                if let Some(r) = self.session.document.ranges.as_deref() {
+                    r.pair(value)?;
+                }
+                self.panels.range.pair = value.to_string();
+                self.panels.range.made_for = None;
+            }
+            "range_side" => match value {
+                "L" | "l" | "left" => {
+                    self.panels.range.side = "L".into();
+                    self.panels.range.made_for = None;
+                }
+                "R" | "r" | "right" => {
+                    self.panels.range.side = "R".into();
+                    self.panels.range.made_for = None;
+                }
+                _ => return Err("L or R".into()),
+            },
             "travel" => match value {
                 "preview" => self.preview_travel(),
                 "off" => self.panels.layers.clear_travel(),

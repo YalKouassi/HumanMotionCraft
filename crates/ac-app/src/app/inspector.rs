@@ -1,18 +1,16 @@
 //! The right panel: a summary, then one collapsible section per panel (`panels/`): the selected
 //! joint, layers, physics report, scene boxes, the AI in-between, motion from text, and pins.
+//! Any section (as well as `Range` and `Picker` from the viewport toolbar) can also be opened as
+//! its own dockable or pop-out native-window panel via `craft_ui::docking` (`shell/layout.rs`).
 
 use serde_json::json;
 
 use super::App;
+use super::shell::DockPanel;
 use crate::app::ui_ids::Tag;
 
 impl App {
     pub(super) fn inspector(&mut self, ui: &mut egui::Ui) {
-        // what runs whether a section is open or not: a finished AI preview, the physics report
-        // the timeline marks come from (Shift+A is `ai.toggle`'s shortcut, in the keymap)
-        self.ai_poll();
-        self.text_poll(ui.ctx());
-        self.physics_refresh();
         egui::ScrollArea::vertical()
             .auto_shrink([false, false])
             .show(ui, |ui| self.inspector_body(ui));
@@ -34,25 +32,74 @@ impl App {
         let problems = self.panels.physics.marks.len();
         let boxes = self.session.document.clip.surfaces.len();
         let layers = self.session.document.clip.layers.len();
-        section(ui, "Joint", true, |ui| self.joint_panel(ui));
-        section(ui, &format!("Layers ({layers})"), true, |ui| {
-            self.layers_panel(ui)
-        });
+        self.inspector_section(ui, DockPanel::Joint, "Joint", true, |app, ui| app.joint_panel(ui));
+        self.inspector_section(
+            ui,
+            DockPanel::Layers,
+            &format!("Layers ({layers})"),
+            true,
+            |app, ui| app.layers_panel(ui),
+        );
         let physics = if problems > 0 {
             format!("Physics ({problems} problems)")
         } else {
             "Physics".into()
         };
-        section(ui, &physics, true, |ui| self.physics_panel(ui));
-        section(ui, &format!("Scene boxes ({boxes})"), boxes > 0, |ui| {
-            self.scene_panel(ui)
+        self.inspector_section(ui, DockPanel::Physics, &physics, true, |app, ui| {
+            app.physics_panel(ui)
         });
-        section(ui, "AI in-between", true, |ui| self.ai_panel(ui));
-        section(ui, "Motion from text", true, |ui| self.text_panel(ui));
-        section(ui, "Pins", false, |ui| self.pins_panel(ui));
+        self.inspector_section(
+            ui,
+            DockPanel::Scene,
+            &format!("Scene boxes ({boxes})"),
+            boxes > 0,
+            |app, ui| app.scene_panel(ui),
+        );
+        self.inspector_section(ui, DockPanel::Ai, "AI in-between", true, |app, ui| {
+            app.ai_panel(ui)
+        });
+        self.inspector_section(ui, DockPanel::Text, "Motion from text", true, |app, ui| {
+            app.text_panel(ui)
+        });
+        self.inspector_section(ui, DockPanel::Pins, "Pins", false, |app, ui| app.pins_panel(ui));
     }
 
-    fn pins_panel(&mut self, ui: &mut egui::Ui) {
+    /// A collapsible section in the Inspector; when `panel` is open in the docking workspace (as
+    /// its own docked tab or floating second-monitor window), shows a button to return it here
+    /// instead of drawing it twice.
+    fn inspector_section(
+        &mut self,
+        ui: &mut egui::Ui,
+        panel: DockPanel,
+        title: &str,
+        open: bool,
+        body: impl FnOnce(&mut Self, &mut egui::Ui),
+    ) {
+        let id = title.split(' ').next().unwrap_or(title);
+        let tag_id = format!("panel.{}", id.to_lowercase());
+        if self.is_dock_panel_open(panel) {
+            ui.horizontal(|ui| {
+                ui.label(egui::RichText::new(title).strong()).tag(&tag_id, title);
+                if ui
+                    .small_button("Return")
+                    .on_hover_text("Close the standalone panel and return this section to the Inspector")
+                    .tag(format!("{tag_id}.return"), "Return")
+                    .clicked()
+                {
+                    self.set_dock_panel(panel, false);
+                }
+            });
+            return;
+        }
+        egui::CollapsingHeader::new(egui::RichText::new(title).strong())
+            .id_salt(id)
+            .default_open(open)
+            .show(ui, |ui| body(self, ui))
+            .header_response
+            .tag(tag_id, title);
+    }
+
+    pub(in crate::app) fn pins_panel(&mut self, ui: &mut egui::Ui) {
         let pins: Vec<String> = self.session.document.pins.keys().cloned().collect();
         if pins.is_empty() {
             ui.label(
@@ -83,15 +130,4 @@ impl App {
             self.run("pins.clear", json!({}));
         }
     }
-}
-
-/// A collapsible section (its id is its first word, so a count in the title doesn't reset it).
-fn section(ui: &mut egui::Ui, title: &str, open: bool, body: impl FnOnce(&mut egui::Ui)) {
-    let id = title.split(' ').next().unwrap_or(title);
-    egui::CollapsingHeader::new(egui::RichText::new(title).strong())
-        .id_salt(id)
-        .default_open(open)
-        .show(ui, body)
-        .header_response
-        .tag(format!("panel.{}", id.to_lowercase()), title);
 }

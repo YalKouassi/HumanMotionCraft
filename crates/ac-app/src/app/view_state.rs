@@ -33,8 +33,10 @@ pub struct ViewAids {
     pub trails: bool,
     /// Frames each side of the playhead a trail shows (0: the whole animation).
     pub trail_span: u32,
-    /// The body-part picker over the viewport's right side.
+    /// The body-part picker panel (docked or floating).
     pub picker: bool,
+    /// The coupled range-of-motion panel (docked or floating).
+    pub range: bool,
     /// Finger and face handles too (the rig's `game` profile, not just `body`).
     pub all_handles: bool,
     /// The rotate gizmo turns about the joint's own axes (else the world's).
@@ -60,6 +62,7 @@ impl Default for ViewAids {
             trails: false,
             trail_span: 0,
             picker: false,
+            range: false,
             all_handles: false,
             local: false,
             follow: false,
@@ -73,7 +76,7 @@ impl Default for ViewAids {
 }
 
 /// The names `--ui` (and the control port's `ui` op) take, the app's own first.
-pub const UI_NAMES: &str = "tab, search, dope, overlay, ghost, tool, camera, zoom, onion, onion_count, onion_step, trails, trail_span, picker, handles, gizmo, ortho, follow, select";
+pub const UI_NAMES: &str = "tab, search, dope, overlay, ghost, tool, camera, zoom, onion, onion_count, onion_step, trails, trail_span, picker, range, handles, gizmo, ortho, follow, select";
 
 fn on(value: &str) -> Result<bool, String> {
     match value {
@@ -155,7 +158,14 @@ impl App {
             "onion_step" => v.onion_step = number(value, 1, MAX_ONION_STEP)?,
             "trails" => v.trails = on(value)?,
             "trail_span" => v.trail_span = number(value, 0, MAX_TRAIL_SPAN)?,
-            "picker" => v.picker = on(value)?,
+            "picker" => {
+                let b = on(value)?;
+                self.set_dock_panel(super::shell::DockPanel::Picker, b);
+            }
+            "range" => {
+                let b = on(value)?;
+                self.set_dock_panel(super::shell::DockPanel::Range, b);
+            }
             "handles" => {
                 v.all_handles = match value {
                     "body" => false,

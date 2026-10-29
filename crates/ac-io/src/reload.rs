@@ -43,6 +43,9 @@ fn reload_limits(doc: &mut Document) -> Out {
         .map_err(|e| format!("{}: {e} (the joint limits in use are kept)", path.display()))?;
     let bones = limits.lo.len();
     doc.limits = Some(Arc::new(limits));
+    let ranges = crate::setup::load_ranges(assets(doc)?, &doc.skeleton)
+        .map_err(|e| format!("{e} (the tables in use are kept)"))?;
+    doc.ranges = Some(Arc::new(ranges));
     Ok(json!({ "bones": bones }))
 }
 
