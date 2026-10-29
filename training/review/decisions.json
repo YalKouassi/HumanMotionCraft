@@ -2,6 +2,9279 @@
   "format": "humanmotioncraft.review",
   "version": 1,
   "takes": {
+    "100style/run_100style_BR_045": {
+      "status": "cut",
+      "cuts": [
+        [
+          1265,
+          1270
+        ],
+        [
+          1286,
+          1310
+        ],
+        [
+          1372,
+          1373
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 5/2980) with the scan's cuts",
+      "frames": 2980,
+      "by": "agent"
+    },
+    "accad/fight_accad_male2_extended_2": {
+      "status": "cut",
+      "cuts": [
+        [
+          67,
+          71
+        ],
+        [
+          89,
+          104
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.abduction, 2/533) with the scan's cuts",
+      "frames": 533,
+      "by": "agent"
+    },
+    "accad/walk_accad_eric1": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          63
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 59/306) with the scan's cuts",
+      "frames": 306,
+      "by": "agent"
+    },
+    "accad/walk_accad_female1_b15_walkturnaround180": {
+      "status": "cut",
+      "cuts": [
+        [
+          311,
+          318
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.flexion, hip.rotation, 3/319) with the scan's cuts",
+      "frames": 319,
+      "by": "agent"
+    },
+    "addbiomechanics/dance_addbiomechanics_han2023_s001_split4_20220513_ballethighleg_1_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 106/240 frames (trunk.abduction, trunk.flexion)",
+      "frames": 240,
+      "by": "agent"
+    },
+    "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject11_djasym4_segment_1": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/42 frames (shoulder.flexion)",
+      "frames": 42,
+      "by": "agent"
+    },
+    "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject3_dj2_segment_1": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/48 frames (shoulder.flexion)",
+      "frames": 48,
+      "by": "agent"
+    },
+    "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject3_dj4_segment_1": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 3/41 frames (shoulder.flexion)",
+      "frames": 41,
+      "by": "agent"
+    },
+    "addbiomechanics/stretch_addbiomechanics_han2023_s005_split3_20220610_worrier1_3_segment_1": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 89/240 frames (shoulder.abduction)",
+      "frames": 240,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject12_t0_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 27/27 frames (hip.abduction, trunk.abduction)",
+      "frames": 27,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject12_t20_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 27/27 frames (hip.abduction, trunk.abduction)",
+      "frames": 27,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject12_t22_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 28/28 frames (trunk.abduction)",
+      "frames": 28,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject12_t5_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 34/34 frames (trunk.abduction)",
+      "frames": 34,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject12_t7_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 32/32 frames (trunk.abduction)",
+      "frames": 32,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject12_t8_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 31/31 frames (trunk.abduction)",
+      "frames": 31,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t0_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 26/26 frames (trunk.abduction, trunk.rotation)",
+      "frames": 26,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t12_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 22/32 frames (trunk.rotation)",
+      "frames": 32,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t13_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 33/33 frames (trunk.abduction, trunk.rotation)",
+      "frames": 33,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t14_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 31/31 frames (trunk.abduction, trunk.rotation)",
+      "frames": 31,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t19_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 32/32 frames (trunk.rotation)",
+      "frames": 32,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t1_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 6/25 frames (trunk.abduction)",
+      "frames": 25,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject39_t5_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 13/30 frames (trunk.abduction, trunk.rotation)",
+      "frames": 30,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t11_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 31/42 frames (trunk.abduction)",
+      "frames": 42,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t12_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 40/47 frames (hip.abduction, trunk.abduction, trunk.rotation)",
+      "frames": 47,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t14_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 4/28 frames (trunk.abduction)",
+      "frames": 28,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t17_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 19/26 frames (trunk.abduction, trunk.rotation)",
+      "frames": 26,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t18_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 33/34 frames (hip.abduction, trunk.abduction)",
+      "frames": 34,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t1_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 24/30 frames (hip.abduction, shoulder.flexion, trunk.abduction, trunk.rotation)",
+      "frames": 30,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t5_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 32/32 frames (hip.abduction, trunk.abduction)",
+      "frames": 32,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t8_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 25/33 frames (hip.abduction, trunk.abduction, trunk.rotation)",
+      "frames": 33,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t9_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 16/35 frames (hip.abduction, trunk.abduction)",
+      "frames": 35,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t12_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 4/49 frames (trunk.abduction, trunk.rotation)",
+      "frames": 49,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t1_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 7/34 frames (trunk.rotation)",
+      "frames": 34,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t5_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 8/33 frames (trunk.rotation)",
+      "frames": 33,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t8_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 13/35 frames (trunk.rotation)",
+      "frames": 35,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t10_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 19/47 frames (trunk.rotation)",
+      "frames": 47,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t11_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 14/48 frames (trunk.rotation)",
+      "frames": 48,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t12_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 19/48 frames (trunk.rotation)",
+      "frames": 48,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t15_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 18/46 frames (trunk.rotation)",
+      "frames": 46,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t17_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 18/47 frames (trunk.rotation)",
+      "frames": 47,
+      "by": "agent"
+    },
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t19_segment_0": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 32/34 frames (trunk.rotation)",
+      "frames": 34,
+      "by": "agent"
+    },
+    "cmu/any_cmu_104_17": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          12
+        ],
+        [
+          20,
+          38
+        ],
+        [
+          61,
+          72
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 3/116) with the scan's cuts",
+      "frames": 116,
+      "by": "agent"
+    },
+    "cmu/any_cmu_104_18": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 4/168 frames); scan: floor -0.91 m",
+      "frames": 168,
+      "by": "agent"
+    },
+    "cmu/any_cmu_104_26": {
+      "status": "cut",
+      "cuts": [
+        [
+          86,
+          102
+        ],
+        [
+          125,
+          140
+        ],
+        [
+          163,
+          214
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 51/275) with the scan's cuts",
+      "frames": 275,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          373,
+          383
+        ],
+        [
+          441,
+          451
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/541) with the scan's cuts",
+      "frames": 541,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          228,
+          241
+        ],
+        [
+          322,
+          332
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/646) with the scan's cuts",
+      "frames": 646,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          351,
+          377
+        ],
+        [
+          460,
+          477
+        ],
+        [
+          532,
+          545
+        ],
+        [
+          592,
+          602
+        ],
+        [
+          652,
+          662
+        ],
+        [
+          764,
+          791
+        ],
+        [
+          800,
+          819
+        ],
+        [
+          877,
+          896
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 62/993) with the scan's cuts",
+      "frames": 993,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_54": {
+      "status": "cut",
+      "cuts": [
+        [
+          106,
+          116
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/170) with the scan's cuts",
+      "frames": 170,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_55": {
+      "status": "cut",
+      "cuts": [
+        [
+          48,
+          57
+        ],
+        [
+          62,
+          72
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/117) with the scan's cuts",
+      "frames": 117,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_02": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/28 frames (ankle.flexion)",
+      "frames": 28,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_03": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 2/58 frames (ankle.flexion)",
+      "frames": 58,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          28,
+          39
+        ],
+        [
+          55,
+          65
+        ],
+        [
+          68,
+          84
+        ],
+        [
+          125,
+          136
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 17/137) with the scan's cuts",
+      "frames": 137,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_06": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 79/163 frames (ankle.flexion)",
+      "frames": 163,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_07": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 14/75 frames (ankle.flexion)",
+      "frames": 75,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_08": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 16/83 frames (ankle.flexion)",
+      "frames": 83,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_09": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 6/59 frames (ankle.flexion)",
+      "frames": 59,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_10": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 79/127 frames (ankle.flexion)",
+      "frames": 127,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          63,
+          138
+        ],
+        [
+          141,
+          153
+        ],
+        [
+          165,
+          171
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 42/172) with the scan's cuts",
+      "frames": 172,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          24
+        ],
+        [
+          74,
+          84
+        ],
+        [
+          93,
+          104
+        ],
+        [
+          129,
+          141
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 27/142) with the scan's cuts",
+      "frames": 142,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_13": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 63/92 frames (ankle.flexion)",
+      "frames": 92,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_14": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 27/144 frames (ankle.flexion)",
+      "frames": 144,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_15": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 101/291 frames); scan: 79% cut",
+      "frames": 291,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_16": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 58/75 frames (ankle.flexion)",
+      "frames": 75,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_17": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 6/140 frames); scan: 57% cut",
+      "frames": 140,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_18": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 69/97 frames (ankle.flexion)",
+      "frames": 97,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_19": {
+      "status": "cut",
+      "cuts": [
+        [
+          30,
+          40
+        ],
+        [
+          92,
+          104
+        ],
+        [
+          114,
+          129
+        ],
+        [
+          169,
+          181
+        ],
+        [
+          192,
+          206
+        ],
+        [
+          269,
+          297
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 42/298) with the scan's cuts",
+      "frames": 298,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_20": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 77/191 frames (ankle.flexion)",
+      "frames": 191,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_22": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 9/50 frames (ankle.flexion)",
+      "frames": 50,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_23": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 16/64 frames (ankle.flexion)",
+      "frames": 64,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_24": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/65 frames (ankle.flexion)",
+      "frames": 65,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_25": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          15
+        ],
+        [
+          47,
+          67
+        ],
+        [
+          74,
+          94
+        ],
+        [
+          109,
+          119
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 22/154) with the scan's cuts",
+      "frames": 154,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_26": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 11/100 frames (ankle.flexion)",
+      "frames": 100,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_27": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          24
+        ],
+        [
+          57,
+          67
+        ],
+        [
+          72,
+          86
+        ],
+        [
+          94,
+          112
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 34/139) with the scan's cuts",
+      "frames": 139,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_28": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 26/89 frames (ankle.flexion)",
+      "frames": 89,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_29": {
+      "status": "cut",
+      "cuts": [
+        [
+          3,
+          14
+        ],
+        [
+          50,
+          63
+        ],
+        [
+          94,
+          105
+        ],
+        [
+          114,
+          124
+        ],
+        [
+          138,
+          148
+        ],
+        [
+          157,
+          168
+        ],
+        [
+          215,
+          233
+        ],
+        [
+          281,
+          291
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 23/292) with the scan's cuts",
+      "frames": 292,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_30": {
+      "status": "cut",
+      "cuts": [
+        [
+          32,
+          50
+        ],
+        [
+          58,
+          70
+        ],
+        [
+          96,
+          116
+        ],
+        [
+          123,
+          134
+        ],
+        [
+          168,
+          179
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 14/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_31": {
+      "status": "cut",
+      "cuts": [
+        [
+          67,
+          78
+        ],
+        [
+          158,
+          167
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/168) with the scan's cuts",
+      "frames": 168,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_32": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          18
+        ],
+        [
+          41,
+          55
+        ],
+        [
+          67,
+          77
+        ],
+        [
+          172,
+          183
+        ],
+        [
+          204,
+          221
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 35/222) with the scan's cuts",
+      "frames": 222,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_33": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          34
+        ],
+        [
+          38,
+          56
+        ],
+        [
+          58,
+          70
+        ],
+        [
+          78,
+          88
+        ],
+        [
+          96,
+          107
+        ],
+        [
+          237,
+          261
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 49/265) with the scan's cuts",
+      "frames": 265,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_34": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 8/79 frames (ankle.flexion)",
+      "frames": 79,
+      "by": "agent"
+    },
+    "cmu/any_cmu_107_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          95,
+          107
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/207) with the scan's cuts",
+      "frames": 207,
+      "by": "agent"
+    },
+    "cmu/any_cmu_111_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          47,
+          78
+        ],
+        [
+          100,
+          118
+        ],
+        [
+          208,
+          236
+        ],
+        [
+          252,
+          267
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, shoulder.flexion, 36/404) with the scan's cuts",
+      "frames": 404,
+      "by": "agent"
+    },
+    "cmu/any_cmu_113_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          50,
+          88
+        ],
+        [
+          357,
+          395
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 55/461) with the scan's cuts",
+      "frames": 461,
+      "by": "agent"
+    },
+    "cmu/any_cmu_113_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          166,
+          182
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, hip.flexion, 7/253) with the scan's cuts",
+      "frames": 253,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          108,
+          119
+        ],
+        [
+          141,
+          151
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, shoulder.flexion, 3/203) with the scan's cuts",
+      "frames": 203,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          610,
+          622
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 3/811) with the scan's cuts",
+      "frames": 811,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          128,
+          138
+        ],
+        [
+          194,
+          209
+        ],
+        [
+          297,
+          310
+        ],
+        [
+          315,
+          334
+        ],
+        [
+          383,
+          404
+        ],
+        [
+          471,
+          476
+        ],
+        [
+          499,
+          518
+        ],
+        [
+          554,
+          568
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 41/639) with the scan's cuts",
+      "frames": 639,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          120,
+          294
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.flexion, 3/409) with the scan's cuts",
+      "frames": 409,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          196,
+          208
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 3/238) with the scan's cuts",
+      "frames": 238,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          141,
+          152
+        ],
+        [
+          159,
+          169
+        ],
+        [
+          178,
+          188
+        ],
+        [
+          246,
+          253
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, 6/254) with the scan's cuts",
+      "frames": 254,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          341,
+          350
+        ],
+        [
+          356,
+          364
+        ],
+        [
+          597,
+          602
+        ],
+        [
+          609,
+          619
+        ],
+        [
+          641,
+          649
+        ],
+        [
+          691,
+          706
+        ],
+        [
+          741,
+          746
+        ],
+        [
+          783,
+          806
+        ],
+        [
+          853,
+          853
+        ],
+        [
+          906,
+          916
+        ],
+        [
+          993,
+          1009
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 29/1125) with the scan's cuts",
+      "frames": 1125,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          211,
+          255
+        ],
+        [
+          258,
+          276
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/362) with the scan's cuts",
+      "frames": 362,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          267,
+          271
+        ],
+        [
+          295,
+          318
+        ],
+        [
+          342,
+          346
+        ],
+        [
+          390,
+          402
+        ],
+        [
+          413,
+          428
+        ],
+        [
+          455,
+          465
+        ],
+        [
+          469,
+          484
+        ],
+        [
+          516,
+          541
+        ],
+        [
+          586,
+          599
+        ],
+        [
+          617,
+          631
+        ],
+        [
+          639,
+          648
+        ],
+        [
+          650,
+          661
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, shoulder.flexion, 38/742) with the scan's cuts",
+      "frames": 742,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_15": {
+      "status": "cut",
+      "cuts": [
+        [
+          83,
+          96
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 4/331) with the scan's cuts",
+      "frames": 331,
+      "by": "agent"
+    },
+    "cmu/any_cmu_120_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          63,
+          80
+        ],
+        [
+          91,
+          104
+        ],
+        [
+          140,
+          158
+        ],
+        [
+          236,
+          251
+        ],
+        [
+          297,
+          310
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 31/357) with the scan's cuts",
+      "frames": 357,
+      "by": "agent"
+    },
+    "cmu/any_cmu_120_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          121,
+          134
+        ],
+        [
+          209,
+          226
+        ],
+        [
+          297,
+          307
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 13/379) with the scan's cuts",
+      "frames": 379,
+      "by": "agent"
+    },
+    "cmu/any_cmu_120_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          285,
+          296
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/379) with the scan's cuts",
+      "frames": 379,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_01": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, hip.abduction, 39/197 frames); scan: 98% cut",
+      "frames": 197,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_02": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 54/195 frames (ankle.flexion)",
+      "frames": 195,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          73,
+          92
+        ],
+        [
+          104,
+          131
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 23/221) with the scan's cuts",
+      "frames": 221,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          70,
+          89
+        ],
+        [
+          106,
+          135
+        ],
+        [
+          153,
+          174
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 34/175) with the scan's cuts",
+      "frames": 175,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          65,
+          77
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, 2/128) with the scan's cuts",
+      "frames": 128,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          170,
+          180
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/224) with the scan's cuts",
+      "frames": 224,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          46,
+          65
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/84) with the scan's cuts",
+      "frames": 84,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_09": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/76 frames (ankle.flexion)",
+      "frames": 76,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_11": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/45 frames (ankle.flexion)",
+      "frames": 45,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          102,
+          114
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 3/207) with the scan's cuts",
+      "frames": 207,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          112,
+          123
+        ],
+        [
+          140,
+          163
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 14/232) with the scan's cuts",
+      "frames": 232,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          68,
+          80
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 3/181) with the scan's cuts",
+      "frames": 181,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_19": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, hip.abduction, shoulder.flexion, 166/260 frames); scan: floor -0.21 m",
+      "frames": 260,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_20": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 232/445 frames (ankle.flexion, hip.abduction)",
+      "frames": 445,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_21": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, hip.abduction, 216/339 frames); scan: floor -0.29 m",
+      "frames": 339,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_24": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 6/197 frames); scan: 61% cut",
+      "frames": 197,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_25": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 2/317 frames); scan: 97% cut",
+      "frames": 317,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_28": {
+      "status": "cut",
+      "cuts": [
+        [
+          88,
+          96
+        ],
+        [
+          99,
+          110
+        ],
+        [
+          129,
+          133
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/193) with the scan's cuts",
+      "frames": 193,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_29": {
+      "status": "cut",
+      "cuts": [
+        [
+          53,
+          58
+        ],
+        [
+          63,
+          74
+        ],
+        [
+          160,
+          199
+        ],
+        [
+          207,
+          228
+        ],
+        [
+          263,
+          277
+        ],
+        [
+          283,
+          295
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 32/371) with the scan's cuts",
+      "frames": 371,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_30": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 149/358 frames (ankle.flexion)",
+      "frames": 358,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_31": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 130/245 frames); scan: 56% cut",
+      "frames": 245,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_33": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 149/224 frames (ankle.flexion)",
+      "frames": 224,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_34": {
+      "status": "cut",
+      "cuts": [
+        [
+          73,
+          89
+        ],
+        [
+          94,
+          130
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 30/210) with the scan's cuts",
+      "frames": 210,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_35": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 86/174 frames (ankle.flexion)",
+      "frames": 174,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_36": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 114/164 frames (ankle.flexion)",
+      "frames": 164,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_22": {
+      "status": "cut",
+      "cuts": [
+        [
+          652,
+          657
+        ],
+        [
+          659,
+          664
+        ],
+        [
+          693,
+          698
+        ],
+        [
+          701,
+          711
+        ],
+        [
+          736,
+          752
+        ],
+        [
+          850,
+          868
+        ],
+        [
+          884,
+          905
+        ],
+        [
+          936,
+          956
+        ],
+        [
+          970,
+          990
+        ],
+        [
+          1275,
+          1315
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 71/1343) with the scan's cuts",
+      "frames": 1343,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_26": {
+      "status": "cut",
+      "cuts": [
+        [
+          43,
+          57
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/131) with the scan's cuts",
+      "frames": 131,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_31": {
+      "status": "cut",
+      "cuts": [
+        [
+          133,
+          233
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/234) with the scan's cuts",
+      "frames": 234,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_34": {
+      "status": "cut",
+      "cuts": [
+        [
+          139,
+          241
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/242) with the scan's cuts",
+      "frames": 242,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_35": {
+      "status": "cut",
+      "cuts": [
+        [
+          148,
+          261
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/262) with the scan's cuts",
+      "frames": 262,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_43": {
+      "status": "cut",
+      "cuts": [
+        [
+          96,
+          114
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/149) with the scan's cuts",
+      "frames": 149,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_47": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 17/156 frames); scan: 76% cut",
+      "frames": 156,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_50": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 14/132 frames); scan: 77% cut",
+      "frames": 132,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_57": {
+      "status": "cut",
+      "cuts": [
+        [
+          33,
+          50
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/102) with the scan's cuts",
+      "frames": 102,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_62": {
+      "status": "cut",
+      "cuts": [
+        [
+          66,
+          77
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/119) with the scan's cuts",
+      "frames": 119,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_64": {
+      "status": "cut",
+      "cuts": [
+        [
+          102,
+          118
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 6/145) with the scan's cuts",
+      "frames": 145,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_68": {
+      "status": "cut",
+      "cuts": [
+        [
+          83,
+          98
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, trunk.rotation, 6/165) with the scan's cuts",
+      "frames": 165,
+      "by": "agent"
+    },
+    "cmu/any_cmu_125_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          299,
+          465
+        ],
+        [
+          483,
+          580
+        ],
+        [
+          585,
+          631
+        ],
+        [
+          660,
+          671
+        ],
+        [
+          772,
+          783
+        ],
+        [
+          921,
+          1055
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 11/1069) with the scan's cuts",
+      "frames": 1069,
+      "by": "agent"
+    },
+    "cmu/any_cmu_125_03": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 4/1102 frames); scan: 83% cut",
+      "frames": 1102,
+      "by": "agent"
+    },
+    "cmu/any_cmu_125_04": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 77/1203 frames); scan: 82% cut",
+      "frames": 1203,
+      "by": "agent"
+    },
+    "cmu/any_cmu_125_05": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 7/670 frames); scan: 74% cut",
+      "frames": 670,
+      "by": "agent"
+    },
+    "cmu/any_cmu_126_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          153,
+          157
+        ],
+        [
+          161,
+          174
+        ],
+        [
+          242,
+          247
+        ],
+        [
+          347,
+          352
+        ],
+        [
+          375,
+          385
+        ],
+        [
+          496,
+          507
+        ],
+        [
+          537,
+          551
+        ],
+        [
+          584,
+          596
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 15/648) with the scan's cuts",
+      "frames": 648,
+      "by": "agent"
+    },
+    "cmu/any_cmu_126_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          96,
+          106
+        ],
+        [
+          209,
+          222
+        ],
+        [
+          265,
+          279
+        ],
+        [
+          375,
+          379
+        ],
+        [
+          517,
+          522
+        ],
+        [
+          619,
+          642
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, shoulder.abduction, 18/646) with the scan's cuts",
+      "frames": 646,
+      "by": "agent"
+    },
+    "cmu/any_cmu_126_06": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (shoulder.abduction, 18/627 frames); scan: floor +0.33 m; 100% cut",
+      "frames": 627,
+      "by": "agent"
+    },
+    "cmu/any_cmu_126_07": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (shoulder.abduction, 4/629 frames); scan: floor +0.23 m; 100% cut",
+      "frames": 629,
+      "by": "agent"
+    },
+    "cmu/any_cmu_126_10": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (shoulder.abduction, 13/313 frames); scan: 93% cut",
+      "frames": 313,
+      "by": "agent"
+    },
+    "cmu/any_cmu_126_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          276,
+          292
+        ],
+        [
+          354,
+          358
+        ],
+        [
+          386,
+          390
+        ],
+        [
+          499,
+          504
+        ],
+        [
+          1589,
+          1606
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, shoulder.flexion, 8/1689) with the scan's cuts",
+      "frames": 1689,
+      "by": "agent"
+    },
+    "cmu/any_cmu_135_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          147,
+          157
+        ],
+        [
+          185,
+          194
+        ],
+        [
+          864,
+          868
+        ],
+        [
+          1073,
+          1084
+        ],
+        [
+          1150,
+          1161
+        ],
+        [
+          1207,
+          1211
+        ],
+        [
+          1250,
+          1255
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 5/1529) with the scan's cuts",
+      "frames": 1529,
+      "by": "agent"
+    },
+    "cmu/any_cmu_135_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          248,
+          252
+        ],
+        [
+          284,
+          296
+        ],
+        [
+          321,
+          325
+        ],
+        [
+          354,
+          366
+        ],
+        [
+          449,
+          459
+        ],
+        [
+          676,
+          680
+        ],
+        [
+          776,
+          788
+        ],
+        [
+          1105,
+          1115
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 11/1301) with the scan's cuts",
+      "frames": 1301,
+      "by": "agent"
+    },
+    "cmu/any_cmu_135_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          27,
+          31
+        ],
+        [
+          108,
+          119
+        ],
+        [
+          280,
+          290
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 2/368) with the scan's cuts",
+      "frames": 368,
+      "by": "agent"
+    },
+    "cmu/any_cmu_135_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          153,
+          163
+        ],
+        [
+          218,
+          222
+        ],
+        [
+          326,
+          339
+        ],
+        [
+          394,
+          406
+        ],
+        [
+          462,
+          473
+        ],
+        [
+          532,
+          542
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 11/612) with the scan's cuts",
+      "frames": 612,
+      "by": "agent"
+    },
+    "cmu/any_cmu_139_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          171,
+          202
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 22/247) with the scan's cuts",
+      "frames": 247,
+      "by": "agent"
+    },
+    "cmu/any_cmu_13_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          236,
+          248
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/569) with the scan's cuts",
+      "frames": 569,
+      "by": "agent"
+    },
+    "cmu/any_cmu_141_15": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 101/291 frames); scan: 79% cut",
+      "frames": 291,
+      "by": "agent"
+    },
+    "cmu/any_cmu_141_18": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 69/97 frames (ankle.flexion)",
+      "frames": 97,
+      "by": "agent"
+    },
+    "cmu/any_cmu_141_22": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 9/50 frames (ankle.flexion)",
+      "frames": 50,
+      "by": "agent"
+    },
+    "cmu/any_cmu_141_23": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 16/64 frames (ankle.flexion)",
+      "frames": 64,
+      "by": "agent"
+    },
+    "cmu/any_cmu_141_24": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/65 frames (ankle.flexion)",
+      "frames": 65,
+      "by": "agent"
+    },
+    "cmu/any_cmu_141_26": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 11/100 frames (ankle.flexion)",
+      "frames": 100,
+      "by": "agent"
+    },
+    "cmu/any_cmu_141_27": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          24
+        ],
+        [
+          57,
+          67
+        ],
+        [
+          72,
+          86
+        ],
+        [
+          94,
+          112
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 34/139) with the scan's cuts",
+      "frames": 139,
+      "by": "agent"
+    },
+    "cmu/any_cmu_142_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          233,
+          246
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/471) with the scan's cuts",
+      "frames": 471,
+      "by": "agent"
+    },
+    "cmu/any_cmu_142_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          593,
+          611
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 9/661) with the scan's cuts",
+      "frames": 661,
+      "by": "agent"
+    },
+    "cmu/any_cmu_142_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          192,
+          205
+        ],
+        [
+          355,
+          372
+        ],
+        [
+          678,
+          693
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 18/758) with the scan's cuts",
+      "frames": 758,
+      "by": "agent"
+    },
+    "cmu/any_cmu_142_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          232,
+          236
+        ],
+        [
+          628,
+          645
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 8/667) with the scan's cuts",
+      "frames": 667,
+      "by": "agent"
+    },
+    "cmu/any_cmu_142_10": {
+      "status": "cut",
+      "cuts": [
+        [
+          847,
+          865
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 9/1127) with the scan's cuts",
+      "frames": 1127,
+      "by": "agent"
+    },
+    "cmu/any_cmu_142_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          1416,
+          1432
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/1455) with the scan's cuts",
+      "frames": 1455,
+      "by": "agent"
+    },
+    "cmu/any_cmu_143_21": {
+      "status": "cut",
+      "cuts": [
+        [
+          311,
+          326
+        ],
+        [
+          427,
+          465
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 33/538) with the scan's cuts",
+      "frames": 538,
+      "by": "agent"
+    },
+    "cmu/any_cmu_144_22": {
+      "status": "cut",
+      "cuts": [
+        [
+          676,
+          687
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 2/835) with the scan's cuts",
+      "frames": 835,
+      "by": "agent"
+    },
+    "cmu/any_cmu_144_31": {
+      "status": "cut",
+      "cuts": [
+        [
+          43,
+          53
+        ],
+        [
+          303,
+          314
+        ],
+        [
+          615,
+          621
+        ],
+        [
+          627,
+          632
+        ],
+        [
+          1125,
+          1130
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 2/1208) with the scan's cuts",
+      "frames": 1208,
+      "by": "agent"
+    },
+    "cmu/any_cmu_21_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          330,
+          341
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/404) with the scan's cuts",
+      "frames": 404,
+      "by": "agent"
+    },
+    "cmu/any_cmu_28_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          100,
+          104
+        ],
+        [
+          232,
+          252
+        ],
+        [
+          341,
+          364
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 22/428) with the scan's cuts",
+      "frames": 428,
+      "by": "agent"
+    },
+    "cmu/any_cmu_28_10": {
+      "status": "cut",
+      "cuts": [
+        [
+          35,
+          45
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, hip.flexion, trunk.rotation, 1/519) with the scan's cuts",
+      "frames": 519,
+      "by": "agent"
+    },
+    "cmu/any_cmu_28_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          566,
+          571
+        ],
+        [
+          630,
+          646
+        ],
+        [
+          648,
+          679
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 17/1654) with the scan's cuts",
+      "frames": 1654,
+      "by": "agent"
+    },
+    "cmu/any_cmu_31_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          272,
+          309
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 28/923) with the scan's cuts",
+      "frames": 923,
+      "by": "agent"
+    },
+    "cmu/any_cmu_31_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          344,
+          352
+        ],
+        [
+          2143,
+          2159
+        ],
+        [
+          3074,
+          3099
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 23/3664) with the scan's cuts",
+      "frames": 3664,
+      "by": "agent"
+    },
+    "cmu/any_cmu_31_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          282,
+          384
+        ],
+        [
+          642,
+          706
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 148/1062) with the scan's cuts",
+      "frames": 1062,
+      "by": "agent"
+    },
+    "cmu/any_cmu_31_17": {
+      "status": "cut",
+      "cuts": [
+        [
+          330,
+          344
+        ],
+        [
+          398,
+          412
+        ],
+        [
+          428,
+          448
+        ],
+        [
+          461,
+          481
+        ],
+        [
+          497,
+          513
+        ],
+        [
+          531,
+          543
+        ],
+        [
+          911,
+          989
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 94/998) with the scan's cuts",
+      "frames": 998,
+      "by": "agent"
+    },
+    "cmu/any_cmu_32_22": {
+      "status": "cut",
+      "cuts": [
+        [
+          75,
+          87
+        ],
+        [
+          181,
+          211
+        ],
+        [
+          230,
+          249
+        ],
+        [
+          487,
+          536
+        ],
+        [
+          545,
+          564
+        ],
+        [
+          580,
+          594
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 70/712) with the scan's cuts",
+      "frames": 712,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          471,
+          479
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/480) with the scan's cuts",
+      "frames": 480,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          409,
+          422
+        ],
+        [
+          1442,
+          1465
+        ],
+        [
+          1844,
+          1881
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 46/1970) with the scan's cuts",
+      "frames": 1970,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          745,
+          803
+        ],
+        [
+          980,
+          1002
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 66/1003) with the scan's cuts",
+      "frames": 1003,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          262,
+          266
+        ],
+        [
+          823,
+          830
+        ],
+        [
+          859,
+          863
+        ],
+        [
+          888,
+          896
+        ],
+        [
+          907,
+          911
+        ],
+        [
+          922,
+          930
+        ],
+        [
+          1022,
+          1026
+        ],
+        [
+          1037,
+          1059
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 18/1060) with the scan's cuts",
+      "frames": 1060,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          216,
+          226
+        ],
+        [
+          263,
+          267
+        ],
+        [
+          271,
+          275
+        ],
+        [
+          351,
+          355
+        ],
+        [
+          365,
+          369
+        ],
+        [
+          469,
+          480
+        ],
+        [
+          556,
+          572
+        ],
+        [
+          582,
+          594
+        ],
+        [
+          651,
+          661
+        ],
+        [
+          691,
+          752
+        ],
+        [
+          760,
+          805
+        ],
+        [
+          811,
+          821
+        ],
+        [
+          823,
+          853
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 107/854) with the scan's cuts",
+      "frames": 854,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          7,
+          11
+        ],
+        [
+          34,
+          41
+        ],
+        [
+          51,
+          56
+        ],
+        [
+          76,
+          87
+        ],
+        [
+          254,
+          266
+        ],
+        [
+          283,
+          288
+        ],
+        [
+          317,
+          327
+        ],
+        [
+          364,
+          407
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 26/408) with the scan's cuts",
+      "frames": 408,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          10
+        ],
+        [
+          39,
+          43
+        ],
+        [
+          59,
+          66
+        ],
+        [
+          149,
+          153
+        ],
+        [
+          169,
+          176
+        ],
+        [
+          242,
+          256
+        ],
+        [
+          383,
+          406
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, trunk.rotation, 30/407) with the scan's cuts",
+      "frames": 407,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_16": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 560/1031 frames (ankle.flexion)",
+      "frames": 1031,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_17": {
+      "status": "cut",
+      "cuts": [
+        [
+          666,
+          704
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 24/705) with the scan's cuts",
+      "frames": 705,
+      "by": "agent"
+    },
+    "cmu/any_cmu_54_18": {
+      "status": "cut",
+      "cuts": [
+        [
+          472,
+          499
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 18/506) with the scan's cuts",
+      "frames": 506,
+      "by": "agent"
+    },
+    "cmu/any_cmu_55_24": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 880/2381 frames (ankle.flexion, hip.flexion, hip.rotation)",
+      "frames": 2381,
+      "by": "agent"
+    },
+    "cmu/any_cmu_62_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          218,
+          232
+        ],
+        [
+          265,
+          275
+        ],
+        [
+          323,
+          334
+        ],
+        [
+          909,
+          925
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 15/927) with the scan's cuts",
+      "frames": 927,
+      "by": "agent"
+    },
+    "cmu/any_cmu_62_21": {
+      "status": "cut",
+      "cuts": [
+        [
+          534,
+          553
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 10/862) with the scan's cuts",
+      "frames": 862,
+      "by": "agent"
+    },
+    "cmu/any_cmu_74_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          280,
+          300
+        ],
+        [
+          304,
+          323
+        ],
+        [
+          347,
+          358
+        ],
+        [
+          363,
+          368
+        ],
+        [
+          371,
+          394
+        ],
+        [
+          402,
+          419
+        ],
+        [
+          421,
+          437
+        ],
+        [
+          462,
+          474
+        ],
+        [
+          532,
+          548
+        ],
+        [
+          556,
+          567
+        ],
+        [
+          584,
+          608
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 52/631) with the scan's cuts",
+      "frames": 631,
+      "by": "agent"
+    },
+    "cmu/any_cmu_77_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          76,
+          98
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 13/252) with the scan's cuts",
+      "frames": 252,
+      "by": "agent"
+    },
+    "cmu/any_cmu_79_66": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 180/180 frames (ankle.flexion, hip.rotation)",
+      "frames": 180,
+      "by": "agent"
+    },
+    "cmu/any_cmu_79_89": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 221/221 frames (ankle.flexion, hip.rotation)",
+      "frames": 221,
+      "by": "agent"
+    },
+    "cmu/any_cmu_79_94": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 234/234 frames (ankle.flexion, hip.rotation)",
+      "frames": 234,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          38,
+          60
+        ],
+        [
+          79,
+          106
+        ],
+        [
+          133,
+          146
+        ],
+        [
+          166,
+          190
+        ],
+        [
+          210,
+          231
+        ],
+        [
+          283,
+          288
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 62/290) with the scan's cuts",
+      "frames": 290,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          42,
+          46
+        ],
+        [
+          72,
+          76
+        ],
+        [
+          106,
+          118
+        ],
+        [
+          157,
+          167
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/379) with the scan's cuts",
+      "frames": 379,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          255,
+          271
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/403) with the scan's cuts",
+      "frames": 403,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          90,
+          102
+        ],
+        [
+          134,
+          138
+        ],
+        [
+          141,
+          145
+        ],
+        [
+          200,
+          224
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 18/254) with the scan's cuts",
+      "frames": 254,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          339,
+          369
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 18/434) with the scan's cuts",
+      "frames": 434,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_18": {
+      "status": "cut",
+      "cuts": [
+        [
+          183,
+          204
+        ],
+        [
+          210,
+          232
+        ],
+        [
+          264,
+          316
+        ],
+        [
+          323,
+          345
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 81/378) with the scan's cuts",
+      "frames": 378,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_25": {
+      "status": "cut",
+      "cuts": [
+        [
+          65,
+          78
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/277) with the scan's cuts",
+      "frames": 277,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_30": {
+      "status": "cut",
+      "cuts": [
+        [
+          568,
+          602
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 25/648) with the scan's cuts",
+      "frames": 648,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_33": {
+      "status": "cut",
+      "cuts": [
+        [
+          278,
+          289
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/484) with the scan's cuts",
+      "frames": 484,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_34": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 137/522 frames (ankle.flexion)",
+      "frames": 522,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_39": {
+      "status": "cut",
+      "cuts": [
+        [
+          265,
+          380
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 100/456) with the scan's cuts",
+      "frames": 456,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_49": {
+      "status": "cut",
+      "cuts": [
+        [
+          85,
+          100
+        ],
+        [
+          277,
+          281
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 6/467) with the scan's cuts",
+      "frames": 467,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_53": {
+      "status": "cut",
+      "cuts": [
+        [
+          215,
+          240
+        ],
+        [
+          394,
+          431
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 39/452) with the scan's cuts",
+      "frames": 452,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_55": {
+      "status": "cut",
+      "cuts": [
+        [
+          95,
+          105
+        ],
+        [
+          172,
+          185
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/344) with the scan's cuts",
+      "frames": 344,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_56": {
+      "status": "cut",
+      "cuts": [
+        [
+          62,
+          75
+        ],
+        [
+          125,
+          142
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 12/173) with the scan's cuts",
+      "frames": 173,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_57": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 130/405 frames (ankle.flexion)",
+      "frames": 405,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_58": {
+      "status": "cut",
+      "cuts": [
+        [
+          156,
+          161
+        ],
+        [
+          463,
+          473
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/588) with the scan's cuts",
+      "frames": 588,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_59": {
+      "status": "cut",
+      "cuts": [
+        [
+          53,
+          71
+        ],
+        [
+          84,
+          99
+        ],
+        [
+          216,
+          285
+        ],
+        [
+          290,
+          294
+        ],
+        [
+          318,
+          348
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 79/385) with the scan's cuts",
+      "frames": 385,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_60": {
+      "status": "cut",
+      "cuts": [
+        [
+          95,
+          122
+        ],
+        [
+          223,
+          247
+        ],
+        [
+          268,
+          280
+        ],
+        [
+          351,
+          464
+        ],
+        [
+          472,
+          483
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 120/515) with the scan's cuts",
+      "frames": 515,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_62": {
+      "status": "cut",
+      "cuts": [
+        [
+          481,
+          546
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 56/572) with the scan's cuts",
+      "frames": 572,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_64": {
+      "status": "cut",
+      "cuts": [
+        [
+          278,
+          354
+        ],
+        [
+          383,
+          429
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 104/609) with the scan's cuts",
+      "frames": 609,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_65": {
+      "status": "cut",
+      "cuts": [
+        [
+          99,
+          129
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 21/454) with the scan's cuts",
+      "frames": 454,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_66": {
+      "status": "cut",
+      "cuts": [
+        [
+          445,
+          477
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 23/518) with the scan's cuts",
+      "frames": 518,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_67": {
+      "status": "cut",
+      "cuts": [
+        [
+          215,
+          337
+        ],
+        [
+          474,
+          495
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 85/539) with the scan's cuts",
+      "frames": 539,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_68": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 179/694 frames (ankle.flexion)",
+      "frames": 694,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_69": {
+      "status": "cut",
+      "cuts": [
+        [
+          280,
+          284
+        ],
+        [
+          359,
+          375
+        ],
+        [
+          645,
+          660
+        ],
+        [
+          690,
+          703
+        ],
+        [
+          739,
+          755
+        ],
+        [
+          786,
+          833
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 51/1070) with the scan's cuts",
+      "frames": 1070,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_70": {
+      "status": "cut",
+      "cuts": [
+        [
+          374,
+          386
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/450) with the scan's cuts",
+      "frames": 450,
+      "by": "agent"
+    },
+    "cmu/any_cmu_80_72": {
+      "status": "cut",
+      "cuts": [
+        [
+          41,
+          55
+        ],
+        [
+          62,
+          62
+        ],
+        [
+          70,
+          86
+        ],
+        [
+          91,
+          113
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 25/272) with the scan's cuts",
+      "frames": 272,
+      "by": "agent"
+    },
+    "cmu/any_cmu_81_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          46,
+          75
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 20/345) with the scan's cuts",
+      "frames": 345,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          46,
+          57
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/99) with the scan's cuts",
+      "frames": 99,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          30,
+          44
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/79) with the scan's cuts",
+      "frames": 79,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          36,
+          47
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/81) with the scan's cuts",
+      "frames": 81,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          36,
+          46
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/81) with the scan's cuts",
+      "frames": 81,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_07": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 44/78 frames); scan: floor -0.22 m; 63% cut",
+      "frames": 78,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          280,
+          300
+        ],
+        [
+          304,
+          323
+        ],
+        [
+          347,
+          358
+        ],
+        [
+          363,
+          368
+        ],
+        [
+          371,
+          394
+        ],
+        [
+          402,
+          419
+        ],
+        [
+          421,
+          437
+        ],
+        [
+          462,
+          474
+        ],
+        [
+          532,
+          548
+        ],
+        [
+          556,
+          567
+        ],
+        [
+          584,
+          608
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 52/631) with the scan's cuts",
+      "frames": 631,
+      "by": "agent"
+    },
+    "cmu/any_cmu_85_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          610,
+          622
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 3/811) with the scan's cuts",
+      "frames": 811,
+      "by": "agent"
+    },
+    "cmu/any_cmu_85_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          128,
+          138
+        ],
+        [
+          194,
+          209
+        ],
+        [
+          297,
+          310
+        ],
+        [
+          315,
+          334
+        ],
+        [
+          383,
+          404
+        ],
+        [
+          471,
+          476
+        ],
+        [
+          499,
+          518
+        ],
+        [
+          554,
+          568
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 41/639) with the scan's cuts",
+      "frames": 639,
+      "by": "agent"
+    },
+    "cmu/any_cmu_85_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          141,
+          152
+        ],
+        [
+          159,
+          169
+        ],
+        [
+          178,
+          188
+        ],
+        [
+          246,
+          253
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, 6/254) with the scan's cuts",
+      "frames": 254,
+      "by": "agent"
+    },
+    "cmu/any_cmu_85_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          341,
+          350
+        ],
+        [
+          356,
+          364
+        ],
+        [
+          597,
+          602
+        ],
+        [
+          609,
+          619
+        ],
+        [
+          641,
+          649
+        ],
+        [
+          691,
+          706
+        ],
+        [
+          741,
+          746
+        ],
+        [
+          783,
+          806
+        ],
+        [
+          853,
+          853
+        ],
+        [
+          906,
+          916
+        ],
+        [
+          993,
+          1009
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 29/1125) with the scan's cuts",
+      "frames": 1125,
+      "by": "agent"
+    },
+    "cmu/any_cmu_85_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          211,
+          255
+        ],
+        [
+          258,
+          276
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/362) with the scan's cuts",
+      "frames": 362,
+      "by": "agent"
+    },
+    "cmu/any_cmu_90_01": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, hip.abduction, 39/197 frames); scan: 98% cut",
+      "frames": 197,
+      "by": "agent"
+    },
+    "cmu/any_cmu_90_11": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/45 frames (ankle.flexion)",
+      "frames": 45,
+      "by": "agent"
+    },
+    "cmu/any_cmu_90_20": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 232/445 frames (ankle.flexion, hip.abduction)",
+      "frames": 445,
+      "by": "agent"
+    },
+    "cmu/any_cmu_90_21": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, hip.abduction, 216/339 frames); scan: floor -0.29 m",
+      "frames": 339,
+      "by": "agent"
+    },
+    "cmu/any_cmu_90_29": {
+      "status": "cut",
+      "cuts": [
+        [
+          53,
+          58
+        ],
+        [
+          63,
+          74
+        ],
+        [
+          160,
+          199
+        ],
+        [
+          207,
+          228
+        ],
+        [
+          263,
+          277
+        ],
+        [
+          283,
+          295
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 32/371) with the scan's cuts",
+      "frames": 371,
+      "by": "agent"
+    },
+    "cmu/any_cmu_91_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          228,
+          241
+        ],
+        [
+          322,
+          332
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/646) with the scan's cuts",
+      "frames": 646,
+      "by": "agent"
+    },
+    "cmu/any_cmu_91_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          351,
+          377
+        ],
+        [
+          460,
+          477
+        ],
+        [
+          532,
+          545
+        ],
+        [
+          592,
+          602
+        ],
+        [
+          652,
+          662
+        ],
+        [
+          764,
+          791
+        ],
+        [
+          800,
+          819
+        ],
+        [
+          877,
+          896
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 62/993) with the scan's cuts",
+      "frames": 993,
+      "by": "agent"
+    },
+    "cmu/any_cmu_91_54": {
+      "status": "cut",
+      "cuts": [
+        [
+          106,
+          116
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/170) with the scan's cuts",
+      "frames": 170,
+      "by": "agent"
+    },
+    "cmu/any_cmu_91_55": {
+      "status": "cut",
+      "cuts": [
+        [
+          48,
+          57
+        ],
+        [
+          62,
+          72
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/117) with the scan's cuts",
+      "frames": 117,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          257,
+          268
+        ],
+        [
+          333,
+          344
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/901) with the scan's cuts",
+      "frames": 901,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          224,
+          234
+        ],
+        [
+          244,
+          265
+        ],
+        [
+          344,
+          357
+        ],
+        [
+          484,
+          499
+        ],
+        [
+          568,
+          582
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 28/835) with the scan's cuts",
+      "frames": 835,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          588,
+          600
+        ],
+        [
+          670,
+          684
+        ],
+        [
+          742,
+          758
+        ],
+        [
+          812,
+          816
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 15/933) with the scan's cuts",
+      "frames": 933,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          610,
+          620
+        ],
+        [
+          645,
+          659
+        ],
+        [
+          680,
+          693
+        ],
+        [
+          716,
+          732
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 17/786) with the scan's cuts",
+      "frames": 786,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          891,
+          904
+        ],
+        [
+          962,
+          975
+        ],
+        [
+          1182,
+          1193
+        ],
+        [
+          1246,
+          1256
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 11/1318) with the scan's cuts",
+      "frames": 1318,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          51,
+          62
+        ],
+        [
+          79,
+          93
+        ],
+        [
+          96,
+          106
+        ],
+        [
+          153,
+          165
+        ],
+        [
+          172,
+          187
+        ],
+        [
+          202,
+          216
+        ],
+        [
+          384,
+          398
+        ],
+        [
+          405,
+          417
+        ],
+        [
+          420,
+          431
+        ],
+        [
+          434,
+          447
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 36/578) with the scan's cuts",
+      "frames": 578,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          264,
+          275
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/994) with the scan's cuts",
+      "frames": 994,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_10": {
+      "status": "cut",
+      "cuts": [
+        [
+          157,
+          193
+        ],
+        [
+          742,
+          754
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 30/864) with the scan's cuts",
+      "frames": 864,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          90,
+          100
+        ],
+        [
+          167,
+          179
+        ],
+        [
+          457,
+          467
+        ],
+        [
+          528,
+          540
+        ],
+        [
+          623,
+          645
+        ],
+        [
+          761,
+          772
+        ],
+        [
+          797,
+          807
+        ],
+        [
+          831,
+          845
+        ],
+        [
+          866,
+          878
+        ],
+        [
+          1091,
+          1101
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 32/1202) with the scan's cuts",
+      "frames": 1202,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          327,
+          339
+        ],
+        [
+          405,
+          417
+        ],
+        [
+          702,
+          706
+        ],
+        [
+          983,
+          994
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 8/1125) with the scan's cuts",
+      "frames": 1125,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          163,
+          177
+        ],
+        [
+          399,
+          415
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 12/499) with the scan's cuts",
+      "frames": 499,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          164,
+          206
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 17/749) with the scan's cuts",
+      "frames": 749,
+      "by": "agent"
+    },
+    "cmu/any_cmu_94_15": {
+      "status": "cut",
+      "cuts": [
+        [
+          518,
+          532
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/553) with the scan's cuts",
+      "frames": 553,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_111_18": {
+      "status": "cut",
+      "cuts": [
+        [
+          47,
+          78
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 22/135) with the scan's cuts",
+      "frames": 135,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_134_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          52,
+          64
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/76) with the scan's cuts",
+      "frames": 76,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_136_17": {
+      "status": "cut",
+      "cuts": [
+        [
+          383,
+          394
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/530) with the scan's cuts",
+      "frames": 530,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_136_18": {
+      "status": "cut",
+      "cuts": [
+        [
+          162,
+          173
+        ],
+        [
+          253,
+          264
+        ],
+        [
+          355,
+          369
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 9/373) with the scan's cuts",
+      "frames": 373,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_137_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          492,
+          508
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/542) with the scan's cuts",
+      "frames": 542,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_137_22": {
+      "status": "cut",
+      "cuts": [
+        [
+          376,
+          400
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 15/411) with the scan's cuts",
+      "frames": 411,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_26_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          56,
+          80
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 15/185) with the scan's cuts",
+      "frames": 185,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_74_07": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 44/78 frames); scan: floor -0.22 m; 63% cut",
+      "frames": 78,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_79_93": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 285/285 frames (ankle.flexion, hip.rotation)",
+      "frames": 285,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_80_19": {
+      "status": "cut",
+      "cuts": [
+        [
+          308,
+          369
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 52/456) with the scan's cuts",
+      "frames": 456,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_81_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          36,
+          68
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 23/303) with the scan's cuts",
+      "frames": 303,
+      "by": "agent"
+    },
+    "cmu/carry_cmu_82_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          190,
+          200
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/300) with the scan's cuts",
+      "frames": 300,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          211,
+          221
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/281) with the scan's cuts",
+      "frames": 281,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_03": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 24/109 frames (ankle.flexion)",
+      "frames": 109,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          2,
+          15
+        ],
+        [
+          38,
+          53
+        ],
+        [
+          62,
+          67
+        ],
+        [
+          74,
+          78
+        ],
+        [
+          154,
+          190
+        ],
+        [
+          235,
+          240
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 26/300) with the scan's cuts",
+      "frames": 300,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          70,
+          115
+        ],
+        [
+          132,
+          154
+        ],
+        [
+          212,
+          223
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 51/229) with the scan's cuts",
+      "frames": 229,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          8
+        ],
+        [
+          153,
+          169
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 6/298) with the scan's cuts",
+      "frames": 298,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_08": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 47/180 frames (ankle.flexion, hip.abduction)",
+      "frames": 180,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          131,
+          152
+        ],
+        [
+          171,
+          196
+        ],
+        [
+          276,
+          285
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 29/286) with the scan's cuts",
+      "frames": 286,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_10": {
+      "status": "cut",
+      "cuts": [
+        [
+          16,
+          36
+        ],
+        [
+          53,
+          75
+        ],
+        [
+          89,
+          114
+        ],
+        [
+          184,
+          203
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 51/204) with the scan's cuts",
+      "frames": 204,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          5
+        ],
+        [
+          7,
+          19
+        ],
+        [
+          66,
+          85
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 14/148) with the scan's cuts",
+      "frames": 148,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          270,
+          280
+        ],
+        [
+          322,
+          327
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/339) with the scan's cuts",
+      "frames": 339,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_13": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 96/274 frames (ankle.flexion)",
+      "frames": 274,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          19,
+          32
+        ],
+        [
+          94,
+          98
+        ],
+        [
+          123,
+          137
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, neck.flexion, 9/161) with the scan's cuts",
+      "frames": 161,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_15": {
+      "status": "cut",
+      "cuts": [
+        [
+          60,
+          64
+        ],
+        [
+          83,
+          111
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, neck.flexion, 16/135) with the scan's cuts",
+      "frames": 135,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          45,
+          62
+        ],
+        [
+          76,
+          92
+        ],
+        [
+          103,
+          130
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, trunk.rotation, 32/131) with the scan's cuts",
+      "frames": 131,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_17": {
+      "status": "cut",
+      "cuts": [
+        [
+          113,
+          129
+        ],
+        [
+          143,
+          158
+        ],
+        [
+          172,
+          183
+        ],
+        [
+          189,
+          193
+        ],
+        [
+          203,
+          214
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 11/261) with the scan's cuts",
+      "frames": 261,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_18": {
+      "status": "cut",
+      "cuts": [
+        [
+          114,
+          129
+        ],
+        [
+          315,
+          340
+        ],
+        [
+          356,
+          371
+        ],
+        [
+          389,
+          400
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 28/457) with the scan's cuts",
+      "frames": 457,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_19": {
+      "status": "cut",
+      "cuts": [
+        [
+          53,
+          88
+        ],
+        [
+          99,
+          115
+        ],
+        [
+          123,
+          146
+        ],
+        [
+          160,
+          177
+        ],
+        [
+          208,
+          214
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, neck.flexion, 45/215) with the scan's cuts",
+      "frames": 215,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_05_20": {
+      "status": "cut",
+      "cuts": [
+        [
+          160,
+          180
+        ],
+        [
+          195,
+          219
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 10/274) with the scan's cuts",
+      "frames": 274,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_137_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          327,
+          340
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/407) with the scan's cuts",
+      "frames": 407,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_13_29": {
+      "status": "cut",
+      "cuts": [
+        [
+          436,
+          441
+        ],
+        [
+          500,
+          521
+        ],
+        [
+          558,
+          589
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 32/1148) with the scan's cuts",
+      "frames": 1148,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_13_31": {
+      "status": "cut",
+      "cuts": [
+        [
+          309,
+          329
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (trunk.rotation, 11/754) with the scan's cuts",
+      "frames": 754,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_141_06": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 79/163 frames (ankle.flexion)",
+      "frames": 163,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_141_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          24
+        ],
+        [
+          74,
+          84
+        ],
+        [
+          93,
+          104
+        ],
+        [
+          129,
+          141
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 27/142) with the scan's cuts",
+      "frames": 142,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_143_35": {
+      "status": "cut",
+      "cuts": [
+        [
+          309,
+          319
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/320) with the scan's cuts",
+      "frames": 320,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_14_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          450,
+          464
+        ],
+        [
+          484,
+          499
+        ],
+        [
+          520,
+          533
+        ],
+        [
+          551,
+          565
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 20/1339) with the scan's cuts",
+      "frames": 1339,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_54_25": {
+      "status": "cut",
+      "cuts": [
+        [
+          127,
+          132
+        ],
+        [
+          1018,
+          1037
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 10/1136) with the scan's cuts",
+      "frames": 1136,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_60_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          175,
+          187
+        ],
+        [
+          197,
+          212
+        ],
+        [
+          221,
+          231
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 6/561) with the scan's cuts",
+      "frames": 561,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_60_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          322,
+          332
+        ],
+        [
+          338,
+          348
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/525) with the scan's cuts",
+      "frames": 525,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_60_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          105,
+          115
+        ],
+        [
+          117,
+          123
+        ],
+        [
+          731,
+          739
+        ],
+        [
+          761,
+          779
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, trunk.rotation, 9/855) with the scan's cuts",
+      "frames": 855,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_60_10": {
+      "status": "cut",
+      "cuts": [
+        [
+          71,
+          83
+        ],
+        [
+          87,
+          93
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (trunk.rotation, 3/299) with the scan's cuts",
+      "frames": 299,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_60_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          51,
+          56
+        ],
+        [
+          416,
+          443
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 18/527) with the scan's cuts",
+      "frames": 527,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_60_15": {
+      "status": "cut",
+      "cuts": [
+        [
+          178,
+          188
+        ],
+        [
+          285,
+          289
+        ],
+        [
+          446,
+          455
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (trunk.rotation, 1/535) with the scan's cuts",
+      "frames": 535,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_80_63": {
+      "status": "cut",
+      "cuts": [
+        [
+          214,
+          302
+        ],
+        [
+          346,
+          378
+        ],
+        [
+          412,
+          424
+        ],
+        [
+          500,
+          504
+        ],
+        [
+          513,
+          525
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 105/568) with the scan's cuts",
+      "frames": 568,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_85_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          108,
+          119
+        ],
+        [
+          141,
+          151
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, shoulder.flexion, 3/203) with the scan's cuts",
+      "frames": 203,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_85_15": {
+      "status": "cut",
+      "cuts": [
+        [
+          83,
+          96
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 4/331) with the scan's cuts",
+      "frames": 331,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_90_30": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 149/358 frames (ankle.flexion)",
+      "frames": 358,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_90_31": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 130/245 frames); scan: 56% cut",
+      "frames": 245,
+      "by": "agent"
+    },
+    "cmu/fallandgetup_cmu_90_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          68,
+          80
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 3/181) with the scan's cuts",
+      "frames": 181,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_111_19": {
+      "status": "cut",
+      "cuts": [
+        [
+          35,
+          46
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 2/256) with the scan's cuts",
+      "frames": 256,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_135_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          144,
+          155
+        ],
+        [
+          201,
+          205
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 2/329) with the scan's cuts",
+      "frames": 329,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_141_14": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 27/144 frames (ankle.flexion)",
+      "frames": 144,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_144_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          140,
+          150
+        ],
+        [
+          168,
+          180
+        ],
+        [
+          199,
+          203
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/697) with the scan's cuts",
+      "frames": 697,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_144_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          38,
+          42
+        ],
+        [
+          95,
+          100
+        ],
+        [
+          154,
+          165
+        ],
+        [
+          220,
+          230
+        ],
+        [
+          288,
+          293
+        ],
+        [
+          354,
+          365
+        ],
+        [
+          417,
+          427
+        ],
+        [
+          484,
+          496
+        ],
+        [
+          554,
+          559
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 9/846) with the scan's cuts",
+      "frames": 846,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_144_10": {
+      "status": "cut",
+      "cuts": [
+        [
+          106,
+          111
+        ],
+        [
+          171,
+          177
+        ],
+        [
+          234,
+          244
+        ],
+        [
+          302,
+          313
+        ],
+        [
+          368,
+          378
+        ],
+        [
+          431,
+          449
+        ],
+        [
+          496,
+          518
+        ],
+        [
+          562,
+          583
+        ],
+        [
+          630,
+          657
+        ],
+        [
+          700,
+          714
+        ],
+        [
+          764,
+          790
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 47/875) with the scan's cuts",
+      "frames": 875,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_56_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          701,
+          705
+        ],
+        [
+          879,
+          898
+        ],
+        [
+          1516,
+          1526
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 11/1696) with the scan's cuts",
+      "frames": 1696,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_74_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          46,
+          57
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/99) with the scan's cuts",
+      "frames": 99,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_74_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          30,
+          44
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/79) with the scan's cuts",
+      "frames": 79,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_74_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          36,
+          47
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/81) with the scan's cuts",
+      "frames": 81,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_74_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          36,
+          46
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/81) with the scan's cuts",
+      "frames": 81,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_86_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          128,
+          138
+        ],
+        [
+          542,
+          546
+        ],
+        [
+          1030,
+          1034
+        ],
+        [
+          1096,
+          1100
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/1145) with the scan's cuts",
+      "frames": 1145,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_86_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          458,
+          461
+        ],
+        [
+          584,
+          588
+        ],
+        [
+          1111,
+          1115
+        ],
+        [
+          1279,
+          1283
+        ],
+        [
+          1561,
+          1573
+        ],
+        [
+          1626,
+          1638
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 6/2485) with the scan's cuts",
+      "frames": 2485,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_86_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          535,
+          547
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/2302) with the scan's cuts",
+      "frames": 2302,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_87_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          53,
+          65
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/154) with the scan's cuts",
+      "frames": 154,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_88_06": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 5/58 frames (ankle.flexion, hip.abduction, hip.flexion)",
+      "frames": 58,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_90_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          65,
+          77
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, 2/128) with the scan's cuts",
+      "frames": 128,
+      "by": "agent"
+    },
+    "cmu/fight_cmu_90_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          170,
+          180
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/224) with the scan's cuts",
+      "frames": 224,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_05_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          26,
+          53
+        ],
+        [
+          55,
+          59
+        ],
+        [
+          62,
+          75
+        ],
+        [
+          85,
+          95
+        ],
+        [
+          102,
+          127
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, 31/221) with the scan's cuts",
+      "frames": 221,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_144_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          62,
+          92
+        ],
+        [
+          158,
+          169
+        ],
+        [
+          172,
+          184
+        ],
+        [
+          279,
+          305
+        ],
+        [
+          366,
+          377
+        ],
+        [
+          380,
+          394
+        ],
+        [
+          463,
+          485
+        ],
+        [
+          537,
+          552
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 52/615) with the scan's cuts",
+      "frames": 615,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_144_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          104,
+          119
+        ],
+        [
+          121,
+          134
+        ],
+        [
+          240,
+          265
+        ],
+        [
+          354,
+          370
+        ],
+        [
+          473,
+          485
+        ],
+        [
+          488,
+          501
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 24/581) with the scan's cuts",
+      "frames": 581,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_49_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          30,
+          39
+        ],
+        [
+          72,
+          77
+        ],
+        [
+          80,
+          85
+        ],
+        [
+          91,
+          102
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/120) with the scan's cuts",
+      "frames": 120,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_49_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          13
+        ],
+        [
+          29,
+          34
+        ],
+        [
+          36,
+          41
+        ],
+        [
+          69,
+          74
+        ],
+        [
+          77,
+          82
+        ],
+        [
+          96,
+          101
+        ],
+        [
+          113,
+          123
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.abduction, 4/144) with the scan's cuts",
+      "frames": 144,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_85_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          120,
+          294
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.flexion, 3/409) with the scan's cuts",
+      "frames": 409,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_85_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          196,
+          208
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 3/238) with the scan's cuts",
+      "frames": 238,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_85_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          267,
+          271
+        ],
+        [
+          295,
+          318
+        ],
+        [
+          342,
+          346
+        ],
+        [
+          390,
+          402
+        ],
+        [
+          413,
+          428
+        ],
+        [
+          455,
+          465
+        ],
+        [
+          469,
+          484
+        ],
+        [
+          516,
+          541
+        ],
+        [
+          586,
+          599
+        ],
+        [
+          617,
+          631
+        ],
+        [
+          639,
+          648
+        ],
+        [
+          650,
+          661
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, shoulder.flexion, 38/742) with the scan's cuts",
+      "frames": 742,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_87_03": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 10/62 frames (ankle.flexion, hip.abduction)",
+      "frames": 62,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_87_04": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 8/54 frames (ankle.flexion)",
+      "frames": 54,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_87_05": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 12/128 frames); scan: 63% cut",
+      "frames": 128,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_88_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          107,
+          117
+        ],
+        [
+          124,
+          128
+        ],
+        [
+          157,
+          169
+        ],
+        [
+          171,
+          182
+        ],
+        [
+          237,
+          256
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/310) with the scan's cuts",
+      "frames": 310,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_88_05": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 5/37 frames); scan: 70% cut",
+      "frames": 37,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_88_07": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 4/39 frames (ankle.flexion)",
+      "frames": 39,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_88_08": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 4/72 frames (ankle.flexion)",
+      "frames": 72,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_89_03": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 12/68 frames (ankle.flexion)",
+      "frames": 68,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_89_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          27,
+          38
+        ],
+        [
+          99,
+          109
+        ],
+        [
+          167,
+          179
+        ],
+        [
+          200,
+          211
+        ],
+        [
+          248,
+          253
+        ],
+        [
+          404,
+          478
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation, 75/479) with the scan's cuts",
+      "frames": 479,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_89_05": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, hip.rotation, 113/1112 frames); scan: 52% cut",
+      "frames": 1112,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_90_02": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 54/195 frames (ankle.flexion)",
+      "frames": 195,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_90_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          73,
+          92
+        ],
+        [
+          104,
+          131
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 23/221) with the scan's cuts",
+      "frames": 221,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_90_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          70,
+          89
+        ],
+        [
+          106,
+          135
+        ],
+        [
+          153,
+          174
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 34/175) with the scan's cuts",
+      "frames": 175,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_90_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          46,
+          65
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/84) with the scan's cuts",
+      "frames": 84,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_90_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          102,
+          114
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 3/207) with the scan's cuts",
+      "frames": 207,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_90_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          112,
+          123
+        ],
+        [
+          140,
+          163
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 14/232) with the scan's cuts",
+      "frames": 232,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_90_19": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, hip.abduction, shoulder.flexion, 166/260 frames); scan: floor -0.21 m",
+      "frames": 260,
+      "by": "agent"
+    },
+    "cmu/flip_cmu_90_28": {
+      "status": "cut",
+      "cuts": [
+        [
+          88,
+          96
+        ],
+        [
+          99,
+          110
+        ],
+        [
+          129,
+          133
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/193) with the scan's cuts",
+      "frames": 193,
+      "by": "agent"
+    },
+    "cmu/gesture_cmu_138_31": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 198/198 frames (neck.abduction, neck.flexion, neck.rotation, trunk.rotation)",
+      "frames": 198,
+      "by": "agent"
+    },
+    "cmu/gesture_cmu_141_16": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 58/75 frames (ankle.flexion)",
+      "frames": 75,
+      "by": "agent"
+    },
+    "cmu/gesture_cmu_31_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          543,
+          564
+        ],
+        [
+          965,
+          982
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, hip.flexion, 19/1796) with the scan's cuts",
+      "frames": 1796,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_111_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          62,
+          98
+        ],
+        [
+          186,
+          194
+        ],
+        [
+          356,
+          370
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 32/381) with the scan's cuts",
+      "frames": 381,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_111_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          28,
+          74
+        ],
+        [
+          80,
+          114
+        ],
+        [
+          148,
+          169
+        ],
+        [
+          187,
+          200
+        ],
+        [
+          208,
+          211
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, hip.rotation, 48/381) with the scan's cuts",
+      "frames": 381,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_111_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          2,
+          55
+        ],
+        [
+          339,
+          417
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, hip.flexion, shoulder.flexion, 99/493) with the scan's cuts",
+      "frames": 493,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_111_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          150,
+          200
+        ],
+        [
+          246,
+          256
+        ],
+        [
+          263,
+          279
+        ],
+        [
+          287,
+          306
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, 59/384) with the scan's cuts",
+      "frames": 384,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_111_21": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, hip.rotation, 46/569 frames); scan: floor -0.22 m",
+      "frames": 569,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_139_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          76,
+          98
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 13/252) with the scan's cuts",
+      "frames": 252,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_139_17": {
+      "status": "cut",
+      "cuts": [
+        [
+          31,
+          45
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_139_18": {
+      "status": "cut",
+      "cuts": [
+        [
+          77,
+          88
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 2/214) with the scan's cuts",
+      "frames": 214,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_140_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          128,
+          140
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 3/225) with the scan's cuts",
+      "frames": 225,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_140_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          103,
+          119
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 4/204) with the scan's cuts",
+      "frames": 204,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_77_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          171,
+          202
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 22/247) with the scan's cuts",
+      "frames": 247,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_77_17": {
+      "status": "cut",
+      "cuts": [
+        [
+          31,
+          45
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_77_18": {
+      "status": "cut",
+      "cuts": [
+        [
+          77,
+          88
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 2/214) with the scan's cuts",
+      "frames": 214,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_90_33": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 149/224 frames (ankle.flexion)",
+      "frames": 224,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_90_34": {
+      "status": "cut",
+      "cuts": [
+        [
+          73,
+          89
+        ],
+        [
+          94,
+          130
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 30/210) with the scan's cuts",
+      "frames": 210,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_90_35": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 86/174 frames (ankle.flexion)",
+      "frames": 174,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_90_36": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 114/164 frames (ankle.flexion)",
+      "frames": 164,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_141_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          28,
+          39
+        ],
+        [
+          55,
+          65
+        ],
+        [
+          68,
+          84
+        ],
+        [
+          125,
+          136
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 17/137) with the scan's cuts",
+      "frames": 137,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_143_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          41,
+          53
+        ],
+        [
+          59,
+          63
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 3/85) with the scan's cuts",
+      "frames": 85,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_143_06": {
+      "status": "cut",
+      "cuts": [
+        [
+          49,
+          61
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 3/98) with the scan's cuts",
+      "frames": 98,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_143_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          41,
+          53
+        ],
+        [
+          77,
+          96
+        ],
+        [
+          107,
+          117
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 6/139) with the scan's cuts",
+      "frames": 139,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_49_02": {
+      "status": "cut",
+      "cuts": [
+        [
+          131,
+          141
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 1/521) with the scan's cuts",
+      "frames": 521,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_75_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          28,
+          39
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/95) with the scan's cuts",
+      "frames": 95,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_79_01": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 147/147 frames (ankle.flexion, hip.rotation)",
+      "frames": 147,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_82_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          73
+        ],
+        [
+          101,
+          111
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 1/227) with the scan's cuts",
+      "frames": 227,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_83_43": {
+      "status": "cut",
+      "cuts": [
+        [
+          96,
+          114
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/149) with the scan's cuts",
+      "frames": 149,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_83_47": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 17/156 frames); scan: 76% cut",
+      "frames": 156,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_83_50": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 14/132 frames); scan: 77% cut",
+      "frames": 132,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_83_57": {
+      "status": "cut",
+      "cuts": [
+        [
+          33,
+          50
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/102) with the scan's cuts",
+      "frames": 102,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_83_62": {
+      "status": "cut",
+      "cuts": [
+        [
+          66,
+          77
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/119) with the scan's cuts",
+      "frames": 119,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_83_64": {
+      "status": "cut",
+      "cuts": [
+        [
+          102,
+          118
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 6/145) with the scan's cuts",
+      "frames": 145,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_01": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 10/96 frames); scan: floor -0.91 m; 62% cut",
+      "frames": 96,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_48": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 1/30 frames); scan: 87% cut",
+      "frames": 30,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_53": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 4/75 frames (ankle.flexion)",
+      "frames": 75,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_54": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/62 frames (ankle.flexion)",
+      "frames": 62,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_55": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          3
+        ],
+        [
+          75,
+          104
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/126) with the scan's cuts",
+      "frames": 126,
+      "by": "agent"
+    },
+    "cmu/run_cmu_127_29": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 2/52 frames (hip.abduction)",
+      "frames": 52,
+      "by": "agent"
+    },
+    "cmu/run_cmu_127_31": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 47/128 frames (hip.abduction)",
+      "frames": 128,
+      "by": "agent"
+    },
+    "cmu/run_cmu_127_32": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 19/82 frames (hip.abduction)",
+      "frames": 82,
+      "by": "agent"
+    },
+    "cmu/run_cmu_127_38": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 3/48 frames (hip.abduction)",
+      "frames": 48,
+      "by": "agent"
+    },
+    "cmu/run_cmu_128_10": {
+      "status": "cut",
+      "cuts": [
+        [
+          30,
+          40
+        ],
+        [
+          42,
+          64
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 14/107) with the scan's cuts",
+      "frames": 107,
+      "by": "agent"
+    },
+    "cmu/run_cmu_141_02": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/28 frames (ankle.flexion)",
+      "frames": 28,
+      "by": "agent"
+    },
+    "cmu/run_cmu_141_03": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 2/58 frames (ankle.flexion)",
+      "frames": 58,
+      "by": "agent"
+    },
+    "cmu/run_cmu_141_34": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 8/79 frames (ankle.flexion)",
+      "frames": 79,
+      "by": "agent"
+    },
+    "cmu/run_cmu_143_01": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/25 frames (shoulder.flexion)",
+      "frames": 25,
+      "by": "agent"
+    },
+    "cmu/run_cmu_143_42": {
+      "status": "cut",
+      "cuts": [
+        [
+          94,
+          104
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 1/134) with the scan's cuts",
+      "frames": 134,
+      "by": "agent"
+    },
+    "cmu/run_cmu_19_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          12,
+          22
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 1/83) with the scan's cuts",
+      "frames": 83,
+      "by": "agent"
+    },
+    "cmu/run_cmu_75_04": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 1/73 frames (ankle.flexion)",
+      "frames": 73,
+      "by": "agent"
+    },
+    "cmu/sidestep_cmu_141_32": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          18
+        ],
+        [
+          41,
+          55
+        ],
+        [
+          67,
+          77
+        ],
+        [
+          172,
+          183
+        ],
+        [
+          204,
+          221
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 35/222) with the scan's cuts",
+      "frames": 222,
+      "by": "agent"
+    },
+    "cmu/sidestep_cmu_141_33": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          34
+        ],
+        [
+          38,
+          56
+        ],
+        [
+          58,
+          70
+        ],
+        [
+          78,
+          88
+        ],
+        [
+          96,
+          107
+        ],
+        [
+          237,
+          261
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 49/265) with the scan's cuts",
+      "frames": 265,
+      "by": "agent"
+    },
+    "cmu/sidestep_cmu_83_68": {
+      "status": "cut",
+      "cuts": [
+        [
+          83,
+          98
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, trunk.rotation, 6/165) with the scan's cuts",
+      "frames": 165,
+      "by": "agent"
+    },
+    "cmu/sit_cmu_141_17": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 6/140 frames); scan: 57% cut",
+      "frames": 140,
+      "by": "agent"
+    },
+    "cmu/sit_cmu_62_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          201,
+          217
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/316) with the scan's cuts",
+      "frames": 316,
+      "by": "agent"
+    },
+    "cmu/sit_cmu_75_17": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 8/81 frames (hip.abduction)",
+      "frames": 81,
+      "by": "agent"
+    },
+    "cmu/sit_cmu_75_20": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 54/124 frames (ankle.flexion)",
+      "frames": 124,
+      "by": "agent"
+    },
+    "cmu/sit_cmu_86_15": {
+      "status": "cut",
+      "cuts": [
+        [
+          348,
+          358
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (trunk.rotation, 1/1773) with the scan's cuts",
+      "frames": 1773,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_141_10": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 79/127 frames (ankle.flexion)",
+      "frames": 127,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_141_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          63,
+          138
+        ],
+        [
+          141,
+          153
+        ],
+        [
+          165,
+          171
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 42/172) with the scan's cuts",
+      "frames": 172,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_141_28": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 26/89 frames (ankle.flexion)",
+      "frames": 89,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_143_22": {
+      "status": "cut",
+      "cuts": [
+        [
+          63,
+          73
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 1/273) with the scan's cuts",
+      "frames": 273,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_34_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          110,
+          114
+        ],
+        [
+          244,
+          256
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 3/676) with the scan's cuts",
+      "frames": 676,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_79_79": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 210/210 frames (ankle.flexion, hip.rotation)",
+      "frames": 210,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_79_91": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 125/125 frames (ankle.flexion, hip.rotation)",
+      "frames": 125,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_79_92": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 160/160 frames (ankle.flexion, hip.rotation)",
+      "frames": 160,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_80_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          56,
+          72
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/176) with the scan's cuts",
+      "frames": 176,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_80_15": {
+      "status": "cut",
+      "cuts": [
+        [
+          96,
+          120
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 13/309) with the scan's cuts",
+      "frames": 309,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_80_22": {
+      "status": "cut",
+      "cuts": [
+        [
+          30,
+          53
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 14/264) with the scan's cuts",
+      "frames": 264,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_80_23": {
+      "status": "cut",
+      "cuts": [
+        [
+          35,
+          69
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 25/256) with the scan's cuts",
+      "frames": 256,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_86_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          702,
+          717
+        ],
+        [
+          825,
+          845
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 17/2176) with the scan's cuts",
+      "frames": 2176,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_90_24": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 6/197 frames); scan: 61% cut",
+      "frames": 197,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_90_25": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 2/317 frames); scan: 97% cut",
+      "frames": 317,
+      "by": "agent"
+    },
+    "cmu/standing_cmu_137_15": {
+      "status": "cut",
+      "cuts": [
+        [
+          518,
+          519
+        ],
+        [
+          1148,
+          1173
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 16/1346) with the scan's cuts",
+      "frames": 1346,
+      "by": "agent"
+    },
+    "cmu/standing_cmu_137_19": {
+      "status": "cut",
+      "cuts": [
+        [
+          268,
+          282
+        ],
+        [
+          1152,
+          1178
+        ],
+        [
+          1272,
+          1304
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 45/1330) with the scan's cuts",
+      "frames": 1330,
+      "by": "agent"
+    },
+    "cmu/standing_cmu_137_23": {
+      "status": "cut",
+      "cuts": [
+        [
+          597,
+          637
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 31/1137) with the scan's cuts",
+      "frames": 1137,
+      "by": "agent"
+    },
+    "cmu/standing_cmu_137_37": {
+      "status": "cut",
+      "cuts": [
+        [
+          593,
+          605
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/1279) with the scan's cuts",
+      "frames": 1279,
+      "by": "agent"
+    },
+    "cmu/standing_cmu_141_20": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 77/191 frames (ankle.flexion)",
+      "frames": 191,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_111_38": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 257/660 frames (ankle.flexion, hip.abduction)",
+      "frames": 660,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_111_39": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 395/1024 frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation)",
+      "frames": 1024,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_111_41": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 396/924 frames (ankle.flexion, hip.abduction)",
+      "frames": 924,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_113_28": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 520/1288 frames (hip.abduction, hip.flexion)",
+      "frames": 1288,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_113_29": {
+      "status": "cut",
+      "cuts": [
+        [
+          182,
+          248
+        ],
+        [
+          321,
+          465
+        ],
+        [
+          628,
+          649
+        ],
+        [
+          651,
+          656
+        ],
+        [
+          658,
+          663
+        ],
+        [
+          672,
+          677
+        ],
+        [
+          779,
+          784
+        ],
+        [
+          809,
+          821
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 204/1080) with the scan's cuts",
+      "frames": 1080,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_114_10": {
+      "status": "cut",
+      "cuts": [
+        [
+          1205,
+          1218
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/2015) with the scan's cuts",
+      "frames": 2015,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_114_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          130,
+          156
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (hip.abduction, 17/432) with the scan's cuts",
+      "frames": 432,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_12_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          3506,
+          3539
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 24/4450) with the scan's cuts",
+      "frames": 4450,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_141_13": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 63/92 frames (ankle.flexion)",
+      "frames": 92,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_22_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          44,
+          59
+        ],
+        [
+          115,
+          132
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 14/177) with the scan's cuts",
+      "frames": 177,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_23_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          11,
+          29
+        ],
+        [
+          87,
+          104
+        ],
+        [
+          150,
+          168
+        ],
+        [
+          170,
+          174
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 26/177) with the scan's cuts",
+      "frames": 177,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_56_07": {
+      "status": "cut",
+      "cuts": [
+        [
+          1415,
+          1420
+        ],
+        [
+          1558,
+          1563
+        ],
+        [
+          1586,
+          1596
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/2355) with the scan's cuts",
+      "frames": 2355,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_56_08": {
+      "status": "cut",
+      "cuts": [
+        [
+          896,
+          909
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/1044) with the scan's cuts",
+      "frames": 1044,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_83_22": {
+      "status": "cut",
+      "cuts": [
+        [
+          652,
+          657
+        ],
+        [
+          659,
+          664
+        ],
+        [
+          693,
+          698
+        ],
+        [
+          701,
+          711
+        ],
+        [
+          736,
+          752
+        ],
+        [
+          850,
+          868
+        ],
+        [
+          884,
+          905
+        ],
+        [
+          936,
+          956
+        ],
+        [
+          970,
+          990
+        ],
+        [
+          1275,
+          1315
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 71/1343) with the scan's cuts",
+      "frames": 1343,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_86_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          838,
+          864
+        ],
+        [
+          880,
+          896
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 24/1419) with the scan's cuts",
+      "frames": 1419,
+      "by": "agent"
+    },
+    "cmu/stretch_cmu_88_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          34,
+          67
+        ],
+        [
+          70,
+          75
+        ],
+        [
+          79,
+          83
+        ],
+        [
+          160,
+          179
+        ],
+        [
+          183,
+          195
+        ],
+        [
+          226,
+          231
+        ],
+        [
+          235,
+          240
+        ],
+        [
+          243,
+          249
+        ],
+        [
+          252,
+          257
+        ],
+        [
+          263,
+          268
+        ],
+        [
+          278,
+          283
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 15/507) with the scan's cuts",
+      "frames": 507,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_104_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          100,
+          137
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/138) with the scan's cuts",
+      "frames": 138,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_104_14": {
+      "status": "cut",
+      "cuts": [
+        [
+          162,
+          172
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/177) with the scan's cuts",
+      "frames": 177,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_104_16": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 5/82 frames); scan: 57% cut",
+      "frames": 82,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          409,
+          420
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/684) with the scan's cuts",
+      "frames": 684,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          186,
+          196
+        ],
+        [
+          215,
+          227
+        ],
+        [
+          273,
+          284
+        ],
+        [
+          331,
+          341
+        ],
+        [
+          344,
+          354
+        ],
+        [
+          358,
+          368
+        ],
+        [
+          372,
+          382
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 10/466) with the scan's cuts",
+      "frames": 466,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          351,
+          367
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/675) with the scan's cuts",
+      "frames": 675,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          1020,
+          1033
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/1351) with the scan's cuts",
+      "frames": 1351,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          379,
+          392
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/466) with the scan's cuts",
+      "frames": 466,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          117,
+          128
+        ],
+        [
+          219,
+          232
+        ],
+        [
+          239,
+          250
+        ],
+        [
+          417,
+          428
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 10/556) with the scan's cuts",
+      "frames": 556,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          280,
+          292
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/740) with the scan's cuts",
+      "frames": 740,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          442,
+          459
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/473) with the scan's cuts",
+      "frames": 473,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_23": {
+      "status": "cut",
+      "cuts": [
+        [
+          292,
+          310
+        ],
+        [
+          503,
+          513
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 10/667) with the scan's cuts",
+      "frames": 667,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_25": {
+      "status": "cut",
+      "cuts": [
+        [
+          144,
+          155
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/784) with the scan's cuts",
+      "frames": 784,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_27": {
+      "status": "cut",
+      "cuts": [
+        [
+          333,
+          361
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 19/724) with the scan's cuts",
+      "frames": 724,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_28": {
+      "status": "cut",
+      "cuts": [
+        [
+          220,
+          232
+        ],
+        [
+          403,
+          406
+        ],
+        [
+          419,
+          437
+        ],
+        [
+          774,
+          790
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 19/827) with the scan's cuts",
+      "frames": 827,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_29": {
+      "status": "cut",
+      "cuts": [
+        [
+          213,
+          223
+        ],
+        [
+          232,
+          243
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/545) with the scan's cuts",
+      "frames": 545,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_30": {
+      "status": "cut",
+      "cuts": [
+        [
+          278,
+          288
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/785) with the scan's cuts",
+      "frames": 785,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_62": {
+      "status": "cut",
+      "cuts": [
+        [
+          172,
+          182
+        ],
+        [
+          240,
+          251
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/462) with the scan's cuts",
+      "frames": 462,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_132_56": {
+      "status": "cut",
+      "cuts": [
+        [
+          1314,
+          1331
+        ],
+        [
+          1355,
+          1359
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation, 8/1771) with the scan's cuts",
+      "frames": 1771,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_01": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 74/202 frames); scan: 62% cut",
+      "frames": 202,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_02": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 69/195 frames); scan: 59% cut",
+      "frames": 195,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_03": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 58/170 frames); scan: 54% cut",
+      "frames": 170,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_04": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 73/175 frames); scan: 67% cut",
+      "frames": 175,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_05": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 44/93 frames); scan: 68% cut",
+      "frames": 93,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_06": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 54/100 frames); scan: 68% cut",
+      "frames": 100,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_07": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 47/96 frames); scan: 70% cut",
+      "frames": 96,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_08": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 48/100 frames); scan: 65% cut",
+      "frames": 100,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_09": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 51/107 frames); scan: 67% cut",
+      "frames": 107,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_138_10": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (ankle.flexion, 49/109 frames); scan: 69% cut",
+      "frames": 109,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_141_07": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 14/75 frames (ankle.flexion)",
+      "frames": 75,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_141_08": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 16/83 frames (ankle.flexion)",
+      "frames": 83,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_141_09": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 6/59 frames (ankle.flexion)",
+      "frames": 59,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_141_19": {
+      "status": "cut",
+      "cuts": [
+        [
+          30,
+          40
+        ],
+        [
+          92,
+          104
+        ],
+        [
+          114,
+          129
+        ],
+        [
+          169,
+          181
+        ],
+        [
+          192,
+          206
+        ],
+        [
+          269,
+          297
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 42/298) with the scan's cuts",
+      "frames": 298,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_141_25": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          15
+        ],
+        [
+          47,
+          67
+        ],
+        [
+          74,
+          94
+        ],
+        [
+          109,
+          119
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 22/154) with the scan's cuts",
+      "frames": 154,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_141_29": {
+      "status": "cut",
+      "cuts": [
+        [
+          3,
+          14
+        ],
+        [
+          50,
+          63
+        ],
+        [
+          94,
+          105
+        ],
+        [
+          114,
+          124
+        ],
+        [
+          138,
+          148
+        ],
+        [
+          157,
+          168
+        ],
+        [
+          215,
+          233
+        ],
+        [
+          281,
+          291
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 23/292) with the scan's cuts",
+      "frames": 292,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_141_30": {
+      "status": "cut",
+      "cuts": [
+        [
+          32,
+          50
+        ],
+        [
+          58,
+          70
+        ],
+        [
+          96,
+          116
+        ],
+        [
+          123,
+          134
+        ],
+        [
+          168,
+          179
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 14/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_141_31": {
+      "status": "cut",
+      "cuts": [
+        [
+          67,
+          78
+        ],
+        [
+          158,
+          167
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/168) with the scan's cuts",
+      "frames": 168,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_143_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          68,
+          80
+        ],
+        [
+          134,
+          138
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/153) with the scan's cuts",
+      "frames": 153,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_35_27": {
+      "status": "cut",
+      "cuts": [
+        [
+          1484,
+          1502
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, trunk.rotation, 9/2452) with the scan's cuts",
+      "frames": 2452,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_38_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          95,
+          107
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/2158) with the scan's cuts",
+      "frames": 2158,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_54_20": {
+      "status": "cut",
+      "cuts": [
+        [
+          4,
+          16
+        ],
+        [
+          87,
+          107
+        ],
+        [
+          137,
+          163
+        ],
+        [
+          293,
+          303
+        ],
+        [
+          328,
+          338
+        ],
+        [
+          439,
+          449
+        ],
+        [
+          474,
+          484
+        ],
+        [
+          672,
+          676
+        ],
+        [
+          700,
+          704
+        ],
+        [
+          709,
+          717
+        ],
+        [
+          789,
+          800
+        ],
+        [
+          832,
+          859
+        ],
+        [
+          861,
+          896
+        ],
+        [
+          905,
+          931
+        ],
+        [
+          1023,
+          1034
+        ],
+        [
+          1117,
+          1133
+        ],
+        [
+          1242,
+          1254
+        ],
+        [
+          1277,
+          1287
+        ],
+        [
+          1311,
+          1321
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 86/1549) with the scan's cuts",
+      "frames": 1549,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_54_21": {
+      "status": "cut",
+      "cuts": [
+        [
+          214,
+          225
+        ],
+        [
+          248,
+          259
+        ],
+        [
+          266,
+          278
+        ],
+        [
+          341,
+          352
+        ],
+        [
+          379,
+          390
+        ],
+        [
+          415,
+          426
+        ],
+        [
+          452,
+          463
+        ],
+        [
+          543,
+          555
+        ],
+        [
+          618,
+          622
+        ],
+        [
+          629,
+          633
+        ],
+        [
+          982,
+          983
+        ],
+        [
+          1019,
+          1019
+        ],
+        [
+          1054,
+          1055
+        ],
+        [
+          1090,
+          1094
+        ],
+        [
+          1127,
+          1128
+        ],
+        [
+          1612,
+          1628
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 25/1747) with the scan's cuts",
+      "frames": 1747,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_54_22": {
+      "status": "cut",
+      "cuts": [
+        [
+          166,
+          170
+        ],
+        [
+          242,
+          254
+        ],
+        [
+          343,
+          355
+        ],
+        [
+          545,
+          555
+        ],
+        [
+          577,
+          587
+        ],
+        [
+          595,
+          599
+        ],
+        [
+          628,
+          633
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 9/634) with the scan's cuts",
+      "frames": 634,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_83_26": {
+      "status": "cut",
+      "cuts": [
+        [
+          43,
+          57
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 5/131) with the scan's cuts",
+      "frames": 131,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_01": {
+      "status": "cut",
+      "cuts": [
+        [
+          409,
+          420
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/684) with the scan's cuts",
+      "frames": 684,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_03": {
+      "status": "cut",
+      "cuts": [
+        [
+          186,
+          196
+        ],
+        [
+          215,
+          227
+        ],
+        [
+          273,
+          284
+        ],
+        [
+          331,
+          341
+        ],
+        [
+          344,
+          354
+        ],
+        [
+          358,
+          368
+        ],
+        [
+          372,
+          382
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 10/466) with the scan's cuts",
+      "frames": 466,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          373,
+          383
+        ],
+        [
+          441,
+          451
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/541) with the scan's cuts",
+      "frames": 541,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_05": {
+      "status": "cut",
+      "cuts": [
+        [
+          351,
+          367
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 7/675) with the scan's cuts",
+      "frames": 675,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_09": {
+      "status": "cut",
+      "cuts": [
+        [
+          1020,
+          1033
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/1351) with the scan's cuts",
+      "frames": 1351,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_11": {
+      "status": "cut",
+      "cuts": [
+        [
+          379,
+          392
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/466) with the scan's cuts",
+      "frames": 466,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          117,
+          128
+        ],
+        [
+          219,
+          232
+        ],
+        [
+          239,
+          250
+        ],
+        [
+          417,
+          428
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 10/556) with the scan's cuts",
+      "frames": 556,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          280,
+          292
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/740) with the scan's cuts",
+      "frames": 740,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_16": {
+      "status": "cut",
+      "cuts": [
+        [
+          442,
+          459
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 4/473) with the scan's cuts",
+      "frames": 473,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_23": {
+      "status": "cut",
+      "cuts": [
+        [
+          292,
+          310
+        ],
+        [
+          503,
+          513
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 10/667) with the scan's cuts",
+      "frames": 667,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_25": {
+      "status": "cut",
+      "cuts": [
+        [
+          144,
+          155
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/784) with the scan's cuts",
+      "frames": 784,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_27": {
+      "status": "cut",
+      "cuts": [
+        [
+          333,
+          361
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 19/724) with the scan's cuts",
+      "frames": 724,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_28": {
+      "status": "cut",
+      "cuts": [
+        [
+          220,
+          232
+        ],
+        [
+          403,
+          406
+        ],
+        [
+          419,
+          437
+        ],
+        [
+          774,
+          790
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 19/827) with the scan's cuts",
+      "frames": 827,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_29": {
+      "status": "cut",
+      "cuts": [
+        [
+          213,
+          223
+        ],
+        [
+          232,
+          243
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/545) with the scan's cuts",
+      "frames": 545,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_30": {
+      "status": "cut",
+      "cuts": [
+        [
+          278,
+          288
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/785) with the scan's cuts",
+      "frames": 785,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_91_62": {
+      "status": "cut",
+      "cuts": [
+        [
+          172,
+          182
+        ],
+        [
+          240,
+          251
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 3/462) with the scan's cuts",
+      "frames": 462,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_back_walkover_s1": {
+      "status": "cut",
+      "cuts": [
+        [
+          67,
+          72
+        ],
+        [
+          89,
+          114
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (neck.abduction, neck.flexion, neck.rotation, 16/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_back_walkover_s2": {
+      "status": "cut",
+      "cuts": [
+        [
+          28,
+          33
+        ],
+        [
+          37,
+          41
+        ],
+        [
+          76,
+          91
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, trunk.abduction, trunk.flexion, trunk.rotation, 6/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_back_walkover_s3": {
+      "status": "cut",
+      "cuts": [
+        [
+          55,
+          66
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 2/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_cartwheel_left_s3": {
+      "status": "cut",
+      "cuts": [
+        [
+          48,
+          53
+        ],
+        [
+          65,
+          76
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 2/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_cartwheel_right_s2": {
+      "status": "cut",
+      "cuts": [
+        [
+          44,
+          57
+        ],
+        [
+          83,
+          90
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (shoulder.flexion, 4/180) with the scan's cuts",
+      "frames": 180,
+      "by": "agent"
+    },
     "kimodo/acrobat_kimodo_dive_roll_s1": {
       "status": "ok",
       "type": "run",
@@ -53,6 +9326,30 @@
       "status": "reject",
       "note": "never turns over: not a round-off",
       "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/fall_kimodo_fall_hit_chest_s1": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 115/240 frames (shoulder.abduction, shoulder.flexion)",
+      "frames": 240,
+      "by": "agent"
+    },
+    "kimodo/fall_kimodo_fall_twist_ankle_s3": {
+      "status": "cut",
+      "cuts": [
+        [
+          62,
+          72
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.flexion, 1/240) with the scan's cuts",
+      "frames": 240,
       "by": "agent"
     },
     "kimodo/gardening_kimodo_garden_dig_s1": {
