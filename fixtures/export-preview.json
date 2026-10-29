@@ -1,0 +1,32 @@
+{
+  "$schema": "./schema.json",
+  "name": "export-preview",
+  "feature": "clip.video",
+  "description": "Export preview: the built-in Walk loop played into an animated GIF and a contact sheet (no ffmpeg needed; an MP4 goes through ffmpeg the same way). Frames 0 to 6 at the animation's own 30 fps are 7 frames; at 15 fps every second frame, 0, 2, 4, 6: 4 frames, at 64 x 48 pixels. The contact sheet of frames 0, 10 and 20 in one row of 40 x 50 cells is 3 cells and two 2-pixel gaps across, 3*40+2*2 = 124 by 50 pixels. A file that is not .mp4/.gif (or .png for a sheet), an odd view and a backwards range are refused.",
+  "script": [
+    { "command": "clip.open", "params": { "id": "Locomotion/Walk" } },
+    {
+      "command": "clip.video",
+      "params": { "path": "{tmp}/walk.gif", "from": 0, "to": 6, "width": 64, "height": 48 },
+      "expect": { "format": "gif", "frames": 7, "fps": 30, "width": 64, "height": 48, "from": 0, "to": 6 }
+    },
+    {
+      "command": "clip.video",
+      "params": { "path": "{tmp}/walk-15.gif", "from": 0, "to": 6, "fps": 15, "width": 64, "height": 48, "view": "front", "fixed": true },
+      "expect": { "frames": 4, "to": 6 }
+    },
+    {
+      "command": "clip.sheet",
+      "params": { "path": "{tmp}/walk.png", "frames": [0, 10, 20], "width": 40, "height": 50 },
+      "expect": { "frames": [0, 10, 20], "width": 124, "height": 50 }
+    }
+  ],
+  "expect": { "tolerance": 1e-9 },
+  "errors": [
+    { "command": "clip.video", "params": { "path": "{tmp}/walk.avi" } },
+    { "command": "clip.video", "params": { "path": "{tmp}/walk.gif", "view": "below" } },
+    { "command": "clip.video", "params": { "path": "{tmp}/walk.gif", "from": 9, "to": 2 } },
+    { "command": "clip.sheet", "params": { "path": "{tmp}/walk.jpg" } },
+    { "command": "clip.sheet", "params": { "path": "{tmp}/walk.png", "frames": [] } }
+  ]
+}

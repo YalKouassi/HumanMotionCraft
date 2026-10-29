@@ -1,0 +1,118 @@
+{
+  "$schema": "./schema.json",
+  "name": "edit-batch-history",
+  "feature": "edit.batch",
+  "description": "An agent's history tools. A checkpoint `start` names index 0 (nothing done yet). One atomic batch keys frame 0 at rest, goes to frame 10, lifts the root one hip height (offset z 0.9450101 + 1 = 1.9450101) and keys it: one undo step named by its label, \"Raise and key\", and its change summary lists keys 0 and 10 added on the base layer, frames 0..10. The root head then stands at 0.8724132 + 0.8698308 = 1.742244 m (x 0, y -0.0108229 as at rest). A batch that is not atomic keys frame 20 and then fails moving a key that does not exist (99): the steps before stay as one step, \"Partial\", and the result names the failed step (2, key.move). A dry run of moving key 20 to 30 reports the move ([20, 30]) and the undo label it would make (\"Move key 20→30\") but leaves keys 0, 10, 20 as they were. Going back to `start` undoes 2 steps (no keys left); going to index 2 redoes them. A checkpoint `two` at index 2 is dropped when, after an undo, a new edit (set root offset) replaces the undone step: only `start` is left. A session reset clears the 2 steps and the keys. The errors: an atomic batch whose second step names a bone that does not exist (the first step's frame change is rolled back too), a batch holding edit.undo, a dry run of a command that writes files, an unknown command id, a checkpoint without a name, unknown checkpoints and indices.",
+  "script": [
+    { "command": "edit.checkpoint", "params": { "name": "start" }, "expect": { "name": "start", "index": 0 } },
+    {
+      "command": "edit.batch",
+      "params": {
+        "label": "Raise and key",
+        "commands": [
+          { "id": "key.set" },
+          { "id": "frame.set", "params": { "frame": 10 } },
+          { "id": "pose.set_root", "params": { "root": [0, 0, 1.9450101408607229] } },
+          { "id": "key.set", "params": {} }
+        ]
+      },
+      "expect": {
+        "done": 4,
+        "label": "Raise and key",
+        "results": [{ "frame": 0 }, { "frame": 10 }, {}, { "frame": 10 }],
+        "changed": { "keys": [{ "layer": "Base", "added": [0, 10] }], "frames": [0, 10], "settings": ["frame"] }
+      }
+    },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.742244] } },
+    {
+      "command": "edit.history",
+      "expect": {
+        "current": 1,
+        "first": 0,
+        "steps": [{ "index": 1, "label": "Raise and key", "command": "edit.batch", "done": true }],
+        "checkpoints": [{ "name": "start", "index": 0 }]
+      }
+    },
+    {
+      "command": "edit.batch",
+      "params": {
+        "atomic": false,
+        "label": "Partial",
+        "commands": [
+          { "id": "frame.set", "params": { "frame": 20 } },
+          { "command": "key.set" },
+          { "id": "key.move", "params": { "from": 99, "to": 5 } }
+        ]
+      },
+      "expect": {
+        "done": 2,
+        "failed": { "step": 2, "id": "key.move", "error": { "kind": "refused", "command": "key.move" } },
+        "changed": { "keys": [{ "layer": "Base", "added": [20] }], "frames": [20, 20] }
+      }
+    },
+    {
+      "command": "edit.dry_run",
+      "params": { "id": "key.move", "params": { "from": 20, "to": 30 } },
+      "expect": {
+        "id": "key.move",
+        "undo_label": "Move key 20→30",
+        "changed": { "keys": [{ "layer": "Base", "moved": [[20, 30]] }], "frames": [20, 30] }
+      }
+    },
+    { "command": "editor.state", "expect": { "keys": [{ "frame": 0 }, { "frame": 10 }, { "frame": 20 }] } },
+    {
+      "command": "edit.history",
+      "expect": {
+        "current": 2,
+        "steps": [{ "index": 1, "label": "Raise and key" }, { "index": 2, "label": "Partial", "done": true }]
+      }
+    },
+    { "command": "edit.revert_to", "params": { "name": "start" }, "expect": { "from": 2, "to": 0, "undone": 2, "redone": 0 } },
+    { "command": "editor.state", "expect": { "keys": [] } },
+    {
+      "command": "edit.history",
+      "expect": { "current": 0, "steps": [{ "index": 1, "done": false }, { "index": 2, "done": false }] }
+    },
+    { "command": "edit.revert_to", "params": { "index": 2 }, "expect": { "from": 0, "to": 2, "undone": 0, "redone": 2 } },
+    { "command": "edit.checkpoint", "params": { "name": "two" }, "expect": { "index": 2 } },
+    { "command": "edit.undo", "expect": { "changed": true, "label": "Partial" } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101408607229] } },
+    {
+      "command": "edit.history",
+      "expect": {
+        "current": 2,
+        "steps": [{ "index": 1, "label": "Raise and key" }, { "index": 2, "label": "Set root offset", "command": "pose.set_root" }],
+        "checkpoints": [{ "name": "start", "index": 0 }]
+      }
+    },
+    {
+      "command": "session.info",
+      "expect": { "product": "HumanMotionCraft", "seed": null, "deterministic": true, "history": 2, "check_outputs": true }
+    },
+    { "command": "session.reset", "expect": { "reset": true, "dropped": 2 } },
+    { "command": "editor.state", "expect": { "keys": [], "frame": 0 } },
+    { "command": "edit.history", "expect": { "current": 0, "steps": [], "checkpoints": [] } }
+  ],
+  "errors": [
+    {
+      "command": "edit.batch",
+      "params": {
+        "commands": [
+          { "id": "frame.set", "params": { "frame": 5 } },
+          { "id": "pose.set_bone", "params": { "bone": "wrist.l", "rotation": [0, 0, 0, 1] } }
+        ]
+      }
+    },
+    { "command": "edit.batch", "params": { "commands": [{ "id": "edit.undo" }] } },
+    { "command": "edit.batch", "params": { "commands": [{ "id": "key.set", "params": [1] }] } },
+    { "command": "edit.dry_run", "params": { "id": "clip.save" } },
+    { "command": "edit.dry_run", "params": { "id": "key.sett" } },
+    { "command": "edit.history", "params": { "x": 1 } },
+    { "command": "edit.checkpoint", "params": {} },
+    { "command": "edit.revert_to", "params": { "name": "nope" } },
+    { "command": "edit.revert_to", "params": { "index": 99 } },
+    { "command": "edit.revert_to", "params": { "name": "start", "index": 0 } },
+    { "command": "session.reset", "params": { "x": 1 } },
+    { "command": "session.info", "params": { "x": 1 } }
+  ]
+}

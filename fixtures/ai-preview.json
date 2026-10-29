@@ -1,0 +1,43 @@
+{
+  "$schema": "./schema.json",
+  "name": "ai-preview",
+  "feature": "ai.preview",
+  "description": "A fill is shown before it is kept. Keys standing at frame 0 (root offset z 0.9450101, root head 0.8724132) and one hip height (0.8698308) higher at frame 20, linear. Previewing the gap leaves the animation alone: no AI band, and the preview is live. The plain-interpolation preview (the comparison) moves the root head in a straight line: 0.8724132 at frame 0, halfway (1.3073286) at frame 10, 1.742244 at frame 20. Keeping it makes 19 AI keys (band 1..19, labelled with the model) and the clip then shows frame 10 at 1.3073286; the preview is gone. Undo says \"Keep AI fill 1–19\" and brings back the clip with its preview (live again, as it was made from that clip); redo keeps it again. A preview of 20..30 goes stale when key 30 is changed: keeping it is refused, the edit wins. Physics is off: this checks the keys.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "ai.preview", "expect": { "from": 0, "to": 20, "frames": 19, "model": "parts", "mode": "ai" } },
+    { "command": "editor.state", "expect": { "bands": [], "preview": { "from": 0, "to": 20, "model": "parts", "plain": false, "live": true } } },
+    {
+      "command": "ai.preview",
+      "params": { "mode": "plain" },
+      "expect": { "model": "plain interpolation", "mode": "plain", "root_heads": { "$contains": [[0, -0.0108229, 0.8724132], [0, -0.0108229, 1.3073286], [0, -0.0108229, 1.742244]] } }
+    },
+    { "command": "ai.accept", "expect": { "from": 0, "to": 20, "frames": 19, "mode": "plain" } },
+    { "command": "editor.state", "expect": { "bands": [{ "from": 1, "to": 19, "model": "parts" }], "preview": null } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.3073286] } },
+    { "command": "edit.undo", "expect": { "label": "Keep AI fill 1–19" } },
+    { "command": "editor.state", "expect": { "bands": [], "preview": { "live": true } } },
+    { "command": "edit.redo", "expect": { "label": "Keep AI fill 1–19" } },
+    { "command": "ai.discard", "expect": { "discarded": false } },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "ai.preview", "params": { "from": 20, "to": 30 }, "expect": { "frames": 9 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "editor.state", "expect": { "preview": { "from": 20, "to": 30, "live": false } } }
+  ],
+  "errors": [
+    { "command": "ai.accept" },
+    { "command": "ai.preview", "params": { "mode": "fancy" } },
+    { "command": "ai.preview", "params": { "from": 0 } },
+    { "command": "ai.preview", "params": { "from": 0, "to": 30 } },
+    { "command": "ai.discard", "params": { "all": true } }
+  ],
+  "views": ["front"]
+}

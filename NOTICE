@@ -1,0 +1,45 @@
+HumanMotionCraft
+Copyright (C) 2026 HumanMotionCraft Contributors
+
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU
+General Public License as published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version. This program is distributed in the hope that it
+will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License (LICENSE) for more details.
+
+The licence covers the program, not what you make with it: animations, poses and exports you create
+are yours.
+
+This product includes data derived from Anny (https://github.com/naver/anny),
+Copyright (C) 2025 NAVER Corporation, licensed under the Apache License, Version 2.0.
+HumanMotionCraft is an independent project, not affiliated with or endorsed by NAVER or
+NAVER LABS Europe.
+
+Mesh, rig and poses originate from the MakeHuman community (MPFB2 and the community pose
+packs), released under CC0 1.0 Universal.
+
+Motion data in the built-in animation library and the in-betweener's training data:
+
+The data used in this project was obtained from mocap.cs.cmu.edu. The database was created with
+funding from NSF EIA-0196217. (CMU Graphics Lab Motion Capture Database; BVH conversion by
+B. Hahne.)
+
+100STYLE by Ian Mason, Sebastian Starke and Taku Komura (https://www.ianxmason.com/100style,
+https://zenodo.org/record/8127870), licensed under CC BY 4.0
+(https://creativecommons.org/licenses/by/4.0/). Retargeted onto the rig and cut into 3-second clips.
+
+Motion from text (optional, installed separately from the app's Motion from text panel or by
+tools/textmotion/setup_textmotion.py), the
+85 built-in library clips we generated with it ("dataset": "kimodo"), and the generated motion in
+the in-betweener's training data:
+
+Kimodo by NVIDIA (https://github.com/nv-tlabs/kimodo), code under the Apache License, Version 2.0;
+the Kimodo-SOMA-RP-v1.2 model under the NVIDIA Open Model License
+(https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-license/), which
+claims no ownership of the motion it generates. HumanMotionCraft is not affiliated with or
+endorsed by NVIDIA.
+
+Built with Meta Llama 3. Kimodo's text encoder (LLM2Vec by McGill NLP, on Meta Llama 3 8B
+Instruct) is downloaded by the setup under the Meta Llama 3 Community License
+(https://www.llama.com/llama3/license/), Copyright (C) Meta Platforms, Inc. All Rights Reserved.
+No part of it is distributed with HumanMotionCraft.

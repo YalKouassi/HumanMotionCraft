@@ -1,0 +1,81 @@
+{
+  "$schema": "./schema.json",
+  "name": "rotate-arm-and-bend",
+  "feature": "pose.rotate",
+  "description": "Turning the upper arm 90 degrees about world Z carries the wrist round the shoulder: offset (0.2840532, -0.1616917, -0.3037233) becomes (0.1616917, 0.2840532, -0.3037233), so the wrist is at (0.3232714, 0.2669274, 0.1637656). spread_bend on the rest pose: the spine03 head is (0, 0.0206533, 0.1357467) from the root, a lean of atan(0.0206533 / 0.1357467) = 8.6510 degrees; half of it (SPINE_SHARE) is 4.3255.",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "pose.rotate",
+      "params": {
+        "bone": "upperarm01.L",
+        "axis": [
+          0,
+          0,
+          1
+        ],
+        "angle": 1.5707963267948966
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "wrist.L"
+      },
+      "expect": {
+        "position": [
+          0.3232714,
+          0.2669274,
+          0.1637656
+        ]
+      }
+    },
+    {
+      "command": "pose.reset",
+      "params": {}
+    },
+    {
+      "command": "pose.spread_bend",
+      "params": {},
+      "expect": {
+        "degrees": 4.3255
+      },
+      "tolerance": 0.001
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "pose.rotate",
+      "params": {
+        "bone": "upperarm01.L",
+        "axis": [
+          0,
+          0,
+          0
+        ],
+        "angle": 1
+      }
+    },
+    {
+      "command": "pose.spread_bend",
+      "params": {
+        "share": 2
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

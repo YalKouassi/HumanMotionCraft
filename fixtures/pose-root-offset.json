@@ -1,0 +1,86 @@
+{
+  "$schema": "./schema.json",
+  "name": "pose-root-offset",
+  "feature": "pose.set_root",
+  "description": "The root offset is in hip heights (0.8698308 m). Root rest head z 0.0504142 + 1 hip height = 0.9202450; x and y stay at the rest head (0, -0.0108229). Undo puts it back. Starts from root offset 0 (the rest pose stands on the floor; 0 puts the root at its rest head).",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.9202450
+        ]
+      }
+    },
+    {
+      "command": "edit.undo",
+      "params": {}
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.0504142
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 0.000001
+  },
+  "errors": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1E+9
+        ]
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0
+        ]
+      }
+    }
+  ],
+  "views": [
+    "front",
+    "side"
+  ]
+}

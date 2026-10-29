@@ -1,0 +1,114 @@
+{
+  "$schema": "./schema.json",
+  "name": "edit-gesture-undo",
+  "feature": "edit.begin",
+  "description": "Two root moves inside one gesture undo as one step. Root offset 0 puts the root at its rest head z 0.0504142; undo returns there; redo restores the last move: 0.0504142 + 0.2 hip heights (0.2 x 0.8698308 = 0.1739662) = 0.2243804.",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "edit.begin",
+      "params": {
+        "label": "Lift"
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.1
+        ]
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.2
+        ]
+      }
+    },
+    {
+      "command": "edit.end",
+      "params": {}
+    },
+    {
+      "command": "edit.undo",
+      "params": {}
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.0504142
+        ]
+      }
+    },
+    {
+      "command": "edit.redo",
+      "params": {}
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.2243804
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "edit.undo",
+      "params": {
+        "steps": 2
+      }
+    },
+    {
+      "command": "edit.redo",
+      "params": {
+        "steps": 2
+      }
+    },
+    {
+      "command": "edit.begin",
+      "params": {
+        "label": ""
+      }
+    },
+    {
+      "command": "edit.end",
+      "params": {
+        "commit": true
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

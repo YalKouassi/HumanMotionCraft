@@ -1,0 +1,65 @@
+{
+  "$schema": "./schema.json",
+  "name": "pose-rotate-root",
+  "feature": "pose.set_bone",
+  "description": "Turning the root 90 degrees about Z (q = [0,0,sin45,cos45]) carries its children round it. upperleg01.L rests at root + (0.1019421, 0.0028925, -0.0114742); turned 90 degrees about Z, (x, y) -> (-y, x) gives root + (-0.0028925, 0.1019421, -0.0114742) = (-0.0028925, 0.0911192, 0.0389400). Starts from root offset 0 (the rest pose stands on the floor; 0 puts the root at its rest head).",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "root",
+        "rotation": [
+          0,
+          0,
+          0.7071067811865476,
+          0.7071067811865476
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "bones": {
+      "upperleg01.L": {
+        "position": [
+          -0.0028925,
+          0.0911192,
+          0.0389400
+        ]
+      }
+    },
+    "tolerance": 0.000001
+  },
+  "errors": [
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "no.such.bone",
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "root"
+      }
+    }
+  ],
+  "views": [
+    "top"
+  ]
+}

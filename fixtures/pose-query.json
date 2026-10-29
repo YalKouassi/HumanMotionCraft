@@ -1,0 +1,148 @@
+{
+  "$schema": "./schema.json",
+  "name": "pose-query",
+  "feature": "pose.query",
+  "description": "Measuring the pose shown. Standing at rest every rotation is the identity, so each head is its baked rest head lifted by the standing root offset (0.9450101 hip heights x 0.8698308 = 0.8219990 m): wrist.L at (0.4456329, -0.1788175, 0.1637656 + 0.8219990 = 0.9857646); the wrists are 2 x 0.4456329 = 0.8912658 m apart; the left ankle is 0.0734171 m above the floor (rest z -0.7485819 + 0.8219990). The left leg's reach is hip-to-ankle over thigh plus shin from the rest heads: 0.7910655 / 0.7940617 = 0.9962267 (not straight), and no joint is past its limits. Bending the left knee 90 degrees the wrong way (rotation vector x -pi/2; its range starts at -0.2887458 rad) puts it 73.4560826 degrees past its limit, the only bone past.",
+  "script": [
+    {
+      "command": "pose.query",
+      "params": {
+        "bones": [
+          "wrist.L"
+        ],
+        "pairs": [
+          [
+            "wrist.L",
+            "wrist.R"
+          ],
+          [
+            "foot.L",
+            "floor"
+          ]
+        ]
+      },
+      "expect": {
+        "frame": null,
+        "bones": [
+          {
+            "bone": "wrist.L",
+            "position": [
+              0.4456329,
+              -0.1788175,
+              0.9857646
+            ],
+            "local": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "past_limits_deg": 0
+          }
+        ],
+        "pairs": [
+          {
+            "a": "wrist.L",
+            "b": "wrist.R",
+            "distance": 0.8912658,
+            "delta": [
+              -0.8912658,
+              0,
+              0
+            ]
+          },
+          {
+            "a": "foot.L",
+            "b": "floor",
+            "distance": 0.0734171
+          }
+        ],
+        "limbs": {
+          "$contains": [
+            {
+              "limb": "leg.L",
+              "reach": 0.9962267,
+              "length": 0.7940617,
+              "distance": 0.7910655,
+              "straight": false
+            }
+          ]
+        },
+        "outside_limits": []
+      },
+      "tolerance": 1e-06
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "lowerleg01.L",
+        "rotation": [
+          -0.7071067811865476,
+          0,
+          0,
+          0.7071067811865476
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "bones": [
+          "lowerleg01.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "bone": "lowerleg01.L",
+            "past_limits_deg": 73.4560826
+          }
+        ],
+        "outside_limits": [
+          {
+            "bone": "lowerleg01.L",
+            "past_deg": 73.4560826
+          }
+        ]
+      },
+      "tolerance": 1e-06
+    }
+  ],
+  "errors": [
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "bones": [
+          "wrist.l"
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "pairs": [
+          [
+            "wrist.L"
+          ]
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "pairs": [
+          [
+            "wrist.L",
+            "ceiling"
+          ]
+        ]
+      }
+    }
+  ]
+}

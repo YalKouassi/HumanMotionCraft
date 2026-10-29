@@ -1,0 +1,80 @@
+name	type	seconds	prompt
+jump_forward	jump	3	A person crouches, then jumps forward with both feet and lands.
+jump_run	jump	4	A person runs forward and leaps over a gap, landing on one foot and continuing to run.
+jump_side	jump	3	A person jumps sideways to the left with both feet and lands.
+jump_hop_one_leg	leg_jump	4	A person hops forward on their right leg three times.
+jump_skip	leg_jump	4	A person skips forward happily.
+transition_walk_to_run	transitions_between	5	A person walks forward, then speeds up into a run.
+transition_crouch_stand	transitions_between	5	A person crouches down low, waits, then stands back up.
+transition_run_to_stop	braking	4	A person runs forward and comes to a stop.
+stop_walk	braking	4	A person walks forward and stops, standing still.
+turn_in_place	turning_in_place	4	A person standing still turns around in place to face the opposite direction.
+turn_left	turning_in_place	3	A person standing still turns ninety degrees to their left.
+walk_circle	circular	8	A person walks in a circle clockwise.
+walk_tired	walk	6	A tired person walks forward slowly, shoulders slumped.
+walk_proud	walk	6	A person walks forward confidently with their chest out.
+walk_sneak	crouch	6	A person sneaks forward on tiptoe, crouching low.
+walk_backwards	walk	5	A person walks backwards carefully.
+side_step	side_step	5	A person side steps to the right, then back to the left.
+small_steps	small_steps	5	A person takes small careful steps forward on a slippery floor.
+run_jog	run	5	A person jogs forward at an easy pace.
+sprint	sprint	4	A person sprints forward as fast as they can.
+talk_gesture	speech	6	A person stands and talks, gesturing with both hands.
+talk_phone	speech	6	A person stands talking on a phone held to their right ear.
+whiteboard	whiteboard	6	A person writes on a whiteboard with their right hand.
+wave	gesture	4	A person waves hello with their right hand.
+point	gesture	4	A person points ahead with their right arm.
+clap	gesture	4	A person claps their hands several times.
+shrug	gesture	3	A person shrugs their shoulders.
+cheer	gesture	4	A person raises both arms in the air and cheers.
+carry_box	carry	6	A person picks up a box from the floor and carries it forward.
+carry_heavy	carry	6	A person walks forward carrying a heavy box with both arms.
+open_door	door	5	A person walks up to a door, opens it with their right hand and walks through.
+garden_dig	gardening	6	A person digs in the ground with a shovel.
+cook_stir	cooking	6	A person stands at a stove stirring a pot with their right hand.
+sit_down_stand_up	ground_sit_stand	6	A person sits down on a chair and then stands up again.
+sit_armchair	armchair	6	A person sits relaxed in an armchair, leaning back.
+sit_desk_type	desk	6	A person sits at a desk typing on a keyboard.
+sit_floor	ground	6	A person sits down cross-legged on the floor.
+idle_stand	standing	6	A person stands idle, shifting their weight from foot to foot.
+idle_look_around	standing	6	A person stands still and looks around.
+stretch_arms	stretch	6	A person stretches their arms above their head.
+squats	stretch	6	A person does three squats.
+dance_sway	dance	6	A person dances, swaying their hips and arms to music.
+punch_combo	fight	4	A person throws a left jab and a right punch.
+kick	fight	4	A person kicks forward with their right leg.
+fall_get_up	fallandgetup	8	A person trips, falls to the ground and gets back up.
+fall_trip_forward	fall	8	A person walks forward, trips over something, falls forward onto their hands and chest, and lies still on the floor.
+fall_slip_backward	fall	8	A person slips and falls backwards onto their back, and lies still on the floor.
+fall_faint	fall	8	A person standing still faints: their knees buckle and they collapse onto the floor and lie there without moving.
+fall_side_left	fall	8	A person loses their balance, falls sideways onto their left side, and lies on the floor.
+fall_side_right	fall	8	A person loses their balance, falls sideways onto their right side, and lies on the floor.
+fall_hit_chest	fall	8	A person is hit hard in the chest, staggers backwards and falls flat on their back, lying motionless on the floor.
+fall_run_trip	fall	8	A person running trips, falls forward and rolls on the floor, then lies still.
+fall_knees_forward	fall	8	A person drops to their knees, then falls forward face down onto the floor and lies still.
+fall_dizzy	fall	8	A dizzy person staggers in a circle and collapses onto the floor, lying still.
+fall_shoved	fall	8	A person is pushed hard from behind, stumbles forward and falls face down on the floor, lying still.
+fall_exhausted	fall	8	An exhausted person stumbles and collapses face down on the floor.
+fall_seat_then_back	fall	8	A person falls backwards onto their bottom, then falls back flat onto the floor and lies there.
+fall_twist_ankle	fall	8	A person walking twists their ankle, falls onto the floor and lies there holding their ankle.
+fall_hit_head	fall	8	A person is struck on the side of the head, spins round and falls onto the floor, lying still.
+fall_slow_collapse	fall	8	A wounded person clutches their stomach, slowly sinks to their knees, then collapses onto their side on the floor.
+fall_bad_landing	fall	8	A person jumps, lands badly, and falls backwards onto the floor, lying flat on their back.
+cartwheel_left	acrobat	6	A person does a cartwheel to the left and lands standing.
+cartwheel_right	acrobat	6	A person does a cartwheel to the right and lands standing.
+forward_roll	acrobat	6	A person does a forward roll on the floor and stands back up.
+backward_roll	acrobat	6	A person does a backward roll on the floor and stands back up.
+handstand	acrobat	6	A person goes up into a handstand, holds it for a moment, and comes back down to standing.
+backflip	acrobat	6	A person does a standing backflip and lands on their feet.
+front_flip	acrobat	6	A person runs forward and does a front flip, landing on their feet.
+vault_wall	acrobat	6	A person runs forward and vaults over a low wall using one hand, then keeps running.
+round_off	acrobat	6	A person runs a few steps and does a round-off, landing on both feet facing the way they came.
+dive_roll	acrobat	6	A person runs, dives forward into a roll, and comes up running.
+back_walkover	acrobat	6	A person bends backwards into a back walkover and stands up again.
+handspring	acrobat	6	A person runs forward and does a front handspring, landing on their feet.
+crawl_hands_knees	ground	6	A person crawls forward on their hands and knees.
+crawl_belly	ground	6	A person crawls forward on their belly, pulling with their arms.
+lie_down	ground	6	A person lies down on their back on the floor and stays there.
+roll_over	ground	6	A person lying on their back on the floor rolls over onto their front.
+get_up_from_lying	ground	6	A person lying on their back on the floor gets up to standing.
+scoot_backwards	ground	6	A person on the floor scoots backwards using their hands and feet.

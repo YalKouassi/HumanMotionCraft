@@ -1,0 +1,8 @@
+{
+  "name": "Cast a spell",
+  "description": "Get ready, cast, open the arms wide, relax: 5 keys, the AI fills the 86 frames between.",
+  "script": [
+    { "command": "ai.settings", "params": { "style": "any" } },
+    { "command": "anim.block", "params": { "poses": ["Standing/Relaxed", "Action/Ready stance", "Action/Casting a spell", "Action/Arms spread", "Standing/Relaxed"], "frames": [0, 18, 42, 64, 90], "fill": "ai", "physics": true } }
+  ]
+}

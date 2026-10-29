@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "clip-move-unkeyed",
+  "feature": "clip.move",
+  "description": "An edit not keyed yet moves with the body instead of being dropped. One key at frame 0 (root offset 0). On frame 10 the root is set to (0.5, 0, 0) hip heights and not keyed. Sliding 1 m along +X adds 1 / 0.8698308 = 1.1496488 hip heights: the shown root offset becomes (1.6496488, 0, 0), and the key on frame 0 becomes (1.1496488, 0, 0), seen by going back to frame 0 (which drops the unkeyed edit, as moving frames always does). Physics off.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "pose.set_root", "params": { "root": [0.5, 0, 0] } },
+    { "command": "clip.move", "params": { "by": [1, 0, 0] }, "expect": { "keys": 1 } },
+    { "command": "pose.get", "params": {}, "expect": { "root": [1.6496488, 0, 0] } },
+    { "command": "frame.set", "params": { "frame": 0 } },
+    { "command": "pose.get", "params": {}, "expect": { "root": [1.1496488, 0, 0] } }
+  ],
+  "expect": { "tolerance": 0.000001 },
+  "errors": [],
+  "views": ["top"]
+}

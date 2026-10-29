@@ -1,0 +1,218 @@
+{
+  "$schema": "./schema.json",
+  "name": "library-clips",
+  "feature": "clip.save_as",
+  "description": "The built-in library is installed (installing again copies nothing). A new animation saves under its group; save as, rename, duplicate (\"<name> copy\") and regroup give the ids shown; a written file imports back as a 1-frame animation (one key); deleting removes it from the list.",
+  "script": [
+    {
+      "command": "library.list",
+      "params": {},
+      "expect": {
+        "animations": {
+          "$contains": [
+            {
+              "id": "Locomotion/Walk"
+            }
+          ]
+        },
+        "poses": {
+          "$contains": [
+            {
+              "id": "Reference/T-pose"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "command": "library.install",
+      "params": {
+        "from": "{assets}/library"
+      },
+      "expect": {
+        "copied": 0
+      }
+    },
+    {
+      "command": "clip.new",
+      "params": {
+        "name": "Fixture",
+        "group": "Mine"
+      },
+      "expect": {
+        "id": "Mine/Fixture"
+      }
+    },
+    {
+      "command": "clip.save",
+      "params": {},
+      "expect": {
+        "id": "Mine/Fixture"
+      }
+    },
+    {
+      "command": "clip.save_as",
+      "params": {
+        "name": "Copy",
+        "group": "Mine"
+      },
+      "expect": {
+        "id": "Mine/Copy"
+      }
+    },
+    {
+      "command": "clip.rename",
+      "params": {
+        "to": "Renamed"
+      },
+      "expect": {
+        "id": "Mine/Renamed"
+      }
+    },
+    {
+      "command": "clip.duplicate",
+      "params": {},
+      "expect": {
+        "id": "Mine/Renamed copy"
+      }
+    },
+    {
+      "command": "clip.group",
+      "params": {
+        "id": "Mine/Renamed copy",
+        "group": "Other"
+      },
+      "expect": {
+        "id": "Other/Renamed copy"
+      }
+    },
+    {
+      "command": "clip.write",
+      "params": {
+        "path": "{tmp}/out.clip.json"
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{tmp}/out.clip.json"
+      },
+      "expect": {
+        "length": 1
+      }
+    },
+    {
+      "command": "clip.open",
+      "params": {
+        "id": "Mine/Fixture"
+      },
+      "expect": {
+        "id": "Mine/Fixture",
+        "length": 1
+      }
+    },
+    {
+      "command": "clip.delete",
+      "params": {
+        "id": "Mine/Renamed"
+      }
+    },
+    {
+      "command": "library.list",
+      "params": {},
+      "expect": {
+        "animations": {
+          "$contains": [
+            {
+              "id": "Other/Renamed copy"
+            },
+            {
+              "id": "Mine/Fixture"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "library.list",
+      "params": {
+        "kind": "poses"
+      }
+    },
+    {
+      "command": "library.install",
+      "params": {
+        "from": "{tmp}/no-such-folder"
+      }
+    },
+    {
+      "command": "clip.new",
+      "params": {
+        "name": "///"
+      }
+    },
+    {
+      "command": "clip.open",
+      "params": {
+        "id": "No/Such"
+      }
+    },
+    {
+      "command": "clip.save",
+      "params": {
+        "as": "x"
+      }
+    },
+    {
+      "command": "clip.save_as",
+      "params": {
+        "name": "///"
+      }
+    },
+    {
+      "command": "clip.rename",
+      "params": {
+        "to": "///"
+      }
+    },
+    {
+      "command": "clip.duplicate",
+      "params": {
+        "id": "No/Such"
+      }
+    },
+    {
+      "command": "clip.group",
+      "params": {
+        "id": "No/Such",
+        "group": "X"
+      }
+    },
+    {
+      "command": "clip.delete",
+      "params": {
+        "id": "No/Such"
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{tmp}/missing.clip.json"
+      }
+    },
+    {
+      "command": "clip.write",
+      "params": {
+        "path": "{tmp}"
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "$schema": "./schema.json",
+  "name": "pins-locks-loop",
+  "feature": "parts.lock",
+  "description": "A pin is listed, then cleared. With the Left arm locked, dragging its wrist leaves it at its rest head (0.4456329, -0.1788175, 0.1637656). Loop on shows in the state.",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "pin.set",
+      "params": {
+        "bone": "wrist.L"
+      },
+      "expect": {
+        "pins": [
+          "wrist.L"
+        ]
+      }
+    },
+    {
+      "command": "pins.clear",
+      "params": {}
+    },
+    {
+      "command": "pin.set",
+      "params": {
+        "bone": "wrist.R",
+        "on": false
+      },
+      "expect": {
+        "pins": []
+      }
+    },
+    {
+      "command": "parts.lock",
+      "params": {
+        "parts": [
+          "Left arm"
+        ]
+      },
+      "expect": {
+        "locked": [
+          "Left arm"
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "wrist.L",
+        "by": [
+          0,
+          0,
+          0.05
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "wrist.L"
+      },
+      "expect": {
+        "position": [
+          0.4456329,
+          -0.1788175,
+          0.1637656
+        ]
+      }
+    },
+    {
+      "command": "clip.loop",
+      "params": {
+        "on": true
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "loop": true,
+        "locked": [
+          "Left arm"
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "pin.set",
+      "params": {
+        "bone": "hand.L"
+      }
+    },
+    {
+      "command": "pins.clear",
+      "params": {
+        "bone": "wrist.L"
+      }
+    },
+    {
+      "command": "parts.lock",
+      "params": {
+        "parts": [
+          "Tail"
+        ]
+      }
+    },
+    {
+      "command": "clip.loop",
+      "params": {}
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

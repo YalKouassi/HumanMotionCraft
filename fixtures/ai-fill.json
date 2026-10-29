@@ -1,0 +1,278 @@
+{
+  "$schema": "./schema.json",
+  "name": "ai-fill",
+  "feature": "ai.fill",
+  "description": "Learned in-betweening with hand-checkable goals. With ai_force 0 the network's change is dropped, so the fill is the plain interpolation in the first key's frame: keys standing at frame 0 (root offset z 0.9450101) and one hip height higher at frame 20 put frame 10's root head halfway, at 0.8724132 + 0.8698308 / 2 = 1.3073286. The 19 frames between become AI keys labelled with the model (parts), one band 1..19. Re-keying frame 20 two hip heights up refills them: frame 10 is then one hip height up, 1.742244. Moving key 20 to 30 refills 1..29. With the network on (ai_force 1) the fill still keeps 19 AI keys. Physics is off: this checks the keys. Undo names what it undoes: \"AI fill 1–29\" (the frames between keys 0 and 30).",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "ai.info",
+      "params": {},
+      "expect": {
+        "model": {
+          "tag": "parts",
+          "given": true,
+          "commercial": true,
+          "max_gap": 45,
+          "context": 10,
+          "styles": {
+            "$contains": [
+              "walk",
+              "run",
+              "fall",
+              "dance",
+              "natural"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "ai_force": 0
+      },
+      "expect": {
+        "style": "any",
+        "ai_force": 0,
+        "style_force": 1
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 20
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "ai.fill",
+      "params": {},
+      "expect": {
+        "from": 0,
+        "to": 20,
+        "frames": 19,
+        "model": "parts"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "bands": [
+          {
+            "from": 1,
+            "to": 19,
+            "model": "parts"
+          }
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          1.3073286
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 20
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          2.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          1.742244
+        ]
+      }
+    },
+    {
+      "command": "key.move",
+      "params": {
+        "from": 20,
+        "to": 30
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "bands": [
+          {
+            "from": 1,
+            "to": 29,
+            "model": "parts"
+          }
+        ]
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "ai_force": 1,
+        "style": "walk"
+      },
+      "expect": {
+        "style": "walk",
+        "ai_force": 1
+      }
+    },
+    {
+      "command": "ai.fill",
+      "params": {
+        "from": 0,
+        "to": 30
+      },
+      "expect": {
+        "frames": 29,
+        "model": "parts walk"
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "style": "any"
+      },
+      "expect": {
+        "style": "any"
+      }
+    },
+    {
+      "command": "edit.undo",
+      "expect": {
+        "command": "ai.fill",
+        "label": "AI fill 1–29"
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "ai.fill",
+      "params": {
+        "from": 0
+      }
+    },
+    {
+      "command": "ai.fill",
+      "params": {
+        "from": 0,
+        "to": 5
+      }
+    },
+    {
+      "command": "ai.fill",
+      "params": {
+        "from": 30,
+        "to": 0
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "style": "flying"
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "ai_force": 2
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "head": -1
+      }
+    },
+    {
+      "command": "ai.info",
+      "params": {
+        "tag": "parts"
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

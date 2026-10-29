@@ -1,0 +1,31 @@
+{
+  "$schema": "./schema.json",
+  "name": "library-item-menu",
+  "feature": "clip.rename",
+  "description": "The library's right-click menu works on any item, not only the open one. With Mine/Second open, renaming Mine/First by its id gives Mine/Renamed and leaves the open animation alone (saving it still saves Mine/Second). Duplicate gives \"Renamed copy\", move to group Other gives Other/Renamed copy, delete removes it. Poses: the current pose saves as Poses/Mine pose, renames to Poses/Kept, moves to Other/Kept, applies to the left arm only, then is deleted. Renaming a built-in or a missing animation by id is refused.",
+  "script": [
+    { "command": "clip.new", "params": { "name": "First", "group": "Mine" }, "expect": { "id": "Mine/First" } },
+    { "command": "clip.new", "params": { "name": "Second", "group": "Mine" }, "expect": { "id": "Mine/Second" } },
+    { "command": "clip.rename", "params": { "id": "Mine/First", "to": "Renamed" }, "expect": { "id": "Mine/Renamed" } },
+    { "command": "clip.save", "params": {}, "expect": { "id": "Mine/Second" } },
+    { "command": "clip.duplicate", "params": { "id": "Mine/Renamed" }, "expect": { "id": "Mine/Renamed copy" } },
+    { "command": "clip.group", "params": { "id": "Mine/Renamed copy", "group": "Other" }, "expect": { "id": "Other/Renamed copy" } },
+    { "command": "clip.delete", "params": { "id": "Other/Renamed copy" }, "expect": {} },
+    { "command": "clip.rename", "params": { "id": "Mine/Second", "to": "Open one" }, "expect": { "id": "Mine/Open one" } },
+    { "command": "pose.save", "params": { "name": "Mine pose", "group": "Poses" }, "expect": { "id": "Poses/Mine pose" } },
+    { "command": "pose.rename", "params": { "id": "Poses/Mine pose", "to": "Kept" }, "expect": { "id": "Poses/Kept" } },
+    { "command": "pose.group", "params": { "id": "Poses/Kept", "group": "Other" }, "expect": { "id": "Other/Kept" } },
+    { "command": "pose.apply", "params": { "id": "Other/Kept", "parts": ["Left arm"] }, "expect": {} },
+    { "command": "pose.delete", "params": { "id": "Other/Kept" }, "expect": {} },
+    {
+      "command": "library.list",
+      "params": {},
+      "expect": { "animations": { "$contains": [ { "id": "Mine/Renamed", "name": "Renamed" }, { "id": "Mine/Open one", "current": true } ] } }
+    }
+  ],
+  "expect": { "tolerance": 1e-9 },
+  "errors": [
+    { "command": "clip.rename", "params": { "id": "Locomotion/Walk", "to": "Mine now" } },
+    { "command": "clip.rename", "params": { "id": "Mine/Nobody", "to": "Somebody" } }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "./schema.json",
+  "name": "rig-and-pose-queries",
+  "feature": "rig.info",
+  "description": "rig.info reports the rig file: 104 bones, hip height 0.8698308 m. pose.get returns what pose.set_root set. pose.reset stands the body on the floor: the lowest joint (toe3-3.L, rest z -0.8019990) ends 0.02 m up, its x and y at the rest head (0.1915675, -0.1711017).",
+  "script": [
+    {
+      "command": "rig.info",
+      "params": {},
+      "expect": {
+        "bones": 104,
+        "hip_height": 0.8698308
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "pose.get",
+      "params": {},
+      "expect": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "pose.reset",
+      "params": {}
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "toe3-3.L"
+      },
+      "expect": {
+        "position": [
+          0.1915675,
+          -0.1711017,
+          0.02
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "rig.info",
+      "params": {
+        "bone": "root"
+      }
+    },
+    {
+      "command": "pose.get",
+      "params": {
+        "frame": 3
+      }
+    },
+    {
+      "command": "pose.reset",
+      "params": {
+        "parts": [
+          "Left arm"
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "hand.L"
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

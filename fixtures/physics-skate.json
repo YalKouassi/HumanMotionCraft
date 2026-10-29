@@ -1,0 +1,122 @@
+{
+  "$schema": "./schema.json",
+  "name": "physics-skate",
+  "feature": "physics.set",
+  "description": "Fulcrum: the standing body is keyed to slide one hip height (0.8698308 m) along X over 60 frames (0.435 m/s, under the 0.5 m/s plant speed) with its feet on the floor (toes 2 cm up, inside the 5 cm contact band). Planted feet cannot slide, so the pass holds the body where it stood: every frame's root offset is the standing (0, 0, 0.9450101), and all 60 frames after the first were corrected. The keyed frame-30 offset is halfway, (0.5, 0, 0.9450101). Nothing leaves the ground, so there are no flights.",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 60
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          1,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "physics.solve",
+      "params": {
+        "frame": 30
+      },
+      "expect": {
+        "keyed": [
+          0.5,
+          0,
+          0.9450101
+        ],
+        "root": [
+          0,
+          0,
+          0.9450101
+        ],
+        "slid": 60,
+        "flights": [],
+        "lifted": 0
+      }
+    },
+    {
+      "command": "physics.solve",
+      "params": {
+        "frame": 60
+      },
+      "expect": {
+        "keyed": [
+          1,
+          0,
+          0.9450101
+        ],
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": true
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 60
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.8724132
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "physics.set",
+      "params": {}
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

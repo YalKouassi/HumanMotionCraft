@@ -1,0 +1,33 @@
+[project]
+name = "ac-train"
+version = "0.1.0"
+description = "HumanMotionCraft training: retarget mocap onto the rig, train and export the in-betweener, cut the built-in library."
+requires-python = ">=3.10"
+dependencies = ["numpy", "torch"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+torch = { index = "torch-cu126" }
+
+[[tool.uv.index]]
+name = "torch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+# Checks (no extra install: uv fetches them):
+#   uvx ruff check .                                         lint
+#   uv run --with pytest python -m pytest                    tests (CPU; data-only tests skip)
+#   uv run python -m ac_train.pipeline --quick               retarget, train, export, cargo test
+[tool.ruff]
+line-length = 130
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+# the maths names matrices as the papers do (I, R, K)
+ignore = ["E741"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

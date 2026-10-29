@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "humanmotioncraft": {
+      "type": "stdio",
+      "command": "./target/release/ac.exe",
+      "args": ["--assets", "assets", "mcp", "--live", "7811"]
+    }
+  }
+}

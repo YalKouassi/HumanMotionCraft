@@ -1,0 +1,44 @@
+{
+  "$schema": "./schema.json",
+  "name": "library-add-file",
+  "feature": "library.add_file",
+  "description": "Importing single files (a drop on the window, File > Import file). A new animation Mine/Drop me is written out as Drop me.clip.json; importing that file puts it in the Imported group, as Drop me 2 because Drop me is already a name in the library; importing the same file again finds that copy and copies nothing (already). The built-in T-pose file imports as a pose, Imported/T-pose 2 (Reference/T-pose has the name). Into a group of its own it keeps its name when that group is new but the name is taken elsewhere, so it is numbered again: Mine poses/T-pose 3. A text file, a missing file and a pose for no rig are refused.",
+  "script": [
+    { "command": "clip.new", "params": { "name": "Drop me", "group": "Mine" }, "expect": { "id": "Mine/Drop me" } },
+    { "command": "clip.write", "params": { "path": "{tmp}/Drop me.clip.json" } },
+    {
+      "command": "library.add_file",
+      "params": { "path": "{tmp}/Drop me.clip.json" },
+      "expect": { "kind": "animation", "id": "Imported/Drop me 2", "already": false }
+    },
+    {
+      "command": "library.add_file",
+      "params": { "path": "{tmp}/Drop me.clip.json" },
+      "expect": { "kind": "animation", "id": "Imported/Drop me 2", "already": true }
+    },
+    {
+      "command": "library.add_file",
+      "params": { "path": "{assets}/library/poses/Reference/T-pose.pose.json" },
+      "expect": { "kind": "pose", "id": "Imported/T-pose 2", "already": false }
+    },
+    {
+      "command": "library.add_file",
+      "params": { "path": "{assets}/library/poses/Reference/T-pose.pose.json", "group": "Mine poses" },
+      "expect": { "kind": "pose", "id": "Mine poses/T-pose 3", "already": false }
+    },
+    {
+      "command": "library.list",
+      "params": {},
+      "expect": {
+        "animations": { "$contains": [ { "id": "Imported/Drop me 2", "name": "Drop me 2", "frames": 1 } ] },
+        "poses": { "$contains": [ { "id": "Imported/T-pose 2" }, { "id": "Mine poses/T-pose 3" } ] }
+      }
+    }
+  ],
+  "expect": { "tolerance": 1e-9 },
+  "errors": [
+    { "command": "library.add_file", "params": { "path": "{tmp}/notes.txt" } },
+    { "command": "library.add_file", "params": { "path": "{tmp}/missing.clip.json" } },
+    { "command": "library.add_file", "params": { "path": "{assets}/rig/limits.json" } }
+  ]
+}

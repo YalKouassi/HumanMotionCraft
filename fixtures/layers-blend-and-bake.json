@@ -1,0 +1,235 @@
+{
+  "$schema": "./schema.json",
+  "name": "layers-blend-and-bake",
+  "feature": "layer.set",
+  "description": "Base key: root offset 0. A Top layer (override, whole body) keys root offset (0, 0, 1); at weight 0.5 the root is halfway: 0.0504142 + 0.5 x 0.8698308 = 0.4853296. A second layer moved under Top, then deleted, leaves Base and Top. Baking Top writes the blend into one base key and leaves only the base; the root stays at 0.4853296. The physics pass is off: this checks the keyed motion itself.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {}
+    },
+    {
+      "command": "layer.add",
+      "params": {
+        "name": "Top"
+      },
+      "expect": {
+        "edit": 1,
+        "layers": [
+          {
+            "name": "Base"
+          },
+          {
+            "name": "Top",
+            "source": "keys"
+          }
+        ]
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {}
+    },
+    {
+      "command": "layer.set",
+      "params": {
+        "i": 1,
+        "weight": 0.5
+      },
+      "expect": {
+        "layers": [
+          {
+            "name": "Base"
+          },
+          {
+            "name": "Top",
+            "weight": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.4853296
+        ]
+      }
+    },
+    {
+      "command": "layer.edit",
+      "params": {
+        "i": 0
+      },
+      "expect": {
+        "edit": 0
+      }
+    },
+    {
+      "command": "layer.add",
+      "params": {
+        "name": "Second"
+      }
+    },
+    {
+      "command": "layer.move",
+      "params": {
+        "i": 2,
+        "to": 1
+      },
+      "expect": {
+        "layers": [
+          {
+            "name": "Base"
+          },
+          {
+            "name": "Second"
+          },
+          {
+            "name": "Top"
+          }
+        ],
+        "edit": 1
+      }
+    },
+    {
+      "command": "layer.delete",
+      "params": {
+        "i": 1
+      },
+      "expect": {
+        "layers": [
+          {
+            "name": "Base"
+          },
+          {
+            "name": "Top"
+          }
+        ]
+      }
+    },
+    {
+      "command": "layer.bake",
+      "params": {
+        "i": 1
+      },
+      "expect": {
+        "baked": 1,
+        "layers": [
+          {
+            "name": "Base",
+            "keys": 1
+          }
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.4853296
+        ]
+      }
+    },
+    {
+      "command": "layers.list",
+      "params": {},
+      "expect": {
+        "layers": [
+          {
+            "name": "Base"
+          }
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "layers.list",
+      "params": {
+        "i": 0
+      }
+    },
+    {
+      "command": "layer.add",
+      "params": {
+        "source": "link",
+        "link": "No/Such"
+      }
+    },
+    {
+      "command": "layer.edit",
+      "params": {
+        "i": 9
+      }
+    },
+    {
+      "command": "layer.set",
+      "params": {
+        "i": 9,
+        "weight": 1
+      }
+    },
+    {
+      "command": "layer.move",
+      "params": {
+        "i": 0,
+        "to": 1
+      }
+    },
+    {
+      "command": "layer.delete",
+      "params": {
+        "i": 0
+      }
+    },
+    {
+      "command": "layer.bake",
+      "params": {
+        "i": 0
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

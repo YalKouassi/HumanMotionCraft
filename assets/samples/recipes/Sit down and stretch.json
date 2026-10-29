@@ -1,0 +1,8 @@
+{
+  "name": "Sit down and stretch",
+  "description": "From standing down to the floor: a low crouch, sit cross-legged, fold forward to the toes, lean back. 5 keys, the AI fills the 110 frames between in its ground style. Physics is off: it holds feet, not a seated body.",
+  "script": [
+    { "command": "ai.settings", "params": { "style": "ground" } },
+    { "command": "anim.block", "params": { "poses": ["Standing/Relaxed", "Action/Low crouch", "On the floor/Cross-legged", "Sports and fitness/Toe-touch stretch", "On the floor/Leaning back"], "frames": [0, 26, 56, 86, 114], "fill": "ai", "physics": false } }
+  ]
+}

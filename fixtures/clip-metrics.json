@@ -1,0 +1,273 @@
+{
+  "$schema": "./schema.json",
+  "name": "clip-metrics",
+  "feature": "clip.metrics",
+  "description": "Motion quality measured on a clip made to break the rules. The keys are made with the physics pass off (so each frame shows its keys). Keys (linear): frame 0 standing at rest; frame 10 the whole body slid 12 cm along +X (root offset x 0.12 / 0.8698308 = 0.1379579 hip heights); frame 20 the same; frame 30 also lowered 5 cm (root z 0.9450101 - 0.05 / 0.8698308 = 0.8875277). Measured on the keys: every foot point stays within 5 cm of the floor and moves 1.2 cm a frame (0.36 m/s, under the 0.5 m/s a planted point may move), so each foot is planted on all 31 frames and slides the full 12 cm. The lowest points stand 2 cm up at rest, so lowering 0.5 cm a frame from frame 20 puts them more than 1 mm under the floor from frame 25 (0.5 cm) to 30 (3 cm): 6 frames. Standing still on both feet keeps the centre of mass over them (no balance frames), the rest pose is inside every joint limit, and the velocity changes at the keys are 0.36 m/s at frame 10 (moving to still: 0.012 m x 30 fps) and 0.15 m/s at frame 20 (still to sinking 0.005 m x 30 fps), both under the 1 m/s of a pop. Measured on what plays (the physics pass is on): its fulcrum rule holds the planted feet (no slide) and its support rule lifts the body out of the floor (no penetration). Last, a knee bent 90 degrees the wrong way (rotation vector x -pi/2, its range starts at -0.2887458 rad) keyed on frames 40 and 41 (so frame 41 is still) is 90 - 16.5439 = 73.4561 degrees past its limit on frame 41; with that foot off the floor the body stands still on one foot, its centre of mass beside it: one frame out of balance.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0.13795785962212959,
+          0,
+          0.9450101408607229
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 20
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 30
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0.13795785962212959,
+          0,
+          0.8875276993515022
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "motion": "keys"
+      },
+      "expect": {
+        "from": 0,
+        "to": 30,
+        "frames": 31,
+        "motion": "keys",
+        "sliding": [
+          {
+            "foot": "L",
+            "from": 0,
+            "to": 30,
+            "slide_cm": 12
+          },
+          {
+            "foot": "R",
+            "from": 0,
+            "to": 30,
+            "slide_cm": 12
+          }
+        ],
+        "sliding_max_cm": 12,
+        "penetration": {
+          "frames": 6,
+          "spans": [
+            [
+              25,
+              30
+            ]
+          ],
+          "max_cm": 3,
+          "worst_frame": 30
+        },
+        "balance": {
+          "frames": 0,
+          "spans": []
+        },
+        "limits": [],
+        "keys": [
+          {
+            "frame": 10,
+            "dv": 0.36
+          },
+          {
+            "frame": 20,
+            "dv": 0.15
+          }
+        ],
+        "pops": 0
+      },
+      "tolerance": 0.001
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": true
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "motion": "shown"
+      },
+      "expect": {
+        "motion": "shown",
+        "sliding_max_cm": 0,
+        "penetration": {
+          "frames": 0
+        }
+      },
+      "tolerance": 0.02
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "from": 12,
+        "to": 18,
+        "motion": "keys"
+      },
+      "expect": {
+        "frames": 7,
+        "sliding": [
+          {
+            "foot": "L",
+            "from": 12,
+            "to": 18,
+            "slide_cm": 0
+          },
+          {
+            "foot": "R"
+          }
+        ],
+        "keys": []
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 40
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "lowerleg01.L",
+        "rotation": [
+          -0.7071067811865476,
+          0,
+          0,
+          0.7071067811865476
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 41
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "from": 41,
+        "to": 41,
+        "motion": "keys"
+      },
+      "expect": {
+        "limits": [
+          {
+            "bone": "lowerleg01.L",
+            "frames": 1,
+            "spans": [
+              [
+                41,
+                41
+              ]
+            ],
+            "max_deg": 73.4560826,
+            "worst_frame": 41
+          }
+        ],
+        "balance": {
+          "frames": 1,
+          "spans": [
+            [
+              41,
+              41
+            ]
+          ],
+          "worst_frame": 41,
+          "moving_frames": 0
+        }
+      },
+      "tolerance": 0.0001
+    }
+  ],
+  "errors": [
+    {
+      "command": "clip.metrics",
+      "params": {
+        "from": 20,
+        "to": 10
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "to": 500
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "motion": "ghost"
+      }
+    }
+  ]
+}

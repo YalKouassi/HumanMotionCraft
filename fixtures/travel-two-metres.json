@@ -1,0 +1,160 @@
+{
+  "$schema": "./schema.json",
+  "name": "travel-two-metres",
+  "feature": "layer.travel",
+  "description": "Standing keys on 0 and on 60 two metres along -Y (root offset y -2 / 0.8698308 = -2.2992975). A travel layer fills every frame 0..60 (61 AI keys) from the Locomotion mocap. It fades in and out over 6 frames, so the ends show the keys: the root at (0, -0.0108229, 0.0504142 + 0.8219990 = 0.8724132) and (0, -2.0108229, 0.8724132). Replanning, and a walk-only gait, keep that. The physics pass is off: this checks the keyed motion itself.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {}
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 60
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          -2.2992977484816586,
+          0.9450102249770875
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {}
+    },
+    {
+      "command": "layer.travel",
+      "params": {
+        "from": 0,
+        "to": 60
+      },
+      "expect": {
+        "i": 1,
+        "layers": [
+          {
+            "name": "Base"
+          },
+          {
+            "source": "travel",
+            "keys": 61,
+            "start": 0,
+            "end": 60,
+            "fade": 6
+          }
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 0
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.8724132
+        ]
+      }
+    },
+    {
+      "command": "layer.plan",
+      "params": {
+        "i": 1
+      },
+      "expect": {
+        "layers": [
+          {
+            "name": "Base"
+          },
+          {
+            "keys": 61
+          }
+        ]
+      }
+    },
+    {
+      "command": "layer.set",
+      "params": {
+        "i": 1,
+        "gait": "walk"
+      },
+      "expect": {
+        "layers": [
+          {
+            "name": "Base"
+          },
+          {
+            "gait": "walk",
+            "keys": 61
+          }
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 60
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -2.0108229,
+          0.8724132
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "layer.travel",
+      "params": {
+        "from": 0,
+        "to": 1
+      }
+    },
+    {
+      "command": "layer.plan",
+      "params": {
+        "i": 0
+      }
+    },
+    {
+      "command": "layer.travel",
+      "params": {
+        "from": 5
+      }
+    }
+  ],
+  "views": [
+    "side",
+    "top"
+  ]
+}

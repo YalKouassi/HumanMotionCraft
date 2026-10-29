@@ -1,0 +1,3 @@
+[alias]
+# repo tasks: `cargo xtask check` runs the whole pre-commit gate (see xtask/src/main.rs)
+xtask = "run --quiet --package xtask --"

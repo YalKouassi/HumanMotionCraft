@@ -1,0 +1,28 @@
+{
+  "$schema": "./schema.json",
+  "name": "travel-preview",
+  "feature": "layer.travel_preview",
+  "description": "A travel is previewed before it is added. Standing keys on 0 and on 60 two metres along -Y (as in travel-two-metres). The preview works out the same travel on a copy: frames 0..60, the auto gait, and the hips' path on every frame from the standing root head (0, -0.0108229, 0.8724132) to (0, -2.0108229, 0.8724132), the travel fading into the keys at both ends. The animation is unchanged: still one layer with its two keys.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "key.set" },
+    { "command": "frame.set", "params": { "frame": 60 } },
+    { "command": "pose.set_root", "params": { "root": [0, -2.2992977484816586, 0.9450102249770875] } },
+    { "command": "key.set" },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    {
+      "command": "layer.travel_preview",
+      "expect": {
+        "from": 0, "to": 60, "gait": "auto",
+        "path": { "$contains": [[0, -0.0108229, 0.8724132], [0, -2.0108229, 0.8724132]] }
+      }
+    },
+    { "command": "layers.list", "expect": { "layers": [{ "name": "Base", "keys": 2 }] } }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": [
+    { "command": "layer.travel_preview", "params": { "from": 0, "to": 1 } },
+    { "command": "layer.travel_preview", "params": { "from": 5 } }
+  ],
+  "views": ["top"]
+}

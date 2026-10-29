@@ -1,0 +1,107 @@
+{
+  "$schema": "./schema.json",
+  "name": "surfaces-and-physics",
+  "feature": "surface.add",
+  "description": "The standing body faces -Y (the hip line runs +X), so a 1.2 m wide, 0.6 m deep box 0.8 m ahead of the root (0, -0.0108229) is centred at (0, -0.8108229): x -0.6..0.6, y -1.1108229..-0.5108229, top 0.9. Moving it 0.1 m along X and raising its top to 1 m, then deleting it, leaves none. The physics switch shows in the list.",
+  "script": [
+    {
+      "command": "surface.add",
+      "params": {
+        "width": 1.2,
+        "depth": 0.6,
+        "top": 0.9
+      },
+      "expect": {
+        "surfaces": [
+          {
+            "min": [
+              -0.6,
+              -1.1108229
+            ],
+            "max": [
+              0.6,
+              -0.5108229
+            ],
+            "top": 0.9
+          }
+        ]
+      }
+    },
+    {
+      "command": "surface.set",
+      "params": {
+        "i": 0,
+        "move": [
+          0.1,
+          0,
+          0
+        ],
+        "top": 1.0
+      },
+      "expect": {
+        "surfaces": [
+          {
+            "min": [
+              -0.5,
+              -1.1108229
+            ],
+            "max": [
+              0.7,
+              -0.5108229
+            ],
+            "top": 1.0
+          }
+        ]
+      }
+    },
+    {
+      "command": "surface.delete",
+      "params": {
+        "i": 0
+      },
+      "expect": {
+        "surfaces": []
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": true
+      },
+      "expect": {
+        "physics": true
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "surface.add",
+      "params": {
+        "width": 0
+      }
+    },
+    {
+      "command": "surface.set",
+      "params": {
+        "i": 3,
+        "top": 1
+      }
+    },
+    {
+      "command": "surface.delete",
+      "params": {
+        "i": 3
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {}
+    }
+  ],
+  "views": [
+    "top"
+  ]
+}

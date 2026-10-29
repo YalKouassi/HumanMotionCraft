@@ -1,0 +1,73 @@
+{
+  "$schema": "./schema.json",
+  "name": "drag-wrist-reach",
+  "feature": "pose.drag",
+  "description": "Dragging the wrist 5 cm up brings it nearer the shoulder, so the two-bone solve reaches exactly: wrist.L rest head (0.4456329, -0.1788175, 0.1637656) + (0, 0, 0.05).",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "wrist.L",
+        "by": [
+          0,
+          0,
+          0.05
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "bones": {
+      "wrist.L": {
+        "position": [
+          0.4456329,
+          -0.1788175,
+          0.2137656
+        ]
+      }
+    },
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "hand.L",
+        "by": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "wrist.L",
+        "to": [
+          0,
+          0,
+          0
+        ],
+        "by": [
+          0,
+          0,
+          0.1
+        ]
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+ "format": "humanmotioncraft.models",
+ "version": 1,
+ "note": "Owner's decision (2026-10-28): trained on the free-licence sets only: the CC0 loops, CMU (commercial use allowed), 100STYLE (CC BY 4.0, credited in NOTICE) and our Kimodo-generated motion (the NVIDIA Open Model License claims no ownership of outputs). No non-commercial terms. Trained and exported by training/ (python -m ac_train.train / ac_train.export); the card in weights.json lists the sets, styles and metrics.",
+ "models": [
+  {
+   "tag": "parts",
+   "path": "parts",
+   "source": "training/data/models/parts/model.pt (ac_train.train, 180 min, 166,755 steps) on builtin_loops, cmu, 100style, kimodo",
+   "commercial": true,
+   "default": true
+  }
+ ]
+}

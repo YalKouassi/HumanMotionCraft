@@ -1,0 +1,5564 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "The schema this file follows (for editors; the runner ignores it).",
+      "default": null
+    },
+    "name": {
+      "type": "string",
+      "description": "Unique, lower-case with dashes; `ac fixtures --only <name>` runs it."
+    },
+    "feature": {
+      "type": "string",
+      "description": "The command (or feature) it proves."
+    },
+    "description": {
+      "type": "string",
+      "description": "What a reviewer should see in the views, and how each expected number was worked out."
+    },
+    "pinned": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Numbers copied from the program's own output: why that is acceptable here.",
+      "default": null
+    },
+    "script": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "description": "The commands, run in order on a fresh session."
+    },
+    "expect": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Expect"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Checks after the script."
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Mistake"
+      },
+      "description": "Mistakes: each must be refused with a message and leave the document unchanged."
+    },
+    "views": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "front",
+          "back",
+          "left",
+          "right",
+          "side",
+          "top",
+          "three-quarter"
+        ]
+      },
+      "description": "Camera views rendered for the gallery and the visual goldens.",
+      "default": []
+    }
+  },
+  "required": [
+    "name",
+    "feature",
+    "description",
+    "script"
+  ],
+  "title": "Feature fixture",
+  "description": "A feature fixture: a script of commands with hand-worked expectations, mistakes that must be\nrefused, and the views a person looks at.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "Step": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "A registered command id (`ac commands`).",
+          "enum": [
+            "ai.accept",
+            "ai.clear",
+            "ai.discard",
+            "ai.fill",
+            "ai.fill_all",
+            "ai.gaps",
+            "ai.info",
+            "ai.keep",
+            "ai.preview",
+            "ai.settings",
+            "ai.toggle",
+            "anim.block",
+            "anim.steps",
+            "assets.reload",
+            "bone.world",
+            "clip.contacts",
+            "clip.critique",
+            "clip.curves",
+            "clip.delete",
+            "clip.duplicate",
+            "clip.export",
+            "clip.export_batch",
+            "clip.group",
+            "clip.import",
+            "clip.loop",
+            "clip.metrics",
+            "clip.move",
+            "clip.new",
+            "clip.open",
+            "clip.rename",
+            "clip.sample",
+            "clip.save",
+            "clip.save_as",
+            "clip.sheet",
+            "clip.video",
+            "clip.write",
+            "edit.batch",
+            "edit.begin",
+            "edit.checkpoint",
+            "edit.dry_run",
+            "edit.end",
+            "edit.history",
+            "edit.redo",
+            "edit.revert_to",
+            "edit.undo",
+            "editor.state",
+            "feet.lock",
+            "feet.plant",
+            "frame.set",
+            "key.channel",
+            "key.copy",
+            "key.delete",
+            "key.hold",
+            "key.interp",
+            "key.move",
+            "key.move_parts",
+            "key.remove_parts",
+            "key.set",
+            "keys.copy",
+            "keys.delete",
+            "keys.paste",
+            "keys.retime",
+            "layer.add",
+            "layer.bake",
+            "layer.delete",
+            "layer.edit",
+            "layer.move",
+            "layer.plan",
+            "layer.set",
+            "layer.solo",
+            "layer.travel",
+            "layer.travel_preview",
+            "layers.list",
+            "library.add_file",
+            "library.import",
+            "library.install",
+            "library.list",
+            "library.samples",
+            "marker.add",
+            "marker.delete",
+            "marker.move",
+            "marker.rename",
+            "onion.frames",
+            "parts.delete",
+            "parts.lock",
+            "parts.save",
+            "physics.overlay",
+            "physics.set",
+            "physics.solve",
+            "pin.set",
+            "pins.clear",
+            "pose.apply",
+            "pose.copy",
+            "pose.delete",
+            "pose.drag",
+            "pose.get",
+            "pose.group",
+            "pose.mirror",
+            "pose.move",
+            "pose.paste",
+            "pose.query",
+            "pose.reach",
+            "pose.rename",
+            "pose.reset",
+            "pose.rotate",
+            "pose.save",
+            "pose.set_bone",
+            "pose.set_root",
+            "pose.spread_bend",
+            "recovery.clear",
+            "recovery.list",
+            "recovery.restore",
+            "recovery.write",
+            "rig.info",
+            "session.info",
+            "session.reset",
+            "surface.add",
+            "surface.delete",
+            "surface.set",
+            "text.fill",
+            "text.generate",
+            "text.helper",
+            "text.install",
+            "trail.points"
+          ]
+        },
+        "params": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true,
+          "description": "Its parameters. `{tmp}` in a text becomes the fixture's scratch folder, `{assets}` the\nassets folder.",
+          "default": null
+        },
+        "expect": {
+          "description": "What its result must hold: numbers within the tolerance, objects key by key (keys not named\nare not checked), `{\"$contains\": [items]}` for an array holding matching items.",
+          "default": null
+        },
+        "tolerance": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double",
+          "description": "This step's tolerance (default: the fixture's).",
+          "default": null
+        },
+        "pinned": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Numbers copied from the program's own output: why.",
+          "default": null
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "description": "One command of the script.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.accept"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Keep AI fill; undoable (the undo step is named for each run)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.clear"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Clear AI keys; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "key before the span"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "key after the span"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.discard"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Discard AI preview"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.fill"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "AI fill; undoable (the undo step is named for each run)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key before the gap (default: around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key after the gap"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.fill_all"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "AI fill all gaps; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "refill": {
+                    "type": "boolean",
+                    "description": "also fill again the gaps the model filled before (default: only empty gaps)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.gaps"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "AI gaps"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.info"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "AI model"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.keep"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Keep AI keys; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.preview"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Preview AI fill"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key before the gap (default: around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key after the gap"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "\"ai\" (the model, default) or \"plain\" (plain interpolation)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.settings"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "AI fill settings"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "style": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a style the model knows (\"any\": none)"
+                  },
+                  "style_force": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 3.0,
+                    "description": "style guidance: 0 none, 1 the style, more is stronger"
+                  },
+                  "ai_force": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.5,
+                    "description": "how much of the network's change to keep (0: plain interpolation)"
+                  },
+                  "trajectory": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "description": "pull the root onto the keys' own path"
+                  },
+                  "head": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "description": "keep the neck and head on the keys' spline"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.toggle"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Switch AI / plain; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key before the gap (default: around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key after the gap"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "anim.block"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Block out animation; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "poses": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "library poses to key, in order"
+                  },
+                  "frames": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1048576,
+                    "description": "the frame of each pose, rising"
+                  },
+                  "fill": {
+                    "type": "string",
+                    "enum": [
+                      "ai",
+                      "plain",
+                      "none"
+                    ],
+                    "description": "between the poses: the model (default), plain interpolation, or the keys' own"
+                  },
+                  "style": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the AI style for the fills (default: the current setting)"
+                  },
+                  "physics": {
+                    "type": "boolean",
+                    "description": "turn the physics pass on or off"
+                  }
+                },
+                "required": [
+                  "poses",
+                  "frames"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "anim.steps"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Footsteps; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key the walk starts on (with `to`; default: the keys around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key the walk ends on"
+                  },
+                  "steps": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 64,
+                    "description": "footfalls, the last one bringing the feet together on `to` (default: between a step every 0.55 m and every 15 frames)"
+                  },
+                  "lead": {
+                    "type": "string",
+                    "enum": [
+                      "L",
+                      "R"
+                    ],
+                    "description": "the foot that steps first (default R)",
+                    "default": "R"
+                  },
+                  "fill": {
+                    "type": "string",
+                    "enum": [
+                      "cycle",
+                      "ai",
+                      "plain",
+                      "none"
+                    ],
+                    "description": "how it walks: the built-in Walk loop with planted feet (default, a key every 2 frames), or only step keys filled by the model, plain interpolation, or the keys' own curve"
+                  },
+                  "style": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the AI style for the fills (default walk)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "assets.reload"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Reload assets"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "what": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "any of limits, library, samples (default: all of them)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "bone.world"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Bone world transform"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "the bone (a bone name (resource ac://skeleton lists them))"
+                  }
+                },
+                "required": [
+                  "bone"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.contacts"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Foot contacts"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.critique"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Review animation"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame (default 0)",
+                    "default": 0
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame (default: the last)"
+                  },
+                  "motion": {
+                    "type": "string",
+                    "enum": [
+                      "shown",
+                      "keys"
+                    ],
+                    "description": "what plays (the physics pass when it is on; default) or the keys alone"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 200,
+                    "description": "most findings (default 20)",
+                    "default": 20
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.curves"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Joint curves"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "a bone (a bone name (resource ac://skeleton lists them))"
+                  }
+                },
+                "required": [
+                  "bone"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.delete"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Delete animation; undoable; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.duplicate"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Duplicate animation; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.export"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Export .glb; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the .glb to write"
+                  },
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "library animations to export (default: the open one)"
+                  },
+                  "profile": {
+                    "type": "string",
+                    "enum": [
+                      "full",
+                      "game",
+                      "body"
+                    ],
+                    "description": "which joints to keep"
+                  },
+                  "bones": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "exactly these joints instead of a profile"
+                  },
+                  "drop": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "joints to leave out as well"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.export_batch"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Export each to .glb; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "the library animations to export, a file each"
+                  },
+                  "folder": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the folder the files go in (made if missing)"
+                  },
+                  "profile": {
+                    "type": "string",
+                    "enum": [
+                      "full",
+                      "game",
+                      "body"
+                    ],
+                    "description": "which joints to keep"
+                  },
+                  "bones": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "exactly these joints instead of a profile"
+                  },
+                  "drop": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "joints to leave out as well"
+                  }
+                },
+                "required": [
+                  "ids",
+                  "folder"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.group"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Move animation to group; undoable; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a group (folder)"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.import"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Import animation file; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a file path"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.loop"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Loop; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "on": {
+                    "type": "boolean",
+                    "description": "loop the animation"
+                  }
+                },
+                "required": [
+                  "on"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.metrics"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Motion metrics"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame (default 0)",
+                    "default": 0
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame (default: the last)"
+                  },
+                  "motion": {
+                    "type": "string",
+                    "enum": [
+                      "shown",
+                      "keys"
+                    ],
+                    "description": "what plays (the physics pass when it is on; default) or the keys alone"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.move"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Move animation; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "by": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "slide, metres (-Y is the way the rig faces at rest) ([x, y, z])"
+                  },
+                  "turn": {
+                    "type": "number",
+                    "minimum": -360.0,
+                    "maximum": 360.0,
+                    "description": "turn about the vertical, degrees (counter-clockwise from above)"
+                  },
+                  "pivot": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "the turn's centre, metres (z unused; default: the root on the frame shown) ([x, y, z])"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.new"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "New animation; undoable; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a name"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a group (folder)"
+                  },
+                  "fps": {
+                    "type": "number",
+                    "minimum": 1.0,
+                    "maximum": 240.0,
+                    "description": "frames per second"
+                  },
+                  "pose": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "start from this pose (library id)"
+                  },
+                  "link": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "play this animation underneath (library id)"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.open"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Open animation; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.rename"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Rename animation; undoable; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "to": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the new name"
+                  },
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library animation to rename (default: the open one)"
+                  }
+                },
+                "required": [
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.sample"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Sample clip"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 10000000.0,
+                    "description": "first frame"
+                  },
+                  "to": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 10000000.0,
+                    "description": "last frame"
+                  },
+                  "step": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 10000.0,
+                    "description": "frames between samples"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.save"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Save; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.save_as"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Save as; undoable; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a name"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a group (folder)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.sheet"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Export contact sheet; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the .png to write"
+                  },
+                  "frames": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1048576,
+                    "description": "the frames to show (1 to 64)"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 64,
+                    "description": "else this many, spread over the animation (default 6)",
+                    "default": 6
+                  },
+                  "view": {
+                    "type": "string",
+                    "enum": [
+                      "front",
+                      "back",
+                      "left",
+                      "right",
+                      "side",
+                      "top",
+                      "three-quarter"
+                    ],
+                    "description": "the camera: front, back, left, right, side (default), top or three-quarter"
+                  },
+                  "width": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 2048,
+                    "description": "a cell's pixels across (default 320)",
+                    "default": 320
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 2048,
+                    "description": "a cell's pixels down (default 400)",
+                    "default": 400
+                  },
+                  "cols": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 64,
+                    "description": "cells to a row (default: one row)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.video"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Export preview video; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the .mp4 (needs ffmpeg) or .gif to write"
+                  },
+                  "from": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1000000.0,
+                    "description": "the first frame (default 0)",
+                    "default": 0.0
+                  },
+                  "to": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1000000.0,
+                    "description": "the last frame (default the animation's last)"
+                  },
+                  "fps": {
+                    "type": "number",
+                    "minimum": 1.0,
+                    "maximum": 120.0,
+                    "description": "frames per second (default the animation's)"
+                  },
+                  "view": {
+                    "type": "string",
+                    "enum": [
+                      "front",
+                      "back",
+                      "left",
+                      "right",
+                      "side",
+                      "top",
+                      "three-quarter"
+                    ],
+                    "description": "the camera: front, back, left, right, side (default), top or three-quarter"
+                  },
+                  "width": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 4096,
+                    "description": "pixels across"
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 4096,
+                    "description": "pixels down"
+                  },
+                  "fixed": {
+                    "type": "boolean",
+                    "description": "one camera that sees the whole shot, so travel shows (default: it follows the body)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.write"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Write animation file; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a file path"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.batch"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Run commands; undoable (the undo step is named for each run)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "commands": {
+                    "type": "array",
+                    "description": "[{id, params}, ...] run in order (at most 1000; not edit.* or session.*)"
+                  },
+                  "atomic": {
+                    "type": "boolean",
+                    "description": "true (default): a refusal puts everything back; false: keep the steps before it"
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the undo step's name"
+                  }
+                },
+                "required": [
+                  "commands"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.begin"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Begin gesture"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the undo step's name"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.checkpoint"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Name this point"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the checkpoint's name (an existing one moves here)"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.dry_run"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Try a command"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the command to try"
+                  },
+                  "params": {
+                    "type": "object",
+                    "description": "its parameters (an object)"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.end"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "End gesture"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.history"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Undo history"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.redo"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Redo"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.revert_to"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Go back to"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a checkpoint"
+                  },
+                  "index": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000,
+                    "description": "or a history index (edit.history)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "edit.undo"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Undo"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "editor.state"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Editor state"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "feet.lock"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Lock feet; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "feet.plant"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Plant foot; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "foot": {
+                    "type": "string",
+                    "enum": [
+                      "L",
+                      "R"
+                    ],
+                    "description": "which foot"
+                  },
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame"
+                  },
+                  "on": {
+                    "type": "boolean",
+                    "description": "plant (default) or take the plant's in-between keys out"
+                  }
+                },
+                "required": [
+                  "foot",
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "frame.set"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Go to frame"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 10000000.0,
+                    "description": "a frame (fractional while scrubbing)"
+                  }
+                },
+                "required": [
+                  "frame"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.channel"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Set key channel; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "a bone (a bone name (resource ac://skeleton lists them))"
+                  },
+                  "frame": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "a key's frame"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "move the joint's key to this frame"
+                  },
+                  "axis": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 5,
+                    "description": "0-2: angle about X/Y/Z (degrees); 3-5: hips position"
+                  },
+                  "value": {
+                    "type": "number",
+                    "minimum": -1000000.0,
+                    "maximum": 1000000.0,
+                    "description": "the new value"
+                  }
+                },
+                "required": [
+                  "bone",
+                  "frame",
+                  "axis",
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.copy"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Copy pose to frame; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the frame to copy"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the frame to key"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.delete"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Delete key; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.hold"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Hold parts; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.interp"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Set interpolation; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "interp": {
+                    "type": "string",
+                    "enum": [
+                      "step",
+                      "linear",
+                      "smooth",
+                      "ease_in",
+                      "ease_out",
+                      "ease"
+                    ],
+                    "description": "interpolation into the next key"
+                  }
+                },
+                "required": [
+                  "interp"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.move"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Move key; undoable (the undo step is named for each run)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the key's frame"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "its new frame"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.move_parts"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Move part keys; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the key's frame"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "where those parts' keys go"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "the body parts to move"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "parts"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.remove_parts"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Remove parts from key; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "a key's frame"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  }
+                },
+                "required": [
+                  "frame"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "key.set"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Set key; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  },
+                  "interp": {
+                    "type": "string",
+                    "enum": [
+                      "step",
+                      "linear",
+                      "smooth",
+                      "ease_in",
+                      "ease_out",
+                      "ease"
+                    ],
+                    "description": "interpolation into the next key"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "keys.copy"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Copy keys"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frames": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1048576,
+                    "description": "the keys' frames"
+                  }
+                },
+                "required": [
+                  "frames"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "keys.delete"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Delete keys; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frames": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1048576,
+                    "description": "the keys' frames"
+                  }
+                },
+                "required": [
+                  "frames"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "keys.paste"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Paste keys; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "where the first key goes (default: the playhead)"
+                  },
+                  "mirror": {
+                    "type": "boolean",
+                    "description": "swap left and right"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "keys.retime"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Retime keys; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "insert",
+                      "delete",
+                      "scale"
+                    ],
+                    "description": "insert or delete frames at `at` (everything after slides), or scale keys about `pivot`"
+                  },
+                  "at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "insert/delete: the first frame inserted or deleted"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000000,
+                    "description": "insert/delete: how many frames"
+                  },
+                  "frames": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "maxItems": 1048576,
+                    "description": "scale: the keys to scale (default: every key of the edited layer)"
+                  },
+                  "pivot": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 10000000.0,
+                    "description": "scale: the frame that stays (default: the first key)"
+                  },
+                  "factor": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100.0,
+                    "description": "scale: 2 doubles the spacing, 0.5 halves it"
+                  }
+                },
+                "required": [
+                  "mode"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.add"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Add layer; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "keys",
+                      "link"
+                    ],
+                    "description": "a layer of keys, or another animation"
+                  },
+                  "link": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the animation a link layer plays (library id)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the layer's name"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "override",
+                      "additive"
+                    ],
+                    "description": "replace what is below, or add to it"
+                  },
+                  "offset": {
+                    "type": "number",
+                    "minimum": -100000.0,
+                    "maximum": 100000.0,
+                    "description": "frames a link starts later"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.bake"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Bake layers down; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the layer (0: the base)"
+                  }
+                },
+                "required": [
+                  "i"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.delete"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Delete layer; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the layer (0: the base)"
+                  }
+                },
+                "required": [
+                  "i"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.edit"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Edit layer; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the layer (0: the base)"
+                  }
+                },
+                "required": [
+                  "i"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.move"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Move layer; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the layer (0: the base)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "description": "its new place"
+                  }
+                },
+                "required": [
+                  "i",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.plan"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Plan travel again; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the layer (0: the base)"
+                  }
+                },
+                "required": [
+                  "i"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.set"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Layer settings; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the layer (0: the base)"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the layer's name"
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "override",
+                      "additive"
+                    ],
+                    "description": "replace what is below, or add to it"
+                  },
+                  "weight": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "description": "how much it shows, 0..1"
+                  },
+                  "offset": {
+                    "type": "number",
+                    "minimum": -100000.0,
+                    "maximum": 100000.0,
+                    "description": "frames a link starts later"
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0.01,
+                    "maximum": 100.0,
+                    "description": "playback speed of a link"
+                  },
+                  "loop": {
+                    "type": "boolean",
+                    "description": "a link repeats"
+                  },
+                  "muted": {
+                    "type": "boolean",
+                    "description": "off"
+                  },
+                  "gait": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "walk",
+                      "run",
+                      "crouch"
+                    ],
+                    "description": "which Locomotion clips to walk with"
+                  },
+                  "fade": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600,
+                    "description": "frames the layer fades in and out over"
+                  },
+                  "start": {
+                    "type": "number",
+                    "minimum": -1000000.0,
+                    "maximum": 1000000.0,
+                    "description": "first frame of its range"
+                  },
+                  "end": {
+                    "type": "number",
+                    "minimum": -1000000.0,
+                    "maximum": 1000000.0,
+                    "description": "last frame of its range"
+                  },
+                  "whole": {
+                    "type": "boolean",
+                    "description": "true: no range, the whole animation"
+                  },
+                  "waypoints": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[x, y] metres on the floor"
+                    },
+                    "maxItems": 1048576,
+                    "description": "a travel's path, [[x, y], ...] metres"
+                  },
+                  "moves": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "oneOf": [
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 2,
+                          "maxItems": 2,
+                          "description": "[dx, dy] metres"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "description": "footsteps moved by hand, {\"L0\": [dx, dy]}"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  }
+                },
+                "required": [
+                  "i"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.solo"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Solo layer; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the layer (0: the base alone)"
+                  },
+                  "on": {
+                    "type": "boolean",
+                    "description": "true (default): mute every other layer above the base; false: unmute them all"
+                  }
+                },
+                "required": [
+                  "i"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.travel"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Travel between keys; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000,
+                    "description": "first frame (with `to`; default: the keys around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000,
+                    "description": "last frame"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  },
+                  "fade": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600,
+                    "description": "frames the layer fades in and out over"
+                  },
+                  "gait": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "walk",
+                      "run",
+                      "crouch"
+                    ],
+                    "description": "which Locomotion clips to walk with"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layer.travel_preview"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Preview travel"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000,
+                    "description": "first frame (with `to`; default: the keys around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000,
+                    "description": "last frame"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  },
+                  "fade": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600,
+                    "description": "frames the layer fades in and out over"
+                  },
+                  "gait": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "walk",
+                      "run",
+                      "crouch"
+                    ],
+                    "description": "which Locomotion clips to walk with"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "layers.list"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Layers"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "library.add_file"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Import file; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "one animation (*.clip.json) or pose (*.pose.json) file"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the group it goes in (default Imported)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "library.import"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Import library; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a folder of *.clip.json and *.pose.json files (subfolders are groups)"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the group for files directly in the folder (default: the folder's name)"
+                  },
+                  "overwrite": {
+                    "type": "boolean",
+                    "description": "replace items already in the library (your changes to them are lost); built-ins are always kept"
+                  }
+                },
+                "required": [
+                  "from"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "library.install"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Install built-ins; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the built-in library folder"
+                  },
+                  "overwrite": {
+                    "type": "boolean",
+                    "description": "replace your edited copies too"
+                  }
+                },
+                "required": [
+                  "from"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "library.list"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Library"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "library.samples"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Import samples; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "overwrite": {
+                    "type": "boolean",
+                    "description": "replace samples already in the library (your changes to them are lost)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "marker.add"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Add marker; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the marker's frame"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the marker's name (one line)"
+                  }
+                },
+                "required": [
+                  "frame"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "marker.delete"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Delete marker; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the marker's frame"
+                  }
+                },
+                "required": [
+                  "frame"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "marker.move"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Move marker; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the marker's frame"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "its new frame"
+                  }
+                },
+                "required": [
+                  "frame",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "marker.rename"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Rename marker; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the marker's frame"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the marker's name (one line)"
+                  }
+                },
+                "required": [
+                  "frame",
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "onion.frames"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Onion-skin frames"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 10000000.0,
+                    "description": "around this frame (default: the playhead)"
+                  },
+                  "count": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "description": "ghosts on each side (default 2)",
+                    "default": 2
+                  },
+                  "step": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "description": "frames between ghosts (default 2)",
+                    "default": 2
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "frames",
+                      "keys"
+                    ],
+                    "description": "every `step` frames, or the nearest keys"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "parts.delete"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Delete part set; undoable; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a name"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "parts.lock"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Lock parts; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "parts.save"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Save part set; undoable; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a name"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  },
+                  "joint": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "a joint with everything below it (a bone name (resource ac://skeleton lists them))"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "physics.overlay"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Physics overlay"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 100000.0,
+                    "description": "the frame to look at (default: the current one)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "physics.set"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Physics pass; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "on": {
+                    "type": "boolean",
+                    "description": "play and export through the physics pass"
+                  }
+                },
+                "required": [
+                  "on"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "physics.solve"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Physics pass result"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 100000.0,
+                    "description": "the frame whose root to report"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pin.set"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Pin joint; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "a bone (a bone name (resource ac://skeleton lists them))"
+                  },
+                  "on": {
+                    "type": "boolean",
+                    "description": "pin (true) or unpin"
+                  }
+                },
+                "required": [
+                  "bone"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pins.clear"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Clear pins; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.apply"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Apply pose; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  },
+                  "key": {
+                    "type": "boolean",
+                    "description": "key it (default true)",
+                    "default": true
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.copy"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Copy pose"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.delete"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Delete pose; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.drag"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Drag joint; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "a bone (a bone name (resource ac://skeleton lists them))"
+                  },
+                  "to": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "where the bone's head goes (metres) ([x, y, z])"
+                  },
+                  "by": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "or: an offset from where it is now (metres) ([x, y, z])"
+                  }
+                },
+                "required": [
+                  "bone"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.get"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Get pose"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "just this bone: its local rotation (a bone name (resource ac://skeleton lists them))"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.group"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Move pose to group; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a group (folder)"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.mirror"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Mirror pose; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "flip",
+                      "l2r",
+                      "r2l"
+                    ],
+                    "description": "flip, or copy one side onto the other"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.move"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Move body on this frame; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "by": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "slide, metres (-Y is the way the rig faces at rest) ([x, y, z])"
+                  },
+                  "turn": {
+                    "type": "number",
+                    "minimum": -360.0,
+                    "maximum": 360.0,
+                    "description": "turn about the vertical, degrees (counter-clockwise from above)"
+                  },
+                  "pivot": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "the turn's centre, metres (z unused; default: the root on the frame shown) ([x, y, z])"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.paste"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Paste pose; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  },
+                  "mirror": {
+                    "type": "boolean",
+                    "description": "paste mirrored"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.query"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Measure pose"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 10000000.0,
+                    "description": "a frame of the motion shown (default: the pose shown now)"
+                  },
+                  "bones": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "bones to report"
+                  },
+                  "pairs": {
+                    "type": "array",
+                    "description": "[[bone, bone] or [bone, \"floor\"], ...]: distances"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.reach"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Reach (full body); undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "a bone (a bone name (resource ac://skeleton lists them))"
+                  },
+                  "to": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "where the bone's head goes (metres) ([x, y, z])"
+                  },
+                  "by": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "or: an offset from where it is now (metres) ([x, y, z])"
+                  }
+                },
+                "required": [
+                  "bone"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.rename"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Rename pose; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the new name"
+                  }
+                },
+                "required": [
+                  "id",
+                  "to"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.reset"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Reset pose; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.rotate"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Rotate joint; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "a bone (a bone name (resource ac://skeleton lists them))"
+                  },
+                  "axis": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "world axis ([x, y, z])"
+                  },
+                  "angle": {
+                    "type": "number",
+                    "minimum": -100.0,
+                    "maximum": 100.0,
+                    "description": "radians"
+                  }
+                },
+                "required": [
+                  "bone",
+                  "axis",
+                  "angle"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.save"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Save pose; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a name"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a group (folder)"
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "body parts (empty: the whole body)"
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.set_bone"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Set bone rotation; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "the bone to turn (a bone name (resource ac://skeleton lists them))"
+                  },
+                  "rotation": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 4,
+                    "maxItems": 4,
+                    "description": "[x, y, z, w] relative to the parent ([x, y, z, w]; normalised on the way in, a zero quaternion is refused)"
+                  }
+                },
+                "required": [
+                  "bone",
+                  "rotation"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.set_root"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Set root offset; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "root": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "offset in hip heights ([x, y, z])"
+                  }
+                },
+                "required": [
+                  "root"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "pose.spread_bend"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Spread bend into the back; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "recovery.clear"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Discard unsaved work; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a recovery file's name, as recovery.list gives it"
+                  },
+                  "all": {
+                    "type": "boolean",
+                    "description": "every recovery file (default: the open animation's)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "recovery.list"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Unsaved work"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "recovery.restore"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Restore unsaved work; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a recovery file's name, as recovery.list gives it"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "recovery.write"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Keep unsaved work; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "rig.info"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Rig info"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "session.info"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Session info"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "session.reset"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Reset session"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "surface.add"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Add box; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the box's name"
+                  },
+                  "width": {
+                    "type": "number",
+                    "minimum": 0.05,
+                    "maximum": 100.0,
+                    "description": "metres across the body"
+                  },
+                  "depth": {
+                    "type": "number",
+                    "minimum": 0.05,
+                    "maximum": 100.0,
+                    "description": "metres along the facing"
+                  },
+                  "top": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 100.0,
+                    "description": "height of its top (m)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "surface.delete"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Delete box; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the box"
+                  }
+                },
+                "required": [
+                  "i"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "surface.set"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Box settings; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "i": {
+                    "type": "integer",
+                    "description": "the box"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the box's name"
+                  },
+                  "top": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 100.0,
+                    "description": "height of its top (m)"
+                  },
+                  "move": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "nudge [dx, dy, 0] metres ([x, y, z])"
+                  },
+                  "size": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "[width, depth, 0] metres around its centre ([x, y, z])"
+                  },
+                  "centre": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "put its middle at [x, y, 0] metres ([x, y, z])"
+                  },
+                  "turn": {
+                    "type": "number",
+                    "minimum": -360.0,
+                    "maximum": 360.0,
+                    "description": "how far it is turned about its centre (degrees)"
+                  }
+                },
+                "required": [
+                  "i"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "text.fill"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Fill gap from text; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "what the body does, in plain words (\"A person waves hello with their right hand.\")"
+                  },
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key before the gap (default: around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key after the gap"
+                  },
+                  "seed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000,
+                    "description": "another seed makes another take of the same prompt (default 1)",
+                    "default": 1
+                  }
+                },
+                "required": [
+                  "prompt"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "text.generate"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Generate motion from text; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "prompt": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "what the body does, in plain words (\"A person waves hello with their right hand.\")"
+                  },
+                  "seconds": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 9.9,
+                    "description": "how long (default 4)",
+                    "default": 4.0
+                  },
+                  "seed": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 1000000000,
+                    "description": "another seed makes another take of the same prompt (default 1)",
+                    "default": 1
+                  },
+                  "at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the frame it starts on (default the playhead); it starts from the pose there when the animation has keys"
+                  }
+                },
+                "required": [
+                  "prompt"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "text.helper"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Motion from text: helper"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "status",
+                      "load",
+                      "stop"
+                    ],
+                    "description": "status (default) says what is installed and running; load starts the helper and loads the model (a minute or more); stop ends it"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "text.install"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Motion from text: install; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "check",
+                      "start",
+                      "stop"
+                    ],
+                    "description": "check (default) says what the install needs and what it is doing; start runs the setup (about 22 GB downloaded, an hour or more; the window stays usable); stop ends it, and start carries on from there"
+                  },
+                  "repair": {
+                    "type": "boolean",
+                    "description": "start even when it is installed: the setup updates or repairs it"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "trail.points"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Motion trail"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "bone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "description": "the joint to trace (a bone name (resource ac://skeleton lists them))"
+                  },
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame (default 0)",
+                    "default": 0
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame (default: the clip's last)"
+                  }
+                },
+                "required": [
+                  "bone"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Expect": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tolerance": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double",
+          "description": "How far a number may be off (default 1e-6).",
+          "default": null
+        },
+        "bones": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true,
+          "description": "Bone name to what `bone.world` must return for it.",
+          "default": null
+        },
+        "state": {
+          "description": "What `editor.state` must hold.",
+          "default": null
+        }
+      },
+      "description": "Checks after the script."
+    },
+    "Mistake": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "A registered command id.",
+          "enum": [
+            "ai.accept",
+            "ai.clear",
+            "ai.discard",
+            "ai.fill",
+            "ai.fill_all",
+            "ai.gaps",
+            "ai.info",
+            "ai.keep",
+            "ai.preview",
+            "ai.settings",
+            "ai.toggle",
+            "anim.block",
+            "anim.steps",
+            "assets.reload",
+            "bone.world",
+            "clip.contacts",
+            "clip.critique",
+            "clip.curves",
+            "clip.delete",
+            "clip.duplicate",
+            "clip.export",
+            "clip.export_batch",
+            "clip.group",
+            "clip.import",
+            "clip.loop",
+            "clip.metrics",
+            "clip.move",
+            "clip.new",
+            "clip.open",
+            "clip.rename",
+            "clip.sample",
+            "clip.save",
+            "clip.save_as",
+            "clip.sheet",
+            "clip.video",
+            "clip.write",
+            "edit.batch",
+            "edit.begin",
+            "edit.checkpoint",
+            "edit.dry_run",
+            "edit.end",
+            "edit.history",
+            "edit.redo",
+            "edit.revert_to",
+            "edit.undo",
+            "editor.state",
+            "feet.lock",
+            "feet.plant",
+            "frame.set",
+            "key.channel",
+            "key.copy",
+            "key.delete",
+            "key.hold",
+            "key.interp",
+            "key.move",
+            "key.move_parts",
+            "key.remove_parts",
+            "key.set",
+            "keys.copy",
+            "keys.delete",
+            "keys.paste",
+            "keys.retime",
+            "layer.add",
+            "layer.bake",
+            "layer.delete",
+            "layer.edit",
+            "layer.move",
+            "layer.plan",
+            "layer.set",
+            "layer.solo",
+            "layer.travel",
+            "layer.travel_preview",
+            "layers.list",
+            "library.add_file",
+            "library.import",
+            "library.install",
+            "library.list",
+            "library.samples",
+            "marker.add",
+            "marker.delete",
+            "marker.move",
+            "marker.rename",
+            "onion.frames",
+            "parts.delete",
+            "parts.lock",
+            "parts.save",
+            "physics.overlay",
+            "physics.set",
+            "physics.solve",
+            "pin.set",
+            "pins.clear",
+            "pose.apply",
+            "pose.copy",
+            "pose.delete",
+            "pose.drag",
+            "pose.get",
+            "pose.group",
+            "pose.mirror",
+            "pose.move",
+            "pose.paste",
+            "pose.query",
+            "pose.reach",
+            "pose.rename",
+            "pose.reset",
+            "pose.rotate",
+            "pose.save",
+            "pose.set_bone",
+            "pose.set_root",
+            "pose.spread_bend",
+            "recovery.clear",
+            "recovery.list",
+            "recovery.restore",
+            "recovery.write",
+            "rig.info",
+            "session.info",
+            "session.reset",
+            "surface.add",
+            "surface.delete",
+            "surface.set",
+            "text.fill",
+            "text.generate",
+            "text.helper",
+            "text.install",
+            "trail.points"
+          ]
+        },
+        "params": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": true,
+          "default": null
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "description": "A mistake that must be refused."
+    }
+  }
+}

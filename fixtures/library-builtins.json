@@ -1,0 +1,30 @@
+{
+  "$schema": "./schema.json",
+  "name": "library-builtins",
+  "feature": "library.list",
+  "description": "Built-ins are kept apart from the person's own work. After installing the shipped library, its animations and poses are listed with builtin true (and edited false: the copies are unchanged), while an animation the person makes and saves (Mine/Fixture) is builtin false. A built-in opens for viewing, but saving over it is refused (the message points to clip.save_as); save as makes the person's own copy, which is not a built-in.",
+  "script": [
+    { "command": "library.install", "params": { "from": "{assets}/library" } },
+    { "command": "clip.new", "params": { "name": "Fixture", "group": "Mine" } },
+    { "command": "clip.save", "expect": { "id": "Mine/Fixture" } },
+    {
+      "command": "library.list",
+      "expect": {
+        "animations": { "$contains": [
+          { "id": "Locomotion/Run", "builtin": true, "edited": false },
+          { "id": "Mine/Fixture", "builtin": false, "edited": false }
+        ] },
+        "poses": { "$contains": [{ "id": "Reference/T-pose", "builtin": true, "edited": false }] }
+      }
+    },
+    { "command": "clip.open", "params": { "id": "Locomotion/Run" } },
+    { "command": "clip.save_as", "params": { "name": "My run", "group": "Mine" }, "expect": { "id": "Mine/My run" } },
+    { "command": "library.list", "expect": { "animations": { "$contains": [{ "id": "Mine/My run", "builtin": false, "current": true }] } } },
+    { "command": "clip.open", "params": { "id": "Locomotion/Run" } }
+  ],
+  "errors": [
+    { "command": "clip.save" },
+    { "command": "library.list", "params": { "builtin": true } }
+  ],
+  "views": []
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-motion",
+  "feature": "text.generate",
+  "description": "Motion from text, with fixtures' stand-in engine in place of the optional helper (ac_textmotion::stand_in): it holds the start pose and moves the root in a straight line from the start key's root to the end key's, so the numbers can be worked out by hand. text.helper reports the stand-in, loaded. Keys of yours stand at frame 0 (root offset z 0.9450101) and frame 30 (z 1.9450101). text.fill with the playhead on 12 fills the gap 0-30: 29 AI keys tagged \"text A person waves.\", and frame 15 is halfway, z = (0.9450101 + 1.9450101) / 2 = 1.4450101. text.generate from 30 for 1 s at 30 fps covers 30-60: your key on 30 stays, 29 AI keys between, and a key of yours on 60; the stand-in holds the pose on 30, so frames 45 and 60 keep z 1.9450101. Raising the key on 30 to z 2.0 leaves both stretches as they were and says so for 0-30 and 30-60. Refused, leaving the animation as it was: an empty prompt (spaces and a line break), 20 seconds (over the 9.9 s range), generating from 0 for the default 4 s (0-120 would cover your keys on 30 and 60), a fill given only from, keys 0 and 5 or 0 and 60 (not neighbouring keys of yours), and text.helper's unknown action fly.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    {
+      "command": "text.helper",
+      "params": {},
+      "expect": { "running": true, "loaded": true, "busy": false, "model": "stand-in" }
+    },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.9450101] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 12 } },
+    {
+      "command": "text.fill",
+      "params": { "prompt": "A person waves." },
+      "expect": {
+        "from": 0,
+        "to": 30,
+        "frames": 29,
+        "model": "text A person waves.",
+        "notes": ["made by the fixtures' stand-in, not the model"]
+      }
+    },
+    {
+      "command": "clip.sample",
+      "params": { "from": 15, "to": 15 },
+      "expect": { "roots": [[0, 0, 1.4450101]] }
+    },
+    {
+      "command": "text.generate",
+      "params": { "prompt": "A person waves.", "at": 30, "seconds": 1 },
+      "expect": { "from": 30, "to": 60, "frames": 29, "model": "text A person waves." }
+    },
+    {
+      "command": "clip.sample",
+      "params": { "from": 45, "to": 60, "step": 15 },
+      "expect": { "roots": [[0, 0, 1.9450101], [0, 0, 1.9450101]] }
+    },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 2.0] } },
+    {
+      "command": "key.set",
+      "params": {},
+      "expect": {
+        "frame": 30,
+        "notes": [
+          "0-30: the motion made from text was left as it was; make it again (text.fill) to meet the changed key",
+          "30-60: the motion made from text was left as it was; make it again (text.fill) to meet the changed key"
+        ]
+      }
+    },
+    {
+      "command": "clip.sample",
+      "params": { "from": 15, "to": 45, "step": 30 },
+      "expect": { "roots": [[0, 0, 1.4450101], [0, 0, 1.9450101]] }
+    }
+  ],
+  "errors": [
+    { "command": "text.generate", "params": { "prompt": "  \n " } },
+    { "command": "text.generate", "params": { "prompt": "A person waves.", "seconds": 20 } },
+    { "command": "text.generate", "params": { "prompt": "A person waves.", "at": 0 } },
+    { "command": "text.fill", "params": { "prompt": "A person waves.", "from": 0 } },
+    { "command": "text.fill", "params": { "prompt": "A person waves.", "from": 0, "to": 5 } },
+    { "command": "text.fill", "params": { "prompt": "A person waves.", "from": 0, "to": 60 } },
+    { "command": "text.helper", "params": { "action": "fly" } }
+  ]
+}

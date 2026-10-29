@@ -1,0 +1,37 @@
+{
+  "$schema": "./schema.json",
+  "name": "smooth-hold",
+  "feature": "key.set",
+  "description": "A smooth hold stays put when a long move follows it. Three smooth keys: frames 0 and 16 the same standing pose (root offset [0, 0, 0.945]: the root at (0, -0.0108229, 0.8724043)), frame 60 two hip heights forward (-Y) with the right upper arm turned 90 degrees about X. A Catmull-Rom curve takes its tangent at frame 16 from frames 0 and 60, so between the two equal keys it swung the hips 10.9 cm back (y 0.0979) and moved the arm; clamped tangents are flat at the hold, so frame 8 is frame 0 exactly: the root at (0, -0.0108229, 0.8724043) and the right elbow (lowerarm01.R) at (-0.3294696, -0.0212158, 1.1008943). Frame 38, halfway through the move, is between the keys: y -0.7719249. Physics off.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.945] } },
+    { "command": "key.set", "params": { "interp": "smooth" } },
+    { "command": "frame.set", "params": { "frame": 16 } },
+    { "command": "key.set", "params": { "interp": "smooth" } },
+    { "command": "frame.set", "params": { "frame": 60 } },
+    { "command": "pose.set_root", "params": { "root": [0, -2, 0.945] } },
+    {
+      "command": "pose.set_bone",
+      "params": { "bone": "upperarm01.R", "rotation": [0.7071068, 0, 0, 0.7071068] }
+    },
+    { "command": "key.set", "params": { "interp": "smooth" } },
+    { "command": "frame.set", "params": { "frame": 8 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "root" },
+      "expect": { "position": [0, -0.0108229, 0.8724043] }
+    },
+    {
+      "command": "bone.world",
+      "params": { "bone": "lowerarm01.R" },
+      "expect": { "position": [-0.3294696, -0.0212158, 1.1008943] }
+    },
+    { "command": "frame.set", "params": { "frame": 38 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "root" },
+      "expect": { "position": [0, -0.7719249, 0.8724043] }
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "Dash",
+  "description": "A short dash forward (-Y) and a stop: ready, two sprinting keys and a stride 1.1 m apart, then standing 4.2 m from the start. 5 keys; the AI fills the 56 frames between in its run style and makes the steps.",
+  "script": [
+    { "command": "ai.settings", "params": { "style": "run" } },
+    { "command": "anim.block", "params": { "poses": ["Action/Ready stance", "Sports and fitness/Sprint", "Standing/Mid-step", "Sports and fitness/Sprint", "Standing/Relaxed"], "frames": [0, 14, 28, 42, 60], "fill": "ai", "physics": true } },
+    { "command": "frame.set", "params": { "frame": 14 } },
+    { "command": "pose.set_root", "params": { "root": [0, -1.0, 0.6751260] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 28 } },
+    { "command": "pose.set_root", "params": { "root": [0, -2.1, 0.8980153] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 42 } },
+    { "command": "pose.set_root", "params": { "root": [0, -3.2, 0.6751260] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 60 } },
+    { "command": "pose.set_root", "params": { "root": [0, -4.2, 0.9213442] } },
+    { "command": "key.set", "params": {} }
+  ]
+}

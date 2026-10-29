@@ -1,0 +1,53 @@
+//! The core: the rig, quaternions, forward kinematics, the document, and the command
+//! registry and session every front end (UI, CLI, MCP, fixtures) goes through.
+//!
+//! Headless and deterministic: no UI, GPU, I/O dialogs, clocks or unseeded randomness.
+#![deny(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unimplemented,
+    clippy::todo,
+    clippy::unreachable
+)]
+
+pub mod ai;
+mod batch;
+pub mod clip;
+pub mod clipfile;
+pub mod command;
+pub mod commands;
+pub mod critique;
+pub mod diff;
+pub mod document;
+pub mod editor;
+pub mod edits;
+pub mod error;
+pub mod fullbody;
+pub mod gait;
+pub mod gaps;
+pub mod hash;
+mod history;
+pub mod ik;
+pub mod keyops;
+pub mod markers;
+pub mod metrics;
+pub mod outputs;
+pub mod parts;
+pub mod physics;
+pub mod placement;
+pub mod posequery;
+pub mod problems;
+pub mod product;
+pub mod quat;
+pub mod retime;
+pub mod rig;
+pub mod session;
+pub mod suggest;
+pub mod travel;
+
+pub use command::{CommandSpec, Form, Kind, ParamSpec};
+pub use document::{Document, Pose};
+pub use error::CoreError;
+pub use rig::Skeleton;
+pub use session::Session;

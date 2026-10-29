@@ -1,0 +1,16 @@
+/target
+/vendor/craft-libs
+*.png
+!assets/**/*.png
+!tests/visual/*.png
+
+# training data and local-only outputs (see training/README.md)
+/training/data/
+/training/.venv/
+
+# Python caches
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+/demo video

@@ -1,0 +1,85 @@
+{
+  "$schema": "./schema.json",
+  "name": "clip-unsaved",
+  "feature": "editor.state",
+  "description": "Unsaved changes are the open animation against what the library holds. A new animation is written at once: clean. A key at frame 10 makes it unsaved; undo brings it back to the saved state (clean), redo makes it unsaved again; save makes it clean. Undoing the key after the save leaves it unsaved (the file has the key, the editor doesn't): what the library holds is outside the undo history. Deleting the open animation closes it (an empty untitled one, nothing to keep: clean); undoing the delete brings it back unsaved, and saving writes the file again.",
+  "script": [
+    {
+      "command": "clip.new",
+      "params": { "name": "Dirty", "group": "Mine" },
+      "expect": { "id": "Mine/Dirty" }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "id": "Mine/Dirty", "unsaved": false }
+    },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "key.set", "params": {} },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "unsaved": true, "length": 11 }
+    },
+    { "command": "edit.undo", "params": {} },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "unsaved": false, "length": 1 }
+    },
+    { "command": "edit.redo", "params": {} },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "unsaved": true }
+    },
+    {
+      "command": "clip.save",
+      "params": {},
+      "expect": { "id": "Mine/Dirty" }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "unsaved": false, "length": 11 }
+    },
+    { "command": "edit.undo", "params": {} },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "unsaved": true, "length": 1 }
+    },
+    {
+      "command": "clip.delete",
+      "params": { "id": "Mine/Dirty" },
+      "expect": { "closed": "Mine/Dirty" }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "name": "untitled", "unsaved": false }
+    },
+    { "command": "edit.undo", "params": {} },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "id": "Mine/Dirty", "unsaved": true }
+    },
+    {
+      "command": "clip.save",
+      "params": {},
+      "expect": { "id": "Mine/Dirty" }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "unsaved": false }
+    }
+  ],
+  "expect": { "tolerance": 1e-06 },
+  "errors": [
+    { "command": "clip.delete", "params": { "id": "No/Such" } },
+    { "command": "clip.save", "params": { "as": "x" } }
+  ],
+  "views": ["front"]
+}

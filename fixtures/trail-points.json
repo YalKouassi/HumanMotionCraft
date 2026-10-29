@@ -1,0 +1,35 @@
+{
+  "$schema": "./schema.json",
+  "name": "trail-points",
+  "feature": "trail.points",
+  "description": "Two linear keys: the rest pose at frame 0, the root up 1 hip height (0.8698308 m) at frame 10, so the root climbs 0.08698308 m a frame from its rest head z 0.0504142 (x 0, y -0.0108229): frame 4 is at 0.0504142 + 4 x 0.08698308 = 0.3983465, frame 5 at 0.4853296, frame 6 at 0.5723127. Frames 4 to 6 hold no key. Over the whole clip (0 to 10) the root's keys are 0 and 10. A partial key on the left arm at frame 5 sets the left wrist but not the root: the wrist's trail shows keys 0, 5 and 10, the root's still 0 and 10. The physics pass is off; the trail is the keyed motion.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "trail.points", "params": { "bone": "root", "from": 4, "to": 6 },
+      "expect": {
+        "frames": [4, 5, 6],
+        "points": [[0, -0.0108229, 0.3983465], [0, -0.0108229, 0.4853296], [0, -0.0108229, 0.5723127]],
+        "keys": []
+      } },
+    { "command": "trail.points", "params": { "bone": "root" },
+      "expect": { "frames": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "keys": [0, 10] } },
+    { "command": "frame.set", "params": { "frame": 5 } },
+    { "command": "key.set", "params": { "parts": ["Left arm"] } },
+    { "command": "trail.points", "params": { "bone": "wrist.L" },
+      "expect": { "keys": [0, 5, 10] } },
+    { "command": "trail.points", "params": { "bone": "root" },
+      "expect": { "keys": [0, 10] } }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": [
+    { "command": "trail.points", "params": { "bone": "no.such.bone" } },
+    { "command": "trail.points", "params": { "bone": "root", "from": 8, "to": 2 } },
+    { "command": "trail.points", "params": { "bone": "root", "from": 0, "to": 5000 } }
+  ],
+  "views": []
+}

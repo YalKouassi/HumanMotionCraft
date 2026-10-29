@@ -1,0 +1,27 @@
+{
+  "$schema": "./schema.json",
+  "name": "reach-feet-pinned",
+  "feature": "pose.reach",
+  "description": "Full-body IK. With both feet pinned, reaching the left wrist 5 cm up lands it exactly on wrist.L rest head (0.4456329, -0.1788175, 0.1637656) + (0, 0, 0.05), and the feet stay at their rest heads (+-0.1766242, -0.0038723, -0.7485819). Dragging the root 15 cm down with the feet pinned (pose.drag uses the full-body solve when other joints are pinned) puts the root head at 0.0504142 - 0.15 = -0.0995858 and the feet still do not move.",
+  "script": [
+    {"command": "pose.set_root", "params": {"root": [0, 0, 0]}},
+    {"command": "pin.set", "params": {"bone": "foot.L"}},
+    {"command": "pin.set", "params": {"bone": "foot.R"}, "expect": {"pins": ["foot.L", "foot.R"]}},
+    {"command": "pose.reach", "params": {"bone": "wrist.L", "by": [0, 0, 0.05]}, "expect": {"position": [0.4456329, -0.1788175, 0.2137656], "reached": true}},
+    {"command": "bone.world", "params": {"bone": "foot.L"}, "expect": {"position": [0.1766242, -0.0038723, -0.7485819]}},
+    {"command": "bone.world", "params": {"bone": "foot.R"}, "expect": {"position": [-0.1766242, -0.0038723, -0.7485819]}},
+    {"command": "pose.reset", "params": {}},
+    {"command": "pose.set_root", "params": {"root": [0, 0, 0]}},
+    {"command": "pose.drag", "params": {"bone": "root", "by": [0, 0, -0.15]}},
+    {"command": "bone.world", "params": {"bone": "root"}, "expect": {"position": [0, -0.0108229, -0.0995858]}},
+    {"command": "bone.world", "params": {"bone": "foot.L"}, "expect": {"position": [0.1766242, -0.0038723, -0.7485819]}}
+  ],
+  "expect": {"tolerance": 1e-04},
+  "errors": [
+    {"command": "pose.reach", "params": {"bone": "hand.L", "by": [0, 0, 0.1]}},
+    {"command": "pose.reach", "params": {"bone": "wrist.L", "to": [0, 0, 0], "by": [0, 0, 0.1]}},
+    {"command": "pose.reach", "params": {"bone": "wrist.L"}},
+    {"command": "pose.reach", "params": {"bone": "wrist.L", "to": [5000, 0, 0]}}
+  ],
+  "views": ["front"]
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "./schema.json",
+  "name": "library-import",
+  "feature": "library.import",
+  "description": "Import library. Samples: the six assets/samples/*.clip.json land in the Samples group (ids are the file names, in name order); importing them again copies nothing and keeps all six. A folder of your own: two samples written to the scratch folder as Jump.clip.json and Dash.clip.json import into the group given, Mine (Dash before Jump); again, both are kept. The built-in library folder imports nothing, even with overwrite: every item is already there and built-ins are never replaced. A missing folder, a folder with no *.clip.json or *.pose.json (the rig folder) and no folder at all are refused, as is an overwrite that is not true or false.",
+  "script": [
+    {
+      "command": "library.samples",
+      "params": {},
+      "expect": {
+        "copied": [
+          "Samples/Cast a spell",
+          "Samples/Dash",
+          "Samples/Jump",
+          "Samples/Kung fu combo",
+          "Samples/Sit down and stretch",
+          "Samples/Wave and cheer"
+        ],
+        "kept": [],
+        "group": "Samples"
+      }
+    },
+    {
+      "command": "library.samples",
+      "params": {},
+      "expect": {
+        "copied": [],
+        "kept": [
+          "Samples/Cast a spell",
+          "Samples/Dash",
+          "Samples/Jump",
+          "Samples/Kung fu combo",
+          "Samples/Sit down and stretch",
+          "Samples/Wave and cheer"
+        ]
+      }
+    },
+    { "command": "clip.open", "params": { "id": "Samples/Jump" } },
+    { "command": "clip.write", "params": { "path": "{tmp}/Jump.clip.json" } },
+    { "command": "clip.open", "params": { "id": "Samples/Dash" } },
+    { "command": "clip.write", "params": { "path": "{tmp}/Dash.clip.json" } },
+    {
+      "command": "library.import",
+      "params": { "from": "{tmp}", "group": "Mine" },
+      "expect": {
+        "group": "Mine",
+        "animations": { "copied": ["Mine/Dash", "Mine/Jump"], "kept": [] },
+        "poses": { "copied": [], "kept": [] },
+        "skipped": []
+      }
+    },
+    {
+      "command": "library.import",
+      "params": { "from": "{tmp}", "group": "Mine" },
+      "expect": {
+        "animations": { "copied": [], "kept": ["Mine/Dash", "Mine/Jump"] },
+        "skipped": []
+      }
+    },
+    {
+      "command": "library.import",
+      "params": { "from": "{assets}/library", "overwrite": true },
+      "expect": {
+        "animations": { "copied": [] },
+        "poses": { "copied": [] },
+        "skipped": []
+      }
+    },
+    {
+      "command": "library.list",
+      "params": {},
+      "expect": {
+        "animations": {
+          "$contains": [{ "id": "Mine/Jump" }, { "id": "Mine/Dash" }, { "id": "Samples/Kung fu combo" }]
+        }
+      }
+    }
+  ],
+  "errors": [
+    { "command": "library.import", "params": { "from": "{tmp}/no such folder" } },
+    { "command": "library.import", "params": { "from": "{assets}/rig" } },
+    { "command": "library.import", "params": {} },
+    { "command": "library.samples", "params": { "overwrite": "yes" } }
+  ]
+}

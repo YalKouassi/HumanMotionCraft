@@ -1,0 +1,45 @@
+{
+  "$schema": "./schema.json",
+  "name": "physics-overlay",
+  "feature": "physics.overlay",
+  "description": "What the viewport draws over a frame. The physics-jump keys (standing at 0 and 30, one hip height up at 15, linear) make one flight 0..30. Standing at frame 0: the centre of mass is at (0, -0.0213425, 0.9287697) (de Leva masses; height pinned from the first run, the rest follows from it), and all 30 foot points (14 toe heads and a heel per foot) touch the floor (2 cm up, inside the 5 cm band) without moving, so all are pinned, with the centre of mass inside their support. At the top (frame 15) gravity has lifted everything by g t (T - t) / 2 = 9.81 * 0.5 * 0.5 / 2 = 1.22625 m: the centre of mass is at 0.9287697 + 1.22625 = 2.1550197, no foot touches, and the keyed pose (the ghost) is 2.0986632 - (0.8724132 + 0.8698308) = 0.3564192 below the pass. A fast slide follows: from frame 30 to 60 the body is keyed two hip heights along X (1.7396616 m in 1 s, over the 0.5 m/s plant speed), so at frame 45 all 30 points touch but none is pinned, the pass leaves the body where it was keyed (ghost 0) and there is no flight. With physics off, frame 15 shows the keyed pose: the centre of mass one hip height up, 0.9287697 + 0.8698308 = 1.7986005, and no arc (the arc is the pass's).",
+  "script": [
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 15 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 60 } },
+    { "command": "pose.set_root", "params": { "root": [2, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "physics.set", "params": { "on": true } },
+    {
+      "command": "physics.overlay",
+      "params": { "frame": 0 },
+      "expect": { "frame": 0, "physics": true, "com": [0, -0.0213425, 0.9287697], "inside": true, "pinned": 30, "flight": { "from": 0, "to": 30 }, "keyed_moved": 0 }
+    },
+    { "command": "frame.set", "params": { "frame": 15 } },
+    {
+      "command": "physics.overlay",
+      "expect": { "frame": 15, "com": [0, -0.0213425, 2.1550197], "contacts": [], "inside": null, "support": null, "flight": { "from": 0, "to": 30 }, "keyed_moved": 0.3564192 }
+    },
+    {
+      "command": "physics.overlay",
+      "params": { "frame": 45 },
+      "expect": { "frame": 45, "com": [0.8698308, -0.0213425, 0.9287697], "inside": true, "pinned": 0, "contacts": { "$contains": [{ "pinned": false }] }, "flight": null, "keyed_moved": 0 }
+    },
+    { "command": "physics.set", "params": { "on": false } },
+    {
+      "command": "physics.overlay",
+      "params": { "frame": 15 },
+      "expect": { "physics": false, "com": [0, -0.0213425, 1.7986005], "flight": null, "keyed_moved": 0 }
+    }
+  ],
+  "errors": [
+    { "command": "physics.overlay", "params": { "frame": -1 } }
+  ],
+  "views": ["front"]
+}

@@ -1,0 +1,35 @@
+[package]
+name = "ac-app"
+description = "The desktop app (eframe, wgpu)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "humanmotioncraft"
+path = "src/main.rs"
+
+[dependencies]
+ac-ai.workspace = true
+ac-core.workspace = true
+ac-io.workspace = true
+ac-media.workspace = true
+ac-textmotion.workspace = true
+ac-render.workspace = true
+craft-atomic.workspace = true
+eframe = { version = "0.37", default-features = false, features = ["wgpu", "default_fonts", "accesskit", "clipboard"] }
+egui = "0.37"
+serde.workspace = true
+serde_json.workspace = true
+craft-keymap = { workspace = true, features = ["egui", "ui"] }
+craft-menu.workspace = true
+craft-quit = { workspace = true, features = ["egui"] }
+craft-settings.workspace = true
+png = "0.17"
+rfd = "0.17"
+tracing.workspace = true
+
+[lints]
+workspace = true

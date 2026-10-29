@@ -1,0 +1,33 @@
+{
+  "$schema": "./schema.json",
+  "name": "ai-toggle",
+  "feature": "ai.toggle",
+  "description": "One key (Shift+A) switches the span around the playhead between the model and plain interpolation. Keys of yours on 0 (root offset z 0.9450101) and 20 (one hip height, 0.8698308 m, higher), linear, with ai_force 0 so the fill is checkable: frame 10's root head is halfway, 1.3073286, either way. The first switch fills 0–20 with the model (19 AI keys, band 1..19, \"parts\"); the second clears those 19 keys (plain again, no band). A gap over the model's 45 frames (20–80, 59 frames) is refused with its length, and nothing changes. Physics is off: this checks the keys.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "ai.settings", "params": { "ai_force": 0 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 80 } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "ai.toggle", "expect": { "from": 0, "to": 20, "mode": "ai", "model": "parts" } },
+    { "command": "editor.state", "expect": { "bands": [{ "from": 1, "to": 19, "model": "parts" }] } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.3073286] } },
+    { "command": "ai.toggle", "expect": { "from": 0, "to": 20, "mode": "plain", "cleared": 19 } },
+    { "command": "editor.state", "expect": { "bands": [] } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.3073286] } },
+    { "command": "edit.undo", "expect": { "label": "Switch AI / plain" } },
+    { "command": "editor.state", "expect": { "bands": [{ "from": 1, "to": 19 }] } }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": [
+    { "command": "ai.toggle", "params": { "from": 20, "to": 80 } },
+    { "command": "ai.toggle", "params": { "from": 0 } },
+    { "command": "ai.toggle", "params": { "from": 0, "to": 80 } }
+  ],
+  "views": ["side"]
+}

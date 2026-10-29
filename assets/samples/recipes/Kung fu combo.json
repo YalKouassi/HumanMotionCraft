@@ -1,0 +1,8 @@
+{
+  "name": "Kung fu combo",
+  "description": "From a fighting stance: palm strike, block and strike, high kick, back to the stance. 5 keys, the AI fills the 76 frames between in its combat style.",
+  "script": [
+    { "command": "ai.settings", "params": { "style": "combat" } },
+    { "command": "anim.block", "params": { "poses": ["Martial arts/Fighting stance", "Martial arts/Palm strike", "Martial arts/Block and strike", "Martial arts/High kick", "Martial arts/Fighting stance"], "frames": [0, 18, 36, 56, 80], "fill": "ai", "physics": true } }
+  ]
+}

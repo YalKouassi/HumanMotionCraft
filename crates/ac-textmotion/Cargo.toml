@@ -1,0 +1,16 @@
+[package]
+name = "ac-textmotion"
+description = "Motion from text: the text.* commands, through the optional helper process tools/textmotion installs (no egui)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ac-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

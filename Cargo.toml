@@ -1,0 +1,61 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "xtask"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "GPL-3.0-or-later"
+publish = false
+
+[workspace.dependencies]
+ac-core = { path = "crates/ac-core" }
+ac-ai = { path = "crates/ac-ai" }
+ac-io = { path = "crates/ac-io" }
+ac-media = { path = "crates/ac-media" }
+ac-textmotion = { path = "crates/ac-textmotion" }
+ac-render = { path = "crates/ac-render" }
+ac-cli = { path = "crates/ac-cli" }
+craft-atomic = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47d36e6d25747ab5665c4f174b03df5b7" }
+craft-keymap = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47d36e6d25747ab5665c4f174b03df5b7" }
+craft-menu = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47d36e6d25747ab5665c4f174b03df5b7" }
+craft-quit = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47d36e6d25747ab5665c4f174b03df5b7" }
+craft-settings = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47d36e6d25747ab5665c4f174b03df5b7" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "std", "ansi"] }
+
+# the network is ~260M multiply-adds a pass: unoptimised it takes seconds, so tests and dev builds
+# compile it optimised
+[profile.dev.package.ac-ai]
+opt-level = 3
+
+# the core (FK, IK, physics, sampling) runs thousands of times a test: optimised, the suite takes a
+# fraction of the time; the crates that call it keep debug builds for fast compiles
+[profile.dev.package.ac-core]
+opt-level = 2
+
+[profile.dev.package.ac-io]
+opt-level = 2
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+
+# craft-libs' egui fork (same rev as craft-libs d40c2be), so craft-* UI crates and the app share one egui
+[patch.crates-io]
+winit = { git = "https://github.com/storytold/winit.git", rev = "a517b3846ee8457d84ee4975110bfda6797c44dc" }
+ecolor = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+emath = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+epaint = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+epaint_default_fonts = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+egui = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+egui-winit = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+egui-wgpu = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }
+eframe = { git = "https://github.com/storytold/egui.git", rev = "6d518fc799681571963842f95b55a6b68431b15a" }

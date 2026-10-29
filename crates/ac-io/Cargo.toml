@@ -1,0 +1,22 @@
+[package]
+name = "ac-io"
+description = "Files: the animation and pose library, clip/pose files, export."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ac-core.workspace = true
+craft-atomic.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+gltf = { version = "1", default-features = false, features = ["import", "utils", "names"] }
+glam = "0.30"

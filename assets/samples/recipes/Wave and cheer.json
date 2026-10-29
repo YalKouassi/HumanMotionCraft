@@ -1,0 +1,8 @@
+{
+  "name": "Wave and cheer",
+  "description": "Wave, strike a hero pose, cheer, relax: 5 keys 20 to 30 frames apart, the AI fills the 96 frames between in its idle style.",
+  "script": [
+    { "command": "ai.settings", "params": { "style": "idle" } },
+    { "command": "anim.block", "params": { "poses": ["Standing/Relaxed", "Gestures/Waving goodbye", "Gestures/Hero stance", "Gestures/Cheering", "Standing/Relaxed"], "frames": [0, 20, 46, 70, 100], "fill": "ai", "physics": true } }
+  ]
+}

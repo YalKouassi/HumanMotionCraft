@@ -1,0 +1,40 @@
+{
+  "$schema": "./schema.json",
+  "name": "physics-problems",
+  "feature": "physics.solve",
+  "description": "The physics report lists what it fixed as runs of frames to jump to. The skate from physics-skate (the standing body keyed to slide one hip height along X over 60 frames, feet on the floor) has a planted foot sliding on every frame after the first: one run, \"Foot sliding 1–60\". Keyed 0.1 m lower (root offset z 0.9450101 - 0.1 / 0.8698308 = 0.8300453, so the toes are 8 cm under the floor) every frame is also lifted out of the ground: \"Feet in the ground 0–60\" comes first (it starts on frame 0), then the slide. Nothing is still and off balance.",
+  "script": [
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 60 } },
+    { "command": "pose.set_root", "params": { "root": [1, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "physics.solve",
+      "expect": {
+        "slid": 60, "lifted": 0, "balanced": [], "lifted_frames": [],
+        "problems": [{ "kind": "sliding", "from": 1, "to": 60, "label": "Foot sliding 1–60" }]
+      }
+    },
+    { "command": "pose.set_root", "params": { "root": [1, 0, 0.8300453] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 0 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.8300453] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "physics.solve",
+      "expect": {
+        "lifted": 61, "slid": 60, "balanced": [],
+        "problems": [
+          { "kind": "penetration", "from": 0, "to": 60, "label": "Feet in the ground 0–60" },
+          { "kind": "sliding", "from": 1, "to": 60, "label": "Foot sliding 1–60" }
+        ]
+      }
+    }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": [
+    { "command": "physics.solve", "params": { "frame": 500 } }
+  ],
+  "views": ["front"]
+}

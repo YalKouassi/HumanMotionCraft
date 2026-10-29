@@ -1,0 +1,36 @@
+{
+  "$schema": "./schema.json",
+  "name": "onion-frames",
+  "feature": "onion.frames",
+  "description": "Keys on frames 0, 10 and 20 (the clip is 21 frames, 0 to 20). Around frame 10, 2 ghosts 3 frames apart are 7 and 4 before, 13 and 16 after. 3 ghosts 5 apart would be 5, 0, -5 and 15, 20, 25: -5 and 25 are outside the clip, so 5, 0 and 15, 20. In keys mode around 12.4 (rounds to 12) the nearest keys are 10 then 0 before and 20 after. Around 10 itself the key on 10 is the pose shown, not a ghost: 0 before, 20 after. With no parameters it uses the playhead (10), 2 ghosts 2 apart: 8, 6 and 12, 14. Nothing here changes the document.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "onion.frames", "params": { "frame": 10, "count": 2, "step": 3 },
+      "expect": { "before": [7, 4], "after": [13, 16] } },
+    { "command": "onion.frames", "params": { "frame": 10, "count": 3, "step": 5 },
+      "expect": { "before": [5, 0], "after": [15, 20] } },
+    { "command": "onion.frames", "params": { "frame": 12.4, "count": 2, "mode": "keys" },
+      "expect": { "before": [10, 0], "after": [20] } },
+    { "command": "onion.frames", "params": { "frame": 10, "count": 1, "mode": "keys" },
+      "expect": { "before": [0], "after": [20] } },
+    { "command": "onion.frames", "params": {},
+      "expect": { "before": [8, 6], "after": [12, 14] } }
+  ],
+  "expect": { "tolerance": 1e-9 },
+  "errors": [
+    { "command": "onion.frames", "params": { "count": 0 } },
+    { "command": "onion.frames", "params": { "count": 6 } },
+    { "command": "onion.frames", "params": { "step": 0 } },
+    { "command": "onion.frames", "params": { "mode": "every" } }
+  ],
+  "views": []
+}

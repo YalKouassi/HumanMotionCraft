@@ -1,0 +1,31 @@
+{
+  "$schema": "./schema.json",
+  "name": "anim-block",
+  "feature": "anim.block",
+  "description": "Block out an animation in one step: the A-pose (rest) at frames 0 and 40 and the T-pose at 20, filled with plain interpolation. The T-pose turns upperarm01.L by 37.1° about -Y ([0, -0.3181334, 0, 0.9480460]); halfway between, frame 10 holds half the turn, 18.55°: [0, -sin(9.275°), 0, cos(9.275°)] = [0, -0.1611739, 0, 0.9869260], and the right arm the mirror. Two fills (0..20, 20..40) make two AI bands (labelled with the model), the clip is 41 frames, physics is set off as asked, and the playhead goes back to the first pose. One undo removes the whole block.",
+  "script": [
+    { "command": "library.install", "params": { "from": "{assets}/library" } },
+    {
+      "command": "anim.block",
+      "params": { "poses": ["Reference/A-pose", "Reference/T-pose", "Reference/A-pose"], "frames": [0, 20, 40], "fill": "plain", "physics": false },
+      "expect": { "keys": 3, "fills": [{ "from": 0, "to": 20, "model": "plain interpolation" }, { "from": 20, "to": 40, "model": "plain interpolation" }], "physics": false, "frames": 41 }
+    },
+    { "command": "editor.state", "expect": { "frame": 0, "length": 41, "bands": [{ "from": 1, "to": 19, "model": "parts" }, { "from": 21, "to": 39, "model": "parts" }] } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "pose.get", "params": { "bone": "upperarm01.L" }, "expect": { "rotation": [0, -0.1611739, 0, 0.986926] } },
+    { "command": "pose.get", "params": { "bone": "upperarm01.R" }, "expect": { "rotation": [0, 0.1611739, 0, 0.986926] } },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "pose.get", "params": { "bone": "upperarm01.L" }, "expect": { "rotation": [0, -0.3181334, 0, 0.948046] } },
+    { "command": "edit.undo" },
+    { "command": "editor.state", "expect": { "keys": [], "bands": [] } }
+  ],
+  "errors": [
+    { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/T-pose"], "frames": [0] } },
+    { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/T-pose"], "frames": [20, 0] } },
+    { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/Nope"], "frames": [0, 20] } },
+    { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/T-pose"], "frames": [0, 200] } },
+    { "command": "anim.block", "params": { "poses": ["Reference/A-pose"], "frames": [0], "fill": "magic" } },
+    { "command": "pose.get", "params": { "bone": "tail" } }
+  ],
+  "views": []
+}

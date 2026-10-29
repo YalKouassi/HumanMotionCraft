@@ -1,0 +1,18 @@
+{
+  "$schema": "./schema.json",
+  "name": "assets-reload",
+  "feature": "assets.reload",
+  "description": "Hot reload: the window watches the joint limits, the library and the samples and runs assets.reload for what changed. Reloading the limits reads one range per rig bone (104). A part set saved, reloading the library counts it (1) and the poses; reloading the samples reads the 6 shipped samples (assets/samples/*.clip.json) and their 6 recipes (assets/samples/recipes/*.json, one named after each). Everything (the default) reloads in the order limits, library, samples. Something it can't reload is refused.",
+  "script": [
+    { "command": "assets.reload", "params": { "what": ["limits"] }, "expect": { "reloaded": ["limits"], "limits": { "bones": 104 } } },
+    { "command": "parts.save", "params": { "name": "Both hands", "parts": ["Hands"] } },
+    { "command": "assets.reload", "params": { "what": ["library"] }, "expect": { "reloaded": ["library"], "library": { "part_sets": 1 } } },
+    { "command": "assets.reload", "params": { "what": ["samples"] }, "expect": { "samples": { "samples": 6, "recipes": 6 } } },
+    { "command": "assets.reload", "params": {}, "expect": { "reloaded": ["limits", "library", "samples"] } }
+  ],
+  "expect": { "tolerance": 1e-9 },
+  "errors": [
+    { "command": "assets.reload", "params": { "what": ["textures"] } },
+    { "command": "assets.reload", "params": { "what": "limits" } }
+  ]
+}

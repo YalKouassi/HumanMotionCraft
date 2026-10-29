@@ -1,0 +1,205 @@
+{
+  "$schema": "./schema.json",
+  "name": "anim-steps-walk",
+  "feature": "anim.steps",
+  "description": "Footsteps that walk like the built-in Walk loop (fill cycle, the default). The same two standing keys as anim-steps (frame 0 at the origin, frame 40 1.3047 m along -Y): 3 footfalls on 13 and 27, the feet together on 40, right foot first. Between the keys the loop plays a step from one heel strike to the next, with a key every 2 frames and every frame near a footfall. The right foot lands 0.6523731 m ahead on 13 and stays there, to the millimetre, until the left foot lands on 27 (frames 13, 20 and 26 have it at y -0.6562454); halfway through its swing (frame 20) the left foot is up off the floor. Strides of 0.65 m are longer than the loop's 0.42 m, so the hips come down (notes say how much). One undo step named Footsteps takes every key out: on frame 13 the right foot is back on the two keys' curve (y -0.3778248). Physics off.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.945
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "smooth"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 40
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          -1.5,
+          0.945
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "smooth"
+      }
+    },
+    {
+      "command": "anim.steps",
+      "params": {
+        "from": 0,
+        "to": 40
+      },
+      "expect": {
+        "from": 0,
+        "to": 40,
+        "keys": [
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          13,
+          14,
+          15,
+          16,
+          18,
+          20,
+          22,
+          24,
+          26,
+          27,
+          28,
+          29,
+          30,
+          32,
+          34,
+          36,
+          38
+        ],
+        "contacts": [
+          13,
+          27
+        ],
+        "steps": 3,
+        "stride": 0.6523731,
+        "lead": "R",
+        "fills": [],
+        "notes": [
+          "the hips come down 7 cm so the legs reach 0.65 m steps"
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 13
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.R"
+      },
+      "expect": {
+        "position": [
+          -0.1766242,
+          -0.6562454,
+          0.0930994
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 20
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.R"
+      },
+      "expect": {
+        "position": [
+          -0.1766242,
+          -0.6562454,
+          0.0744186
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.L"
+      },
+      "expect": {
+        "position": [
+          0.1766242,
+          -0.4104478,
+          0.1874234
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 26
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.R"
+      },
+      "expect": {
+        "position": [
+          -0.1766242,
+          -0.6562454,
+          0.0858845
+        ]
+      }
+    },
+    {
+      "command": "edit.undo",
+      "params": {},
+      "expect": {
+        "label": "Footsteps"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 13
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.R"
+      },
+      "expect": {
+        "position": [
+          -0.1766242,
+          -0.3778248,
+          0.0734083
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "command": "anim.steps",
+      "params": {
+        "from": 0,
+        "to": 40,
+        "fill": "loop"
+      }
+    }
+  ]
+}

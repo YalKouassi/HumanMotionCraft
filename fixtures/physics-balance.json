@@ -1,0 +1,163 @@
+{
+  "$schema": "./schema.json",
+  "name": "physics-balance",
+  "feature": "physics.solve",
+  "description": "Balance: standing with the spine bent forward (0.4, 0.34, 0.3, 0.3 rad about X on spine05..02) and both arms raised forward (-1.4 rad on upperarm01) puts the centre of mass 17.7 cm ahead of the hips' line, past the toes: out of balance. The pass moves the hips back with the feet held until the centre of mass is inside the support (the hull of toes and heels); the feet stay at their standing heads (+-0.1766242, -0.0038723, 0.0734168 = -0.7485819 + 0.9450101 * 0.8698308).",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "spine05",
+        "rotation": [
+          0.19866933079506122,
+          0,
+          0,
+          0.9800665778412416
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "spine04",
+        "rotation": [
+          0.16918234906699603,
+          0,
+          0,
+          0.9855847669095608
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "spine03",
+        "rotation": [
+          0.14943813247359922,
+          0,
+          0,
+          0.9887710779360422
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "spine02",
+        "rotation": [
+          0.14943813247359922,
+          0,
+          0,
+          0.9887710779360422
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "upperarm01.L",
+        "rotation": [
+          -0.644217687237691,
+          0,
+          0,
+          0.7648421872844885
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "upperarm01.R",
+        "rotation": [
+          -0.644217687237691,
+          0,
+          0,
+          0.7648421872844885
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {}
+    },
+    {
+      "command": "physics.solve",
+      "params": {
+        "frame": 0
+      },
+      "expect": {
+        "keyed_balance": {
+          "inside": false
+        },
+        "balance": {
+          "inside": true
+        },
+        "balanced": [
+          0
+        ]
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": true
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 0
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.L"
+      },
+      "expect": {
+        "position": [
+          0.1766242,
+          -0.0038723,
+          0.0734168
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.R"
+      },
+      "expect": {
+        "position": [
+          -0.1766242,
+          -0.0038723,
+          0.0734168
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 0.0001
+  },
+  "errors": [
+    {
+      "command": "physics.solve",
+      "params": {
+        "frame": -1
+      }
+    }
+  ],
+  "views": [
+    "side"
+  ]
+}

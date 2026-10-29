@@ -1,0 +1,28 @@
+{
+  "$schema": "./schema.json",
+  "name": "layer-solo",
+  "feature": "layer.solo",
+  "description": "Solo hears one layer over the base. Base key: root offset 0 (root head 0.0504142). Top (override, whole body, weight 1) keys root offset (0, 0, 1): the root head is 0.0504142 + 0.8698308 = 0.920245. Second (no keys) sits above. Solo the base (i 0) mutes Top and Second: the root is back at 0.0504142. Solo Top mutes only Second: 0.920245 again. Solo off unmutes every layer. One undo step each. Physics is off: this checks the keyed motion.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0] } },
+    { "command": "key.set" },
+    { "command": "layer.add", "params": { "name": "Top" } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1] } },
+    { "command": "key.set" },
+    { "command": "layer.add", "params": { "name": "Second" } },
+    { "command": "layer.solo", "params": { "i": 0 }, "expect": { "layers": [{ "name": "Base", "muted": false }, { "name": "Top", "muted": true }, { "name": "Second", "muted": true }] } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 0.0504142] } },
+    { "command": "layer.solo", "params": { "i": 1 }, "expect": { "layers": [{ "muted": false }, { "name": "Top", "muted": false }, { "name": "Second", "muted": true }] } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 0.920245] } },
+    { "command": "layer.solo", "params": { "i": 1, "on": false }, "expect": { "layers": [{ "muted": false }, { "muted": false }, { "muted": false }] } },
+    { "command": "edit.undo", "expect": { "label": "Solo layer" } },
+    { "command": "layers.list", "expect": { "layers": [{ "muted": false }, { "muted": false }, { "muted": true }] } }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": [
+    { "command": "layer.solo", "params": { "i": 9 } },
+    { "command": "layer.solo", "params": {} }
+  ],
+  "views": ["front"]
+}

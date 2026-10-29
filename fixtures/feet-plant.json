@@ -1,0 +1,244 @@
+{
+  "$schema": "./schema.json",
+  "name": "feet-plant",
+  "feature": "feet.plant",
+  "description": "Linear keys on 0 and 9 (rest pose; the root at y = 0 then 0.05 hip heights, physics off): the body slides 0.05 x 0.8698308 = 0.0434915 m along +Y and the left foot slides with it. Planting the left foot over 0..9 holds its head at its mean there, half the slide past where it stands on 0: (0.1766242, -0.0038723 + 0.0217458, -0.7485819) = (0.1766242, 0.0178735, -0.7485819), on every frame (the leg bends to reach it; 10 frames change: the two keys get the bent leg, 1..8 get in-between keys tagged foot-lock). Taking the plant out removes those 8 in-between keys; the two keys keep their planted legs.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 0
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 9
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0.05,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "feet.plant",
+      "params": {
+        "foot": "L",
+        "from": 0,
+        "to": 9
+      },
+      "expect": {
+        "frames": 10
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 0
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.L"
+      },
+      "expect": {
+        "position": [
+          0.1766242,
+          0.0178735,
+          -0.7485819
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 6
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.L"
+      },
+      "expect": {
+        "position": [
+          0.1766242,
+          0.0178735,
+          -0.7485819
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 9
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.L"
+      },
+      "expect": {
+        "position": [
+          0.1766242,
+          0.0178735,
+          -0.7485819
+        ]
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "keys": [
+          {
+            "frame": 0,
+            "source": "manual"
+          },
+          {
+            "frame": 1,
+            "source": "ai",
+            "model": "foot-lock"
+          },
+          {
+            "frame": 2
+          },
+          {
+            "frame": 3
+          },
+          {
+            "frame": 4
+          },
+          {
+            "frame": 5
+          },
+          {
+            "frame": 6
+          },
+          {
+            "frame": 7
+          },
+          {
+            "frame": 8,
+            "source": "ai"
+          },
+          {
+            "frame": 9,
+            "source": "manual"
+          }
+        ]
+      }
+    },
+    {
+      "command": "feet.plant",
+      "params": {
+        "foot": "L",
+        "from": 0,
+        "to": 9,
+        "on": false
+      },
+      "expect": {
+        "frames": 8
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "keys": [
+          {
+            "frame": 0
+          },
+          {
+            "frame": 9
+          }
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 0
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.L"
+      },
+      "expect": {
+        "position": [
+          0.1766242,
+          0.0178735,
+          -0.7485819
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "feet.plant",
+      "params": {
+        "foot": "L",
+        "from": 5,
+        "to": 5
+      }
+    },
+    {
+      "command": "feet.plant",
+      "params": {
+        "foot": "R",
+        "from": 0,
+        "to": 9,
+        "on": false
+      }
+    },
+    {
+      "command": "feet.plant",
+      "params": {
+        "foot": "X",
+        "from": 0,
+        "to": 9
+      }
+    }
+  ]
+}

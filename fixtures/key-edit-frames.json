@@ -1,0 +1,184 @@
+{
+  "$schema": "./schema.json",
+  "name": "key-edit-frames",
+  "feature": "key.move",
+  "description": "Keys at 0 and 10; copy 10 to 20 (three keys), move 20 to 30, delete 30 (keys 0 and 10), make the key under the playhead (10) a step key, then delete it (only 0 is left).",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "key.copy",
+      "params": {
+        "from": 10,
+        "to": 20
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "keys": [
+          {
+            "frame": 0
+          },
+          {
+            "frame": 10
+          },
+          {
+            "frame": 20
+          }
+        ]
+      }
+    },
+    {
+      "command": "key.move",
+      "params": {
+        "from": 20,
+        "to": 30
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "keys": [
+          {
+            "frame": 0
+          },
+          {
+            "frame": 10
+          },
+          {
+            "frame": 30
+          }
+        ]
+      }
+    },
+    {
+      "command": "keys.delete",
+      "params": {
+        "frames": [
+          30
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "key.interp",
+      "params": {
+        "interp": "step"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "keys": [
+          {
+            "frame": 0,
+            "interp": "linear"
+          },
+          {
+            "frame": 10,
+            "interp": "step"
+          }
+        ]
+      }
+    },
+    {
+      "command": "key.delete",
+      "params": {}
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "keys": [
+          {
+            "frame": 0
+          }
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "key.move",
+      "params": {
+        "from": 7,
+        "to": 12
+      }
+    },
+    {
+      "command": "key.copy",
+      "params": {
+        "from": 0
+      }
+    },
+    {
+      "command": "keys.delete",
+      "params": {
+        "frames": [
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.interp",
+      "params": {
+        "interp": "bouncy"
+      }
+    },
+    {
+      "command": "key.delete",
+      "params": {}
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

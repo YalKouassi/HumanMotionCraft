@@ -1,0 +1,103 @@
+{
+  "$schema": "./schema.json",
+  "name": "key-linear-inbetween",
+  "feature": "key.set",
+  "description": "Two linear keys: rest at frame 0, root up 1 hip height at frame 10. Halfway (frame 5) the root is up half a hip height: 0.0504142 + 0.4349154 = 0.4853296. Starts from root offset 0 (the rest pose stands on the floor; 0 puts the root at its rest head). The physics pass is off: this checks the keyed motion itself.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      },
+      "expect": {
+        "frame": 0
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      },
+      "expect": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 5
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          0.4853296
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "state": {
+      "length": 11
+    },
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": -5
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear",
+        "parts": [
+          "No such part"
+        ]
+      }
+    }
+  ],
+  "views": [
+    "side"
+  ]
+}

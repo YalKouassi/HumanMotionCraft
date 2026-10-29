@@ -1,0 +1,19 @@
+[package]
+name = "ac-render"
+description = "Renderer: the skinned mannequin, floor and offscreen captures (wgpu, no egui)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+gltf = { version = "1", default-features = false, features = ["import", "utils", "names"] }
+bytemuck = { version = "1", features = ["derive"] }
+glam = "0.30"
+wgpu = "30"
+pollster = "0.4"
+png = "0.17"
+
+[lints]
+workspace = true

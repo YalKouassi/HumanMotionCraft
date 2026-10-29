@@ -1,0 +1,148 @@
+{
+  "$schema": "./schema.json",
+  "name": "physics-jump",
+  "feature": "physics.solve",
+  "description": "Linear keys: standing (root offset z 0.9450101, the lowest toe 2 cm up) at frames 0 and 30, one hip height (0.8698308 m) higher at frame 15. Every frame between is more than 5 cm up, so the body is in the air from frame 0 to frame 30: T = 1 s at 30 fps. Gravity makes frame 15 (t = 0.5 s) the top of the parabola: z = z0 + g t (T - t) / 2 = 0.8724132 + 9.81 * 0.25 / 2 = 2.0986632 m, i.e. root offset 0.9450101 + 1.22625 / 0.8698308 = 2.3547670. The pose and the root's xy stay. With the switch on, playback shows the pass: frame 15's root head is at (0, -0.0108229, 2.0986632).",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      },
+      "expect": {
+        "frame": 0
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 15
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 30
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "physics.solve",
+      "params": {
+        "frame": 15
+      },
+      "expect": {
+        "flights": [
+          [
+            0,
+            30
+          ]
+        ],
+        "lifted": 0,
+        "keyed": [
+          0,
+          0,
+          1.9450101
+        ],
+        "root": [
+          0,
+          0,
+          2.354767
+        ]
+      }
+    },
+    {
+      "command": "physics.solve",
+      "params": {
+        "frame": 0
+      },
+      "expect": {
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": true
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 15
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0,
+          -0.0108229,
+          2.0986632
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "physics.solve",
+      "params": {
+        "frame": 99999
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

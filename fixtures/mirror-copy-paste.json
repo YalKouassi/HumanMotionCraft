@@ -1,0 +1,151 @@
+{
+  "$schema": "./schema.json",
+  "name": "mirror-copy-paste",
+  "feature": "pose.mirror",
+  "description": "The wrist turned 45 degrees about Z, q = [0, 0, sin 22.5, cos 22.5]. Mirroring across X turns the other way: [0, 0, -0.3826834, 0.9238795] on wrist.R. With every parent at identity a bone's world rotation is its own. Copy the Left arm, reset, paste: the turn is back. Paste mirrored: it lands on the right.",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "pose.set_bone",
+      "params": {
+        "bone": "wrist.L",
+        "rotation": [
+          0,
+          0,
+          0.3826834323650898,
+          0.9238795325112867
+        ]
+      }
+    },
+    {
+      "command": "pose.mirror",
+      "params": {
+        "mode": "l2r"
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "wrist.R"
+      },
+      "expect": {
+        "rotation": [
+          0,
+          0,
+          -0.3826834,
+          0.9238795
+        ]
+      }
+    },
+    {
+      "command": "pose.copy",
+      "params": {
+        "parts": [
+          "Left arm"
+        ]
+      },
+      "expect": {
+        "copied": "Left arm"
+      }
+    },
+    {
+      "command": "pose.reset",
+      "params": {}
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "wrist.L"
+      },
+      "expect": {
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "pose.paste",
+      "params": {}
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "wrist.L"
+      },
+      "expect": {
+        "rotation": [
+          0,
+          0,
+          0.3826834,
+          0.9238795
+        ]
+      }
+    },
+    {
+      "command": "pose.reset",
+      "params": {}
+    },
+    {
+      "command": "pose.paste",
+      "params": {
+        "mirror": true
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "wrist.R"
+      },
+      "expect": {
+        "rotation": [
+          0,
+          0,
+          -0.3826834,
+          0.9238795
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "pose.mirror",
+      "params": {
+        "mode": "sideways"
+      }
+    },
+    {
+      "command": "pose.copy",
+      "params": {
+        "parts": [
+          "Tail"
+        ]
+      }
+    },
+    {
+      "command": "pose.paste",
+      "params": {
+        "parts": [
+          "Head"
+        ]
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}

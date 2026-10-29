@@ -1,0 +1,29 @@
+{
+  "$schema": "./schema.json",
+  "name": "text-install",
+  "feature": "text.install",
+  "description": "Installing motion from text from the app. Fixture runs use the stand-in (ac_textmotion::stand_in), which counts as installed and never starts the setup, so this checks the command's answers, not a 22 GB download: check says installed, and the animation is left as it was (no keys). Refused: start (the stand-in installs nothing, even with repair), stop with no install running, and the unknown action fly. The real setup's progress lines are read by crates/ac-textmotion/tests/setup.rs.",
+  "script": [
+    {
+      "command": "text.install",
+      "params": {},
+      "expect": { "state": "installed" }
+    },
+    {
+      "command": "text.install",
+      "params": { "action": "check" },
+      "expect": { "state": "installed" }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "keys": [] }
+    }
+  ],
+  "errors": [
+    { "command": "text.install", "params": { "action": "start" } },
+    { "command": "text.install", "params": { "action": "start", "repair": true } },
+    { "command": "text.install", "params": { "action": "stop" } },
+    { "command": "text.install", "params": { "action": "fly" } }
+  ]
+}

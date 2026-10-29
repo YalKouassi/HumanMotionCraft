@@ -1,0 +1,90 @@
+{
+  "$schema": "./schema.json",
+  "name": "pose-move",
+  "feature": "pose.move",
+  "description": "Moving the body on one frame moves that frame's key and no other. Two linear keys: frame 0 at the rest place (root offset 0: the root at its rest head (0, -0.0108229, 0.0504142)), frame 40 one hip height (0.8698308 m) forward (-Y), so its root is at y = -0.0108229 - 0.8698308 = -0.8806537. On frame 40, sliding 1 m along +X moves its key: the root goes to (1, -0.8806537, 0.0504142); frame 0 stays at (0, -0.0108229, 0.0504142); frame 20 (halfway, linear) is their mean (0.5, -0.4457383, 0.0504142). On frame 20, which has no key, a 0.5 m slide along +Y moves only the pose shown, (0.5, 0.0542617, 0.0504142), and says so; going to frame 20 again drops that edit. On frame 0, a 90 degree turn about the root carries upperleg01.L (rest: root + (0.1019421, 0.0028925, -0.0114742)) to root + (-0.0028925, 0.1019421, -0.0114742) = (-0.0028925, 0.0911192, 0.0389400), and frame 40 stays where it was. Undo puts frame 0 back: (0.1019421, -0.0079304, 0.0389400). Physics off.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 40 } },
+    { "command": "pose.set_root", "params": { "root": [0, -1, 0] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "pose.move",
+      "params": { "by": [1, 0, 0] },
+      "expect": { "frame": 40, "keyed": true, "notes": [] }
+    },
+    {
+      "command": "bone.world",
+      "params": { "bone": "root" },
+      "expect": { "position": [1, -0.8806537, 0.0504142] }
+    },
+    { "command": "frame.set", "params": { "frame": 0 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "root" },
+      "expect": { "position": [0, -0.0108229, 0.0504142] }
+    },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "root" },
+      "expect": { "position": [0.5, -0.4457383, 0.0504142] }
+    },
+    {
+      "command": "pose.move",
+      "params": { "by": [0, 0.5, 0] },
+      "expect": {
+        "frame": 20,
+        "keyed": false,
+        "notes": ["frame 20 has no key: press K to keep the move"]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": { "bone": "root" },
+      "expect": { "position": [0.5, 0.0542617, 0.0504142] }
+    },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "root" },
+      "expect": { "position": [0.5, -0.4457383, 0.0504142] }
+    },
+    { "command": "frame.set", "params": { "frame": 0 } },
+    {
+      "command": "pose.move",
+      "params": { "turn": 90 },
+      "expect": { "frame": 0, "keyed": true }
+    },
+    {
+      "command": "bone.world",
+      "params": { "bone": "upperleg01.L" },
+      "expect": { "position": [-0.0028925, 0.0911192, 0.03894] }
+    },
+    { "command": "frame.set", "params": { "frame": 40 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "root" },
+      "expect": { "position": [1, -0.8806537, 0.0504142] }
+    },
+    {
+      "command": "edit.undo",
+      "params": {},
+      "expect": { "label": "Move body on this frame" }
+    },
+    { "command": "frame.set", "params": { "frame": 0 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "upperleg01.L" },
+      "expect": { "position": [0.1019421, -0.0079304, 0.03894] }
+    }
+  ],
+  "errors": [
+    { "command": "pose.move", "params": {} },
+    { "command": "pose.move", "params": { "turn": 400 } },
+    { "command": "pose.move", "params": { "by": [0, 0] } },
+    { "command": "pose.move", "params": { "by": [0, 0, 2000] } }
+  ]
+}

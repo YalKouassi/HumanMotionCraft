@@ -1,0 +1,71 @@
+{
+  "$schema": "./schema.json",
+  "name": "anim-steps",
+  "feature": "anim.steps",
+  "description": "Footsteps between two standing keys. Frame 0 stands at the origin (root offset [0, 0, 0.945]; ankles at y -0.0038723, x +-0.1766242, z 0.0734083); frame 40 stands 1.5 hip heights forward (1.3047 m along -Y). The default step count is halfway between a step every 0.55 m (1.3047 / 0.55 + 1 = 3.37) and every 15 frames (40 / 15 = 2.67): 3 footfalls, 0.6523731 m apart. Footfalls land on frames 40 * k / 3 rounded (13, 27); the last one brings the feet together on 40. The right foot leads: a passing key on frame 6 lifts it 0.12 m (z 0.1934083) 0.4 of the way to its landing (y -0.0038723 - 0.4 * 0.6523731 = -0.2648215); on frame 13 it lands halfway (y -0.6562454, z 0.0734083) with the left heel up 0.04 m behind (y -0.0038723, z 0.1134083); on frame 27 the left lands where frame 40 has it (y -1.3086185) with the right heel up. fill none leaves the keys' own curve between them (no model needed). One undo step named Footsteps takes the three keys out: on frame 13 the right foot is back on the two keys' curve, gliding along the floor (y -0.3778248). Physics off.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.945] } },
+    { "command": "key.set", "params": { "interp": "smooth" } },
+    { "command": "frame.set", "params": { "frame": 40 } },
+    { "command": "pose.set_root", "params": { "root": [0, -1.5, 0.945] } },
+    { "command": "key.set", "params": { "interp": "smooth" } },
+    {
+      "command": "anim.steps",
+      "params": { "from": 0, "to": 40, "fill": "none" },
+      "expect": {
+        "from": 0,
+        "to": 40,
+        "keys": [6, 13, 27],
+        "contacts": [13, 27],
+        "steps": 3,
+        "stride": 0.6523731,
+        "lead": "R",
+        "fills": [],
+        "notes": []
+      }
+    },
+    { "command": "frame.set", "params": { "frame": 6 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "foot.R" },
+      "expect": { "position": [-0.1766242, -0.2648215, 0.1934083] }
+    },
+    { "command": "frame.set", "params": { "frame": 13 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "foot.R" },
+      "expect": { "position": [-0.1766242, -0.6562454, 0.0734083] }
+    },
+    {
+      "command": "bone.world",
+      "params": { "bone": "foot.L" },
+      "expect": { "position": [0.1766242, -0.0038723, 0.1134083] }
+    },
+    { "command": "frame.set", "params": { "frame": 27 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "foot.L" },
+      "expect": { "position": [0.1766242, -1.3086185, 0.0734083] }
+    },
+    {
+      "command": "bone.world",
+      "params": { "bone": "foot.R" },
+      "expect": { "position": [-0.1766242, -0.6562454, 0.1134083] }
+    },
+    { "command": "edit.undo", "params": {}, "expect": { "label": "Footsteps" } },
+    { "command": "frame.set", "params": { "frame": 13 } },
+    {
+      "command": "bone.world",
+      "params": { "bone": "foot.R" },
+      "expect": { "position": [-0.1766242, -0.3778248, 0.0734083] }
+    }
+  ],
+  "errors": [
+    { "command": "anim.steps", "params": { "from": 0 } },
+    { "command": "anim.steps", "params": { "from": 0, "to": 20 } },
+    { "command": "anim.steps", "params": { "from": 0, "to": 40, "steps": 1 } },
+    { "command": "anim.steps", "params": { "from": 0, "to": 40, "steps": 20 } },
+    { "command": "anim.steps", "params": { "from": 0, "to": 40, "lead": "X" } }
+  ]
+}

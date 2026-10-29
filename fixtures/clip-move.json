@@ -1,0 +1,37 @@
+{
+  "$schema": "./schema.json",
+  "name": "clip-move",
+  "feature": "clip.move",
+  "description": "Two linear keys: frame 0 at the rest place, frame 40 one hip height (0.8698308 m) forward (-Y). The root's rest head is (0, -0.0108229, 0.0504142). Sliding the whole animation 1 m forward moves the root on frame 40 to y = -0.0108229 - 0.8698308 - 1 = -1.8806537, on frame 0 to -1.0108229, and on frame 20 (halfway) to their mean -1.4457383; height is unchanged. The pose does not change: upperleg01.L stays at root + (0.1019421, 0.0028925, -0.0114742) = (0.1019421, -1.0079304, 0.0389400) on frame 0. Then a 90 degree turn about the root on frame 0 (the default pivot, (0, -1.0108229)): (x, y) -> (-y, x) about it. The upper leg goes to root + (-0.0028925, 0.1019421, -0.0114742) = (-0.0028925, -0.9088808, 0.0389400), and frame 40's root, 0.8698308 m ahead along -Y, ends 0.8698308 m along +X: (0.8698308, -1.0108229, 0.0504142). Undo takes the turn back. Physics off, so the keyed poses are the ones shown.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 40 } },
+    { "command": "pose.set_root", "params": { "root": [0, -1, 0] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "clip.move", "params": { "by": [0, -1, 0] }, "expect": { "keys": 2, "notes": [] } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -1.8806537, 0.0504142] } },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -1.4457383, 0.0504142] } },
+    { "command": "frame.set", "params": { "frame": 0 } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -1.0108229, 0.0504142] } },
+    { "command": "bone.world", "params": { "bone": "upperleg01.L" }, "expect": { "position": [0.1019421, -1.0079304, 0.0389400] } },
+    { "command": "clip.move", "params": { "turn": 90 }, "expect": { "keys": 2 } },
+    { "command": "bone.world", "params": { "bone": "upperleg01.L" }, "expect": { "position": [-0.0028925, -0.9088808, 0.0389400] } },
+    { "command": "frame.set", "params": { "frame": 40 } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0.8698308, -1.0108229, 0.0504142] } },
+    { "command": "edit.undo", "params": {} },
+    { "command": "frame.set", "params": { "frame": 40 } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -1.8806537, 0.0504142] } }
+  ],
+  "expect": { "tolerance": 0.000001 },
+  "errors": [
+    { "command": "clip.move", "params": {} },
+    { "command": "clip.move", "params": { "turn": 400 } },
+    { "command": "clip.move", "params": { "by": [0, 0] } },
+    { "command": "clip.move", "params": { "by": [0, 0, 2000] } },
+    { "command": "clip.move", "params": { "by": [0, 0, 90] } }
+  ],
+  "views": ["top"]
+}

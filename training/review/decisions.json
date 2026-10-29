@@ -1,0 +1,125 @@
+{
+  "format": "humanmotioncraft.review",
+  "version": 1,
+  "takes": {
+    "kimodo/acrobat_kimodo_dive_roll_s1": {
+      "status": "ok",
+      "type": "run",
+      "note": "never turns over: a run, not a roll",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_dive_roll_s2": {
+      "status": "ok",
+      "type": "run",
+      "note": "never turns over: a run, not a roll",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_dive_roll_s3": {
+      "status": "ok",
+      "type": "run",
+      "note": "never turns over: a run, not a roll",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_front_flip_s1": {
+      "status": "ok",
+      "type": "jump",
+      "note": "never turns over: a jump, not a flip",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_handspring_s1": {
+      "status": "ok",
+      "type": "jump",
+      "note": "never turns over: a jump, not a handspring",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_round_off_s1": {
+      "status": "reject",
+      "note": "never turns over: not a round-off",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_round_off_s2": {
+      "status": "reject",
+      "note": "never turns over: not a round-off",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/acrobat_kimodo_round_off_s3": {
+      "status": "reject",
+      "note": "never turns over: not a round-off",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/gardening_kimodo_garden_dig_s1": {
+      "status": "reject",
+      "note": "retarget folds the body (head into shoulders, or hips into a blob) on the rig",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/gardening_kimodo_garden_dig_s2": {
+      "status": "reject",
+      "note": "retarget folds the body (head into shoulders, or hips into a blob) on the rig",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/gardening_kimodo_garden_dig_s3": {
+      "status": "reject",
+      "note": "retarget folds the body (head into shoulders, or hips into a blob) on the rig",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/ground_kimodo_lie_down_s1": {
+      "status": "reject",
+      "note": "starts lying and does not move",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/ground_kimodo_lie_down_s2": {
+      "status": "reject",
+      "note": "starts lying and does not move",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/ground_kimodo_lie_down_s3": {
+      "status": "reject",
+      "note": "starts lying and does not move",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/ground_kimodo_roll_over_s1": {
+      "status": "reject",
+      "note": "lies face down and does not roll",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/ground_kimodo_roll_over_s2": {
+      "status": "reject",
+      "note": "lies face down and does not roll",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/ground_kimodo_roll_over_s3": {
+      "status": "reject",
+      "note": "lies face down and does not roll",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/ground_kimodo_sit_floor_s1": {
+      "status": "reject",
+      "note": "retarget folds the body (head into shoulders, or hips into a blob) on the rig",
+      "frames": 180,
+      "by": "agent"
+    },
+    "kimodo/ground_kimodo_sit_floor_s3": {
+      "status": "reject",
+      "note": "retarget folds the body (head into shoulders, or hips into a blob) on the rig",
+      "frames": 180,
+      "by": "agent"
+    }
+  }
+}

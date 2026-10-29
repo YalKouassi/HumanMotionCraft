@@ -1,0 +1,43 @@
+{
+  "$schema": "./schema.json",
+  "name": "recovery-restore",
+  "feature": "recovery.restore",
+  "description": "Crash recovery. A new animation Mine/Rec is saved with its first key (frame 0); a second key at frame 10 is unsaved work. recovery.write keeps it as Mine~Rec.recovery.json (the id's group and name around a ~). The library holds an older version (1 key), so recovery.list offers it, with the recovered clip's 2 keys. Opening another animation drops the edit; recovery.restore brings back Mine/Rec with its 2 keys, unsaved, and the 11-frame length (keys 0 and 10). Saving puts them in the library: the recovery file then holds the same as the library (\"same\") and is not offered (0 offered); recovery.clear with no parameters removes the open animation's file, after which none are left. A name that is not a recovery file, one that leaves the folder and a missing one are refused.",
+  "script": [
+    { "command": "clip.new", "params": { "name": "Rec", "group": "Mine" }, "expect": { "id": "Mine/Rec" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "key.set", "params": {} },
+    { "command": "recovery.write", "params": {}, "expect": { "file": "Mine~Rec.recovery.json", "id": "Mine/Rec" } },
+    {
+      "command": "recovery.list",
+      "params": {},
+      "expect": {
+        "offered": 1,
+        "items": [ { "file": "Mine~Rec.recovery.json", "id": "Mine/Rec", "name": "Rec", "keys": 2, "library": "older", "offer": true } ]
+      }
+    },
+    { "command": "clip.new", "params": { "name": "Other", "group": "Mine" }, "expect": { "id": "Mine/Other" } },
+    {
+      "command": "recovery.restore",
+      "params": { "file": "Mine~Rec.recovery.json" },
+      "expect": { "id": "Mine/Rec", "unsaved": true, "length": 11 }
+    },
+    { "command": "clip.save", "params": {}, "expect": { "id": "Mine/Rec" } },
+    {
+      "command": "recovery.list",
+      "params": {},
+      "expect": { "offered": 0, "items": [ { "file": "Mine~Rec.recovery.json", "library": "same", "offer": false } ] }
+    },
+    { "command": "recovery.clear", "params": {}, "expect": { "removed": ["Mine~Rec.recovery.json"] } },
+    { "command": "recovery.list", "params": {}, "expect": { "offered": 0, "items": [] } }
+  ],
+  "expect": { "tolerance": 1e-9 },
+  "errors": [
+    { "command": "recovery.restore", "params": { "file": "Mine~Rec.clip.json" } },
+    { "command": "recovery.restore", "params": { "file": "../Mine~Rec.recovery.json" } },
+    { "command": "recovery.restore", "params": { "file": "Nobody~Here.recovery.json" } },
+    { "command": "recovery.clear", "params": { "file": "Nobody~Here.recovery.json" } },
+    { "command": "recovery.write", "params": { "path": "{tmp}/x.json" } },
+    { "command": "recovery.list", "params": { "all": true } }
+  ]
+}

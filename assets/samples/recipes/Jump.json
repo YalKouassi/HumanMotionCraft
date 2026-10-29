@@ -1,0 +1,11 @@
+{
+  "name": "Jump",
+  "description": "A standing jump in 5 keys: stand, crouch, reach up at the top (the root lifted 0.63 hip heights), land in a crouch, stand. The AI fills the other 60 frames in its jump style; physics plants the feet and gives the flight its arc.",
+  "script": [
+    { "command": "ai.settings", "params": { "style": "jump" } },
+    { "command": "anim.block", "params": { "poses": ["Standing/Relaxed", "Action/Crouch", "Action/Reaching up", "Action/Crouch", "Standing/Relaxed"], "frames": [0, 16, 30, 44, 64], "fill": "ai", "physics": true } },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.55] } },
+    { "command": "key.set", "params": {} }
+  ]
+}

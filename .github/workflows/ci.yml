@@ -1,0 +1,99 @@
+# The pre-commit gate (`cargo xtask check`, AGENTS.md "Test what you changed") on every push and
+# pull request, plus the training checks.
+#
+# Windows first: the visual goldens in tests/visual/ were blessed on Windows' software adapter
+# (WARP), which GitHub's Windows runners have. A runner on another Windows build can rasterise a
+# few pixels differently; a visual failure uploads target/visual-diff/ to look at (never loosen the
+# tolerance to pass: see docs/testing.md).
+#
+# Git dependencies (craft-libs and the egui/winit forks under github.com/storytold) are public, so
+# no secret is needed. If they ever become private, add a repository secret CRAFT_LIBS_TOKEN (a
+# fine-grained token with read access to those repos); the "private git dependencies" step then
+# hands it to git, and cargo fetches through the git CLI.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+
+jobs:
+  gate:
+    name: fmt, clippy, tests, fixtures, guards (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      CRAFT_LIBS_TOKEN: ${{ secrets.CRAFT_LIBS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: private git dependencies
+        if: ${{ env.CRAFT_LIBS_TOKEN != '' }}
+        shell: bash
+        run: git config --global url."https://x-access-token:${CRAFT_LIBS_TOKEN}@github.com/storytold/".insteadOf "https://github.com/storytold/"
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      - uses: taiki-e/install-action@nextest
+
+      - name: fmt
+        run: cargo fmt --all --check
+
+      - name: clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      - name: tests (visual goldens on WARP included)
+        run: cargo nextest run --workspace --locked --no-fail-fast
+
+      - name: fixtures
+        run: cargo run --locked --quiet -p ac-cli -- fixtures
+
+      - name: guards (names, assets, docs)
+        shell: bash
+        run: |
+          cargo xtask names
+          cargo xtask assets
+          cargo xtask docs
+
+      - name: visual diffs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diff
+          path: target/visual-diff/
+          if-no-files-found: ignore
+
+  training:
+    name: training (ruff, pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: training
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      # CPU only: the CUDA torch in pyproject.toml is for training runs, not checks. Tests that
+      # need torch or the gitignored datasets skip themselves and say why.
+      - name: ruff
+        run: uvx ruff check .
+      - name: pytest
+        run: uv run --no-project --with numpy --with pytest python -m pytest tests -q -rs

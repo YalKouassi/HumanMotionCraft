@@ -1,0 +1,321 @@
+{
+  "$schema": "./schema.json",
+  "name": "keys-retime",
+  "feature": "keys.retime",
+  "description": "Linear keys with the root at x = 0, 1, 2, 3 hip heights on frames 0, 10, 20, 30 and a marker on 20 (physics off, every rotation at rest, so the root head is (x * 0.8698308, -0.0108229, 0.0504142)). Insert 5 frames at 10: keys 0, 15, 25, 35, marker 25; frame 5 is a third of the way to x = 1: 0.8698308 / 3 = 0.2899436. Delete 3 frames at 14 (14, 15, 16): key 15 goes, the rest slide back 3: keys 0, 22, 32, marker 22; frame 11 is half way to x = 2: x = 1, 0.8698308. Scale keys 22 and 32 by 1.5 about 22: 32 goes to 22 + 10 x 1.5 = 37; frame 27 is a third of the way from x = 2 to 3: 7/3 x 0.8698308 = 2.0296052. Undo puts 32 back.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 0
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          1,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 20
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          2,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 30
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          3,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "marker.add",
+      "params": {
+        "frame": 20,
+        "name": "Peak"
+      }
+    },
+    {
+      "command": "keys.retime",
+      "params": {
+        "mode": "insert",
+        "at": 10,
+        "count": 5
+      },
+      "expect": {
+        "keys": [
+          0,
+          15,
+          25,
+          35
+        ],
+        "moved": 3,
+        "removed": []
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "markers": [
+          {
+            "frame": 25,
+            "name": "Peak"
+          }
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 5
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.2899436,
+          -0.0108229,
+          0.0504142
+        ]
+      }
+    },
+    {
+      "command": "keys.retime",
+      "params": {
+        "mode": "delete",
+        "at": 14,
+        "count": 3
+      },
+      "expect": {
+        "keys": [
+          0,
+          22,
+          32
+        ],
+        "moved": 2,
+        "removed": [
+          "Base: 15"
+        ]
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "markers": [
+          {
+            "frame": 22,
+            "name": "Peak"
+          }
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 11
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.8698308,
+          -0.0108229,
+          0.0504142
+        ]
+      }
+    },
+    {
+      "command": "keys.retime",
+      "params": {
+        "mode": "scale",
+        "frames": [
+          22,
+          32
+        ],
+        "pivot": 22,
+        "factor": 1.5
+      },
+      "expect": {
+        "keys": [
+          0,
+          22,
+          37
+        ],
+        "moved": 1
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 27
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          2.0296052,
+          -0.0108229,
+          0.0504142
+        ]
+      }
+    },
+    {
+      "command": "edit.undo",
+      "params": {},
+      "expect": {
+        "label": "Retime keys"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "keys": [
+          {
+            "frame": 0
+          },
+          {
+            "frame": 22
+          },
+          {
+            "frame": 32
+          }
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "keys.retime",
+      "params": {
+        "mode": "insert",
+        "at": 5
+      }
+    },
+    {
+      "command": "keys.retime",
+      "params": {
+        "mode": "scale",
+        "factor": 2,
+        "at": 3
+      }
+    },
+    {
+      "command": "keys.retime",
+      "params": {
+        "mode": "scale",
+        "frames": [
+          0,
+          22
+        ],
+        "pivot": 0,
+        "factor": 0.01
+      }
+    },
+    {
+      "command": "keys.retime",
+      "params": {
+        "mode": "scale",
+        "frames": [
+          5
+        ],
+        "factor": 2
+      }
+    },
+    {
+      "command": "keys.retime",
+      "params": {
+        "mode": "delete",
+        "at": 0,
+        "count": 100
+      }
+    }
+  ]
+}

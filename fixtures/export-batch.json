@@ -1,0 +1,31 @@
+{
+  "$schema": "./schema.json",
+  "name": "export-batch",
+  "feature": "clip.export_batch",
+  "description": "The Export dialog's \"a file per animation\": two library walks and a run export with the game profile into one folder, a .glb each named after the animation, each keeping the rig's 68 game joints (as export-glb). Two with the same name in different groups take their group in the file name (checked by ac-io's unit test). An empty list, a missing animation and the same one twice are refused.",
+  "script": [
+    {
+      "command": "clip.export_batch",
+      "params": { "ids": ["Locomotion/Walk", "Locomotion/Run"], "folder": "{tmp}/out", "profile": "game" },
+      "expect": {
+        "files": [
+          { "id": "Locomotion/Walk", "file": "Walk.glb", "joints": 68 },
+          { "id": "Locomotion/Run", "file": "Run.glb", "joints": 68 }
+        ],
+        "failed": []
+      }
+    },
+    {
+      "command": "clip.export_batch",
+      "params": { "ids": ["Locomotion/Walk"], "folder": "{tmp}/arm", "bones": ["root", "upperarm01.L", "wrist.L"] },
+      "expect": { "files": [ { "file": "Walk.glb", "joints": 3 } ], "failed": [] }
+    }
+  ],
+  "expect": { "tolerance": 1e-9 },
+  "errors": [
+    { "command": "clip.export_batch", "params": { "ids": [], "folder": "{tmp}/out" } },
+    { "command": "clip.export_batch", "params": { "ids": ["Locomotion/No such walk"], "folder": "{tmp}/out" } },
+    { "command": "clip.export_batch", "params": { "ids": ["Locomotion/Walk", "Locomotion/Walk"], "folder": "{tmp}/out" } },
+    { "command": "clip.export_batch", "params": { "ids": ["Locomotion/Walk"], "folder": "{tmp}/out", "profile": "huge" } }
+  ]
+}

@@ -1,0 +1,213 @@
+{
+  "$schema": "./schema.json",
+  "name": "timeline-markers",
+  "feature": "marker.add",
+  "description": "Named markers live in the animation, one a frame, by frame. Add 'Contact' on 10 and an unnamed one on 4 (it is called 'Marker 1', the first free number). Rename 4 to 'Anticipation', move 10 to 24, delete 4: only 'Contact' on 24 is left. Undo of the delete brings 'Anticipation' back. Saved, a new animation opened (no markers) and the first reopened: both markers come back from the file, and it reads as saved.",
+  "script": [
+    {
+      "command": "clip.new",
+      "params": {
+        "name": "Beats",
+        "group": "Mine"
+      },
+      "expect": {
+        "id": "Mine/Beats"
+      }
+    },
+    {
+      "command": "marker.add",
+      "params": {
+        "frame": 10,
+        "name": "Contact"
+      },
+      "expect": {
+        "markers": [
+          {
+            "frame": 10,
+            "name": "Contact"
+          }
+        ]
+      }
+    },
+    {
+      "command": "marker.add",
+      "params": {
+        "frame": 4
+      },
+      "expect": {
+        "markers": [
+          {
+            "frame": 4,
+            "name": "Marker 1"
+          },
+          {
+            "frame": 10,
+            "name": "Contact"
+          }
+        ]
+      }
+    },
+    {
+      "command": "marker.rename",
+      "params": {
+        "frame": 4,
+        "name": "Anticipation"
+      },
+      "expect": {
+        "markers": [
+          {
+            "frame": 4,
+            "name": "Anticipation"
+          },
+          {
+            "frame": 10,
+            "name": "Contact"
+          }
+        ]
+      }
+    },
+    {
+      "command": "marker.move",
+      "params": {
+        "frame": 10,
+        "to": 24
+      },
+      "expect": {
+        "markers": [
+          {
+            "frame": 4,
+            "name": "Anticipation"
+          },
+          {
+            "frame": 24,
+            "name": "Contact"
+          }
+        ]
+      }
+    },
+    {
+      "command": "marker.delete",
+      "params": {
+        "frame": 4
+      },
+      "expect": {
+        "markers": [
+          {
+            "frame": 24,
+            "name": "Contact"
+          }
+        ]
+      }
+    },
+    {
+      "command": "edit.undo",
+      "params": {},
+      "expect": {
+        "label": "Delete marker"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "markers": [
+          {
+            "frame": 4,
+            "name": "Anticipation"
+          },
+          {
+            "frame": 24,
+            "name": "Contact"
+          }
+        ]
+      }
+    },
+    {
+      "command": "clip.save",
+      "params": {},
+      "expect": {
+        "id": "Mine/Beats"
+      }
+    },
+    {
+      "command": "clip.new",
+      "params": {
+        "name": "Other",
+        "group": "Mine"
+      },
+      "expect": {
+        "id": "Mine/Other"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "markers": []
+      }
+    },
+    {
+      "command": "clip.open",
+      "params": {
+        "id": "Mine/Beats"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "id": "Mine/Beats",
+        "unsaved": false,
+        "markers": [
+          {
+            "frame": 4,
+            "name": "Anticipation"
+          },
+          {
+            "frame": 24,
+            "name": "Contact"
+          }
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-09
+  },
+  "errors": [
+    {
+      "command": "marker.add",
+      "params": {
+        "frame": 24,
+        "name": "Again"
+      }
+    },
+    {
+      "command": "marker.rename",
+      "params": {
+        "frame": 5,
+        "name": "Nowhere"
+      }
+    },
+    {
+      "command": "marker.rename",
+      "params": {
+        "frame": 24,
+        "name": "   "
+      }
+    },
+    {
+      "command": "marker.move",
+      "params": {
+        "frame": 24,
+        "to": 4
+      }
+    },
+    {
+      "command": "marker.delete",
+      "params": {
+        "frame": 99
+      }
+    }
+  ]
+}

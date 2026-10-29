@@ -1,0 +1,288 @@
+{
+  "$schema": "./schema.json",
+  "name": "clip-queries",
+  "feature": "clip.sample",
+  "description": "Linear keys: root offset 0 on 0 and (0, 0, 1) on 10. Samples at 0, 5, 10 are 0, 0.5, 1. The root's curves (3 rotation angles, 3 root offsets) rise 0.1 a frame. Feet: lowest and still only on frame 0 (from then on the body rises 0.087 m a frame, 2.6 m/s, above the 0.04 m / 0.5 m/s contact limits), so each foot has one contact frame, and locking the feet changes that one frame. No AI keys: nothing to keep or clear.",
+  "script": [
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "clip.sample",
+      "params": {
+        "from": 0,
+        "to": 10,
+        "step": 5
+      },
+      "expect": {
+        "frames": [
+          0,
+          5,
+          10
+        ],
+        "roots": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.5
+          ],
+          [
+            0,
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "command": "clip.curves",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "frames": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.1
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.2
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.3
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.4
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.5
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.6
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.7
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.8
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.9
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            1.0
+          ]
+        ]
+      }
+    },
+    {
+      "command": "clip.contacts",
+      "params": {},
+      "expect": {
+        "L": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "R": [
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ]
+      }
+    },
+    {
+      "command": "feet.lock",
+      "params": {},
+      "expect": {
+        "frames": 1
+      }
+    },
+    {
+      "command": "ai.keep",
+      "params": {
+        "from": 0,
+        "to": 10
+      },
+      "expect": {
+        "kept": 0
+      }
+    },
+    {
+      "command": "ai.clear",
+      "params": {
+        "from": 0,
+        "to": 10
+      },
+      "expect": {
+        "cleared": 0
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "clip.sample",
+      "params": {
+        "from": 10,
+        "to": 0
+      }
+    },
+    {
+      "command": "clip.curves",
+      "params": {
+        "bone": "hand.L"
+      }
+    },
+    {
+      "command": "clip.contacts",
+      "params": {
+        "height": 0.1
+      }
+    },
+    {
+      "command": "feet.lock",
+      "params": {
+        "side": "L"
+      }
+    },
+    {
+      "command": "ai.keep",
+      "params": {
+        "from": 10,
+        "to": 0
+      }
+    },
+    {
+      "command": "ai.clear",
+      "params": {
+        "from": 10,
+        "to": 0
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {
+        "frame": 3
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}
