@@ -100,6 +100,8 @@ pub struct Palette {
     pub joint: Color32,
     pub joint_picked: Color32,
     pub joint_active: Color32,
+    /// A control the app points out for a moment (it glows this colour).
+    pub hint: Color32,
     /// The greys.
     pub surface: Surface,
 }
@@ -187,6 +189,7 @@ pub const STANDARD: Palette = Palette {
     joint: Color32::from_rgb(90, 200, 255),
     joint_picked: Color32::from_rgb(255, 160, 60),
     joint_active: Color32::from_rgb(255, 214, 70),
+    hint: Color32::from_rgb(255, 150, 40),
     surface: DARK,
 };
 
@@ -232,6 +235,7 @@ pub const SAFE: Palette = Palette {
     joint: Color32::from_rgb(86, 180, 233),
     joint_picked: Color32::from_rgb(230, 159, 0),
     joint_active: Color32::from_rgb(240, 228, 66),
+    hint: Color32::from_rgb(230, 159, 0),
     surface: DARK,
 };
 
@@ -274,6 +278,7 @@ const fn on_light(p: Palette) -> Palette {
             Color32::from_gray(90),
         ],
         travel: deep(p.travel),
+        hint: deep(p.hint),
         surface: LIGHT,
         ..p
     }

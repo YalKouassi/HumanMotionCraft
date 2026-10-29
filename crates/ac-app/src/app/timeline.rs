@@ -53,6 +53,9 @@ pub struct Timeline {
     pub curves: bool,
     /// The retime toolbar.
     pub retime: bool,
+    /// The Dope sheet button glows until this time (seconds, egui's clock): the person dragged
+    /// the timeline as tall as it goes with the dope sheet shut.
+    pub dope_hint: Option<f64>,
     pub time: TimeFormat,
     pub playback: playback::Playback,
     /// Problem marks other panels put on the timeline.
@@ -86,6 +89,7 @@ impl Default for Timeline {
             contacts: false,
             curves: false,
             retime: false,
+            dope_hint: None,
             time: TimeFormat::Frames,
             playback: playback::Playback::default(),
             marks: marks::TimelineMarks::default(),
@@ -289,6 +293,16 @@ impl App {
             tl.start -= f64::from(resp.drag_delta().x / tl.zoom);
         }
         tl.start = tl.start.clamp(-5.0, length);
+    }
+
+    /// How much taller the timeline would be with the dope sheet open (0 when it is, or when the
+    /// curve editor is showing instead of the key rows).
+    pub(super) fn dope_extra(&self) -> f32 {
+        if self.timeline.dope || self.timeline.curves {
+            0.0
+        } else {
+            ac_core::parts::ROWS.len() as f32 * PART_ROW
+        }
     }
 
     fn key_infos(&self) -> Vec<KeyInfo> {

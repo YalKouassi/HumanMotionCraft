@@ -63,6 +63,8 @@ pub struct Shell {
     pub timeline_natural: f32,
     /// The person is dragging the timeline's top edge (its height becomes their own).
     pub timeline_resizing: bool,
+    /// This drag already lit the Dope sheet button (it lights once a drag).
+    pub timeline_hinted: bool,
     /// Where the timeline panel was last frame (its top edge is the resize handle).
     pub timeline_rect: Option<egui::Rect>,
     /// The panels are still fitting their content (control-port replies wait for it).
@@ -112,6 +114,7 @@ impl Shell {
             layout_gen: 0,
             timeline_natural: 0.0,
             timeline_resizing: false,
+            timeline_hinted: false,
             timeline_rect: None,
             layout_settling: false,
         };

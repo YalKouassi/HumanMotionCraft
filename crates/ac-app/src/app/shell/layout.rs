@@ -414,7 +414,15 @@ impl App {
                 });
             }
             let resizing = self.shell.timeline_resizing;
+            // a height of the person's own goes no taller than the timeline with the dope sheet
+            // open (a little slack for the edge); a fitted one is its content's height already
+            let extra = self.dope_extra();
+            let tallest =
+                ((manual || resizing) && natural > 0.0).then_some((natural + extra + 6.0).max(40.0));
             let mut p = egui::Panel::bottom(id("timeline")).resizable(true).min_size(40.0);
+            if let Some(max) = tallest {
+                p = p.max_size(max);
+            }
             if manual {
                 p = p.default_size(l.timeline_height);
             } else if resizing {
@@ -426,7 +434,9 @@ impl App {
             let r = p.show(ui, |ui| {
                 let out = egui::ScrollArea::vertical()
                     .id_salt("timeline-scroll")
-                    .auto_shrink([false, true])
+                    // filling the panel: egui keeps (and reports) the frame's height, so a
+                    // shrunk scroll area would put a dragged height back to the content's
+                    .auto_shrink([false, false])
                     .show(ui, |ui| self.timeline(ui));
                 inner = Some((out.content_size.y, out.inner_rect.height()));
             });
@@ -440,6 +450,12 @@ impl App {
                 !manual && !resizing && (self.shell.timeline_natural - outer).abs() > 1.0;
             if manual || (resizing && (outer - natural).abs() > 2.0) {
                 sizes.0 = Some(outer);
+            }
+            // dragged up as far as it goes with the dope sheet shut: point the button out, once a drag
+            let at_top = tallest.is_some_and(|max| outer >= max - 1.0);
+            if resizing && extra > 0.0 && at_top && !self.shell.timeline_hinted {
+                self.shell.timeline_hinted = true;
+                self.timeline.dope_hint = Some(ui.ctx().input(|i| i.time) + 3.0);
             }
         } else {
             self.shell.timeline_rect = None;
@@ -518,6 +534,7 @@ impl App {
         // sizes and docking workspace are saved once a resize/drag ends
         if !ui.ctx().input(|i| i.pointer.any_down()) {
             self.shell.timeline_resizing = false;
+            self.shell.timeline_hinted = false;
             let dock_json = serde_json::to_string(&self.shell.dock).unwrap_or_default();
             self.shell.prefs.update(|p| {
                 let near = |a: f32, b: f32| (a - b).abs() < 0.5;

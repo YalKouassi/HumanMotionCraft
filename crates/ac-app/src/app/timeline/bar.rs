@@ -143,10 +143,13 @@ impl App {
                 .on_hover_text("Show the whole animation")
                 .tag("timeline.fit", "Fit")
                 .clicked();
+            let hint = self.palette().hint;
             let tl = &mut self.timeline;
-            ui.toggle_value(&mut tl.dope, "Dope sheet")
+            let dope = ui
+                .toggle_value(&mut tl.dope, "Dope sheet")
                 .tag("timeline.dope", "Dope sheet")
                 .on_hover_text("A row per body part: drag, select or delete one part's keys");
+            glow(ui, &dope.rect, hint, &mut tl.dope_hint, tl.dope);
             ui.toggle_value(&mut tl.contacts, "Contacts")
                 .tag("timeline.contacts", "Contacts")
                 .on_hover_text("Where each foot is planted: click a span to pin or free it, drag to plant");
@@ -362,4 +365,34 @@ impl App {
             }
         });
     }
+}
+
+/// Make the Dope sheet button glow while `until` (egui's clock, seconds) is ahead: a pulsing
+/// ring that fades over its last half second. Opening the dope sheet ends it.
+fn glow(ui: &egui::Ui, rect: &egui::Rect, colour: egui::Color32, until: &mut Option<f64>, open: bool) {
+    let Some(end) = *until else { return };
+    let now = ui.input(|i| i.time);
+    if open || !end.is_finite() || now >= end {
+        *until = None;
+        return;
+    }
+    let fade = ((end - now) / 0.5).clamp(0.0, 1.0) as f32;
+    let pulse = 0.65 + 0.35 * (now * 6.0).sin() as f32;
+    let strength = fade * pulse;
+    // the outer ring reaches past the toolbar row, which the timeline's scroll area clips
+    let painter = ui
+        .ctx()
+        .layer_painter(ui.layer_id())
+        .with_clip_rect(rect.expand(10.0));
+    let radius = ui.visuals().widgets.inactive.corner_radius;
+    painter.rect_filled(*rect, radius, colour.gamma_multiply(0.18 * strength));
+    for (grow, alpha, width) in [(1.0, 1.0, 2.0), (3.0, 0.45, 2.0), (5.0, 0.2, 2.0)] {
+        painter.rect_stroke(
+            rect.expand(grow),
+            radius,
+            egui::Stroke::new(width, colour.gamma_multiply(alpha * strength)),
+            egui::StrokeKind::Outside,
+        );
+    }
+    ui.ctx().request_repaint();
 }
