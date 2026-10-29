@@ -197,8 +197,9 @@ impl Document {
         let mut changed = 0;
         for (i, (r, o)) in rots.iter().zip(&roots).enumerate() {
             let f = a + i as i64;
-            let solved = ik::two_bone(&sk, r, *o, &format!("leg.{side}"), at, None, None)
-                .map_err(|e| e.to_string())?;
+            let leg = format!("leg.{side}");
+            let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
+            let solved = ik::two_bone(&sk, r, *o, &leg, at, pole, None).map_err(|e| e.to_string())?;
             let legs: Vec<usize> = (0..solved.len()).filter(|&j| solved.get(j) != r.get(j)).collect();
             if legs.is_empty() {
                 continue;

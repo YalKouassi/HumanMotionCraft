@@ -55,6 +55,8 @@ pub struct Document {
     pub assets: Option<std::path::PathBuf>,
     /// Joint limits for the full-body solver (`None`: unlimited).
     pub limits: Option<Arc<crate::fullbody::Limits>>,
+    /// Coupled range-of-motion tables (`assets/rig/ranges.json`; `None`: not loaded).
+    pub ranges: Option<Arc<crate::ranges::Ranges>>,
     /// The last physics pass and the clip it ran on (reused while the clip is unchanged).
     pub physics_cache: Option<Arc<PhysicsCache>>,
     /// The learned in-betweener the front end loaded (`None`: AI fill is unavailable).
@@ -115,6 +117,7 @@ impl Document {
             library: None,
             assets: None,
             limits: None,
+            ranges: None,
             physics_cache: None,
             ai: None,
             ai_settings: crate::ai::FillSettings::default(),

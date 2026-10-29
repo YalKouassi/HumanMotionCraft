@@ -40,6 +40,7 @@ type Shot = Arc<AtomicU8>;
 pub struct App {
     session: Session,
     renderer: Renderer,
+    render_state: eframe::egui_wgpu::RenderState,
     texture: Option<egui::TextureId>,
     /// Skin joint i is rig bone `skin_to_bone[i]`.
     skin_to_bone: Vec<usize>,
@@ -142,7 +143,8 @@ impl App {
         let rs = cc
             .wgpu_render_state
             .as_ref()
-            .ok_or("the wgpu renderer is not available")?;
+            .ok_or("the wgpu renderer is not available")?
+            .clone();
         let renderer = Renderer::new(&rs.device, rs.target_format, &mesh);
 
         // started for a script or a screenshot, or for an agent: fewer prompts (files/mod.rs)
@@ -232,6 +234,7 @@ impl App {
         let mut app = App {
             session,
             renderer,
+            render_state: rs,
             texture: None,
             skin_to_bone,
             camera: Camera::default(),

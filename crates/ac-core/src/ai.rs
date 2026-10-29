@@ -14,6 +14,16 @@ use crate::rig::Skeleton;
 
 type R<T> = Result<T, String>;
 
+/// A fill kept in the clip: its span, the model label, and what [`Document::keep_possible`] said
+/// (impossible poses the model made, bent back).
+#[derive(Debug, Clone, PartialEq)]
+pub struct Filled {
+    pub from: i64,
+    pub to: i64,
+    pub model: String,
+    pub notes: Vec<String>,
+}
+
 /// A fill worked out but not kept: `clip` is `base` with the span `from..to` filled.
 #[derive(Debug)]
 pub struct Preview {
@@ -27,6 +37,8 @@ pub struct Preview {
     pub plain: bool,
     /// The settings it was worked out with (before `plain` set the AI force to 0).
     pub settings: FillSettings,
+    /// What the fill's check for impossible poses said ([`Filled::notes`]).
+    pub notes: Vec<String>,
 }
 
 /// How a fill runs (cf-animate's AI panel).
@@ -189,9 +201,11 @@ impl crate::document::Document {
         })
     }
 
-    /// Fill between two manual keys (`None`: the ones around the playhead) with the model, then
-    /// plant the feet that stand still in both keys. Returns the span and the model label.
-    pub fn ai_fill(&mut self, span: Option<(i64, i64)>) -> R<(i64, i64, String)> {
+    /// Fill between two manual keys (`None`: the ones around the playhead) with the model, ease it
+    /// through a key it shares with another filled span (`ease.rs`), then plant the feet that
+    /// stand still in both keys, and bend any impossible pose the model made back inside the
+    /// possible limits (`crate::possible`). Returns the span, the model label and notes.
+    pub fn ai_fill(&mut self, span: Option<(i64, i64)>) -> R<Filled> {
         let out = self.fill_clip(span)?;
         let f = self.frame;
         self.go_to(f)?;
@@ -199,7 +213,7 @@ impl crate::document::Document {
     }
 
     /// [`Document::ai_fill`] on the clip alone (the pose shown is left as it is).
-    fn fill_clip(&mut self, span: Option<(i64, i64)>) -> R<(i64, i64, String)> {
+    fn fill_clip(&mut self, span: Option<(i64, i64)>) -> R<Filled> {
         let filler = self.ai_filler().ok_or_else(|| {
             crate::error::hinted(
                 "no AI model is loaded (assets/models)",
@@ -219,8 +233,15 @@ impl crate::document::Document {
         if !note.is_empty() {
             return Err(note);
         }
+        self.ease_borders(a, b)?;
         self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
-        Ok((a, b, filler.label()))
+        let notes = self.keep_possible(a, b)?;
+        Ok(Filled {
+            from: a,
+            to: b,
+            model: filler.label(),
+            notes,
+        })
     }
 
     /// Work out a fill without keeping it: the clip as it would be is stored as the preview (a
@@ -249,7 +270,12 @@ impl crate::document::Document {
         let made = self.fill_clip(span);
         self.ai_settings = settings;
         let filled = std::mem::replace(&mut self.clip, base.clone());
-        let (from, to, label) = made?;
+        let Filled {
+            from,
+            to,
+            model: label,
+            notes,
+        } = made?;
         let p = Arc::new(Preview {
             base,
             links: self.links.clone(),
@@ -263,6 +289,7 @@ impl crate::document::Document {
             },
             plain,
             settings: self.ai_settings.clone(),
+            notes,
         });
         self.ai_preview = Some(p.clone());
         Ok(p)
@@ -347,7 +374,9 @@ impl crate::document::Document {
                 && !crate::edits::generated_in(&self.clip, a, b)
                 && crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?.is_empty()
             {
+                self.ease_borders(a, b)?;
                 self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
+                notes.extend(self.keep_possible(a, b)?);
             }
         }
         let fr = self.frame;

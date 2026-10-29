@@ -14,9 +14,9 @@ propose one and wait for the owner to agree before building it.
 | Rig and posing | 104-bone default rig with per-bone limits and the CC0 mannequin; FK; analytic two-bone IK; full-body damped least squares IK (`pose.reach`, `pose.drag` with pins); mirror, copy/paste, pins, locks, part sets; the rest pose stands on the floor |
 | Clips and keys | keys with 6 interpolations, override/additive layers, links between clips; `key.*`, `keys.retime` (insert, delete, scale), `keys.copy/paste` (mirror), `key.move_parts` (dope rows), markers, `feet.plant`, `clip.move` (slide or turn the whole animation) |
 | Physics | support, contact, fulcrum (planted feet don't slide), static balance, ballistic flights; applied in playback and export when the switch is on; `physics.solve` reports problems; overlay with support area, centre of mass and jump arcs |
-| AI in-between | `ac-ai`: our own `parts` network run in plain Rust (f32 transformer, no ML runtime), trained by `training/` on the free-licence sets only: CMU, 100STYLE, our Kimodo-generated motion and the CC0 loops (2.2 cm mean joint error over 30-frame gaps on their held-out takes). 33 AI styles and 14 motion types. Canonical frame, 6D rotations, style guidance, `ai_force`, trajectory, head, given bones for part layers. `ai.fill`, `ai.fill_all`, `ai.preview/accept/discard`, `ai.gaps`, `ai.toggle`; edits refill the AI spans they touch; feet planted after every fill. Matches PyTorch: network within 1e-4, fills within 0.04 degrees |
+| AI in-between | `ac-ai`: our own `parts` network run in plain Rust (f32 transformer, no ML runtime), trained by `training/` on the free-licence sets only: CMU, 100STYLE, our Kimodo-generated motion and the CC0 loops (2.2 cm mean joint error over 30-frame gaps on their held-out takes). 33 AI styles and 14 motion types. Canonical frame, 6D rotations, style guidance, `ai_force`, trajectory, head, given bones for part layers. `ai.fill`, `ai.fill_all`, `ai.preview/accept/discard`, `ai.gaps`, `ai.toggle`; edits refill the AI spans they touch; a fill is eased through a key it shares with another fill, and its feet are planted (a bent knee keeps its own direction); a pose past what a body can do is bent back to the possible limit and the fill says so. Matches PyTorch: network within 1e-4, fills within 0.04 degrees |
 | Travel | `layer.travel` / `layer.plan`: motion matching over the Locomotion mocap, feet held with leg IK; scene boxes (`surface.*`) |
-| Library | your animations, built-ins to watch and learn from, poses; 40 CMU, 104 100STYLE and 85 generated clips (free-licence only; a walk per style in `Walk styles`); samples; import a folder; search; contact-sheet thumbnails; `library.install` for clips baked locally |
+| Library | your animations, built-ins to watch and learn from, poses; 28 CMU, 104 100STYLE and 85 generated clips (free-licence only; a walk per style in `Walk styles`); samples; import a folder; search; contact-sheet thumbnails; `library.install` for clips baked locally |
 | Export and media | rigged .glb (profiles full/game/body or a bone list) with a round-trip test; `clip.export_batch`; MP4 and GIF (`clip.video`), contact sheets (`clip.sheet`) |
 | App | wgpu GPU-skinned viewport with Drag, IK, Move and rotate tools, ghosts, onion skin, trails, ortho presets; timeline with zoom, snap, box-select, dope sheet, AI bands, curve editor; inspector, layers, physics and AI panels; menus and keymap from the registry, command palette, undo history, settings, themes, autosave and recovery, welcome and tips, block-out wizard |
 | Agents and tools | everything is a command; `ac` CLI (`run`, `script`, `fixtures`, `render`, `video`, `samples`, `new-command`); MCP over stdio and live against the running app; `edit.batch`, `edit.dry_run`, checkpoints, `clip.metrics`, `clip.critique` |
@@ -47,9 +47,11 @@ propose one and wait for the owner to agree before building it.
 5. [ ] **Packaging.** A release build: one `.exe` with its assets, ready to download.
    *Acceptance:* the zip runs on a clean Windows machine with no Rust, Python or ffmpeg installed
    (video export then explains what is missing).
-6. [~] **Install motion from text from the app.** The Motion from text panel lists what the
-   install needs (`text.install` checks the source tree, `uv`, Git, the C++ build tools and the
-   GPU), names the licences installing accepts, and Install runs `setup_textmotion.py` in the
+6. [x] **Install motion from text from the app.** The Motion from text panel lists what the
+   install needs (`text.install` checks the source tree, `uv`, the C++ build tools and the
+   GPU; without a `uv` of the person's own the install fetches a pinned, hash-checked one, uv
+   brings its own Python into the install, and Kimodo comes as GitHub's archive checked by hash,
+   so neither Python nor Git nor any account is needed), names the licences installing accepts, and Install runs `setup_textmotion.py` in the
    background (through `uv run`), with its numbered step, Stop and the log (owner's decision,
    2026-10-29). The setup stops when the app closes its stdin, and starting again resumes. It
    needs the source tree (the setup copies training's rig maths), so packaging (row 5) must ship
@@ -70,6 +72,19 @@ propose one and wait for the owner to agree before building it.
    gap between two standing keys and generates 3 seconds from the playhead, and the contact sheets
    show the wave meeting both keys; without it, the panel and every `text.*` command say how to
    install it; `fixtures/text-motion.json` and `crates/ac-textmotion/tests` pass.
+
+9. [~] **Impossible poses.** Three levels per joint: typical (inside the clinical limits),
+   unusual or athletic (past them but within what reviewed mocap reaches; a warning, fine to
+   keep) and impossible (past the `possible` limits in `assets/rig/ranges.json`: a foot turned
+   round, a knee bent the wrong way). `clip.possible` measures a clip, `clip.fix_impossible` bends
+   keys back (adding keys where the curve swings past), the Range panel shows the level with a
+   Fix button, and every AI fill bends its own impossible frames back and says so in `notes`.
+   Built-ins that were impossible are fixed (Acrobatics 3, Jump 5, Fall and get up 1, Sit 7,
+   Fight 1) or deleted (Acrobatics 1, 2, 4, Dance 1 to 3, On the ground 1 to 4, Sit 5, 6); the
+   review rejects 353 CMU duplicate takes (subjects recorded twice).
+   *Acceptance:* every built-in reads typical or unusual in `clip.possible`;
+   `fixtures/clip-possible.json` and `crates/ac-core/tests/possible.rs` pass; screenshots of the
+   impossible and unusual banners in `target/shots/2026-10-29/possible/`.
 
 ## Open decisions (the owner's)
 

@@ -390,10 +390,11 @@ fn anim_steps(doc: &mut Document, p: &Map<String, Value>) -> Result<Value, Strin
             .collect();
         for w in ends.windows(2).filter(|w| w[1] - w[0] > 1) {
             match doc.ai_fill(Some((w[0], w[1]))) {
-                Ok((x, y, model)) => fills.push(json!({
-                    "from": x,
-                    "to": y,
-                    "model": if fill == "plain" { "plain interpolation".to_string() } else { model },
+                Ok(f) => fills.push(json!({
+                    "from": f.from,
+                    "to": f.to,
+                    "model": if fill == "plain" { "plain interpolation".to_string() } else { f.model },
+                    "notes": f.notes,
                 })),
                 Err(e) => {
                     out = Err(e);

@@ -616,8 +616,8 @@ fn block(doc: &mut Document, ids: &[String], frames: &[i64], fill: &str) -> Resu
     let mut fills = Vec::new();
     if fill != "none" {
         for w in frames.windows(2).filter(|w| w[1] - w[0] > 1) {
-            let (a, b, model) = doc.ai_fill(Some((w[0], w[1])))?;
-            fills.push(json!({ "from": a, "to": b, "model": if fill == "plain" { "plain interpolation".into() } else { model } }));
+            let f = doc.ai_fill(Some((w[0], w[1])))?;
+            fills.push(json!({ "from": f.from, "to": f.to, "model": if fill == "plain" { "plain interpolation".into() } else { f.model }, "notes": f.notes }));
         }
     }
     Ok(fills)

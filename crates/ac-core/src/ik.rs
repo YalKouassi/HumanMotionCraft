@@ -129,6 +129,30 @@ fn index(sk: &Skeleton, name: &str) -> Result<usize, CoreError> {
         .ok_or_else(|| CoreError::Pose(format!("the rig has no bone {name:?}")))
 }
 
+/// The way `limb`'s middle joint points in this pose, as a pole for [`two_bone`]; `None` when the
+/// limb is (nearly) straight and has no bend plane of its own. A solve that holds a foot on a
+/// frame of an animation passes this, so a knee the pose turns out (a crouch) stays out instead of
+/// turning to the default in front of the hips, and frames next to an untouched key don't jump.
+pub fn own_pole(
+    sk: &Skeleton,
+    rotations: &[Quat],
+    root: Vec3,
+    limb: &str,
+) -> Result<Option<Vec3>, CoreError> {
+    let bones = limb_bones(limb).ok_or_else(|| CoreError::Pose(format!("unknown limb {limb:?}")))?;
+    let (_, p) = sk.fk(rotations, root)?;
+    let a = get(&p, index(sk, bones[0])?, "bone")?;
+    let b = get(&p, index(sk, bones[1])?, "bone")?;
+    let c = get(&p, index(sk, bones[2])?, "bone")?;
+    let (la, lb) = (len3(sub3(b, a)), len3(sub3(c, b)));
+    if len3(cross(sub3(a, b), sub3(c, b))) < STRAIGHT_DEG.to_radians().sin() * la * lb {
+        return Ok(None);
+    }
+    let ac = unit(sub3(c, a));
+    let mid = add3(a, scale3(ac, dot(sub3(b, a), ac)));
+    Ok(Some(add3(b, sub3(b, mid))))
+}
+
 /// Rotations with the end of `limb` at `target` (clamped to reach).
 ///
 /// `pole` is a world point the elbow/knee turns toward; `None` keeps the current bend plane (legs:

@@ -26,7 +26,7 @@ from . import ASSETS, REPO
 RIG_JSON = ASSETS / "rig" / "default_rig.json"
 HERE = pathlib.Path(__file__).resolve().parent
 # the modules whose code decides what a set's frames are
-SOURCES = ("bvh.py", "clip.py", "datasets.py", "glb.py", "gltf_motion.py", "quat.py", "retarget.py", "rig.py")
+SOURCES = ("b3d.py", "bvh.py", "clip.py", "datasets.py", "glb.py", "gltf_motion.py", "quat.py", "retarget.py", "rig.py")
 
 
 def _text(b: bytes) -> bytes:

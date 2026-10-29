@@ -113,6 +113,7 @@
             "clip.duplicate",
             "clip.export",
             "clip.export_batch",
+            "clip.fix_impossible",
             "clip.group",
             "clip.import",
             "clip.loop",
@@ -120,6 +121,8 @@
             "clip.move",
             "clip.new",
             "clip.open",
+            "clip.possible",
+            "clip.range",
             "clip.rename",
             "clip.sample",
             "clip.save",
@@ -1174,6 +1177,45 @@
           "if": {
             "properties": {
               "command": {
+                "const": "clip.fix_impossible"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Fix impossible poses; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame (default 0)",
+                    "default": 0
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame (default: the last)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "clip.group"
               }
             },
@@ -1468,6 +1510,122 @@
                 "required": [
                   "id"
                 ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.possible"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Impossible poses"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame (default 0)",
+                    "default": 0
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame (default: the last)"
+                  },
+                  "motion": {
+                    "type": "string",
+                    "enum": [
+                      "shown",
+                      "keys"
+                    ],
+                    "description": "what plays (the physics pass when it is on; default) or the keys alone"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.range"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Joint range of motion"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "pair": {
+                    "type": "string",
+                    "enum": [
+                      "hip_knee",
+                      "ankle_knee",
+                      "hip_swing",
+                      "shoulder_swing",
+                      "trunk_bend",
+                      "neck_bend"
+                    ],
+                    "description": "coupled joint pair (default: hip_knee)",
+                    "default": "hip_knee"
+                  },
+                  "side": {
+                    "type": "string",
+                    "enum": [
+                      "L",
+                      "R"
+                    ],
+                    "description": "left or right side on sided pairs (default: L)",
+                    "default": "L"
+                  },
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "first frame (default 0)",
+                    "default": 0
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "last frame (default: the last)"
+                  },
+                  "motion": {
+                    "type": "string",
+                    "enum": [
+                      "shown",
+                      "keys"
+                    ],
+                    "description": "what plays (the physics pass when it is on; default) or the keys alone"
+                  }
+                },
+                "required": [],
                 "additionalProperties": false
               }
             }
@@ -5442,6 +5600,7 @@
             "clip.duplicate",
             "clip.export",
             "clip.export_batch",
+            "clip.fix_impossible",
             "clip.group",
             "clip.import",
             "clip.loop",
@@ -5449,6 +5608,8 @@
             "clip.move",
             "clip.new",
             "clip.open",
+            "clip.possible",
+            "clip.range",
             "clip.rename",
             "clip.sample",
             "clip.save",

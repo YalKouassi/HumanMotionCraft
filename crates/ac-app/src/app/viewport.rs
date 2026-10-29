@@ -124,7 +124,7 @@ impl App {
         path
     }
 
-    pub(super) fn viewport(&mut self, ui: &mut egui::Ui, frame: &eframe::Frame) {
+    pub(super) fn viewport(&mut self, ui: &mut egui::Ui) -> Rect {
         let size = ui.available_size();
         let (rect, resp) = ui.allocate_exact_size(size, Sense::click_and_drag());
         let ppp = ui.pixels_per_point();
@@ -299,9 +299,6 @@ impl App {
         }
 
         // the bodies: the pose shown, then its ghosts
-        let Some(rs) = frame.wgpu_render_state() else {
-            return;
-        };
         let f = self.session.document.frame;
         let mut bodies: Vec<(Vec<Mat4>, [f32; 4])> = Vec::new();
         // a Move drag shows the body moved before it is committed (and the ghosts too when the
@@ -316,7 +313,7 @@ impl App {
             Ok(m) => bodies.push((m, BODY)),
             Err(e) => {
                 self.status = format!("pose: {e}");
-                return;
+                return rect;
             }
         }
         let onion = self.onion_ghosts();
@@ -355,6 +352,7 @@ impl App {
                 tint: *tint,
             })
             .collect();
+        let rs = &self.render_state;
         match self
             .renderer
             .render(&rs.device, &rs.queue, w, h, &self.camera, &drawn)
@@ -554,9 +552,9 @@ impl App {
         }
 
         self.viewport_toolbar(ui, rect);
-        self.picker(ui.ctx(), rect);
-        // last: the toolbar and the picker may have changed the tool or the selection
+        // last: the toolbar may have changed the tool or the selection
         self.viewport_layout(rect, &screen, &handles, gizmo.as_ref(), &onion_frames);
+        rect
     }
 
     /// Where things are, for the control port's `layout` (window points).

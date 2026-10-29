@@ -33,11 +33,13 @@ use serde_json::json;
 use super::App;
 use super::prefs::{self, Prefs, Theme};
 
+pub use layout::DockPanel;
 pub use status::Level;
 
 /// The shell's state, one field of [`App`].
 pub struct Shell {
     pub prefs: SettingsStore<Prefs>,
+    pub dock: craft_ui::docking::Workspace<DockPanel>,
     keys: keys::Keys,
     pub palette: Option<palette::PaletteState>,
     pub form: Option<form::Form>,
@@ -91,8 +93,10 @@ impl Shell {
             store.get().shortcuts.clone(),
             store.get().shortcut_sets.0.clone(),
         );
+        let dock = layout::load_dock_workspace(&store.get().layout.dock_json);
         let mut shell = Shell {
             prefs: store,
+            dock,
             keys,
             palette: None,
             form: None,

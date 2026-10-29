@@ -94,7 +94,8 @@ def word(s: str) -> str:
 
 def auto_type(take: str) -> str:
     """The motion type a take name gives ("" when it gives none)."""
-    t = take.lower()
+    # an ACCAD or AddBiomechanics take is "<type>_<set>_<stem>": only its type word says what it is
+    t = re.split(r"_(?:accad|addbiomechanics)_", take.lower())[0]
     for name, words in AUTO:
         if any(re.search(w, t) for w in words):
             return name

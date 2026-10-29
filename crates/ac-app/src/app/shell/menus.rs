@@ -60,6 +60,7 @@ const BY_ID: &[(&str, &str)] = &[
     ("clip.loop", "Key"),
     ("clip.curves", "Key"),
     ("clip.contacts", "Physics"),
+    ("clip.range", "Pose"),
     ("clip.sample", "Key"),
     ("clip.move", "Pose"),
 ];

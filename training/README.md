@@ -6,7 +6,8 @@ clips. Nothing here runs at app time.
 
 | Module | What |
 |---|---|
-| `ac_train.datasets` | the dataset registry (source, licence, joint map), readers (BVH, glb) and the retarget to `training/data/rig/<set>.npz` |
+| `ac_train.datasets` | the dataset registry (source, licence, joint map), readers (BVH, `.b3d`, glb) and the retarget to `training/data/rig/<set>.npz` |
+| `ac_train.b3d` | pure-Python `.b3d` (`SubjectOnDisk`) reader and HTTP-Range fetcher for AddBiomechanics 1.0 |
 | `ac_train.train` | trains the network on the retargeted sets into `training/data/models/<tag>/` |
 | `ac_train.export` | writes `assets/models/<tag>/` (the weights the app loads) and the `ac-ai` goldens |
 | `ac_train.library` | cuts 3-second clips from the retargeted sets into a library folder |
@@ -38,9 +39,11 @@ are. `--keep` keeps the folder; `--no-cargo` skips the Rust step.
 | `builtin_loops` | the CC0 loops already in `assets/library` | CC0 1.0 | yes (they are the assets) |
 | `cmu` | [CMU Graphics Lab Motion Capture Database](http://mocap.cs.cmu.edu), BVH conversion from [una-dinosauria/cmu-mocap](https://github.com/una-dinosauria/cmu-mocap) | free for research and commercial use | clips cut from it |
 | `100style` | [100STYLE](https://www.ianxmason.com/100style) (Ian Mason, Sebastian Starke, Taku Komura), [Zenodo](https://zenodo.org/record/8127870) | CC BY 4.0 (commercial use allowed, with credit) | clips cut from it |
+| `accad` | [ACCAD Open Motion Project](https://accad.osu.edu/research/motion-lab/mocap-system-and-data) (Ohio State University) | CC BY 3.0 (commercial use allowed, with credit) | retargeted for training |
+| `addbiomechanics` | [AddBiomechanics Dataset 1.0](https://addbiomechanics.org/download_data.html) (Keenon Werling et al., Stanford University) | CC BY 4.0 (commercial use allowed, with credit) | retargeted for training |
 | `kimodo` | motion we generate with [Kimodo](https://github.com/nv-tlabs/kimodo) (NVIDIA, model `Kimodo-SOMA-RP-v1.2`) from the prompts in `training/kimodo/prompts.tsv` | the model is under the NVIDIA Open Model License, which claims no ownership of what it generates | clips the owner approved; the prompts are committed, the BVHs are not |
 
-The repo supplies these four sets only, and every one allows commercial use, so the committed model
+The repo supplies these six sets only, and every one allows commercial use, so the committed model
 `assets/models/parts` and everything cut into `assets` carry no non-commercial terms; the model's
 card (`weights.json`) lists the sets.
 
@@ -63,6 +66,21 @@ the set's index (`cmu-mocap-index-text.txt`, see `CMU_TYPES` in `datasets.py`). 
 scenery the rig does not have (playground, climbing, ladders, stairs, uneven terrain) are skipped.
 Frame 0 of every CMU file is an added T-pose and is dropped.
 
+ACCAD is 304 takes from The Ohio State University's Open Motion Project: three full-session actors
+(`Female1`, `Male1`, `Male2`: walks, runs, turns, box carries, crouches, crawls, boxing and
+martial-arts kicks) and five character-figure takes (`flip`, `ericrun`, `swagger`, `eric1`,
+`ericdog`). A take's type comes from the action words in its file stem (`ACCAD_TYPES` in
+`datasets.py`), and the five character-figure files trim the trailing frozen frames after the
+performance.
+
+AddBiomechanics 1.0 stores OpenSim kinematics and ground-reaction forces in `.b3d` (`SubjectOnDisk`)
+files using the 22-body Rajagopal 2015 model. `ac_train.b3d` reads `.b3d` files in pure Python
+(without `nimblephysics`, which has no Windows wheels), extracts the 20 pre-computed 3D joint
+centers (`world_frame_joint_centers`) and ground-reaction forces (`ground_contact_force`), and
+synthesizes `neck` and `head` from the torso frame (`back` to mid-`acromial`). Only the overground
+`With_Arm` studies (`Falisse2017`, `Fregly2012`, `Uhlrich2023`, `Tiziana2019`, `Han2023`) are
+fetched; treadmill in-place trials and stair trials are skipped.
+
 The `kimodo` set is generated, not downloaded. `training/kimodo/prompts.tsv` lists each prompt
 with a name, a take type and a length in seconds (at most 10). A take's type comes from that type
 column alone (`carry_kimodo_carry_box_s1`), never from the prompt's words. Each prompt is made once
@@ -82,7 +100,7 @@ uv sync            # numpy and CUDA torch into training/.venv
 
 ### 2a. Or fetch the sets already retargeted
 
-The retargeted sets (all four, with their scans, about 400 MB) are published as this repository's
+The retargeted sets (with their scans, about 400 MB) are published as this repository's
 GitHub release `rig-data-c551151` (`training/rig-data.json`). This downloads them over plain HTTPS
 (no login needed; a private repository's release goes through the GitHub CLI) and checks each
 file's SHA-256, so steps 2 to 3b can be skipped:
@@ -121,11 +139,21 @@ git clone --depth 1 https://github.com/una-dinosauria/cmu-mocap.git cmu-mocap
 curl -L -o 100STYLE.zip https://zenodo.org/api/records/8127870/files/100STYLE.zip/content
 unzip 100STYLE.zip            # the files must end up as 100STYLE/<Style>/<Style>_<gait>.bvh,
                               # with 100STYLE/Dataset_List.csv and 100STYLE/Frame_Cuts.csv
+
+# ACCAD Open Motion Project (about 50 MB of BVH zips)
+mkdir -p accad
+for z in Female1_bvh.zip Male1_bvh.zip Male2_bvh.zip walkdog_BVH.ZIP handspring_BVH.ZIP quickwalk_BVH.ZIP sprint_BVH.ZIP swagger_BVH.ZIP; do
+  curl -L -o "accad/$z" "https://accad.osu.edu/sites/accad.osu.edu/files/$z"
+  unzip -q "accad/$z" -d "accad/${z%.*}"
+done
 cd ../..
+
+# AddBiomechanics 1.0 overground With_Arm studies (6.4 GB via HTTP Range, without downloading the 418 GB zip)
+uv run python -m ac_train.b3d
 ```
 
-The readers look for `cmu-mocap/data/**/*.bvh`, `100STYLE/*/*.bvh` and `kimodo/*.bvh` (step 2b).
-A set you skip is reported and left out.
+The readers look for `cmu-mocap/data/**/*.bvh`, `100STYLE/*/*.bvh`, `accad/**/*.bvh`,
+`addbiomechanics/**/*.b3d` and `kimodo/*.bvh` (step 2b). A set you skip is reported and left out.
 
 ### 2b. Generate the `kimodo` set
 

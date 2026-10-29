@@ -501,8 +501,9 @@ impl Document {
                 let (Some(r), Some(o)) = (rots.get(k), roots.get(k)) else {
                     continue;
                 };
-                let solved = ik::two_bone(&sk, r, *o, &format!("leg.{s}"), at, None, None)
-                    .map_err(|e| e.to_string())?;
+                let leg = format!("leg.{s}");
+                let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
+                let solved = ik::two_bone(&sk, r, *o, &leg, at, pole, None).map_err(|e| e.to_string())?;
                 if let Some(slot) = rots.get_mut(k) {
                     *slot = solved;
                 }
@@ -514,7 +515,7 @@ impl Document {
         Ok(changed.len())
     }
 
-    fn write_solved(
+    pub(crate) fn write_solved(
         &mut self,
         changed: &BTreeSet<usize>,
         first: i64,
@@ -575,8 +576,9 @@ impl Document {
                     let (Some(r), Some(o)) = (rots.get(i), roots.get(i)) else {
                         continue;
                     };
-                    let solved = ik::two_bone(&sk, r, *o, &format!("leg.{s}"), at, None, None)
-                        .map_err(|e| e.to_string())?;
+                    let leg = format!("leg.{s}");
+                    let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
+                    let solved = ik::two_bone(&sk, r, *o, &leg, at, pole, None).map_err(|e| e.to_string())?;
                     if let Some(slot) = rots.get_mut(i) {
                         *slot = solved;
                     }

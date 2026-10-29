@@ -62,7 +62,7 @@ impl App {
     pub(super) fn viewport_toolbar(&mut self, ui: &mut egui::Ui, rect: Rect) {
         let bar = Rect::from_min_size(
             rect.min + Vec2::new(8.0, 8.0),
-            Vec2::new(rect.width() - 16.0, 24.0),
+            Vec2::new((rect.width() - 16.0).max(60.0), 56.0),
         );
         ui.scope_builder(egui::UiBuilder::new().max_rect(bar), |ui| {
             // on a backing of the panel colour, so it reads over the 3D view in either theme
@@ -70,9 +70,10 @@ impl App {
             egui::Frame::new()
                 .fill(backing)
                 .corner_radius(4.0)
-                .inner_margin(egui::Margin::symmetric(4, 0))
+                .inner_margin(egui::Margin::symmetric(4, 2))
                 .show(ui, |ui| {
-                    ui.horizontal(|ui| {
+                    ui.spacing_mut().item_spacing = Vec2::new(6.0, 2.0);
+                    ui.horizontal_wrapped(|ui| {
                         // the tools
                         for (tool, label, action, tip) in TOOLS {
                             let on = self.tool == *tool;
@@ -135,9 +136,46 @@ impl App {
                                 "Trail: the whole animation, or so many frames each side of the playhead",
                             );
                         ui.separator();
-                        ui.toggle_value(&mut self.view.picker, "Picker")
+                        let range_on = self.is_dock_panel_open(super::shell::DockPanel::Range);
+                        let range_out = self.panels.range.outside_frames;
+                        let range_tip = if range_out > 0 {
+                            format!(
+                                "Coupled joint range-of-motion chart ({range_out} frames past clinical hard limit) — dock or drag to a second monitor"
+                            )
+                        } else {
+                            "Coupled joint range-of-motion chart and clinical hard limits — dock or drag to a second monitor".into()
+                        };
+                        let range_txt = if range_out > 0 {
+                            egui::RichText::new(format!("Range ({range_out})"))
+                                .color(self.palette().error)
+                        } else {
+                            egui::RichText::new("Range")
+                        };
+                        if ui
+                            .selectable_label(range_on, range_txt)
+                            .tag("toolbar.range", "Range")
+                            .on_hover_text(range_tip)
+                            .clicked()
+                        {
+                            self.set_dock_panel(super::shell::DockPanel::Range, !range_on);
+                        }
+                        let picker_on = self.is_dock_panel_open(super::shell::DockPanel::Picker);
+                        if ui
+                            .selectable_label(picker_on, "Picker")
                             .tag("toolbar.picker", "Picker")
-                            .on_hover_text("Pick joints and body parts on a small figure, several at once");
+                            .on_hover_text(
+                                "Pick joints and body parts on a small figure, several at once — dock or drag to a second monitor",
+                            )
+                            .clicked()
+                        {
+                            self.set_dock_panel(super::shell::DockPanel::Picker, !picker_on);
+                        }
+                        ui.menu_button("Panels", |ui| self.panels_menu(ui))
+                            .response
+                            .tag("toolbar.panels", "Panels")
+                            .on_hover_text(
+                                "Open any panel as a dockable tab or pop-out window for a second monitor",
+                            );
                         ui.menu_button("View", |ui| self.view_menu(ui))
                             .response
                             .tag("toolbar.view", "View")
@@ -240,6 +278,40 @@ impl App {
             .on_hover_text("The camera keeps the body in the middle as it moves");
         if let Some(id) = go {
             self.act_scoped(id, &ctx);
+        }
+    }
+
+    fn panels_menu(&mut self, ui: &mut egui::Ui) {
+        let mut toggle: Option<(super::shell::DockPanel, bool)> = None;
+        let mut float: Option<super::shell::DockPanel> = None;
+        for &p in super::shell::DockPanel::TOOL_PANELS {
+            let mut open = self.is_dock_panel_open(p);
+            let id = p.id_str();
+            let label = p.short_label();
+            ui.horizontal(|ui| {
+                if ui
+                    .checkbox(&mut open, label)
+                    .tag(format!("toolbar.panels.{id}"), label)
+                    .on_hover_text("Show or hide this panel in the docking workspace")
+                    .changed()
+                {
+                    toggle = Some((p, open));
+                }
+                if ui
+                    .small_button("Pop")
+                    .tag(format!("toolbar.panels.float.{id}"), "Pop")
+                    .on_hover_text("Pop out into a floating OS window (drag to a second monitor)")
+                    .clicked()
+                {
+                    float = Some(p);
+                }
+            });
+        }
+        if let Some((p, open)) = toggle {
+            self.set_dock_panel(p, open);
+        }
+        if let Some(p) = float {
+            self.float_dock_panel(p);
         }
     }
 }

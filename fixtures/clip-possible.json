@@ -1,0 +1,61 @@
+{
+  "$schema": "./schema.json",
+  "name": "clip-possible",
+  "feature": "clip.possible, clip.fix_impossible",
+  "description": "Impossible poses, found and bent back. (1) The rest pose, no keys: every joint inside the clinical limits, level typical. (2) The left foot turned 110 deg outward about the ankle's own toe-out axis. The ankle's zero direction u = unit(toe3-1.L - foot.L rest heads) = (0.0946714, -0.9406275, -0.3259711); the toe-out axis is unit(u x (X - u (u.X))) = (0, -0.3274418, 0.9448713), so the quaternion is (axis sin 55, cos 55) = (0, -0.2682246, 0.7739933, 0.5735764). The swing reads 110 along that axis (abduction 110) and 110 x 0.0327904 = 3.6069 along the flexion axis (-0.9949732, -0.1001412, 0), which is not quite square to it. The possible limit for ankle toe-out is -80..80 (assets/rig/ranges.json), so the foot is 30 deg past: level impossible, one breach. (3) Keyed, then clip.fix_impossible bends the toe-out back to 80 - 0.5 = 79.5 and leaves the flexion at 3.6069: one key fixed, nothing added or left. (4) Measured again: typical (ankle toe-out is in no clinical pair).",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    {
+      "command": "clip.possible",
+      "params": {},
+      "expect": {
+        "frames": 1,
+        "level": "typical",
+        "impossible": { "frames": 0, "spans": [], "worst_frame": null },
+        "breaches": [],
+        "unusual": { "frames": 0 },
+        "notes": ["the animation has no keys: measuring the pose shown alone"]
+      }
+    },
+    { "command": "pose.set_bone", "params": { "bone": "foot.L", "rotation": [0.0, -0.2682246322921031, 0.7739932934429087, 0.573576436351046] } },
+    {
+      "command": "clip.possible",
+      "params": {},
+      "expect": {
+        "level": "impossible",
+        "impossible": { "frames": 1, "spans": [[0, 0]], "max_deg": 30, "worst_frame": 0 },
+        "breaches": [{ "joint": "ankle.L", "component": "abduction", "value_deg": 110, "lo": -80, "hi": 80, "past_deg": 30, "frames": 1, "spans": [[0, 0]], "worst_frame": 0 }]
+      },
+      "tolerance": 0.01
+    },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "clip.fix_impossible",
+      "params": {},
+      "expect": {
+        "keys": 1,
+        "fixed": [{ "frame": 0, "breaches": [{ "joint": "ankle.L", "component": "abduction", "value_deg": 110, "past_deg": 30 }] }],
+        "added": [],
+        "left": 0,
+        "notes": []
+      },
+      "tolerance": 0.01
+    },
+    {
+      "command": "clip.range",
+      "params": { "pair": "ankle_knee", "side": "L", "motion": "keys" },
+      "expect": { "path": [{ "frame": 0, "y": 3.6069 }] },
+      "tolerance": 0.0002
+    },
+    {
+      "command": "clip.possible",
+      "params": { "motion": "keys" },
+      "expect": { "level": "typical", "impossible": { "frames": 0 }, "breaches": [] }
+    }
+  ],
+  "errors": [
+    { "command": "clip.possible", "params": { "from": 10, "to": 5 } },
+    { "command": "clip.possible", "params": { "motion": "sideways" } },
+    { "command": "clip.fix_impossible", "params": { "from": 5, "to": 2 } }
+  ]
+}

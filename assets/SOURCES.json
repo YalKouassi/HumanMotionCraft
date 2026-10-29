@@ -2,5 +2,6 @@
  "library/": "poses and clips from the MakeHuman community pose packs (CC0)",
  "rig/default_rig.json": "default body rig of the Anny model (NAVER LABS Europe, Apache-2.0; rig and mesh from MakeHuman MPFB2, CC0)",
  "rig/limits.json": "derived from the CC0 MakeHuman community pose packs",
- "rig/mannequin.glb": "default body of the Anny model (Apache-2.0; mesh from MakeHuman MPFB2, CC0)"
+ "rig/mannequin.glb": "default body of the Anny model (Apache-2.0; mesh from MakeHuman MPFB2, CC0)",
+ "rig/ranges.json": "joint range-of-motion tables: clinical limits from CDC (Soucie et al. 2011), Roaas & Andersson 1982, Baumbach et al. 2014 and WA DSHS 13-585A; mocap band from CMU, 100STYLE (CC BY 4.0), ACCAD (CC BY 3.0) and AddBiomechanics (CC BY 4.0)"
 }

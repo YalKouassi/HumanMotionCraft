@@ -1,0 +1,48 @@
+{
+  "$schema": "./schema.json",
+  "name": "clip-range",
+  "feature": "clip.range",
+  "description": "Anatomical angles against the clinical limits in assets/rig/ranges.json. (1) The rest pose, no keys, so the pose shown is measured. Hip bend x Knee bend, left. The thigh d = lowerleg01.L - upperleg01.L rest heads leans acos(-d.z) from straight down, its forward share -d.y / hypot(d.x, d.y): hip flexion 4.7276. The knee is the shank v (foot.L - lowerleg01.L) against the thigh u: acos(u.v) about unit(u x v), along the flexion axis unit(u x back-across-u): knee flexion 9.8991 (the rig's rest knee is bent). The hip limit at that knee bend joins 100 (knee straight, DSHS 13-585A) and 132.1 (knee bent 90, CDC): 100 + 32.1 * 9.8991 / 90 = 103.5307, extension -17.75. Closeness is the larger of the hip's |4.7276 - 42.8903| / 60.6403 = 0.6293 and the knee's (CDC range -1.3..139.8) |9.8991 - 69.25| / 70.55 = 0.8413. (2) The chest (spine01) turned 100 deg about +X, which bends it forward (+X x up = forward), keyed at frame 0: the trunk bends 100 forward with no side bend; its limits (DSHS: flexion 90, extension 25) put it 10 deg past, closeness (100 - 32.5) / 57.5 = 1.1739.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    {
+      "command": "clip.range",
+      "params": { "pair": "hip_knee", "side": "L" },
+      "expect": {
+        "pair": "hip_knee",
+        "side": "L",
+        "sided": true,
+        "frames": 1,
+        "x": { "joint": "knee", "component": "flexion", "hard": [-1.3, 139.8] },
+        "y": { "joint": "hip", "component": "flexion" },
+        "playhead": { "x": 9.8991, "y": 4.7276, "hard_lo": -17.75, "hard_hi": 103.5307, "closeness": 0.8413, "past_hard_deg": 0 },
+        "max_closeness": 0.8413,
+        "outside_hard": { "frames": 0, "spans": [], "worst_frame": null },
+        "notes": ["the animation has no keys: measuring the pose shown alone"]
+      },
+      "tolerance": 0.0002
+    },
+    { "command": "pose.set_bone", "params": { "bone": "spine01", "rotation": [0.766044443118978, 0, 0, 0.6427876096865394] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "clip.range",
+      "params": { "pair": "trunk_bend", "from": 0, "to": 0, "motion": "keys" },
+      "expect": {
+        "pair": "trunk_bend",
+        "sided": false,
+        "side": null,
+        "frames": 1,
+        "path": [{ "frame": 0, "x": 0, "y": 100, "hard_hi": 90, "hard_lo": -25, "closeness": 1.1739, "past_hard_deg": 10 }],
+        "outside_hard": { "frames": 1, "spans": [[0, 0]], "max_deg": 10, "worst_frame": 0 }
+      },
+      "tolerance": 0.0002
+    }
+  ],
+  "errors": [
+    { "command": "clip.range", "params": { "pair": "no_such_pair" } },
+    { "command": "clip.range", "params": { "side": "X" } },
+    { "command": "clip.range", "params": { "from": 10, "to": 5 } },
+    { "command": "clip.range", "params": { "to": 99 } }
+  ],
+  "views": ["front", "side"]
+}

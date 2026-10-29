@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 
 use ac_core::parts;
 use egui::{Color32, Pos2, Rect, Sense, Stroke, Vec2};
-use serde_json::{Map, Value, json};
+use serde_json::{Map, json};
 
 use super::App;
 use crate::app::ui_ids::{self, Tag};
@@ -102,25 +102,7 @@ fn layout(pts: Vec<(usize, [f32; 2])>, rect: Rect) -> Vec<(usize, Pos2)> {
 }
 
 impl App {
-    /// The picker, over the viewport's right side.
-    pub(super) fn picker(&mut self, ctx: &egui::Context, rect: Rect) {
-        self.layout["picker"] = Value::Null;
-        if !self.view.picker {
-            return;
-        }
-        let at = Pos2::new(rect.right() - PICKER_W - 12.0, rect.top() + 40.0);
-        egui::Area::new(egui::Id::unique("viewport-picker"))
-            .fixed_pos(at)
-            .constrain_to(rect)
-            .show(ctx, |ui| {
-                egui::Frame::popup(ui.style()).show(ui, |ui| {
-                    ui.set_width(PICKER_W);
-                    self.picker_body(ui);
-                });
-            });
-    }
-
-    fn picker_body(&mut self, ui: &mut egui::Ui) {
+    pub(in crate::app) fn picker_body(&mut self, ui: &mut egui::Ui) {
         let add = ui.input(|i| i.modifiers.shift || i.modifiers.ctrl || i.modifiers.command);
         ui.horizontal(|ui| {
             ui.strong("Picker");

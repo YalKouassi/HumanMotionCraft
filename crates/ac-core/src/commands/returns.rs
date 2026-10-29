@@ -54,6 +54,12 @@ pub const AI_FILL: &[ParamSpec] = &[
     ParamSpec::new("to", Kind::Integer, "your key after the gap").required(),
     ParamSpec::new("frames", Kind::Integer, "frames filled").required(),
     ParamSpec::new("model", Kind::Text, "the model label").required(),
+    ParamSpec::new(
+        "notes",
+        Kind::TextList,
+        "impossible poses the fill made and bent back to the possible limit, or left (empty: none)",
+    )
+    .required(),
 ];
 
 pub const AI_SETTINGS: &[ParamSpec] = &[
@@ -95,6 +101,12 @@ pub const AI_PREVIEW: &[ParamSpec] = &[
         "the root head on every frame of the span (metres)",
     )
     .list()
+    .required(),
+    ParamSpec::new(
+        "notes",
+        Kind::TextList,
+        "impossible poses the fill made and bent back to the possible limit, or left (empty: none)",
+    )
     .required(),
 ];
 
@@ -203,6 +215,12 @@ pub const AI_FILL_ALL: &[ParamSpec] = &[
         .json()
         .required(),
     ParamSpec::new("model", Kind::Text, "the model label").required(),
+    ParamSpec::new(
+        "notes",
+        Kind::TextList,
+        "impossible poses the fills made and bent back to the possible limit, or left (each starts with its gap, from–to; empty: none)",
+    )
+    .required(),
 ];
 
 pub const AI_TOGGLE: &[ParamSpec] = &[
@@ -211,4 +229,9 @@ pub const AI_TOGGLE: &[ParamSpec] = &[
     ParamSpec::new("mode", Kind::Choice(&["ai", "plain"]), "what the span is now").required(),
     ParamSpec::new("cleared", Kind::Integer, "plain: AI keys removed"),
     ParamSpec::new("model", Kind::Text, "ai: the model label"),
+    ParamSpec::new(
+        "notes",
+        Kind::TextList,
+        "ai: impossible poses the fill made and bent back, or left",
+    ),
 ];

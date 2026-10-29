@@ -68,6 +68,7 @@ impl Watch {
     fn look(&self) -> [Print; 3] {
         let mut limits = Print::default();
         add(&mut limits, &self.assets.join("rig/limits.json"));
+        add(&mut limits, &self.assets.join("rig/ranges.json"));
         let mut lib = Print::default();
         for kind in ["animations", "poses"] {
             tree(&mut lib, &self.library.join(kind), 1);

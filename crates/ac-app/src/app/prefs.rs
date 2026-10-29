@@ -188,6 +188,8 @@ pub struct Viewport {
     /// Frames each side of the playhead (0: the whole animation).
     pub trail_span: u32,
     pub picker: bool,
+    #[serde(default)]
+    pub range: bool,
     /// `body` or `all` (fingers and face too).
     pub handles: String,
     /// `world` or `local` axes for the rotate gizmo.
@@ -205,6 +207,7 @@ impl Default for Viewport {
             trails: false,
             trail_span: 0,
             picker: false,
+            range: false,
             handles: "body".into(),
             gizmo: "world".into(),
             follow: false,
@@ -304,6 +307,9 @@ pub struct Layout {
     pub show_library: bool,
     pub show_inspector: bool,
     pub show_timeline: bool,
+    /// Serialized `craft_ui::docking::Workspace<DockPanel>` arrangement (empty: default).
+    #[serde(default)]
+    pub dock_json: String,
 }
 
 impl Default for Layout {
@@ -316,6 +322,7 @@ impl Default for Layout {
             show_library: true,
             show_inspector: true,
             show_timeline: true,
+            dock_json: String::new(),
         }
     }
 }

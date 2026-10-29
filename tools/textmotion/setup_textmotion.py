@@ -8,12 +8,14 @@ The app's Motion from text panel runs this too (Install, `text.install`): it rea
 step lines (`== [3/6] ...`) from the log, and with `--stop-on-eof` the setup ends, with everything
 it started, when the app closes its stdin (Stop, or the app quitting).
 
-Needs `uv` and `git` on PATH, about 35 GB of free disk (the install is 22 GB) and 32 GB of RAM (the text encoder, Llama 3 8B,
+Needs `uv` on PATH (the app fetches its own when there is none), about 35 GB of free disk (the install is 22 GB) and 32 GB of RAM (the text encoder, Llama 3 8B,
 runs on the CPU unless the GPU has 24 GB). On Windows the motion-correction extension is built
-with the Visual Studio C++ build tools (the same ones Rust uses).
+with the Visual Studio C++ build tools (the same ones Rust uses). Nothing else need be installed
+first: uv downloads the Python the install runs on, and no account is needed anywhere.
 
 The folder (default `%LOCALAPPDATA%/<product>/textmotion`, or `AC_TEXTMOTION_DIR`) gets:
-  kimodo/          the Kimodo source at a pinned commit
+  kimodo/          the Kimodo source at a pinned commit (GitHub's archive of it, checked by hash)
+  python/          the Python 3.10 uv downloads, so the install doesn't depend on any other
   .venv/           Python 3.10 with torch, Kimodo and its motion correction
   text_encoders/   Llama 3 8B Instruct (an ungated copy whose weights hash the same as Meta's)
                    and the LLM2Vec adapters, pointed at it, so no Hugging Face login is needed
@@ -41,12 +43,15 @@ import tarfile
 import threading
 import time
 import urllib.request
+import zipfile
 
 HERE = pathlib.Path(__file__).resolve().parent
 REPO = HERE.parent.parent
 
-KIMODO_GIT = "https://github.com/nv-tlabs/kimodo.git"
 KIMODO_COMMIT = "e1c219c99b4b94ba48be1fb6a1cbc64ecee4c954"  # 2026-10-15, the v1.2 weights
+KIMODO_ZIP = f"https://github.com/nv-tlabs/kimodo/archive/{KIMODO_COMMIT}.zip"
+# tree_hash of the archive's files: GitHub may recompress an archive, but not change what is in it
+KIMODO_TREE = "83a8a154316d672daa4d8b6c29c57c520fb0dc2123fbb55e8e2579d3d82a326f"
 MODEL = "nvidia/Kimodo-SOMA-RP-v1.2"
 MODEL_REVISION = "0e3c89024d896064b6851201373f7834784a386b"
 LLAMA = "NousResearch/Meta-Llama-3-8B-Instruct"
@@ -190,15 +195,31 @@ def sha256(path: pathlib.Path) -> str:
     return h.hexdigest()
 
 
+def curl() -> str | None:
+    """The system's curl: Windows' own one checks certificates against Windows' store, which the
+    Python uv downloads can't read whole (its downloads fail with CERTIFICATE_VERIFY_FAILED)."""
+    if os.name == "nt":
+        own = pathlib.Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "curl.exe"
+        if own.exists():
+            return str(own)
+    return shutil.which("curl")
+
+
 def download(url: str, to: pathlib.Path, tries: int = 4) -> None:
+    if c := curl():
+        run([c, "-fL", "-sS", "--retry", str(tries - 1), "--retry-delay", "15", "-o", to, url])
+        return
     for i in range(tries):
         try:
             with urllib.request.urlopen(url, timeout=120) as r, open(to, "wb") as fh:
                 shutil.copyfileobj(r, fh)
             return
         except OSError as e:
-            print(f"  download failed ({e}); retry {i + 1} of {tries - 1}", flush=True)
-            time.sleep(15)
+            if i + 1 < tries:
+                print(f"  download failed ({e}); retry {i + 1} of {tries - 1}", flush=True)
+                time.sleep(15)
+            else:
+                print(f"  download failed ({e})", flush=True)
     raise SystemExit(f"could not download {url}")
 
 
@@ -238,12 +259,50 @@ def msvc_generator() -> str | None:
     return years[out]
 
 
-def clone(root: pathlib.Path) -> None:
+def tree_hash(files: dict[str, bytes]) -> str:
+    """sha256 over each file's path and contents, in path order."""
+    h = hashlib.sha256()
+    for name in sorted(files):
+        h.update(f"{name}:{hashlib.sha256(files[name]).hexdigest()}\n".encode("utf-8"))
+    return h.hexdigest()
+
+
+def writable_then_retry(func, path, _exc) -> None:
+    """For rmtree: Git marks its object files read-only, which Windows won't delete."""
+    os.chmod(path, 0o600)
+    func(path)
+
+
+def kimodo_source(root: pathlib.Path) -> None:
+    """Kimodo at KIMODO_COMMIT, from GitHub's archive (no Git needed); `kimodo/.commit` says which."""
     src = root / "kimodo"
-    if not (src / ".git").exists():
-        run(["git", "clone", "--quiet", KIMODO_GIT, src])
-    run(["git", "-C", src, "fetch", "--quiet", "origin", KIMODO_COMMIT])
-    run(["git", "-C", src, "checkout", "--quiet", KIMODO_COMMIT])
+    mark = src / ".commit"
+    if mark.exists() and mark.read_text(encoding="utf-8").strip() == KIMODO_COMMIT:
+        print(f"  at {KIMODO_COMMIT[:12]} already", flush=True)
+        return
+    deps = root / "deps"
+    deps.mkdir(parents=True, exist_ok=True)
+    archive = deps / f"kimodo-{KIMODO_COMMIT}.zip"
+    print(f"  downloading {KIMODO_ZIP}", flush=True)
+    download(KIMODO_ZIP, archive)
+    with zipfile.ZipFile(archive) as zf:
+        top = f"kimodo-{KIMODO_COMMIT}/"
+        files = {i.filename[len(top):]: zf.read(i) for i in zf.infolist()
+                 if not i.is_dir() and i.filename.startswith(top)}
+    got = tree_hash(files)
+    if got != KIMODO_TREE:
+        archive.unlink()
+        raise SystemExit(f"Kimodo's archive from GitHub is not the one this setup was made for ({got}): run again")
+    # an install from before the archive (a Git clone, its build folder) is replaced whole
+    if src.exists():
+        shutil.rmtree(src, onerror=writable_then_retry)
+    for name, data in files.items():
+        out = src / name
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(data)
+    mark.write_text(KIMODO_COMMIT + "\n", encoding="utf-8")
+    archive.unlink()
+    print(f"  {len(files)} files at {KIMODO_COMMIT[:12]}, matching their hash", flush=True)
 
 
 def eigen(root: pathlib.Path, generator: str | None) -> pathlib.Path:
@@ -269,10 +328,22 @@ def eigen(root: pathlib.Path, generator: str | None) -> pathlib.Path:
     return prefix
 
 
+def uv_python(root: pathlib.Path) -> None:
+    """Every uv here uses a Python uv downloads into the install (none need be installed), even
+    when the person's own uv settings turn downloads off."""
+    os.environ["UV_PYTHON_INSTALL_DIR"] = str(root / "python")
+    os.environ["UV_PYTHON_DOWNLOADS"] = "automatic"
+
+
 def python_env(root: pathlib.Path, cpu: bool) -> str:
     py = venv_bin(root, "python")
     if not py.exists():
-        run(["uv", "venv", "--quiet", "-p", "3.10", root / ".venv"])
+        # a .venv without a working Python (a stopped install, or its Python removed), which uv
+        # won't overwrite: it is only ever the setup's own
+        if (root / ".venv").exists():
+            print("  the environment there has no working Python: making it again", flush=True)
+            shutil.rmtree(root / ".venv", onerror=writable_then_retry)
+        run(["uv", "venv", "--quiet", "--managed-python", "-p", "3.10", root / ".venv"])
     torch_cmd = ["uv", "pip", "install", "--quiet", "-p", py, "torch"]
     if not cpu:
         torch_cmd += ["--index-url", TORCH_INDEX]
@@ -285,7 +356,7 @@ def python_env(root: pathlib.Path, cpu: bool) -> str:
     env["PATH"] = str(py.parent) + os.pathsep + env.get("PATH", "")
     if generator:
         env["CMAKE_GENERATOR"] = generator
-    run(["uv", "pip", "install", "--quiet", "-p", py, f"{root / 'kimodo'}[all]"], env=env)
+    run(["uv", "pip", "install", "--quiet", "-p", py, root / "kimodo"], env=env)
     out = subprocess.run([str(py), "-c", "import torch, kimodo, motion_correction; print(torch.__version__, "
                           "torch.cuda.is_available())"], capture_output=True, stdin=subprocess.DEVNULL, text=True, check=True).stdout.split()
     return f"torch {out[0]}, CUDA {'yes' if out[1] == 'True' else 'no'}"
@@ -329,16 +400,16 @@ def main(argv=None) -> None:
         stop_on_eof()
     root = (args.dir or default_dir()).resolve()
     need("uv", "install it from https://docs.astral.sh/uv/")
-    need("git", "install Git")
     cpu = args.cpu or not has_nvidia()
     if cpu and not args.cpu:
         print("No NVIDIA GPU found (nvidia-smi): installing CPU-only torch. Generating will be very slow.")
     check_space(root)
     root.mkdir(parents=True, exist_ok=True)
+    uv_python(root)
     print(f"Installing Kimodo into {root}")
 
     step(1, "Kimodo source")
-    clone(root)
+    kimodo_source(root)
     step(2, "Python environment (torch, Kimodo, motion correction)")
     torch_info = python_env(root, cpu)
     print(f"  {torch_info}")

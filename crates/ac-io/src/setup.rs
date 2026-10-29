@@ -111,6 +111,13 @@ impl SessionBuilder {
         }
         let mut notes = Vec::new();
         let mut installed = None;
+        match load_ranges(&self.assets, &doc.skeleton) {
+            Ok(r) => doc.ranges = Some(Arc::new(r)),
+            Err(e) => {
+                tracing::warn!("{e}");
+                notes.push(e);
+            }
+        }
         match self.ai {
             Ok(model) => doc.ai = model,
             Err(e) => {
@@ -172,4 +179,22 @@ pub fn init_logging() {
     {
         tracing::debug!("logging already set up: {e}");
     }
+}
+
+/// The range-of-motion tables (`<assets>/rig/ranges.json`); an error says what the Range panel and
+/// `clip.range` then lack, and the rest of the session works without them.
+pub fn load_ranges(assets: &Path, sk: &Skeleton) -> Result<ac_core::ranges::Ranges, String> {
+    let path = assets.join("rig/ranges.json");
+    let text = std::fs::read_to_string(&path).map_err(|e| {
+        format!(
+            "range-of-motion tables not loaded ({}: {e}); the Range panel is empty",
+            path.display()
+        )
+    })?;
+    ac_core::ranges::Ranges::from_json(&text, sk).map_err(|e| {
+        format!(
+            "range-of-motion tables not loaded ({}: {e}); the Range panel is empty",
+            path.display()
+        )
+    })
 }

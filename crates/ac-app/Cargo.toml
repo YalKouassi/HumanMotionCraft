@@ -27,6 +27,7 @@ craft-keymap = { workspace = true, features = ["egui", "ui"] }
 craft-menu.workspace = true
 craft-quit = { workspace = true, features = ["egui"] }
 craft-settings.workspace = true
+craft-ui.workspace = true
 png = "0.17"
 rfd = "0.17"
 tracing.workspace = true
