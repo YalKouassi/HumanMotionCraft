@@ -55,7 +55,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 59/306) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, 59/306) with the scan's cuts",
       "frames": 306,
       "by": "agent"
     },
@@ -70,7 +70,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.flexion, hip.rotation, 3/319) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.flexion, hip.rotation, leg.backwards, 3/319) with the scan's cuts",
       "frames": 319,
       "by": "agent"
     },
@@ -416,17 +416,17 @@
         ],
         [
           20,
-          38
+          39
         ],
         [
           61,
-          72
+          73
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 3/116) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 12/116) with the scan's cuts",
       "frames": 116,
       "by": "agent"
     },
@@ -435,7 +435,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 4/168 frames); scan: floor -0.91 m",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 5/168 frames); scan: floor -0.91 m",
       "frames": 168,
       "by": "agent"
     },
@@ -443,11 +443,11 @@
       "status": "cut",
       "cuts": [
         [
-          86,
+          84,
           102
         ],
         [
-          125,
+          124,
           140
         ],
         [
@@ -458,7 +458,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 51/275) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 58/275) with the scan's cuts",
       "frames": 275,
       "by": "agent"
     },
@@ -636,7 +636,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 14/75 frames (ankle.flexion)",
+      "note": "impossible pose in 14/75 frames (ankle.flexion, leg.backwards)",
       "frames": 75,
       "by": "agent"
     },
@@ -645,7 +645,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 16/83 frames (ankle.flexion)",
+      "note": "impossible pose in 16/83 frames (ankle.flexion, leg.backwards)",
       "frames": 83,
       "by": "agent"
     },
@@ -654,7 +654,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 6/59 frames (ankle.flexion)",
+      "note": "impossible pose in 9/59 frames (ankle.flexion, leg.backwards)",
       "frames": 59,
       "by": "agent"
     },
@@ -731,7 +731,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 27/144 frames (ankle.flexion)",
+      "note": "impossible pose in 38/144 frames (ankle.flexion, leg.backwards)",
       "frames": 144,
       "by": "agent"
     },
@@ -740,7 +740,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 101/291 frames); scan: 79% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 104/291 frames); scan: 79% cut",
       "frames": 291,
       "by": "agent"
     },
@@ -758,7 +758,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 6/140 frames); scan: 57% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 44/140 frames); scan: 57% cut",
       "frames": 140,
       "by": "agent"
     },
@@ -1231,7 +1231,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 41/639) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 41/639) with the scan's cuts",
       "frames": 639,
       "by": "agent"
     },
@@ -1343,7 +1343,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 29/1125) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 29/1125) with the scan's cuts",
       "frames": 1125,
       "by": "agent"
     },
@@ -1514,7 +1514,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, 39/197 frames); scan: 98% cut",
+      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, 40/197 frames); scan: 98% cut",
       "frames": 197,
       "by": "agent"
     },
@@ -1542,7 +1542,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 23/221) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 23/221) with the scan's cuts",
       "frames": 221,
       "by": "agent"
     },
@@ -1610,7 +1610,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/84) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/84) with the scan's cuts",
       "frames": 84,
       "by": "agent"
     },
@@ -1619,7 +1619,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 1/76 frames (ankle.flexion)",
+      "note": "impossible pose in 1/76 frames (ankle.flexion, leg.backwards)",
       "frames": 76,
       "by": "agent"
     },
@@ -1662,7 +1662,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 14/232) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 16/232) with the scan's cuts",
       "frames": 232,
       "by": "agent"
     },
@@ -1686,7 +1686,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, shoulder.flexion, 166/260 frames); scan: floor -0.21 m",
+      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, shoulder.flexion, 171/260 frames); scan: floor -0.21 m",
       "frames": 260,
       "by": "agent"
     },
@@ -1695,7 +1695,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 232/445 frames (ankle.flexion, hip.abduction)",
+      "note": "impossible pose in 252/445 frames (ankle.flexion, hip.abduction, leg.backwards)",
       "frames": 445,
       "by": "agent"
     },
@@ -1704,7 +1704,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, 216/339 frames); scan: floor -0.29 m",
+      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, 221/339 frames); scan: floor -0.29 m",
       "frames": 339,
       "by": "agent"
     },
@@ -1713,7 +1713,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 6/197 frames); scan: 61% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 6/197 frames); scan: 61% cut",
       "frames": 197,
       "by": "agent"
     },
@@ -1722,7 +1722,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 2/317 frames); scan: 97% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 8/317 frames); scan: 97% cut",
       "frames": 317,
       "by": "agent"
     },
@@ -1774,13 +1774,13 @@
         ],
         [
           283,
-          295
+          296
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 32/371) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 35/371) with the scan's cuts",
       "frames": 371,
       "by": "agent"
     },
@@ -1789,7 +1789,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 149/358 frames (ankle.flexion)",
+      "note": "impossible pose in 167/358 frames (ankle.flexion, leg.backwards)",
       "frames": 358,
       "by": "agent"
     },
@@ -1798,7 +1798,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 130/245 frames); scan: 56% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 152/245 frames); scan: 56% cut",
       "frames": 245,
       "by": "agent"
     },
@@ -1807,7 +1807,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 149/224 frames (ankle.flexion)",
+      "note": "impossible pose in 149/224 frames (ankle.flexion, leg.backwards)",
       "frames": 224,
       "by": "agent"
     },
@@ -1826,7 +1826,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 30/210) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 34/210) with the scan's cuts",
       "frames": 210,
       "by": "agent"
     },
@@ -1835,7 +1835,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 86/174 frames (ankle.flexion)",
+      "note": "impossible pose in 87/174 frames (ankle.flexion, leg.backwards)",
       "frames": 174,
       "by": "agent"
     },
@@ -1844,7 +1844,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 114/164 frames (ankle.flexion)",
+      "note": "impossible pose in 114/164 frames (ankle.flexion, leg.backwards)",
       "frames": 164,
       "by": "agent"
     },
@@ -1852,39 +1852,31 @@
       "status": "cut",
       "cuts": [
         [
-          652,
-          657
+          650,
+          665
         ],
         [
-          659,
-          664
-        ],
-        [
-          693,
-          698
-        ],
-        [
-          701,
+          691,
           711
         ],
         [
-          736,
+          735,
           752
         ],
         [
-          850,
-          868
+          849,
+          870
         ],
         [
           884,
           905
         ],
         [
-          936,
-          956
+          934,
+          957
         ],
         [
-          970,
+          969,
           990
         ],
         [
@@ -1895,7 +1887,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 71/1343) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 106/1343) with the scan's cuts",
       "frames": 1343,
       "by": "agent"
     },
@@ -1903,14 +1895,14 @@
       "status": "cut",
       "cuts": [
         [
-          43,
+          42,
           57
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 5/131) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 6/131) with the scan's cuts",
       "frames": 131,
       "by": "agent"
     },
@@ -1925,7 +1917,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 4/234) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 5/234) with the scan's cuts",
       "frames": 234,
       "by": "agent"
     },
@@ -1933,14 +1925,14 @@
       "status": "cut",
       "cuts": [
         [
-          139,
+          138,
           241
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 5/242) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 9/242) with the scan's cuts",
       "frames": 242,
       "by": "agent"
     },
@@ -1948,14 +1940,14 @@
       "status": "cut",
       "cuts": [
         [
-          148,
+          147,
           261
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 4/262) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 8/262) with the scan's cuts",
       "frames": 262,
       "by": "agent"
     },
@@ -1970,7 +1962,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 7/149) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 9/149) with the scan's cuts",
       "frames": 149,
       "by": "agent"
     },
@@ -1979,7 +1971,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 17/156 frames); scan: 76% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 17/156 frames); scan: 76% cut",
       "frames": 156,
       "by": "agent"
     },
@@ -1988,7 +1980,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 14/132 frames); scan: 77% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 14/132 frames); scan: 77% cut",
       "frames": 132,
       "by": "agent"
     },
@@ -2003,7 +1995,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 7/102) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 7/102) with the scan's cuts",
       "frames": 102,
       "by": "agent"
     },
@@ -2012,13 +2004,13 @@
       "cuts": [
         [
           66,
-          77
+          78
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/119) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/119) with the scan's cuts",
       "frames": 119,
       "by": "agent"
     },
@@ -2033,7 +2025,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 6/145) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 6/145) with the scan's cuts",
       "frames": 145,
       "by": "agent"
     },
@@ -2425,7 +2417,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 101/291 frames); scan: 79% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 104/291 frames); scan: 79% cut",
       "frames": 291,
       "by": "agent"
     },
@@ -3164,7 +3156,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 880/2381 frames (ankle.flexion, hip.flexion, hip.rotation)",
+      "note": "impossible pose in 880/2381 frames (ankle.flexion, hip.flexion, hip.rotation, leg.backwards)",
       "frames": 2381,
       "by": "agent"
     },
@@ -3222,16 +3214,12 @@
           323
         ],
         [
-          347,
+          345,
           358
         ],
         [
-          363,
-          368
-        ],
-        [
-          371,
-          394
+          361,
+          395
         ],
         [
           402,
@@ -3243,15 +3231,15 @@
         ],
         [
           462,
-          474
+          475
         ],
         [
-          532,
-          548
+          531,
+          549
         ],
         [
-          556,
-          567
+          555,
+          569
         ],
         [
           584,
@@ -3261,7 +3249,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 52/631) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 90/631) with the scan's cuts",
       "frames": 631,
       "by": "agent"
     },
@@ -3285,7 +3273,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 180/180 frames (ankle.flexion, hip.rotation)",
+      "note": "impossible pose in 180/180 frames (ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 180,
       "by": "agent"
     },
@@ -3294,7 +3282,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 221/221 frames (ankle.flexion, hip.rotation)",
+      "note": "impossible pose in 221/221 frames (ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 221,
       "by": "agent"
     },
@@ -3303,7 +3291,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 234/234 frames (ankle.flexion, hip.rotation)",
+      "note": "impossible pose in 234/234 frames (ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 234,
       "by": "agent"
     },
@@ -3473,13 +3461,13 @@
       "cuts": [
         [
           568,
-          602
+          603
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 25/648) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 26/648) with the scan's cuts",
       "frames": 648,
       "by": "agent"
     },
@@ -3876,14 +3864,14 @@
       "status": "cut",
       "cuts": [
         [
-          46,
+          45,
           57
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/99) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/99) with the scan's cuts",
       "frames": 99,
       "by": "agent"
     },
@@ -3898,7 +3886,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 3/79) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/79) with the scan's cuts",
       "frames": 79,
       "by": "agent"
     },
@@ -3913,7 +3901,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/81) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 2/81) with the scan's cuts",
       "frames": 81,
       "by": "agent"
     },
@@ -3928,7 +3916,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 1/81) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 1/81) with the scan's cuts",
       "frames": 81,
       "by": "agent"
     },
@@ -3937,7 +3925,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 44/78 frames); scan: floor -0.22 m; 63% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 45/78 frames); scan: floor -0.22 m; 63% cut",
       "frames": 78,
       "by": "agent"
     },
@@ -3953,16 +3941,12 @@
           323
         ],
         [
-          347,
+          345,
           358
         ],
         [
-          363,
-          368
-        ],
-        [
-          371,
-          394
+          361,
+          395
         ],
         [
           402,
@@ -3974,15 +3958,15 @@
         ],
         [
           462,
-          474
+          475
         ],
         [
-          532,
-          548
+          531,
+          549
         ],
         [
-          556,
-          567
+          555,
+          569
         ],
         [
           584,
@@ -3992,7 +3976,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 52/631) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 90/631) with the scan's cuts",
       "frames": 631,
       "by": "agent"
     },
@@ -4050,7 +4034,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 41/639) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 41/639) with the scan's cuts",
       "frames": 639,
       "by": "agent"
     },
@@ -4132,7 +4116,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, 29/1125) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 29/1125) with the scan's cuts",
       "frames": 1125,
       "by": "agent"
     },
@@ -4160,7 +4144,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, 39/197 frames); scan: 98% cut",
+      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, 40/197 frames); scan: 98% cut",
       "frames": 197,
       "by": "agent"
     },
@@ -4178,7 +4162,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 232/445 frames (ankle.flexion, hip.abduction)",
+      "note": "impossible pose in 252/445 frames (ankle.flexion, hip.abduction, leg.backwards)",
       "frames": 445,
       "by": "agent"
     },
@@ -4187,7 +4171,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, 216/339 frames); scan: floor -0.29 m",
+      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, 221/339 frames); scan: floor -0.29 m",
       "frames": 339,
       "by": "agent"
     },
@@ -4216,13 +4200,13 @@
         ],
         [
           283,
-          295
+          296
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 32/371) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 35/371) with the scan's cuts",
       "frames": 371,
       "by": "agent"
     },
@@ -4368,7 +4352,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 28/835) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, 28/835) with the scan's cuts",
       "frames": 835,
       "by": "agent"
     },
@@ -4783,7 +4767,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 44/78 frames); scan: floor -0.22 m; 63% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 45/78 frames); scan: floor -0.22 m; 63% cut",
       "frames": 78,
       "by": "agent"
     },
@@ -4792,7 +4776,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 285/285 frames (ankle.flexion, hip.rotation)",
+      "note": "impossible pose in 285/285 frames (ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 285,
       "by": "agent"
     },
@@ -4947,7 +4931,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 47/180 frames (ankle.flexion, hip.abduction)",
+      "note": "impossible pose in 48/180 frames (ankle.flexion, hip.abduction, leg.backwards)",
       "frames": 180,
       "by": "agent"
     },
@@ -5020,7 +5004,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 14/148) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, 14/148) with the scan's cuts",
       "frames": 148,
       "by": "agent"
     },
@@ -5202,7 +5186,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, neck.flexion, 45/215) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, neck.flexion, 45/215) with the scan's cuts",
       "frames": 215,
       "by": "agent"
     },
@@ -5380,21 +5364,13 @@
       "cuts": [
         [
           175,
-          187
-        ],
-        [
-          197,
-          212
-        ],
-        [
-          221,
           231
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 6/561) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 47/561) with the scan's cuts",
       "frames": 561,
       "by": "agent"
     },
@@ -5403,17 +5379,13 @@
       "cuts": [
         [
           322,
-          332
-        ],
-        [
-          338,
           348
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/525) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 17/525) with the scan's cuts",
       "frames": 525,
       "by": "agent"
     },
@@ -5440,7 +5412,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, trunk.rotation, 9/855) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, trunk.rotation, 9/855) with the scan's cuts",
       "frames": 855,
       "by": "agent"
     },
@@ -5494,14 +5466,14 @@
           289
         ],
         [
-          446,
-          455
+          445,
+          456
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (trunk.rotation, 1/535) with the scan's cuts",
+      "note": "cut impossible pose frames (leg.backwards, trunk.rotation, 3/535) with the scan's cuts",
       "frames": 535,
       "by": "agent"
     },
@@ -5575,7 +5547,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 149/358 frames (ankle.flexion)",
+      "note": "impossible pose in 167/358 frames (ankle.flexion, leg.backwards)",
       "frames": 358,
       "by": "agent"
     },
@@ -5584,7 +5556,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 130/245 frames); scan: 56% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 152/245 frames); scan: 56% cut",
       "frames": 245,
       "by": "agent"
     },
@@ -5642,7 +5614,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 27/144 frames (ankle.flexion)",
+      "note": "impossible pose in 38/144 frames (ankle.flexion, leg.backwards)",
       "frames": 144,
       "by": "agent"
     },
@@ -5798,14 +5770,14 @@
       "status": "cut",
       "cuts": [
         [
-          46,
+          45,
           57
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/99) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/99) with the scan's cuts",
       "frames": 99,
       "by": "agent"
     },
@@ -5820,7 +5792,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 3/79) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/79) with the scan's cuts",
       "frames": 79,
       "by": "agent"
     },
@@ -5835,7 +5807,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/81) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 2/81) with the scan's cuts",
       "frames": 81,
       "by": "agent"
     },
@@ -5850,7 +5822,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 1/81) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 1/81) with the scan's cuts",
       "frames": 81,
       "by": "agent"
     },
@@ -5942,7 +5914,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 3/154) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/154) with the scan's cuts",
       "frames": 154,
       "by": "agent"
     },
@@ -6055,7 +6027,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 52/615) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 52/615) with the scan's cuts",
       "frames": 615,
       "by": "agent"
     },
@@ -6254,7 +6226,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 10/62 frames (ankle.flexion, hip.abduction)",
+      "note": "impossible pose in 10/62 frames (ankle.flexion, hip.abduction, leg.backwards)",
       "frames": 62,
       "by": "agent"
     },
@@ -6263,7 +6235,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 8/54 frames (ankle.flexion)",
+      "note": "impossible pose in 9/54 frames (ankle.flexion, leg.backwards)",
       "frames": 54,
       "by": "agent"
     },
@@ -6272,7 +6244,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 12/128 frames); scan: 63% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 12/128 frames); scan: 63% cut",
       "frames": 128,
       "by": "agent"
     },
@@ -6312,7 +6284,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 5/37 frames); scan: 70% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 5/37 frames); scan: 70% cut",
       "frames": 37,
       "by": "agent"
     },
@@ -6374,7 +6346,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation, 75/479) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation, leg.backwards, 75/479) with the scan's cuts",
       "frames": 479,
       "by": "agent"
     },
@@ -6411,7 +6383,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 23/221) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 23/221) with the scan's cuts",
       "frames": 221,
       "by": "agent"
     },
@@ -6449,7 +6421,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/84) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/84) with the scan's cuts",
       "frames": 84,
       "by": "agent"
     },
@@ -6483,7 +6455,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, shoulder.flexion, 14/232) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 16/232) with the scan's cuts",
       "frames": 232,
       "by": "agent"
     },
@@ -6492,7 +6464,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, shoulder.flexion, 166/260 frames); scan: floor -0.21 m",
+      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, shoulder.flexion, 171/260 frames); scan: floor -0.21 m",
       "frames": 260,
       "by": "agent"
     },
@@ -6790,7 +6762,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 149/224 frames (ankle.flexion)",
+      "note": "impossible pose in 149/224 frames (ankle.flexion, leg.backwards)",
       "frames": 224,
       "by": "agent"
     },
@@ -6809,7 +6781,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 30/210) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 34/210) with the scan's cuts",
       "frames": 210,
       "by": "agent"
     },
@@ -6818,7 +6790,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 86/174 frames (ankle.flexion)",
+      "note": "impossible pose in 87/174 frames (ankle.flexion, leg.backwards)",
       "frames": 174,
       "by": "agent"
     },
@@ -6827,7 +6799,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 114/164 frames (ankle.flexion)",
+      "note": "impossible pose in 114/164 frames (ankle.flexion, leg.backwards)",
       "frames": 164,
       "by": "agent"
     },
@@ -6941,7 +6913,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/95) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 2/95) with the scan's cuts",
       "frames": 95,
       "by": "agent"
     },
@@ -6950,7 +6922,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 147/147 frames (ankle.flexion, hip.rotation)",
+      "note": "impossible pose in 147/147 frames (ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 147,
       "by": "agent"
     },
@@ -6984,7 +6956,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 7/149) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 9/149) with the scan's cuts",
       "frames": 149,
       "by": "agent"
     },
@@ -6993,7 +6965,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 17/156 frames); scan: 76% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 17/156 frames); scan: 76% cut",
       "frames": 156,
       "by": "agent"
     },
@@ -7002,7 +6974,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 14/132 frames); scan: 77% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 14/132 frames); scan: 77% cut",
       "frames": 132,
       "by": "agent"
     },
@@ -7017,7 +6989,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 7/102) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 7/102) with the scan's cuts",
       "frames": 102,
       "by": "agent"
     },
@@ -7026,13 +6998,13 @@
       "cuts": [
         [
           66,
-          77
+          78
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/119) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/119) with the scan's cuts",
       "frames": 119,
       "by": "agent"
     },
@@ -7047,7 +7019,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 6/145) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 6/145) with the scan's cuts",
       "frames": 145,
       "by": "agent"
     },
@@ -7056,8 +7028,62 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 10/96 frames); scan: floor -0.91 m; 62% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 44/96 frames); scan: floor -0.91 m; 62% cut",
       "frames": 96,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_04": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (leg.backwards, 18/50 frames); scan: 90% cut",
+      "frames": 50,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_06": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (leg.backwards, 17/84 frames); scan: 58% cut",
+      "frames": 84,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_08": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 13/79 frames (leg.backwards)",
+      "frames": 79,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_09": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 13/87 frames (leg.backwards)",
+      "frames": 87,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_10": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose in 10/84 frames (leg.backwards)",
+      "frames": 84,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_37": {
+      "status": "reject",
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "impossible pose (leg.backwards, 16/38 frames); scan: 97% cut",
+      "frames": 38,
       "by": "agent"
     },
     "cmu/run_cmu_104_48": {
@@ -7065,7 +7091,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 1/30 frames); scan: 87% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 11/30 frames); scan: 87% cut",
       "frames": 30,
       "by": "agent"
     },
@@ -7074,7 +7100,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 4/75 frames (ankle.flexion)",
+      "note": "impossible pose in 13/75 frames (ankle.flexion, leg.backwards)",
       "frames": 75,
       "by": "agent"
     },
@@ -7083,7 +7109,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 1/62 frames (ankle.flexion)",
+      "note": "impossible pose in 10/62 frames (ankle.flexion, leg.backwards)",
       "frames": 62,
       "by": "agent"
     },
@@ -7095,15 +7121,45 @@
           3
         ],
         [
-          75,
+          73,
           104
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 5/126) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 11/126) with the scan's cuts",
       "frames": 126,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_56": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          14
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (leg.backwards, 4/92) with the scan's cuts",
+      "frames": 92,
+      "by": "agent"
+    },
+    "cmu/run_cmu_104_57": {
+      "status": "cut",
+      "cuts": [
+        [
+          0,
+          23
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (leg.backwards, 7/96) with the scan's cuts",
+      "frames": 96,
       "by": "agent"
     },
     "cmu/run_cmu_127_29": {
@@ -7232,7 +7288,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 1/73 frames (ankle.flexion)",
+      "note": "impossible pose in 4/73 frames (ankle.flexion, leg.backwards)",
       "frames": 73,
       "by": "agent"
     },
@@ -7322,7 +7378,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 6/140 frames); scan: 57% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 44/140 frames); scan: 57% cut",
       "frames": 140,
       "by": "agent"
     },
@@ -7355,7 +7411,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 54/124 frames (ankle.flexion)",
+      "note": "impossible pose in 54/124 frames (ankle.flexion, leg.backwards)",
       "frames": 124,
       "by": "agent"
     },
@@ -7454,7 +7510,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 210/210 frames (ankle.flexion, hip.rotation)",
+      "note": "impossible pose in 210/210 frames (ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 210,
       "by": "agent"
     },
@@ -7463,7 +7519,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 125/125 frames (ankle.flexion, hip.rotation)",
+      "note": "impossible pose in 125/125 frames (ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 125,
       "by": "agent"
     },
@@ -7472,7 +7528,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 160/160 frames (ankle.flexion, hip.rotation)",
+      "note": "impossible pose in 160/160 frames (ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 160,
       "by": "agent"
     },
@@ -7560,7 +7616,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 6/197 frames); scan: 61% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 6/197 frames); scan: 61% cut",
       "frames": 197,
       "by": "agent"
     },
@@ -7569,7 +7625,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 2/317 frames); scan: 97% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 8/317 frames); scan: 97% cut",
       "frames": 317,
       "by": "agent"
     },
@@ -7875,39 +7931,31 @@
       "status": "cut",
       "cuts": [
         [
-          652,
-          657
+          650,
+          665
         ],
         [
-          659,
-          664
-        ],
-        [
-          693,
-          698
-        ],
-        [
-          701,
+          691,
           711
         ],
         [
-          736,
+          735,
           752
         ],
         [
-          850,
-          868
+          849,
+          870
         ],
         [
           884,
           905
         ],
         [
-          936,
-          956
+          934,
+          957
         ],
         [
-          970,
+          969,
           990
         ],
         [
@@ -7918,7 +7966,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 71/1343) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 106/1343) with the scan's cuts",
       "frames": 1343,
       "by": "agent"
     },
@@ -7992,22 +8040,37 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 15/507) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 15/507) with the scan's cuts",
       "frames": 507,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_104_12": {
+      "status": "cut",
+      "cuts": [
+        [
+          54,
+          66
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (leg.backwards, 3/105) with the scan's cuts",
+      "frames": 105,
       "by": "agent"
     },
     "cmu/walk_cmu_104_13": {
       "status": "cut",
       "cuts": [
         [
-          100,
+          99,
           137
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 5/138) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 16/138) with the scan's cuts",
       "frames": 138,
       "by": "agent"
     },
@@ -8015,14 +8078,14 @@
       "status": "cut",
       "cuts": [
         [
-          162,
-          172
+          160,
+          173
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 1/177) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 4/177) with the scan's cuts",
       "frames": 177,
       "by": "agent"
     },
@@ -8031,7 +8094,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 5/82 frames); scan: 57% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 18/82 frames); scan: 57% cut",
       "frames": 82,
       "by": "agent"
     },
@@ -8335,7 +8398,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation, 8/1771) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation, leg.backwards, 8/1771) with the scan's cuts",
       "frames": 1771,
       "by": "agent"
     },
@@ -8344,7 +8407,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 74/202 frames); scan: 62% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 81/202 frames); scan: 62% cut",
       "frames": 202,
       "by": "agent"
     },
@@ -8353,7 +8416,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 69/195 frames); scan: 59% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 76/195 frames); scan: 59% cut",
       "frames": 195,
       "by": "agent"
     },
@@ -8362,7 +8425,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 58/170 frames); scan: 54% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 58/170 frames); scan: 54% cut",
       "frames": 170,
       "by": "agent"
     },
@@ -8371,7 +8434,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 73/175 frames); scan: 67% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 76/175 frames); scan: 67% cut",
       "frames": 175,
       "by": "agent"
     },
@@ -8380,7 +8443,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 44/93 frames); scan: 68% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 45/93 frames); scan: 68% cut",
       "frames": 93,
       "by": "agent"
     },
@@ -8389,7 +8452,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 54/100 frames); scan: 68% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 54/100 frames); scan: 68% cut",
       "frames": 100,
       "by": "agent"
     },
@@ -8398,7 +8461,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 47/96 frames); scan: 70% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 48/96 frames); scan: 70% cut",
       "frames": 96,
       "by": "agent"
     },
@@ -8407,7 +8470,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 48/100 frames); scan: 65% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 48/100 frames); scan: 65% cut",
       "frames": 100,
       "by": "agent"
     },
@@ -8416,7 +8479,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 51/107 frames); scan: 67% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 53/107 frames); scan: 67% cut",
       "frames": 107,
       "by": "agent"
     },
@@ -8425,7 +8488,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, 49/109 frames); scan: 69% cut",
+      "note": "impossible pose (ankle.flexion, leg.backwards, 49/109 frames); scan: 69% cut",
       "frames": 109,
       "by": "agent"
     },
@@ -8434,7 +8497,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 14/75 frames (ankle.flexion)",
+      "note": "impossible pose in 14/75 frames (ankle.flexion, leg.backwards)",
       "frames": 75,
       "by": "agent"
     },
@@ -8443,7 +8506,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 16/83 frames (ankle.flexion)",
+      "note": "impossible pose in 16/83 frames (ankle.flexion, leg.backwards)",
       "frames": 83,
       "by": "agent"
     },
@@ -8452,7 +8515,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 6/59 frames (ankle.flexion)",
+      "note": "impossible pose in 9/59 frames (ankle.flexion, leg.backwards)",
       "frames": 59,
       "by": "agent"
     },
@@ -8641,7 +8704,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, trunk.rotation, 9/2452) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, trunk.rotation, 9/2452) with the scan's cuts",
       "frames": 2452,
       "by": "agent"
     },
@@ -8865,14 +8928,14 @@
       "status": "cut",
       "cuts": [
         [
-          43,
+          42,
           57
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 5/131) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 6/131) with the scan's cuts",
       "frames": 131,
       "by": "agent"
     },
@@ -9227,13 +9290,13 @@
       "cuts": [
         [
           55,
-          66
+          67
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 2/180) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, 3/180) with the scan's cuts",
       "frames": 180,
       "by": "agent"
     },
@@ -9348,7 +9411,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 1/240) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 1/240) with the scan's cuts",
       "frames": 240,
       "by": "agent"
     },
