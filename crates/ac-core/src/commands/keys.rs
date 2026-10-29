@@ -558,8 +558,8 @@ fn ai_fill(doc: &mut Document, p: &P) -> Out {
         (Some(_), Some(_)) => Some(range(p)?),
         _ => return Err("give both `from` and `to`, or neither".into()),
     };
-    let (a, b, model) = doc.ai_fill(span)?;
-    Ok(json!({ "from": a, "to": b, "frames": b - a - 1, "model": model }))
+    let f = doc.ai_fill(span)?;
+    Ok(json!({ "from": f.from, "to": f.to, "frames": f.to - f.from - 1, "model": f.model, "notes": f.notes }))
 }
 
 /// A previewed fill: its span, label and the root head on every frame of it (the ghost path).
@@ -573,7 +573,7 @@ fn preview_json(doc: &Document, p: &crate::ai::Preview) -> Out {
         .collect::<Result<Vec<_>, String>>()?;
     Ok(json!({
         "from": p.from, "to": p.to, "frames": p.to - p.from - 1, "model": p.label,
-        "mode": if p.plain { "plain" } else { "ai" }, "root_heads": heads,
+        "mode": if p.plain { "plain" } else { "ai" }, "root_heads": heads, "notes": p.notes,
     }))
 }
 

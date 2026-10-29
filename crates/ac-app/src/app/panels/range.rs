@@ -6,12 +6,15 @@
 //! - the static per-bone box (`assets/rig/limits.json`),
 //! - the current clip's trajectory (`path`) and playhead (`doc.pose`).
 //!
-//! Frames outside a clinical hard limit become marks on the timeline (`timeline::marks`, source
-//! `"range"`) and clickable rows in the panel (`frame.set`).
+//! Three levels (`ac_core::possible`): inside the clinical limits is typical; past them is
+//! unusual or athletic, still realistic (amber); past a possible limit is impossible (red), with a
+//! button that runs `clip.fix_impossible`. Frames past either become marks on the timeline
+//! (`timeline::marks`, source `"range"`) and clickable rows in the panel (`frame.set`).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use ac_core::clip::Clip;
+use ac_core::possible::Possible;
 use ac_core::ranges::{BandPoint, PairSpec, Probe, judge};
 use egui::{Color32, Pos2, Rect, Sense, Stroke, Vec2};
 use serde_json::{Value, json};
@@ -35,6 +38,8 @@ pub struct RangeState {
     pub pair: String,
     pub side: String,
     report: Option<Value>,
+    /// `clip.possible` over the same motion: the clip's level and its impossible frames.
+    possible: Option<Value>,
     error: Option<String>,
     pub(super) made_for: Option<MadeFor>,
     /// Total frames outside the clinical hard limit across all pairs/sides.
@@ -47,6 +52,7 @@ impl Default for RangeState {
             pair: "hip_knee".into(),
             side: "L".into(),
             report: None,
+            possible: None,
             error: None,
             made_for: None,
             outside_frames: 0,
@@ -78,14 +84,23 @@ impl App {
         st.made_for = Some(made_for);
 
         let motion = if shown { "shown" } else { "keys" };
-        match self.session.run(
-            "clip.range",
-            &json!({ "pair": pair, "side": side, "motion": motion }),
-        ) {
-            Ok(r) => {
+        let measured = self
+            .session
+            .run(
+                "clip.range",
+                &json!({ "pair": pair, "side": side, "motion": motion }),
+            )
+            .and_then(|r| {
+                Ok((
+                    r,
+                    self.session.run("clip.possible", &json!({ "motion": motion }))?,
+                ))
+            });
+        match measured {
+            Ok((r, possible)) => {
                 let mut total_outside = 0usize;
                 let mut marks = Vec::new();
-                let err_col = self.palette().error;
+                let (warn_col, err_col) = (self.palette().warning, self.palette().error);
                 if let Some(sum) = r["summary"].as_array() {
                     for item in sum {
                         let out_n = item["outside_hard_frames"].as_u64().unwrap_or(0) as usize;
@@ -101,24 +116,40 @@ impl App {
                                 let from = sp.get(0).and_then(Value::as_i64).unwrap_or(0);
                                 let to = sp.get(1).and_then(Value::as_i64).unwrap_or(from);
                                 let tip = format!(
-                                    "{label}{side_lbl}: up to {max_deg:.1}° past clinical hard limit"
+                                    "{label}{side_lbl}: up to {max_deg:.1}° past the clinical limit (unusual or athletic, still realistic)"
                                 );
                                 marks.push(
-                                    Mark::new(from as f64, "range-limit", err_col, &tip).until(to as f64),
+                                    Mark::new(from as f64, "range-limit", warn_col, &tip).until(to as f64),
                                 );
                             }
                         }
                     }
                 }
+                for b in possible["breaches"].as_array().into_iter().flatten() {
+                    let tip = format!(
+                        "Impossible: {} {} up to {:.0}° past the possible limit",
+                        b["joint"].as_str().unwrap_or("?"),
+                        b["component"].as_str().unwrap_or("?"),
+                        b["past_deg"].as_f64().unwrap_or(0.0)
+                    );
+                    for sp in b["spans"].as_array().into_iter().flatten() {
+                        let from = sp.get(0).and_then(Value::as_i64).unwrap_or(0);
+                        let to = sp.get(1).and_then(Value::as_i64).unwrap_or(from);
+                        marks
+                            .push(Mark::new(from as f64, "range-impossible", err_col, &tip).until(to as f64));
+                    }
+                }
                 let st = &mut self.panels.range;
                 st.outside_frames = total_outside;
                 st.report = Some(r);
+                st.possible = Some(possible);
                 st.error = None;
                 self.timeline.marks.set("range", marks);
             }
             Err(e) => {
                 let st = &mut self.panels.range;
                 st.report = None;
+                st.possible = None;
                 st.outside_frames = 0;
                 st.error = Some(format!("range check failed: {e}"));
                 self.timeline.marks.clear("range");
@@ -199,6 +230,10 @@ impl App {
             self.range_refresh();
         }
 
+        if let Some(level) = self.panels.range.possible.clone() {
+            self.range_level(ui, &level);
+        }
+
         let eff_side: String = if spec.sided {
             self.panels.range.side.clone()
         } else {
@@ -214,6 +249,25 @@ impl App {
         let j = judge(&spec, cur_x, cur_y);
         let (ch_lo, ch_hi, cur_close) = (j.hard_lo, j.hard_hi, j.closeness);
         let (cur_past_hard, cur_past_typ) = (j.past_hard, j.past_typical);
+        let live = Possible::new(sk, &ranges)
+            .and_then(|p| p.breaches(sk, &doc.pose.rotations))
+            .unwrap_or_default();
+        let live_worst = live.iter().max_by(|a, b| a.past().total_cmp(&b.past())).cloned();
+        let impossible: BTreeSet<i64> = self
+            .panels
+            .range
+            .possible
+            .as_ref()
+            .and_then(|p| p["breaches"].as_array())
+            .into_iter()
+            .flatten()
+            .flat_map(|b| b["spans"].as_array().cloned().unwrap_or_default())
+            .flat_map(|sp| {
+                let a = sp.get(0).and_then(Value::as_i64).unwrap_or(0);
+                let b = sp.get(1).and_then(Value::as_i64).unwrap_or(a);
+                a..=b
+            })
+            .collect();
 
         let pal = self.palette();
         let jump_frame = draw_chart(
@@ -221,29 +275,47 @@ impl App {
             pal,
             &spec,
             self.panels.range.report.as_ref(),
-            (cur_x, cur_y, cur_past_hard, cur_past_typ),
+            &impossible,
+            (cur_x, cur_y, cur_past_hard, cur_past_typ, live_worst.is_some()),
         );
         if let Some(f) = jump_frame {
             self.playing = false;
             self.run("frame.set", json!({ "frame": f }));
         }
 
-        // Compact legend
-        ui.horizontal_wrapped(|ui| {
-            ui.spacing_mut().item_spacing.x = 8.0;
-            legend_dot(ui, pal.range, "Hard limit (clinical)");
-            legend_dot(ui, pal.key_ai, "Typical mocap (1–99%)");
-        });
+        // Compact legend, two rows: a nested horizontal does not wrap on a narrow panel
+        for row in [
+            [
+                (pal.range, "Clinical limit"),
+                (pal.key_ai, "Typical mocap (1–99%)"),
+            ],
+            [(pal.warning, "Unusual / athletic"), (pal.error, "Impossible")],
+        ] {
+            ui.horizontal(|ui| {
+                ui.spacing_mut().item_spacing.x = 8.0;
+                for (colour, text) in row {
+                    legend_dot(ui, colour, text);
+                }
+            });
+        }
 
         // Live playhead readout
         let pct = (cur_close * 100.0).round() as i64;
-        let (status_txt, status_col) = if cur_past_hard > 1.0 {
+        let (status_txt, status_col) = if let Some(w) = &live_worst {
             (
                 format!(
-                    "Now: {:.1}°, {:.1}° — {pct}% (+{:.1}° past hard limit [{:.0}°, {:.0}°])",
-                    cur_x, cur_y, cur_past_hard, ch_lo, ch_hi
+                    "Now: impossible: {} {} {:.0}° (possible {:.0}° to {:.0}°)",
+                    w.joint, w.component, w.value, w.lo, w.hi
                 ),
                 pal.error,
+            )
+        } else if cur_past_hard > 1.0 {
+            (
+                format!(
+                    "Now: {:.1}°, {:.1}°: {:.1}° past the clinical limit [{:.0}°, {:.0}°]. Realistic, but unusual or athletic",
+                    cur_x, cur_y, cur_past_hard, ch_lo, ch_hi
+                ),
+                pal.warning,
             )
         } else if cur_past_typ > 1.0 {
             (
@@ -294,8 +366,10 @@ impl App {
                 };
                 let (row_txt, col) = if out_n > 0 {
                     (
-                        format!("{name}: {out_n}f past hard (+{max_past:.1}° at f{target_frame})"),
-                        pal.error,
+                        format!(
+                            "{name}: {out_n}f past clinical, unusual (+{max_past:.1}° at f{target_frame})"
+                        ),
+                        pal.warning,
                     )
                 } else {
                     (
@@ -352,6 +426,75 @@ impl App {
     }
 }
 
+impl App {
+    /// The clip's level (`clip.possible`): what it means, the impossible joints, and a fix.
+    fn range_level(&mut self, ui: &mut egui::Ui, level: &Value) {
+        let pal = self.palette();
+        let msg = level["message"].as_str().unwrap_or_default();
+        match level["level"].as_str() {
+            Some("impossible") => {
+                ui.label(egui::RichText::new(msg).small().color(pal.error));
+                for b in level["breaches"].as_array().into_iter().flatten().take(4) {
+                    let frames = b["spans"]
+                        .as_array()
+                        .into_iter()
+                        .flatten()
+                        .map(|sp| {
+                            match (
+                                sp.get(0).and_then(Value::as_i64),
+                                sp.get(1).and_then(Value::as_i64),
+                            ) {
+                                (Some(a), Some(b)) if a != b => format!("{a}–{b}"),
+                                (Some(a), _) => a.to_string(),
+                                _ => String::new(),
+                            }
+                        })
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    let row = format!(
+                        "{} {}: {:.0}° past (frames {frames})",
+                        b["joint"].as_str().unwrap_or("?"),
+                        b["component"].as_str().unwrap_or("?"),
+                        b["past_deg"].as_f64().unwrap_or(0.0)
+                    );
+                    let worst = b["worst_frame"].as_i64().unwrap_or(0);
+                    if ui
+                        .selectable_label(false, egui::RichText::new(&row).small().color(pal.error))
+                        .on_hover_text(format!("Go to frame {worst}"))
+                        .tag(
+                            format!(
+                                "panel.range.impossible.{}.{}",
+                                b["joint"].as_str().unwrap_or("?"),
+                                b["component"].as_str().unwrap_or("?")
+                            ),
+                            &row,
+                        )
+                        .clicked()
+                    {
+                        self.playing = false;
+                        self.run("frame.set", json!({ "frame": worst }));
+                    }
+                }
+                if ui
+                    .button("Fix impossible poses")
+                    .on_hover_text("Bend every impossible joint on your keys back to its possible limit (clip.fix_impossible; undo puts it back)")
+                    .tag("panel.range.fix", "Fix impossible poses")
+                    .clicked()
+                {
+                    self.run("clip.fix_impossible", json!({}));
+                }
+            }
+            Some("unusual") => {
+                ui.label(egui::RichText::new(msg).small().color(pal.warning));
+            }
+            _ => {
+                ui.label(egui::RichText::new(msg).small().weak());
+            }
+        }
+        ui.add_space(2.0);
+    }
+}
+
 fn legend_dot(ui: &mut egui::Ui, colour: Color32, text: &str) {
     ui.horizontal(|ui| {
         ui.spacing_mut().item_spacing.x = 4.0;
@@ -367,7 +510,8 @@ fn draw_chart(
     pal: &Palette,
     spec: &PairSpec,
     report: Option<&Value>,
-    playhead: (f64, f64, f64, f64),
+    impossible: &BTreeSet<i64>,
+    playhead: (f64, f64, f64, f64, bool),
 ) -> Option<i64> {
     let width = ui.available_width().max(180.0);
     let height = 185.0;
@@ -465,15 +609,18 @@ fn draw_chart(
             let f = pt["frame"].as_i64().unwrap_or(0);
             let past_hard = pt["past_hard_deg"].as_f64().unwrap_or(0.0);
             let past_typ = pt["past_typical_deg"].as_f64().unwrap_or(0.0);
-            let (col, rad) = if past_hard > 1.0 {
+            let gone = impossible.contains(&f);
+            let (col, rad) = if gone {
                 (pal.error, 3.8)
+            } else if past_hard > 1.0 {
+                (pal.warning, 3.2)
             } else if past_typ > 1.0 {
                 (pal.warning, 2.8)
             } else {
                 (pal.key_manual, 2.2)
             };
             painter.circle_filled(pos, rad, col);
-            if past_hard > 1.0 {
+            if gone || past_hard > 1.0 {
                 painter.circle_stroke(pos, rad, Stroke::new(1.0, pal.surface.outline));
             }
             if let Some(ptr) = pointer {
@@ -484,9 +631,13 @@ fn draw_chart(
                     let y = pt["y"].as_f64().unwrap_or(0.0);
                     let h_lo = pt["hard_lo"].as_f64().unwrap_or(0.0);
                     let h_hi = pt["hard_hi"].as_f64().unwrap_or(0.0);
-                    hover_tip = Some(if past_hard > 1.0 {
+                    hover_tip = Some(if gone {
                         format!(
-                            "Frame {f}: ({x:.1}°, {y:.1}°)\n+{past_hard:.1}° past clinical hard limit [{h_lo:.0}°, {h_hi:.0}°]\nClick to go to frame {f}"
+                            "Frame {f}: ({x:.1}°, {y:.1}°)\nImpossible: a joint is past its possible limit (see the list above)\nClick to go to frame {f}"
+                        )
+                    } else if past_hard > 1.0 {
+                        format!(
+                            "Frame {f}: ({x:.1}°, {y:.1}°)\n+{past_hard:.1}° past the clinical limit [{h_lo:.0}°, {h_hi:.0}°]: unusual or athletic, still realistic\nClick to go to frame {f}"
                         )
                     } else {
                         format!(
@@ -502,11 +653,11 @@ fn draw_chart(
     }
 
     // 7. Playhead dot
-    let (cur_x, cur_y, cur_past_hard, cur_past_typ) = playhead;
+    let (cur_x, cur_y, cur_past_hard, cur_past_typ, cur_impossible) = playhead;
     let cur_pos = to_pos(cur_x, cur_y);
-    let head_col = if cur_past_hard > 1.0 {
+    let head_col = if cur_impossible {
         pal.error
-    } else if cur_past_typ > 1.0 {
+    } else if cur_past_hard > 1.0 || cur_past_typ > 1.0 {
         pal.warning
     } else {
         pal.playhead

@@ -13,6 +13,12 @@ writes, for each coupled pair of joint angles:
   pair's ``limits_note`` says which, and where two values are joined (a straight line between
   them, or an ellipse between single-plane limits) the joining is ours.
 
+and ``possible``: per joint angle, the limits past which a pose is impossible (a foot turned on the
+shin, a knee bent the wrong way). They are ours, not published: past anything in the reviewed
+recordings with a margin, and the review (:mod:`ac_train.review`) cuts the frames past them, so each
+entry records what the reviewed frames reach (``observed``). Past the clinical limits but inside
+these is unusual or athletic, not wrong.
+
 It also writes ``checks``: a few poses with their angles, which the Rust tests recompute.
 """
 
@@ -170,6 +176,60 @@ PAIRS = [
 ]
 
 
+#: (joint, component, lo, hi, max_swing): impossible past lo..hi. ``max_swing``: the rule holds only
+#: while the segment is swung less than this from its zero, where the reading is well defined (hip
+#: twist at a big swing and the shoulder overhead read differently for the same pose).
+POSSIBLE = [
+    ("hip", "flexion", -70.0, 170.0, None),
+    ("hip", "abduction", -60.0, 125.0, None),
+    ("hip", "rotation", -100.0, 100.0, 60.0),
+    ("knee", "flexion", -25.0, 170.0, None),
+    ("ankle", "flexion", -90.0, 60.0, None),
+    ("ankle", "abduction", -80.0, 80.0, None),
+    ("shoulder", "flexion", -95.0, 190.0, 150.0),
+    ("shoulder", "abduction", -80.0, 190.0, 150.0),
+    ("trunk", "flexion", -80.0, 120.0, None),
+    ("trunk", "abduction", -60.0, 60.0, None),
+    ("trunk", "rotation", -75.0, 75.0, None),
+    ("neck", "flexion", -90.0, 90.0, None),
+    ("neck", "abduction", -70.0, 70.0, None),
+    ("neck", "rotation", -100.0, 100.0, None),
+]
+POSSIBLE_NOTE = ("Ours, not published: past anything in the reviewed recordings with a margin (a foot turned "
+                 "on the shin, a knee bent the wrong way). Past the clinical limits but inside these is unusual "
+                 "or athletic. observed: the 0.01th and 99.99th percentile of the reviewed frames.")
+#: most of the reviewed frames a possible limit may leave out (a limit that cuts real motion is wrong)
+POSSIBLE_MAX_OUTSIDE = 1e-4
+
+
+def possible_mask(angles: np.ndarray, rule) -> np.ndarray:
+    """Frames of one joint's (N, 3) angles past ``rule`` (an entry of POSSIBLE)."""
+    joint, comp, lo, hi, max_swing = rule
+    v = angles[:, anatomy.COMPONENTS.index(comp)]
+    m = (v < lo) | (v > hi)
+    if max_swing is not None:
+        m &= np.hypot(angles[:, 0], angles[:, 1]) < max_swing
+    return m
+
+
+def build_possible(angles) -> list[dict]:
+    out = []
+    for rule in POSSIBLE:
+        joint, comp, lo, hi, max_swing = rule
+        sides = ("L", "R") if anatomy.DEFS[joint][0] else ("L",)
+        a = [angles[(joint, s)] for s in sides]
+        held = [x if max_swing is None else x[np.hypot(x[:, 0], x[:, 1]) < max_swing] for x in a]
+        v = np.concatenate([x[:, anatomy.COMPONENTS.index(comp)] for x in held])
+        share = float(np.mean(np.concatenate([possible_mask(x, rule) for x in a]))) if len(v) else 0.0
+        if share > POSSIBLE_MAX_OUTSIDE:
+            raise SystemExit(f"possible {joint}.{comp} {lo}..{hi} leaves out {share:.4%} of the reviewed frames: "
+                             "review those takes (ac-review) or widen the limit")
+        obs = np.percentile(v, [0.01, 99.99]) if len(v) else np.array([0.0, 0.0])
+        out.append({"joint": joint, "component": comp, "lo": lo, "hi": hi, "max_swing": max_swing,
+                    "observed": [round(float(obs[0]), 2), round(float(obs[1]), 2)], "outside": round(share, 7)})
+    return out
+
+
 def _needed() -> list[tuple[str, str]]:
     out = []
     for joint in anatomy.JOINTS:
@@ -265,13 +325,15 @@ def build(out: pathlib.Path = OUT_PATH) -> dict:
         raise SystemExit("no retargeted mocap in training/data/rig: run python -m ac_train.datasets first")
     doc = {
         "format": "humanmotioncraft.ranges",
-        "version": 2,
+        "version": 3,
         "space": "anatomical_degrees",
         "sets": used,
         "frames": frames,
         "takes": takes,
         "sources": SOURCES,
         "pairs": [build_pair(angles, spec) for spec in PAIRS],
+        "possible": build_possible(angles),
+        "possible_note": POSSIBLE_NOTE,
         "checks": checks(skel, samples),
     }
     out.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n", encoding="utf-8")

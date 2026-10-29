@@ -57,6 +57,8 @@ struct Def {
     abd_to: Vec3,
     /// Positive rotation turns `twist.0` toward `twist.1`.
     twist: (Vec3, Vec3),
+    /// The bones [`Joint::set_angles`] turns, top first: the turn is shared between them.
+    edit: &'static [&'static str],
 }
 
 const DEFS: &[Def] = &[
@@ -70,6 +72,7 @@ const DEFS: &[Def] = &[
         flex_to: FWD,
         abd_to: OUT,
         twist: (FWD, IN),
+        edit: &["upperleg01"],
     },
     Def {
         joint: "knee",
@@ -81,6 +84,7 @@ const DEFS: &[Def] = &[
         flex_to: BACK,
         abd_to: OUT,
         twist: (FWD, IN),
+        edit: &["lowerleg01"],
     },
     Def {
         joint: "ankle",
@@ -92,6 +96,7 @@ const DEFS: &[Def] = &[
         flex_to: UP,
         abd_to: OUT,
         twist: (DOWN, IN),
+        edit: &["foot"],
     },
     Def {
         joint: "shoulder",
@@ -103,6 +108,7 @@ const DEFS: &[Def] = &[
         flex_to: FWD,
         abd_to: OUT,
         twist: (FWD, IN),
+        edit: &["upperarm01"],
     },
     Def {
         joint: "trunk",
@@ -114,6 +120,7 @@ const DEFS: &[Def] = &[
         flex_to: FWD,
         abd_to: OUT,
         twist: (FWD, OUT),
+        edit: &["spine05", "spine04", "spine03", "spine02", "spine01"],
     },
     Def {
         joint: "neck",
@@ -125,8 +132,14 @@ const DEFS: &[Def] = &[
         flex_to: FWD,
         abd_to: OUT,
         twist: (FWD, OUT),
+        edit: &["neck01", "neck02", "neck03", "head"],
     },
 ];
+
+/// Whether `joint` has a left and a right (the trunk and neck have one).
+pub fn sided(joint: &str) -> bool {
+    DEFS.iter().any(|d| d.joint == joint && d.sided)
+}
 
 /// What each joint's three numbers mean, positive first.
 pub fn meaning(joint: &str) -> [&'static str; 3] {
@@ -154,11 +167,16 @@ pub fn meaning(joint: &str) -> [&'static str; 3] {
     }
 }
 
+/// Most bones a joint's turn is shared between ([`Def::edit`]).
+const MAX_EDIT: usize = 5;
+
 /// A joint's bones and directions, resolved on a rig for one side.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Joint {
     proximal: usize,
     distal: usize,
+    edit: [usize; MAX_EDIT],
+    edits: usize,
     zero_turn: Quat,
     u: Vec3,
     flex_axis: Vec3,
@@ -235,11 +253,20 @@ impl Joint {
             unit(quat::cross(u, across(mirror(d, side), u)))
                 .ok_or_else(|| format!("{joint}: a direction lies along the segment"))
         };
+        if def.edit.is_empty() || def.edit.len() > MAX_EDIT {
+            return Err(format!("{joint}: 1 to {MAX_EDIT} bones to turn"));
+        }
+        let mut edit = [0; MAX_EDIT];
+        for (slot, stem) in edit.iter_mut().zip(def.edit) {
+            *slot = bone(sk, stem, side)?;
+        }
         let (t0, t1) = (mirror(def.twist.0, side), mirror(def.twist.1, side));
         let twist_axis = quat::cross(across(t0, u), across(t1, u));
         Ok(Joint {
             proximal: bone(sk, def.proximal, side)?,
             distal: bone(sk, def.distal, side)?,
+            edit,
+            edits: def.edit.len(),
             zero_turn,
             u,
             flex_axis: axis(def.flex_to)?,
@@ -252,7 +279,56 @@ impl Joint {
     pub fn angles(&self, sk: &Skeleton, rotations: &[Quat]) -> R<[f64; 3]> {
         let rp = world(sk, rotations, self.proximal)?;
         let rd = world(sk, rotations, self.distal)?;
-        let t = quat::mul(quat::mul(quat::conj(rp), rd), self.zero_turn);
+        Ok(self.read(quat::mul(quat::mul(quat::conj(rp), rd), self.zero_turn)))
+    }
+
+    /// The turn `T` (see the module notes) that reads `want` ([flexion, abduction, rotation],
+    /// degrees): the twist about `u`, then the swing whose rotation vector has those flexion and
+    /// abduction parts (both axes lie across `u`; they need not be square to each other).
+    fn turn(&self, want: [f64; 3]) -> Quat {
+        let [f, a, r] = want.map(f64::to_radians);
+        let c = dot(self.flex_axis, self.abd_axis);
+        let det = (1.0 - c * c).max(1e-12);
+        let (p, q) = ((f - c * a) / det, (a - c * f) / det);
+        let s = quat::add3(quat::scale3(self.flex_axis, p), quat::scale3(self.abd_axis, q));
+        let swing = quat::exp(quat::scale3(s, 0.5));
+        let half = 0.5 * r * self.twist_sign;
+        let w = [
+            self.u[0] * half.sin(),
+            self.u[1] * half.sin(),
+            self.u[2] * half.sin(),
+            half.cos(),
+        ];
+        quat::normalize(quat::mul(swing, w))
+    }
+
+    /// Turn the joint's bones so it reads `want` (degrees), leaving every other joint's reading
+    /// as it was. The turn is shared between the joint's bones (the five spine bones for the
+    /// trunk), so a bend stays spread along the spine.
+    pub fn set_angles(&self, sk: &Skeleton, rotations: &mut [Quat], want: [f64; 3]) -> R<()> {
+        if want.iter().any(|v| !v.is_finite()) {
+            return Err("the angles to set are not finite".into());
+        }
+        let rp = world(sk, rotations, self.proximal)?;
+        let goal = quat::mul(quat::mul(rp, self.turn(want)), quat::conj(self.zero_turn));
+        let bones = self.edit.get(..self.edits).unwrap_or(&[]);
+        for (k, &e) in bones.iter().enumerate() {
+            let rd = world(sk, rotations, self.distal)?;
+            let delta = quat::mul(goal, quat::conj(rd));
+            let share = quat::slerp(quat::IDENTITY, delta, 1.0 / (bones.len() - k) as f64);
+            let we = world(sk, rotations, e)?;
+            let local = rotations
+                .get_mut(e)
+                .ok_or_else(|| format!("the pose has no rotation for bone {e}"))?;
+            // world' = share * world, so local' = local * (world^-1 share world)
+            let change = quat::mul(quat::mul(quat::conj(we), share), we);
+            *local = quat::normalize(quat::mul(*local, change));
+        }
+        Ok(())
+    }
+
+    /// [flexion, abduction, rotation] in degrees of a turn `T`.
+    fn read(&self, t: Quat) -> [f64; 3] {
         let along = dot([t[0], t[1], t[2]], self.u);
         let w = quat::normalize([self.u[0] * along, self.u[1] * along, self.u[2] * along, t[3]]);
         let w = if w.iter().all(|x| x.is_finite()) {
@@ -269,11 +345,11 @@ impl Joint {
         } else if twist <= -std::f64::consts::PI {
             twist += std::f64::consts::TAU;
         }
-        Ok([
+        [
             dot(s, self.flex_axis).to_degrees(),
             dot(s, self.abd_axis).to_degrees(),
             (twist * self.twist_sign).to_degrees(),
-        ])
+        ]
     }
 }
 

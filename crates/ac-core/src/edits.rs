@@ -515,7 +515,7 @@ impl Document {
         Ok(changed.len())
     }
 
-    fn write_solved(
+    pub(crate) fn write_solved(
         &mut self,
         changed: &BTreeSet<usize>,
         first: i64,

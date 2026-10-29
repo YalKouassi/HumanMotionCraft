@@ -1,12 +1,12 @@
 //! Looking at a pose and judging a motion: `pose.query`, `clip.metrics`, `clip.critique`,
-//! `clip.range` (the work is in `crate::posequery`, `crate::metrics`, `crate::critique` and
-//! `crate::ranges`).
+//! `clip.range`, `clip.possible` (the work is in `crate::posequery`, `crate::metrics`,
+//! `crate::critique`, `crate::ranges` and `crate::possible`).
 
 use serde_json::{Map, Value};
 
 use crate::command::{self as cmd, CommandSpec, Kind, ParamSpec};
 use crate::document::Document;
-use crate::{critique, metrics, posequery, ranges};
+use crate::{critique, metrics, posequery, possible, ranges};
 
 type P = Map<String, Value>;
 type Out = Result<Value, String>;
@@ -238,6 +238,45 @@ pub static SPECS: &[CommandSpec] = &[
             .required(),
             ParamSpec::new("notes", Kind::TextList, "what was not checked, and why").required(),
         ]),
+    CommandSpec::new("clip.possible", "Impossible poses", clip_possible)
+        .icon("graph")
+        .inputs(&[FROM, TO, MOTION])
+        .outputs(&[
+            ParamSpec::new("from", Kind::Integer, "first frame measured").required(),
+            ParamSpec::new("to", Kind::Integer, "last frame measured").required(),
+            ParamSpec::new("frames", Kind::Integer, "frames measured").required(),
+            ParamSpec::new("motion", Kind::Choice(&["shown", "keys"]), "the motion measured").required(),
+            ParamSpec::new(
+                "level",
+                Kind::Choice(possible::LEVELS),
+                "the worst over the frames: typical (inside the clinical limits), unusual (past them but realistic: athletic) or impossible",
+            )
+            .required(),
+            ParamSpec::new("message", Kind::Text, "what the level means").required(),
+            ParamSpec::new(
+                "impossible",
+                Kind::Text,
+                "{frames, spans: [[a, b]], max_deg, worst_frame}: frames with a joint past its possible limit",
+            )
+            .json()
+            .required(),
+            ParamSpec::new(
+                "breaches",
+                Kind::Text,
+                "per joint angle past its possible limit, worst first: [{joint, component, value_deg, lo, hi, past_deg, frames, spans, worst_frame}] (value and past at the worst frame)",
+            )
+            .json()
+            .required(),
+            ParamSpec::new(
+                "unusual",
+                Kind::Text,
+                "{frames, spans, max_deg, worst_frame}: frames past a clinical limit (any range pair and side)",
+            )
+            .json()
+            .required(),
+            ParamSpec::new("possible_note", Kind::Text, "where the possible limits come from").required(),
+            ParamSpec::new("notes", Kind::TextList, "what was not checked, and why").required(),
+        ]),
 ];
 
 fn int(p: &P, k: &str) -> Option<i64> {
@@ -268,6 +307,11 @@ fn clip_critique(doc: &mut Document, p: &P) -> Out {
     let limit = int(p, "limit").unwrap_or(20).clamp(1, 200) as usize;
     let findings = critique::findings(doc, &m, limit);
     Ok(serde_json::json!({ "count": findings.len(), "findings": findings, "metrics": m.json() }))
+}
+
+fn clip_possible(doc: &mut Document, p: &P) -> Out {
+    let shown = cmd::text(p, "motion") != Some("keys");
+    possible::measure(doc, int(p, "from"), int(p, "to"), shown)
 }
 
 fn clip_range(doc: &mut Document, p: &P) -> Out {

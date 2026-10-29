@@ -17,6 +17,7 @@
 //! - `typical`: the 1st–99th percentile band of the recorded mocap's clean frames;
 //! - `grid`: a 24 × 24 log-scaled density of those frames, for the Range panel's cloud;
 //!
+//! `possible`: per joint angle, the limits past which a pose is impossible (`crate::possible`);
 //! and `checks`: poses with the angles the Python builder measured, which the tests recompute.
 
 use std::collections::BTreeMap;
@@ -96,6 +97,23 @@ pub struct PairSpec {
     pub grid: Grid,
 }
 
+/// Past `lo..hi` a joint angle is impossible (a foot turned round on the shin, a knee bent the
+/// wrong way). Ours, not published: past anything in the reviewed recordings with a margin.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct PossibleSpec {
+    pub joint: String,
+    pub component: String,
+    pub lo: f64,
+    pub hi: f64,
+    /// The limit holds only while the segment is swung less than this (degrees) from its zero,
+    /// where the reading is well defined (`None`: always).
+    #[serde(default)]
+    pub max_swing: Option<f64>,
+    /// What the reviewed recordings reach (0.01th and 99.99th percentile).
+    #[serde(default)]
+    pub observed: [f64; 2],
+}
+
 /// A pose and the angles the builder measured on it (`"hip.L"`, `"trunk"`: [flexion, abduction,
 /// rotation]).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -114,6 +132,9 @@ pub struct Ranges {
     pub takes: u64,
     pub sources: Vec<Source>,
     pub pairs: Vec<PairSpec>,
+    pub possible: Vec<PossibleSpec>,
+    #[serde(default)]
+    pub possible_note: String,
     #[serde(default)]
     pub checks: Vec<Check>,
 }
@@ -151,9 +172,9 @@ impl Ranges {
         if !product::is_format(&r.format, "ranges") {
             return Err(format!("ranges: expected <product>.ranges, got {:?}", r.format));
         }
-        if r.version != 2 {
+        if r.version != 3 {
             return Err(format!(
-                "ranges: version {} (this build reads version 2; rebuild with python -m ac_train.ranges)",
+                "ranges: version {} (this build reads version 3; rebuild with python -m ac_train.ranges)",
                 r.version
             ));
         }
@@ -176,6 +197,16 @@ impl Ranges {
             }
             if p.x_hard.is_some_and(|[lo, hi]| !ordered(lo, hi)) {
                 return Err(format!("ranges: {}: x_hard has lo above hi", p.id));
+            }
+        }
+        for b in &r.possible {
+            anatomy::component(&b.component).map_err(|e| format!("ranges: possible: {e}"))?;
+            Joint::new(sk, &b.joint, "L").map_err(|e| format!("ranges: possible: {e}"))?;
+            if !ordered(b.lo, b.hi) || b.max_swing.is_some_and(|m| !(m.is_finite() && m > 0.0)) {
+                return Err(format!(
+                    "ranges: possible {}.{}: lo above hi, or a bad max_swing",
+                    b.joint, b.component
+                ));
             }
         }
         Ok(r)
@@ -375,7 +406,7 @@ fn axis_json(ax: &AxisSpec, hard: Option<[f64; 2]>) -> Value {
 
 /// The poses `clip.range` measures: frames `from..=to` of the clip, or the pose shown when the
 /// clip has no keys.
-fn poses(
+pub(crate) fn poses(
     doc: &Document,
     from: Option<i64>,
     to: Option<i64>,

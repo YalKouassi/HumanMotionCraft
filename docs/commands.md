@@ -27,6 +27,7 @@ Outputs:
 | `model` | text | yes |  | the model label, or plain interpolation |
 | `mode` | one of ai \| plain | yes |  | the model or plain interpolation |
 | `root_heads` | list of [x, y, z] | yes |  | the root head on every frame of the span (metres) |
+| `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left (empty: none) |
 
 ### `ai.clear`: Clear AI keys
 
@@ -76,6 +77,7 @@ Outputs:
 | `to` | integer | yes |  | your key after the gap |
 | `frames` | integer | yes |  | frames filled |
 | `model` | text | yes |  | the model label |
+| `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left (empty: none) |
 
 ### `ai.fill_all`: AI fill all gaps
 
@@ -94,6 +96,7 @@ Outputs:
 | `filled` | JSON | yes |  | the gaps filled: [[from, to]] |
 | `skipped` | JSON | yes |  | the gaps left: [{from, to, reason}] |
 | `model` | text | yes |  | the model label |
+| `notes` | list of text | yes |  | impossible poses the fills made and bent back to the possible limit, or left (each starts with its gap, from–to; empty: none) |
 
 ### `ai.gaps`: AI gaps
 
@@ -161,6 +164,7 @@ Outputs:
 | `model` | text | yes |  | the model label, or plain interpolation |
 | `mode` | one of ai \| plain | yes |  | the model or plain interpolation |
 | `root_heads` | list of [x, y, z] | yes |  | the root head on every frame of the span (metres) |
+| `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left (empty: none) |
 
 ### `ai.settings`: AI fill settings
 
@@ -206,6 +210,7 @@ Outputs:
 | `mode` | one of ai \| plain | yes |  | what the span is now |
 | `cleared` | integer |  |  | plain: AI keys removed |
 | `model` | text |  |  | ai: the model label |
+| `notes` | list of text |  |  | ai: impossible poses the fill made and bent back, or left |
 
 ## anim
 
@@ -432,6 +437,27 @@ Outputs:
 | `files` | JSON | yes |  | [{id, file, path, joints, frames}] written |
 | `failed` | JSON | yes |  | [{id, error}] not written |
 
+### `clip.fix_impossible`: Fix impossible poses
+
+undoable, icon `graph`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer |  | 0 to 10000000 | first frame (default 0) |
+| `to` | integer |  | 0 to 10000000 | last frame (default: the last) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `keys` | integer | yes |  | keys of the edited layer between from and to that were checked |
+| `fixed` | JSON | yes |  | [{frame, breaches: [{joint, component, value_deg, lo, hi, past_deg}]}]: keys bent back to the possible limit (the values before) |
+| `added` | JSON | yes |  | [frame]: frames between keys where the curve swung past a limit, given a key with the pose bent back |
+| `left` | integer | yes |  | frames still impossible after (a joint another layer sets); notes say which |
+| `notes` | list of text | yes |  | what was left, and why |
+
 ### `clip.group`: Move animation to group
 
 undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `group`.
@@ -560,6 +586,34 @@ Outputs:
 |---|---|---|---|---|
 | `id` | text | yes |  | the library id |
 | `length` | integer | yes |  | frames |
+
+### `clip.possible`: Impossible poses
+
+not undoable, icon `graph`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer |  | 0 to 10000000 | first frame (default 0) |
+| `to` | integer |  | 0 to 10000000 | last frame (default: the last) |
+| `motion` | one of shown \| keys |  |  | what plays (the physics pass when it is on; default) or the keys alone |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer | yes |  | first frame measured |
+| `to` | integer | yes |  | last frame measured |
+| `frames` | integer | yes |  | frames measured |
+| `motion` | one of shown \| keys | yes |  | the motion measured |
+| `level` | one of typical \| unusual \| impossible | yes |  | the worst over the frames: typical (inside the clinical limits), unusual (past them but realistic: athletic) or impossible |
+| `message` | text | yes |  | what the level means |
+| `impossible` | JSON | yes |  | {frames, spans: [[a, b]], max_deg, worst_frame}: frames with a joint past its possible limit |
+| `breaches` | JSON | yes |  | per joint angle past its possible limit, worst first: [{joint, component, value_deg, lo, hi, past_deg, frames, spans, worst_frame}] (value and past at the worst frame) |
+| `unusual` | JSON | yes |  | {frames, spans, max_deg, worst_frame}: frames past a clinical limit (any range pair and side) |
+| `possible_note` | text | yes |  | where the possible limits come from |
+| `notes` | list of text | yes |  | what was not checked, and why |
 
 ### `clip.range`: Joint range of motion
 

@@ -31,3 +31,20 @@ def test_chest_bend_is_trunk_flexion():
     pose[0, skel.index["spine01"]] = [np.sin(h), 0.0, 0.0, np.cos(h)]
     a = anatomy.Joint(skel, "trunk").angles(skel, pose)[0]
     assert np.allclose(a, [20.0, 0.0, 0.0], atol=1e-9)
+
+
+def test_possible_limits_hold_the_rest_pose_and_catch_a_turned_foot():
+    """ranges.POSSIBLE: the rest pose is possible; a foot turned 110 deg out on the shin is not."""
+    from ac_train import ranges
+
+    skel = rig.Skeleton.load()
+    for joint in ("hip", "knee", "ankle", "shoulder", "trunk", "neck"):
+        a = anatomy.Joint(skel, joint, "L").angles(skel, rest(skel))
+        for rule in (r for r in ranges.POSSIBLE if r[0] == joint):
+            assert not ranges.possible_mask(a, rule).any(), (joint, rule)
+    turned = np.array([[0.0, 110.0, 0.0]])
+    rule = next(r for r in ranges.POSSIBLE if r[:2] == ("ankle", "abduction"))
+    assert ranges.possible_mask(turned, rule).all()
+    for joint, comp, lo, hi, max_swing in ranges.POSSIBLE:
+        assert joint in anatomy.JOINTS and comp in anatomy.COMPONENTS and lo < hi
+        assert max_swing is None or max_swing > 0

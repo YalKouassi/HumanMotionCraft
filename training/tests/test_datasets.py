@@ -134,11 +134,11 @@ def test_a_built_set_is_well_formed(path):
 def test_ranges_json_is_well_formed():
     import json
 
-    from ac_train.ranges import OUT_PATH, PAIRS, SETS
+    from ac_train.ranges import OUT_PATH, PAIRS, POSSIBLE, SETS
 
     assert OUT_PATH.is_file()
     data = json.loads(OUT_PATH.read_text(encoding="utf-8"))
-    assert data["version"] == 2
+    assert data["version"] == 3
     assert set(data["sets"]).issubset(set(SETS))
     assert not {"kimodo", "builtin_loops"} & set(data["sets"])  # recorded bodies only
     assert len(data["checks"]) >= 2
@@ -152,3 +152,6 @@ def test_ranges_json_is_well_formed():
         assert all(pt["lo"] <= pt["hi"] for pt in p["typical"])
         assert len(p["grid"]["cells"]) == p["grid"]["rows"]
         assert all(len(row) == p["grid"]["cols"] for row in p["grid"]["cells"])
+    got = [(b["joint"], b["component"], b["lo"], b["hi"], b["max_swing"]) for b in data["possible"]]
+    assert got == [tuple(r) for r in POSSIBLE]
+    assert all(b["outside"] <= 1e-4 for b in data["possible"])  # a limit never cuts real motion

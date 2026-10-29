@@ -55,6 +55,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
     let mut filled: Vec<Value> = Vec::new();
     let mut skipped: Vec<Value> = Vec::new();
     let mut model = String::new();
+    let mut notes: Vec<String> = Vec::new();
     for g in gaps::gaps(doc) {
         if let Some(why) = &g.refused {
             skipped.push(json!({ "from": g.from, "to": g.to, "reason": why }));
@@ -70,9 +71,10 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
             );
             continue;
         }
-        let (a, b, label) = doc.ai_fill(Some((g.from, g.to)))?;
-        model = label;
-        filled.push(json!([a, b]));
+        let f = doc.ai_fill(Some((g.from, g.to)))?;
+        notes.extend(f.notes.iter().map(|n| format!("{}–{}: {n}", f.from, f.to)));
+        model = f.model;
+        filled.push(json!([f.from, f.to]));
     }
     if filled.is_empty() {
         let why: Vec<String> = skipped
@@ -92,7 +94,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
             format!("nothing to fill ({})", why.join("; "))
         });
     }
-    Ok(json!({ "filled": filled, "skipped": skipped, "model": model }))
+    Ok(json!({ "filled": filled, "skipped": skipped, "model": model, "notes": notes }))
 }
 
 /// The span: `from` and `to`, else the gap the playhead is in.
@@ -123,6 +125,6 @@ fn ai_toggle(doc: &mut Document, p: &P) -> Out {
     if let Some(why) = g.refused {
         return Err(why);
     }
-    let (a, b, model) = doc.ai_fill(Some((g.from, g.to)))?;
-    Ok(json!({ "from": a, "to": b, "mode": "ai", "model": model }))
+    let f = doc.ai_fill(Some((g.from, g.to)))?;
+    Ok(json!({ "from": f.from, "to": f.to, "mode": "ai", "model": f.model, "notes": f.notes }))
 }

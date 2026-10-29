@@ -2,6 +2,29 @@
   "format": "humanmotioncraft.review",
   "version": 1,
   "takes": {
+    "100style/any_100style_TR1_076": {
+      "status": "cut",
+      "cuts": [
+        [
+          46,
+          56
+        ],
+        [
+          69,
+          81
+        ],
+        [
+          1197,
+          1213
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 11/1768) with the scan's cuts",
+      "frames": 1768,
+      "by": "agent"
+    },
     "100style/run_100style_BR_045": {
       "status": "cut",
       "cuts": [
@@ -11,7 +34,7 @@
         ],
         [
           1286,
-          1310
+          1317
         ],
         [
           1372,
@@ -21,8 +44,196 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 5/2980) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.rotation, 12/2980) with the scan's cuts",
       "frames": 2980,
+      "by": "agent"
+    },
+    "100style/sidestep_100style_SW_024": {
+      "status": "cut",
+      "cuts": [
+        [
+          1927,
+          1939
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 3/2219) with the scan's cuts",
+      "frames": 2219,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_005": {
+      "status": "cut",
+      "cuts": [
+        [
+          2228,
+          2242
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 5/3486) with the scan's cuts",
+      "frames": 3486,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_008": {
+      "status": "cut",
+      "cuts": [
+        [
+          4133,
+          4149
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 7/4351) with the scan's cuts",
+      "frames": 4351,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_012": {
+      "status": "cut",
+      "cuts": [
+        [
+          2370,
+          2380
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 1/2592) with the scan's cuts",
+      "frames": 2592,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_027": {
+      "status": "cut",
+      "cuts": [
+        [
+          802,
+          818
+        ],
+        [
+          3043,
+          3058
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 13/5297) with the scan's cuts",
+      "frames": 5297,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_065": {
+      "status": "cut",
+      "cuts": [
+        [
+          53,
+          63
+        ],
+        [
+          494,
+          505
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 3/3017) with the scan's cuts",
+      "frames": 3017,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_066": {
+      "status": "cut",
+      "cuts": [
+        [
+          2000,
+          2010
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 1/3064) with the scan's cuts",
+      "frames": 3064,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_076": {
+      "status": "cut",
+      "cuts": [
+        [
+          473,
+          485
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 3/2334) with the scan's cuts",
+      "frames": 2334,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_088": {
+      "status": "cut",
+      "cuts": [
+        [
+          1405,
+          1417
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 3/2990) with the scan's cuts",
+      "frames": 2990,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_090": {
+      "status": "cut",
+      "cuts": [
+        [
+          1579,
+          1592
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 4/6285) with the scan's cuts",
+      "frames": 6285,
+      "by": "agent"
+    },
+    "100style/walk_100style_BW_098": {
+      "status": "cut",
+      "cuts": [
+        [
+          3263,
+          3279
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 7/3434) with the scan's cuts",
+      "frames": 3434,
+      "by": "agent"
+    },
+    "100style/walk_100style_FW_077": {
+      "status": "cut",
+      "cuts": [
+        [
+          2816,
+          2822
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 2/2823) with the scan's cuts",
+      "frames": 2823,
       "by": "agent"
     },
     "accad/fight_accad_male2_extended_2": {
@@ -42,6 +253,36 @@
       ],
       "note": "cut impossible pose frames (shoulder.abduction, 2/533) with the scan's cuts",
       "frames": 533,
+      "by": "agent"
+    },
+    "accad/ground_accad_female1_a11_crawlforward": {
+      "status": "cut",
+      "cuts": [
+        [
+          48,
+          59
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 2/601) with the scan's cuts",
+      "frames": 601,
+      "by": "agent"
+    },
+    "accad/jump_accad_male1_c19_run2hop2walk": {
+      "status": "cut",
+      "cuts": [
+        [
+          108,
+          113
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 1/114) with the scan's cuts",
+      "frames": 114,
       "by": "agent"
     },
     "accad/walk_accad_eric1": {
@@ -70,7 +311,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.flexion, hip.rotation, leg.backwards, 3/319) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.flexion, hip.rotation, leg.backwards, 3/319) with the scan's cuts",
       "frames": 319,
       "by": "agent"
     },
@@ -407,12 +648,255 @@
       "frames": 34,
       "by": "agent"
     },
+    "cmu/any_cmu_102_01": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_02 (a duplicate in the CMU set)",
+      "frames": 69,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_02": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_03 (a duplicate in the CMU set)",
+      "frames": 44,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_03": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_04 (a duplicate in the CMU set)",
+      "frames": 38,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_04": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_05 (a duplicate in the CMU set)",
+      "frames": 42,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_09": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_11 (a duplicate in the CMU set)",
+      "frames": 12,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_13 (a duplicate in the CMU set)",
+      "frames": 44,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_12": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_14 (a duplicate in the CMU set)",
+      "frames": 43,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_13": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_15 (a duplicate in the CMU set)",
+      "frames": 38,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_14": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_16 (a duplicate in the CMU set)",
+      "frames": 49,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_15": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_17 (a duplicate in the CMU set)",
+      "frames": 45,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_18": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_20 (a duplicate in the CMU set)",
+      "frames": 58,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_19": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_21 (a duplicate in the CMU set)",
+      "frames": 57,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_20": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_22 (a duplicate in the CMU set)",
+      "frames": 152,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_21": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_23 (a duplicate in the CMU set)",
+      "frames": 130,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_22": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_24 (a duplicate in the CMU set)",
+      "frames": 62,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_23": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_25 (a duplicate in the CMU set)",
+      "frames": 89,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_24": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_26 (a duplicate in the CMU set)",
+      "frames": 82,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_25": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_27 (a duplicate in the CMU set)",
+      "frames": 74,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_26": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_28 (a duplicate in the CMU set)",
+      "frames": 112,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_27": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_29 (a duplicate in the CMU set)",
+      "frames": 43,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_28": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_30 (a duplicate in the CMU set)",
+      "frames": 176,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_29": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_31 (a duplicate in the CMU set)",
+      "frames": 200,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_30": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_32 (a duplicate in the CMU set)",
+      "frames": 54,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_31": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_33 (a duplicate in the CMU set)",
+      "frames": 57,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_32": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_34 (a duplicate in the CMU set)",
+      "frames": 76,
+      "by": "agent"
+    },
+    "cmu/any_cmu_102_33": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_78_35 (a duplicate in the CMU set)",
+      "frames": 55,
+      "by": "agent"
+    },
+    "cmu/any_cmu_103_02": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_93_02 (a duplicate in the CMU set)",
+      "frames": 373,
+      "by": "agent"
+    },
     "cmu/any_cmu_104_17": {
       "status": "cut",
       "cuts": [
         [
           0,
-          12
+          13
         ],
         [
           20,
@@ -426,7 +910,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 12/116) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, shoulder.flexion, 13/116) with the scan's cuts",
       "frames": 116,
       "by": "agent"
     },
@@ -435,7 +919,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 5/168 frames); scan: floor -0.91 m",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 5/168 frames); scan: floor -0.91 m",
       "frames": 168,
       "by": "agent"
     },
@@ -458,280 +942,250 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 58/275) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 58/275) with the scan's cuts",
       "frames": 275,
       "by": "agent"
     },
     "cmu/any_cmu_105_04": {
-      "status": "cut",
-      "cuts": [
-        [
-          373,
-          383
-        ],
-        [
-          441,
-          451
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/541) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_04 (a duplicate in the CMU set)",
       "frames": 541,
       "by": "agent"
     },
     "cmu/any_cmu_105_07": {
-      "status": "cut",
-      "cuts": [
-        [
-          228,
-          241
-        ],
-        [
-          322,
-          332
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 5/646) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_91_07 (a duplicate in the CMU set)",
       "frames": 646,
       "by": "agent"
     },
     "cmu/any_cmu_105_08": {
-      "status": "cut",
-      "cuts": [
-        [
-          351,
-          377
-        ],
-        [
-          460,
-          477
-        ],
-        [
-          532,
-          545
-        ],
-        [
-          592,
-          602
-        ],
-        [
-          652,
-          662
-        ],
-        [
-          764,
-          791
-        ],
-        [
-          800,
-          819
-        ],
-        [
-          877,
-          896
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 62/993) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_91_08 (a duplicate in the CMU set)",
       "frames": 993,
       "by": "agent"
     },
-    "cmu/any_cmu_105_54": {
-      "status": "cut",
-      "cuts": [
-        [
-          106,
-          116
-        ]
-      ],
+    "cmu/any_cmu_105_37": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 1/170) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_91_37 (a duplicate in the CMU set)",
+      "frames": 79,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_38": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_91_38 (a duplicate in the CMU set)",
+      "frames": 115,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_53": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_53 (a duplicate in the CMU set)",
+      "frames": 139,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_54": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_91_54 (a duplicate in the CMU set)",
       "frames": 170,
       "by": "agent"
     },
     "cmu/any_cmu_105_55": {
-      "status": "cut",
-      "cuts": [
-        [
-          48,
-          57
-        ],
-        [
-          62,
-          72
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 1/117) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_91_55 (a duplicate in the CMU set)",
       "frames": 117,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_56": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_91_56 (a duplicate in the CMU set)",
+      "frames": 125,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_58": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_91_58 (a duplicate in the CMU set)",
+      "frames": 123,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_59": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_91_59 (a duplicate in the CMU set)",
+      "frames": 78,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_60": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_91_60 (a duplicate in the CMU set)",
+      "frames": 92,
+      "by": "agent"
+    },
+    "cmu/any_cmu_105_61": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_91_61 (a duplicate in the CMU set)",
+      "frames": 91,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_01": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_141_01 (a duplicate in the CMU set)",
+      "frames": 19,
       "by": "agent"
     },
     "cmu/any_cmu_106_02": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 1/28 frames (ankle.flexion)",
+      "note": "the same motion as cmu/run_cmu_141_02 (a duplicate in the CMU set)",
       "frames": 28,
       "by": "agent"
     },
     "cmu/any_cmu_106_03": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 2/58 frames (ankle.flexion)",
+      "note": "the same motion as cmu/run_cmu_141_03 (a duplicate in the CMU set)",
       "frames": 58,
       "by": "agent"
     },
     "cmu/any_cmu_106_04": {
-      "status": "cut",
-      "cuts": [
-        [
-          28,
-          39
-        ],
-        [
-          55,
-          65
-        ],
-        [
-          68,
-          84
-        ],
-        [
-          125,
-          136
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 17/137) with the scan's cuts",
+      "note": "the same motion as cmu/jump_cmu_141_04 (a duplicate in the CMU set)",
       "frames": 137,
+      "by": "agent"
+    },
+    "cmu/any_cmu_106_05": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_141_05 (a duplicate in the CMU set)",
+      "frames": 58,
       "by": "agent"
     },
     "cmu/any_cmu_106_06": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 79/163 frames (ankle.flexion)",
+      "note": "the same motion as cmu/dance_cmu_141_06 (a duplicate in the CMU set)",
       "frames": 163,
       "by": "agent"
     },
     "cmu/any_cmu_106_07": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 14/75 frames (ankle.flexion, leg.backwards)",
+      "note": "the same motion as cmu/walk_cmu_141_07 (a duplicate in the CMU set)",
       "frames": 75,
       "by": "agent"
     },
     "cmu/any_cmu_106_08": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 16/83 frames (ankle.flexion, leg.backwards)",
+      "note": "the same motion as cmu/walk_cmu_141_08 (a duplicate in the CMU set)",
       "frames": 83,
       "by": "agent"
     },
     "cmu/any_cmu_106_09": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 9/59 frames (ankle.flexion, leg.backwards)",
+      "note": "the same motion as cmu/walk_cmu_141_09 (a duplicate in the CMU set)",
       "frames": 59,
       "by": "agent"
     },
     "cmu/any_cmu_106_10": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 79/127 frames (ankle.flexion)",
+      "note": "the same motion as cmu/sports_cmu_141_10 (a duplicate in the CMU set)",
       "frames": 127,
       "by": "agent"
     },
     "cmu/any_cmu_106_11": {
-      "status": "cut",
-      "cuts": [
-        [
-          63,
-          138
-        ],
-        [
-          141,
-          153
-        ],
-        [
-          165,
-          171
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 42/172) with the scan's cuts",
+      "note": "the same motion as cmu/sports_cmu_141_11 (a duplicate in the CMU set)",
       "frames": 172,
       "by": "agent"
     },
     "cmu/any_cmu_106_12": {
-      "status": "cut",
-      "cuts": [
-        [
-          0,
-          24
-        ],
-        [
-          74,
-          84
-        ],
-        [
-          93,
-          104
-        ],
-        [
-          129,
-          141
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 27/142) with the scan's cuts",
+      "note": "the same motion as cmu/dance_cmu_141_12 (a duplicate in the CMU set)",
       "frames": 142,
       "by": "agent"
     },
     "cmu/any_cmu_106_13": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 63/92 frames (ankle.flexion)",
+      "note": "the same motion as cmu/stretch_cmu_141_13 (a duplicate in the CMU set)",
       "frames": 92,
       "by": "agent"
     },
     "cmu/any_cmu_106_14": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 38/144 frames (ankle.flexion, leg.backwards)",
+      "note": "the same motion as cmu/fight_cmu_141_14 (a duplicate in the CMU set)",
       "frames": 144,
       "by": "agent"
     },
@@ -740,25 +1194,25 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 104/291 frames); scan: 79% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 104/291 frames); scan: 79% cut",
       "frames": 291,
       "by": "agent"
     },
     "cmu/any_cmu_106_16": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 58/75 frames (ankle.flexion)",
+      "note": "the same motion as cmu/gesture_cmu_141_16 (a duplicate in the CMU set)",
       "frames": 75,
       "by": "agent"
     },
     "cmu/any_cmu_106_17": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 44/140 frames); scan: 57% cut",
+      "note": "the same motion as cmu/sit_cmu_141_17 (a duplicate in the CMU set)",
       "frames": 140,
       "by": "agent"
     },
@@ -772,46 +1226,20 @@
       "by": "agent"
     },
     "cmu/any_cmu_106_19": {
-      "status": "cut",
-      "cuts": [
-        [
-          30,
-          40
-        ],
-        [
-          92,
-          104
-        ],
-        [
-          114,
-          129
-        ],
-        [
-          169,
-          181
-        ],
-        [
-          192,
-          206
-        ],
-        [
-          269,
-          297
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 42/298) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_141_19 (a duplicate in the CMU set)",
       "frames": 298,
       "by": "agent"
     },
     "cmu/any_cmu_106_20": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 77/191 frames (ankle.flexion)",
+      "note": "the same motion as cmu/standing_cmu_141_20 (a duplicate in the CMU set)",
       "frames": 191,
       "by": "agent"
     },
@@ -843,29 +1271,11 @@
       "by": "agent"
     },
     "cmu/any_cmu_106_25": {
-      "status": "cut",
-      "cuts": [
-        [
-          0,
-          15
-        ],
-        [
-          47,
-          67
-        ],
-        [
-          74,
-          94
-        ],
-        [
-          109,
-          119
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 22/154) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_141_25 (a duplicate in the CMU set)",
       "frames": 154,
       "by": "agent"
     },
@@ -908,177 +1318,63 @@
     "cmu/any_cmu_106_28": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 26/89 frames (ankle.flexion)",
+      "note": "the same motion as cmu/sports_cmu_141_28 (a duplicate in the CMU set)",
       "frames": 89,
       "by": "agent"
     },
     "cmu/any_cmu_106_29": {
-      "status": "cut",
-      "cuts": [
-        [
-          3,
-          14
-        ],
-        [
-          50,
-          63
-        ],
-        [
-          94,
-          105
-        ],
-        [
-          114,
-          124
-        ],
-        [
-          138,
-          148
-        ],
-        [
-          157,
-          168
-        ],
-        [
-          215,
-          233
-        ],
-        [
-          281,
-          291
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 23/292) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_141_29 (a duplicate in the CMU set)",
       "frames": 292,
       "by": "agent"
     },
     "cmu/any_cmu_106_30": {
-      "status": "cut",
-      "cuts": [
-        [
-          32,
-          50
-        ],
-        [
-          58,
-          70
-        ],
-        [
-          96,
-          116
-        ],
-        [
-          123,
-          134
-        ],
-        [
-          168,
-          179
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 14/180) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_141_30 (a duplicate in the CMU set)",
       "frames": 180,
       "by": "agent"
     },
     "cmu/any_cmu_106_31": {
-      "status": "cut",
-      "cuts": [
-        [
-          67,
-          78
-        ],
-        [
-          158,
-          167
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 7/168) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_141_31 (a duplicate in the CMU set)",
       "frames": 168,
       "by": "agent"
     },
     "cmu/any_cmu_106_32": {
-      "status": "cut",
-      "cuts": [
-        [
-          0,
-          18
-        ],
-        [
-          41,
-          55
-        ],
-        [
-          67,
-          77
-        ],
-        [
-          172,
-          183
-        ],
-        [
-          204,
-          221
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 35/222) with the scan's cuts",
+      "note": "the same motion as cmu/sidestep_cmu_141_32 (a duplicate in the CMU set)",
       "frames": 222,
       "by": "agent"
     },
     "cmu/any_cmu_106_33": {
-      "status": "cut",
-      "cuts": [
-        [
-          0,
-          34
-        ],
-        [
-          38,
-          56
-        ],
-        [
-          58,
-          70
-        ],
-        [
-          78,
-          88
-        ],
-        [
-          96,
-          107
-        ],
-        [
-          237,
-          261
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 49/265) with the scan's cuts",
+      "note": "the same motion as cmu/sidestep_cmu_141_33 (a duplicate in the CMU set)",
       "frames": 265,
       "by": "agent"
     },
     "cmu/any_cmu_106_34": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 8/79 frames (ankle.flexion)",
+      "note": "the same motion as cmu/run_cmu_141_34 (a duplicate in the CMU set)",
       "frames": 79,
       "by": "agent"
     },
@@ -1158,285 +1454,129 @@
       "frames": 253,
       "by": "agent"
     },
-    "cmu/any_cmu_117_02": {
-      "status": "cut",
-      "cuts": [
-        [
-          108,
-          119
-        ],
-        [
-          141,
-          151
-        ]
-      ],
+    "cmu/any_cmu_117_01": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (hip.abduction, shoulder.flexion, 3/203) with the scan's cuts",
+      "note": "the same motion as cmu/dance_cmu_85_01 (a duplicate in the CMU set)",
+      "frames": 250,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_02": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/dance_cmu_85_02 (a duplicate in the CMU set)",
       "frames": 203,
       "by": "agent"
     },
     "cmu/any_cmu_117_03": {
-      "status": "cut",
-      "cuts": [
-        [
-          610,
-          622
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (hip.abduction, 3/811) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_85_03 (a duplicate in the CMU set)",
       "frames": 811,
       "by": "agent"
     },
     "cmu/any_cmu_117_04": {
-      "status": "cut",
-      "cuts": [
-        [
-          128,
-          138
-        ],
-        [
-          194,
-          209
-        ],
-        [
-          297,
-          310
-        ],
-        [
-          315,
-          334
-        ],
-        [
-          383,
-          404
-        ],
-        [
-          471,
-          476
-        ],
-        [
-          499,
-          518
-        ],
-        [
-          554,
-          568
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 41/639) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_85_04 (a duplicate in the CMU set)",
       "frames": 639,
       "by": "agent"
     },
     "cmu/any_cmu_117_05": {
-      "status": "cut",
-      "cuts": [
-        [
-          120,
-          294
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.flexion, 3/409) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_85_05 (a duplicate in the CMU set)",
       "frames": 409,
       "by": "agent"
     },
     "cmu/any_cmu_117_06": {
-      "status": "cut",
-      "cuts": [
-        [
-          196,
-          208
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (hip.abduction, 3/238) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_85_06 (a duplicate in the CMU set)",
       "frames": 238,
       "by": "agent"
     },
-    "cmu/any_cmu_117_08": {
-      "status": "cut",
-      "cuts": [
-        [
-          141,
-          152
-        ],
-        [
-          159,
-          169
-        ],
-        [
-          178,
-          188
-        ],
-        [
-          246,
-          253
-        ]
-      ],
+    "cmu/any_cmu_117_07": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, 6/254) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_85_07 (a duplicate in the CMU set)",
+      "frames": 240,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_08": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_85_08 (a duplicate in the CMU set)",
       "frames": 254,
       "by": "agent"
     },
-    "cmu/any_cmu_117_12": {
-      "status": "cut",
-      "cuts": [
-        [
-          341,
-          350
-        ],
-        [
-          356,
-          364
-        ],
-        [
-          597,
-          602
-        ],
-        [
-          609,
-          619
-        ],
-        [
-          641,
-          649
-        ],
-        [
-          691,
-          706
-        ],
-        [
-          741,
-          746
-        ],
-        [
-          783,
-          806
-        ],
-        [
-          853,
-          853
-        ],
-        [
-          906,
-          916
-        ],
-        [
-          993,
-          1009
-        ]
-      ],
+    "cmu/any_cmu_117_10": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 29/1125) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_85_10 (a duplicate in the CMU set)",
+      "frames": 194,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_85_11 (a duplicate in the CMU set)",
+      "frames": 451,
+      "by": "agent"
+    },
+    "cmu/any_cmu_117_12": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_85_12 (a duplicate in the CMU set)",
       "frames": 1125,
       "by": "agent"
     },
     "cmu/any_cmu_117_13": {
-      "status": "cut",
-      "cuts": [
-        [
-          211,
-          255
-        ],
-        [
-          258,
-          276
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 7/362) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_85_13 (a duplicate in the CMU set)",
       "frames": 362,
       "by": "agent"
     },
     "cmu/any_cmu_117_14": {
-      "status": "cut",
-      "cuts": [
-        [
-          267,
-          271
-        ],
-        [
-          295,
-          318
-        ],
-        [
-          342,
-          346
-        ],
-        [
-          390,
-          402
-        ],
-        [
-          413,
-          428
-        ],
-        [
-          455,
-          465
-        ],
-        [
-          469,
-          484
-        ],
-        [
-          516,
-          541
-        ],
-        [
-          586,
-          599
-        ],
-        [
-          617,
-          631
-        ],
-        [
-          639,
-          648
-        ],
-        [
-          650,
-          661
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, shoulder.flexion, 38/742) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_85_14 (a duplicate in the CMU set)",
       "frames": 742,
       "by": "agent"
     },
     "cmu/any_cmu_117_15": {
-      "status": "cut",
-      "cuts": [
-        [
-          83,
-          96
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (hip.abduction, 4/331) with the scan's cuts",
+      "note": "the same motion as cmu/dance_cmu_85_15 (a duplicate in the CMU set)",
       "frames": 331,
       "by": "agent"
     },
@@ -1512,105 +1652,72 @@
     "cmu/any_cmu_121_01": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, 40/197 frames); scan: 98% cut",
+      "note": "the same motion as cmu/any_cmu_90_01 (a duplicate in the CMU set)",
       "frames": 197,
       "by": "agent"
     },
     "cmu/any_cmu_121_02": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 54/195 frames (ankle.flexion)",
+      "note": "the same motion as cmu/flip_cmu_90_02 (a duplicate in the CMU set)",
       "frames": 195,
       "by": "agent"
     },
     "cmu/any_cmu_121_03": {
-      "status": "cut",
-      "cuts": [
-        [
-          73,
-          92
-        ],
-        [
-          104,
-          131
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 23/221) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_90_03 (a duplicate in the CMU set)",
       "frames": 221,
       "by": "agent"
     },
     "cmu/any_cmu_121_04": {
-      "status": "cut",
-      "cuts": [
-        [
-          70,
-          89
-        ],
-        [
-          106,
-          135
-        ],
-        [
-          153,
-          174
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 34/175) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_90_04 (a duplicate in the CMU set)",
       "frames": 175,
       "by": "agent"
     },
     "cmu/any_cmu_121_05": {
-      "status": "cut",
-      "cuts": [
-        [
-          65,
-          77
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, 2/128) with the scan's cuts",
+      "note": "the same motion as cmu/fight_cmu_90_05 (a duplicate in the CMU set)",
       "frames": 128,
       "by": "agent"
     },
-    "cmu/any_cmu_121_07": {
-      "status": "cut",
-      "cuts": [
-        [
-          170,
-          180
-        ]
-      ],
+    "cmu/any_cmu_121_06": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 1/224) with the scan's cuts",
+      "note": "the same motion as cmu/fight_cmu_90_06 (a duplicate in the CMU set)",
+      "frames": 156,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_07": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/fight_cmu_90_07 (a duplicate in the CMU set)",
       "frames": 224,
       "by": "agent"
     },
     "cmu/any_cmu_121_08": {
-      "status": "cut",
-      "cuts": [
-        [
-          46,
-          65
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/84) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_90_08 (a duplicate in the CMU set)",
       "frames": 84,
       "by": "agent"
     },
@@ -1626,283 +1733,468 @@
     "cmu/any_cmu_121_11": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 1/45 frames (ankle.flexion)",
+      "note": "the same motion as cmu/any_cmu_90_11 (a duplicate in the CMU set)",
       "frames": 45,
       "by": "agent"
     },
     "cmu/any_cmu_121_12": {
-      "status": "cut",
-      "cuts": [
-        [
-          102,
-          114
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (shoulder.flexion, 3/207) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_90_12 (a duplicate in the CMU set)",
       "frames": 207,
       "by": "agent"
     },
     "cmu/any_cmu_121_13": {
-      "status": "cut",
-      "cuts": [
-        [
-          112,
-          123
-        ],
-        [
-          140,
-          163
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 16/232) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_90_13 (a duplicate in the CMU set)",
       "frames": 232,
       "by": "agent"
     },
-    "cmu/any_cmu_121_16": {
-      "status": "cut",
-      "cuts": [
-        [
-          68,
-          80
-        ]
-      ],
+    "cmu/any_cmu_121_14": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (shoulder.flexion, 3/181) with the scan's cuts",
+      "note": "the same motion as cmu/flip_cmu_90_14 (a duplicate in the CMU set)",
+      "frames": 210,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_15": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/flip_cmu_90_15 (a duplicate in the CMU set)",
+      "frames": 297,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_16": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/fallandgetup_cmu_90_16 (a duplicate in the CMU set)",
       "frames": 181,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_17": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_90_17 (a duplicate in the CMU set)",
+      "frames": 151,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_18": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_90_18 (a duplicate in the CMU set)",
+      "frames": 99,
       "by": "agent"
     },
     "cmu/any_cmu_121_19": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, shoulder.flexion, 171/260 frames); scan: floor -0.21 m",
+      "note": "the same motion as cmu/flip_cmu_90_19 (a duplicate in the CMU set)",
       "frames": 260,
       "by": "agent"
     },
     "cmu/any_cmu_121_20": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 252/445 frames (ankle.flexion, hip.abduction, leg.backwards)",
+      "note": "the same motion as cmu/any_cmu_90_20 (a duplicate in the CMU set)",
       "frames": 445,
       "by": "agent"
     },
     "cmu/any_cmu_121_21": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, 221/339 frames); scan: floor -0.29 m",
+      "note": "the same motion as cmu/any_cmu_90_21 (a duplicate in the CMU set)",
       "frames": 339,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_22": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_90_22 (a duplicate in the CMU set)",
+      "frames": 173,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_23": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_90_23 (a duplicate in the CMU set)",
+      "frames": 297,
       "by": "agent"
     },
     "cmu/any_cmu_121_24": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 6/197 frames); scan: 61% cut",
+      "note": "the same motion as cmu/sports_cmu_90_24 (a duplicate in the CMU set)",
       "frames": 197,
       "by": "agent"
     },
     "cmu/any_cmu_121_25": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 8/317 frames); scan: 97% cut",
+      "note": "the same motion as cmu/sports_cmu_90_25 (a duplicate in the CMU set)",
       "frames": 317,
       "by": "agent"
     },
-    "cmu/any_cmu_121_28": {
-      "status": "cut",
-      "cuts": [
-        [
-          88,
-          96
-        ],
-        [
-          99,
-          110
-        ],
-        [
-          129,
-          133
-        ]
-      ],
+    "cmu/any_cmu_121_26": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/193) with the scan's cuts",
+      "note": "the same motion as cmu/sports_cmu_90_26 (a duplicate in the CMU set)",
+      "frames": 358,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_27": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_90_27 (a duplicate in the CMU set)",
+      "frames": 306,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_28": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/flip_cmu_90_28 (a duplicate in the CMU set)",
       "frames": 193,
       "by": "agent"
     },
     "cmu/any_cmu_121_29": {
-      "status": "cut",
-      "cuts": [
-        [
-          53,
-          58
-        ],
-        [
-          63,
-          74
-        ],
-        [
-          160,
-          199
-        ],
-        [
-          207,
-          228
-        ],
-        [
-          263,
-          277
-        ],
-        [
-          283,
-          296
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 35/371) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_90_29 (a duplicate in the CMU set)",
       "frames": 371,
       "by": "agent"
     },
     "cmu/any_cmu_121_30": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 167/358 frames (ankle.flexion, leg.backwards)",
+      "note": "the same motion as cmu/dance_cmu_90_30 (a duplicate in the CMU set)",
       "frames": 358,
       "by": "agent"
     },
     "cmu/any_cmu_121_31": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 152/245 frames); scan: 56% cut",
+      "note": "the same motion as cmu/dance_cmu_90_31 (a duplicate in the CMU set)",
       "frames": 245,
+      "by": "agent"
+    },
+    "cmu/any_cmu_121_32": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_90_32 (a duplicate in the CMU set)",
+      "frames": 181,
       "by": "agent"
     },
     "cmu/any_cmu_121_33": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 149/224 frames (ankle.flexion, leg.backwards)",
+      "note": "the same motion as cmu/ground_cmu_90_33 (a duplicate in the CMU set)",
       "frames": 224,
       "by": "agent"
     },
     "cmu/any_cmu_121_34": {
-      "status": "cut",
-      "cuts": [
-        [
-          73,
-          89
-        ],
-        [
-          94,
-          130
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 34/210) with the scan's cuts",
+      "note": "the same motion as cmu/ground_cmu_90_34 (a duplicate in the CMU set)",
       "frames": 210,
       "by": "agent"
     },
     "cmu/any_cmu_121_35": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 87/174 frames (ankle.flexion, leg.backwards)",
+      "note": "the same motion as cmu/ground_cmu_90_35 (a duplicate in the CMU set)",
       "frames": 174,
       "by": "agent"
     },
     "cmu/any_cmu_121_36": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 114/164 frames (ankle.flexion, leg.backwards)",
+      "note": "the same motion as cmu/ground_cmu_90_36 (a duplicate in the CMU set)",
       "frames": 164,
       "by": "agent"
     },
-    "cmu/any_cmu_122_22": {
-      "status": "cut",
-      "cuts": [
-        [
-          650,
-          665
-        ],
-        [
-          691,
-          711
-        ],
-        [
-          735,
-          752
-        ],
-        [
-          849,
-          870
-        ],
-        [
-          884,
-          905
-        ],
-        [
-          934,
-          957
-        ],
-        [
-          969,
-          990
-        ],
-        [
-          1275,
-          1315
-        ]
-      ],
+    "cmu/any_cmu_122_01": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 106/1343) with the scan's cuts",
+      "note": "the same motion as cmu/sidestep_cmu_83_01 (a duplicate in the CMU set)",
+      "frames": 158,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_02": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_02 (a duplicate in the CMU set)",
+      "frames": 91,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_03": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_03 (a duplicate in the CMU set)",
+      "frames": 167,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_04": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_04 (a duplicate in the CMU set)",
+      "frames": 117,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_05": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_05 (a duplicate in the CMU set)",
+      "frames": 122,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_06": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_06 (a duplicate in the CMU set)",
+      "frames": 100,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_07": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_07 (a duplicate in the CMU set)",
+      "frames": 106,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_08": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_08 (a duplicate in the CMU set)",
+      "frames": 116,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_09": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_09 (a duplicate in the CMU set)",
+      "frames": 113,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_10": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_10 (a duplicate in the CMU set)",
+      "frames": 120,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/standing_cmu_83_11 (a duplicate in the CMU set)",
+      "frames": 25,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_12": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_12 (a duplicate in the CMU set)",
+      "frames": 127,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_13": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_13 (a duplicate in the CMU set)",
+      "frames": 127,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_14": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_14 (a duplicate in the CMU set)",
+      "frames": 107,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_15": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_15 (a duplicate in the CMU set)",
+      "frames": 131,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_16": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_16 (a duplicate in the CMU set)",
+      "frames": 128,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_17": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_17 (a duplicate in the CMU set)",
+      "frames": 131,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_18": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_18 (a duplicate in the CMU set)",
+      "frames": 117,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_19": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_19 (a duplicate in the CMU set)",
+      "frames": 127,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_20": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_20 (a duplicate in the CMU set)",
+      "frames": 131,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_21": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_21 (a duplicate in the CMU set)",
+      "frames": 130,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_22": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/stretch_cmu_83_22 (a duplicate in the CMU set)",
       "frames": 1343,
       "by": "agent"
     },
-    "cmu/any_cmu_122_26": {
-      "status": "cut",
-      "cuts": [
-        [
-          42,
-          57
-        ]
-      ],
+    "cmu/any_cmu_122_23": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 6/131) with the scan's cuts",
+      "note": "the same motion as cmu/sidestep_cmu_83_23 (a duplicate in the CMU set)",
+      "frames": 136,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_24": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_24 (a duplicate in the CMU set)",
+      "frames": 133,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_25": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_25 (a duplicate in the CMU set)",
+      "frames": 135,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_26": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_26 (a duplicate in the CMU set)",
       "frames": 131,
       "by": "agent"
     },
@@ -1917,22 +2209,31 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 5/234) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 6/234) with the scan's cuts",
       "frames": 234,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_33": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_33 (a duplicate in the CMU set)",
+      "frames": 323,
       "by": "agent"
     },
     "cmu/any_cmu_122_34": {
       "status": "cut",
       "cuts": [
         [
-          138,
+          137,
           241
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 9/242) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 11/242) with the scan's cuts",
       "frames": 242,
       "by": "agent"
     },
@@ -1940,108 +2241,429 @@
       "status": "cut",
       "cuts": [
         [
-          147,
+          146,
           261
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 8/262) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 10/262) with the scan's cuts",
       "frames": 262,
       "by": "agent"
     },
-    "cmu/any_cmu_122_43": {
-      "status": "cut",
-      "cuts": [
-        [
-          96,
-          114
-        ]
-      ],
+    "cmu/any_cmu_122_36": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 9/149) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_83_36 (a duplicate in the CMU set)",
+      "frames": 266,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_37": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_37 (a duplicate in the CMU set)",
+      "frames": 240,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_38": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_38 (a duplicate in the CMU set)",
+      "frames": 252,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_39": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_39 (a duplicate in the CMU set)",
+      "frames": 243,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_40": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_40 (a duplicate in the CMU set)",
+      "frames": 133,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_41": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_41 (a duplicate in the CMU set)",
+      "frames": 118,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_42": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_42 (a duplicate in the CMU set)",
+      "frames": 135,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_43": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_43 (a duplicate in the CMU set)",
       "frames": 149,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_44": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_83_44 (a duplicate in the CMU set)",
+      "frames": 165,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_45": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_45 (a duplicate in the CMU set)",
+      "frames": 124,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_46": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_46 (a duplicate in the CMU set)",
+      "frames": 125,
       "by": "agent"
     },
     "cmu/any_cmu_122_47": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 17/156 frames); scan: 76% cut",
+      "note": "the same motion as cmu/jump_cmu_83_47 (a duplicate in the CMU set)",
       "frames": 156,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_48": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_48 (a duplicate in the CMU set)",
+      "frames": 111,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_49": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_49 (a duplicate in the CMU set)",
+      "frames": 114,
       "by": "agent"
     },
     "cmu/any_cmu_122_50": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 14/132 frames); scan: 77% cut",
+      "note": "the same motion as cmu/jump_cmu_83_50 (a duplicate in the CMU set)",
       "frames": 132,
       "by": "agent"
     },
-    "cmu/any_cmu_122_57": {
-      "status": "cut",
-      "cuts": [
-        [
-          33,
-          50
-        ]
-      ],
+    "cmu/any_cmu_122_51": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 7/102) with the scan's cuts",
+      "note": "the same motion as cmu/jump_cmu_83_51 (a duplicate in the CMU set)",
+      "frames": 148,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_52": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_52 (a duplicate in the CMU set)",
+      "frames": 127,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_53": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_53 (a duplicate in the CMU set)",
+      "frames": 135,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_54": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_54 (a duplicate in the CMU set)",
+      "frames": 105,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_55": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_55 (a duplicate in the CMU set)",
+      "frames": 184,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_56": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_56 (a duplicate in the CMU set)",
+      "frames": 125,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_57": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_57 (a duplicate in the CMU set)",
       "frames": 102,
       "by": "agent"
     },
-    "cmu/any_cmu_122_62": {
-      "status": "cut",
-      "cuts": [
-        [
-          66,
-          78
-        ]
-      ],
+    "cmu/any_cmu_122_58": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/119) with the scan's cuts",
+      "note": "the same motion as cmu/jump_cmu_83_58 (a duplicate in the CMU set)",
+      "frames": 91,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_59": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_59 (a duplicate in the CMU set)",
+      "frames": 151,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_60": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_60 (a duplicate in the CMU set)",
+      "frames": 102,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_61": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_61 (a duplicate in the CMU set)",
+      "frames": 126,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_62": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_62 (a duplicate in the CMU set)",
       "frames": 119,
       "by": "agent"
     },
-    "cmu/any_cmu_122_64": {
-      "status": "cut",
-      "cuts": [
-        [
-          102,
-          118
-        ]
-      ],
+    "cmu/any_cmu_122_63": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 6/145) with the scan's cuts",
+      "note": "the same motion as cmu/sidestep_cmu_83_63 (a duplicate in the CMU set)",
+      "frames": 171,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_64": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_83_64 (a duplicate in the CMU set)",
       "frames": 145,
       "by": "agent"
     },
-    "cmu/any_cmu_122_68": {
-      "status": "cut",
-      "cuts": [
-        [
-          83,
-          98
-        ]
-      ],
+    "cmu/any_cmu_122_65": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, trunk.rotation, 6/165) with the scan's cuts",
+      "note": "the same motion as cmu/jump_cmu_83_65 (a duplicate in the CMU set)",
+      "frames": 100,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_66": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_66 (a duplicate in the CMU set)",
+      "frames": 168,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_67": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_67 (a duplicate in the CMU set)",
+      "frames": 169,
+      "by": "agent"
+    },
+    "cmu/any_cmu_122_68": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_83_68 (a duplicate in the CMU set)",
       "frames": 165,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_01": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_01 (a duplicate in the CMU set)",
+      "frames": 179,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_02": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_02 (a duplicate in the CMU set)",
+      "frames": 190,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_03": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_03 (a duplicate in the CMU set)",
+      "frames": 463,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_04": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_04 (a duplicate in the CMU set)",
+      "frames": 417,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_05": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_05 (a duplicate in the CMU set)",
+      "frames": 226,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_06": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_06 (a duplicate in the CMU set)",
+      "frames": 209,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_07": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_07 (a duplicate in the CMU set)",
+      "frames": 390,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_08": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_08 (a duplicate in the CMU set)",
+      "frames": 214,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_09": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_09 (a duplicate in the CMU set)",
+      "frames": 210,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_10": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_10 (a duplicate in the CMU set)",
+      "frames": 200,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_11 (a duplicate in the CMU set)",
+      "frames": 157,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_12": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_12 (a duplicate in the CMU set)",
+      "frames": 199,
+      "by": "agent"
+    },
+    "cmu/any_cmu_123_13": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_13 (a duplicate in the CMU set)",
+      "frames": 168,
       "by": "agent"
     },
     "cmu/any_cmu_125_02": {
@@ -2382,19 +3004,40 @@
       "frames": 612,
       "by": "agent"
     },
-    "cmu/any_cmu_139_09": {
-      "status": "cut",
-      "cuts": [
-        [
-          171,
-          202
-        ]
-      ],
+    "cmu/any_cmu_139_02": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (hip.abduction, 22/247) with the scan's cuts",
+      "note": "the same motion as cmu/standing_cmu_77_02 (a duplicate in the CMU set)",
+      "frames": 234,
+      "by": "agent"
+    },
+    "cmu/any_cmu_139_09": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/ground_cmu_77_09 (a duplicate in the CMU set)",
       "frames": 247,
+      "by": "agent"
+    },
+    "cmu/any_cmu_139_21": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/stretch_cmu_77_21 (a duplicate in the CMU set)",
+      "frames": 328,
+      "by": "agent"
+    },
+    "cmu/any_cmu_139_25": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_25 (a duplicate in the CMU set)",
+      "frames": 166,
       "by": "agent"
     },
     "cmu/any_cmu_13_16": {
@@ -2415,81 +3058,72 @@
     "cmu/any_cmu_141_15": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 104/291 frames); scan: 79% cut",
+      "note": "the same motion as cmu/any_cmu_106_15 (a duplicate in the CMU set)",
       "frames": 291,
       "by": "agent"
     },
     "cmu/any_cmu_141_18": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 69/97 frames (ankle.flexion)",
+      "note": "the same motion as cmu/any_cmu_106_18 (a duplicate in the CMU set)",
       "frames": 97,
+      "by": "agent"
+    },
+    "cmu/any_cmu_141_21": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_106_21 (a duplicate in the CMU set)",
+      "frames": 68,
       "by": "agent"
     },
     "cmu/any_cmu_141_22": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 9/50 frames (ankle.flexion)",
+      "note": "the same motion as cmu/any_cmu_106_22 (a duplicate in the CMU set)",
       "frames": 50,
       "by": "agent"
     },
     "cmu/any_cmu_141_23": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 16/64 frames (ankle.flexion)",
+      "note": "the same motion as cmu/any_cmu_106_23 (a duplicate in the CMU set)",
       "frames": 64,
       "by": "agent"
     },
     "cmu/any_cmu_141_24": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 1/65 frames (ankle.flexion)",
+      "note": "the same motion as cmu/any_cmu_106_24 (a duplicate in the CMU set)",
       "frames": 65,
       "by": "agent"
     },
     "cmu/any_cmu_141_26": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose in 11/100 frames (ankle.flexion)",
+      "note": "the same motion as cmu/any_cmu_106_26 (a duplicate in the CMU set)",
       "frames": 100,
       "by": "agent"
     },
     "cmu/any_cmu_141_27": {
-      "status": "cut",
-      "cuts": [
-        [
-          0,
-          24
-        ],
-        [
-          57,
-          67
-        ],
-        [
-          72,
-          86
-        ],
-        [
-          94,
-          112
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 34/139) with the scan's cuts",
+      "note": "the same motion as cmu/any_cmu_106_27 (a duplicate in the CMU set)",
       "frames": 139,
       "by": "agent"
     },
@@ -2704,18 +3338,26 @@
         [
           35,
           45
+        ],
+        [
+          394,
+          434
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (hip.abduction, hip.flexion, trunk.rotation, 1/519) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, hip.abduction, hip.flexion, trunk.rotation, 19/519) with the scan's cuts",
       "frames": 519,
       "by": "agent"
     },
     "cmu/any_cmu_28_11": {
       "status": "cut",
       "cuts": [
+        [
+          283,
+          311
+        ],
         [
           566,
           571
@@ -2732,8 +3374,31 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (shoulder.flexion, 17/1654) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, shoulder.flexion, 36/1654) with the scan's cuts",
       "frames": 1654,
+      "by": "agent"
+    },
+    "cmu/any_cmu_28_13": {
+      "status": "cut",
+      "cuts": [
+        [
+          132,
+          214
+        ],
+        [
+          352,
+          371
+        ],
+        [
+          589,
+          607
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 91/1472) with the scan's cuts",
+      "frames": 1472,
       "by": "agent"
     },
     "cmu/any_cmu_31_07": {
@@ -3156,7 +3821,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 880/2381 frames (ankle.flexion, hip.flexion, hip.rotation, leg.backwards)",
+      "note": "impossible pose in 880/2381 frames (ankle.abduction, ankle.flexion, hip.flexion, hip.rotation, leg.backwards)",
       "frames": 2381,
       "by": "agent"
     },
@@ -3200,6 +3865,384 @@
       ],
       "note": "cut impossible pose frames (ankle.flexion, 10/862) with the scan's cuts",
       "frames": 862,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_02": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_02 (a duplicate in the CMU set)",
+      "frames": 123,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_03": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_03 (a duplicate in the CMU set)",
+      "frames": 111,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_04": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_04 (a duplicate in the CMU set)",
+      "frames": 103,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_05": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_05 (a duplicate in the CMU set)",
+      "frames": 97,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_06": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_06 (a duplicate in the CMU set)",
+      "frames": 132,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_07": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_07 (a duplicate in the CMU set)",
+      "frames": 94,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_08": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_08 (a duplicate in the CMU set)",
+      "frames": 91,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_09": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_09 (a duplicate in the CMU set)",
+      "frames": 113,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_10": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_10 (a duplicate in the CMU set)",
+      "frames": 141,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_11 (a duplicate in the CMU set)",
+      "frames": 148,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_12": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_12 (a duplicate in the CMU set)",
+      "frames": 126,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_13": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_13 (a duplicate in the CMU set)",
+      "frames": 109,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_14": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_14 (a duplicate in the CMU set)",
+      "frames": 140,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_15": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_15 (a duplicate in the CMU set)",
+      "frames": 104,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_16": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_16 (a duplicate in the CMU set)",
+      "frames": 155,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_17": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_17 (a duplicate in the CMU set)",
+      "frames": 134,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_18": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_18 (a duplicate in the CMU set)",
+      "frames": 119,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_19": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_19 (a duplicate in the CMU set)",
+      "frames": 92,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_20": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_20 (a duplicate in the CMU set)",
+      "frames": 147,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_21": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_21 (a duplicate in the CMU set)",
+      "frames": 109,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_22": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_22 (a duplicate in the CMU set)",
+      "frames": 132,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_23": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_23 (a duplicate in the CMU set)",
+      "frames": 130,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_24": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_24 (a duplicate in the CMU set)",
+      "frames": 145,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_25": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_25 (a duplicate in the CMU set)",
+      "frames": 154,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_26": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_26 (a duplicate in the CMU set)",
+      "frames": 141,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_27": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_27 (a duplicate in the CMU set)",
+      "frames": 142,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_28": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_28 (a duplicate in the CMU set)",
+      "frames": 129,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_29": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_29 (a duplicate in the CMU set)",
+      "frames": 145,
+      "by": "agent"
+    },
+    "cmu/any_cmu_63_30": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_64_30 (a duplicate in the CMU set)",
+      "frames": 154,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_01": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_01 (a duplicate in the CMU set)",
+      "frames": 179,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_02": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_02 (a duplicate in the CMU set)",
+      "frames": 190,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_03": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_03 (a duplicate in the CMU set)",
+      "frames": 463,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_04": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_04 (a duplicate in the CMU set)",
+      "frames": 417,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_05": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_05 (a duplicate in the CMU set)",
+      "frames": 226,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_06": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_06 (a duplicate in the CMU set)",
+      "frames": 209,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_07": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_07 (a duplicate in the CMU set)",
+      "frames": 390,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_08": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_08 (a duplicate in the CMU set)",
+      "frames": 214,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_09": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_09 (a duplicate in the CMU set)",
+      "frames": 210,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_10": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_10 (a duplicate in the CMU set)",
+      "frames": 200,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_11 (a duplicate in the CMU set)",
+      "frames": 157,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_12": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_12 (a duplicate in the CMU set)",
+      "frames": 199,
+      "by": "agent"
+    },
+    "cmu/any_cmu_73_13": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/carry_cmu_70_13 (a duplicate in the CMU set)",
+      "frames": 168,
       "by": "agent"
     },
     "cmu/any_cmu_74_13": {
@@ -3249,23 +4292,71 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 90/631) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 90/631) with the scan's cuts",
       "frames": 631,
       "by": "agent"
     },
-    "cmu/any_cmu_77_08": {
-      "status": "cut",
-      "cuts": [
-        [
-          76,
-          98
-        ]
-      ],
+    "cmu/any_cmu_77_03": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (hip.abduction, 13/252) with the scan's cuts",
+      "note": "the same motion as cmu/standing_cmu_139_03 (a duplicate in the CMU set)",
+      "frames": 246,
+      "by": "agent"
+    },
+    "cmu/any_cmu_77_06": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/ground_cmu_139_06 (a duplicate in the CMU set)",
+      "frames": 338,
+      "by": "agent"
+    },
+    "cmu/any_cmu_77_07": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/ground_cmu_139_07 (a duplicate in the CMU set)",
+      "frames": 126,
+      "by": "agent"
+    },
+    "cmu/any_cmu_77_08": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/ground_cmu_139_08 (a duplicate in the CMU set)",
       "frames": 252,
+      "by": "agent"
+    },
+    "cmu/any_cmu_77_14": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_139_14 (a duplicate in the CMU set)",
+      "frames": 248,
+      "by": "agent"
+    },
+    "cmu/any_cmu_77_15": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sidestep_cmu_139_15 (a duplicate in the CMU set)",
+      "frames": 270,
+      "by": "agent"
+    },
+    "cmu/any_cmu_77_34": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_139_34 (a duplicate in the CMU set)",
+      "frames": 281,
       "by": "agent"
     },
     "cmu/any_cmu_79_66": {
@@ -3273,7 +4364,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 180/180 frames (ankle.flexion, hip.rotation, leg.backwards)",
+      "note": "impossible pose in 180/180 frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 180,
       "by": "agent"
     },
@@ -3291,7 +4382,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 234/234 frames (ankle.flexion, hip.rotation, leg.backwards)",
+      "note": "impossible pose in 234/234 frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 234,
       "by": "agent"
     },
@@ -3461,13 +4552,13 @@
       "cuts": [
         [
           568,
-          603
+          604
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 26/648) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 27/648) with the scan's cuts",
       "frames": 648,
       "by": "agent"
     },
@@ -3860,124 +4951,184 @@
       "frames": 345,
       "by": "agent"
     },
-    "cmu/any_cmu_84_03": {
-      "status": "cut",
-      "cuts": [
-        [
-          45,
-          57
-        ]
-      ],
+    "cmu/any_cmu_84_01": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/99) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_74_01 (a duplicate in the CMU set)",
+      "frames": 116,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_02": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_74_02 (a duplicate in the CMU set)",
+      "frames": 66,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_03": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/fight_cmu_74_03 (a duplicate in the CMU set)",
       "frames": 99,
       "by": "agent"
     },
     "cmu/any_cmu_84_04": {
-      "status": "cut",
-      "cuts": [
-        [
-          30,
-          44
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/79) with the scan's cuts",
+      "note": "the same motion as cmu/fight_cmu_74_04 (a duplicate in the CMU set)",
       "frames": 79,
       "by": "agent"
     },
     "cmu/any_cmu_84_05": {
-      "status": "cut",
-      "cuts": [
-        [
-          36,
-          47
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 2/81) with the scan's cuts",
+      "note": "the same motion as cmu/fight_cmu_74_05 (a duplicate in the CMU set)",
       "frames": 81,
       "by": "agent"
     },
     "cmu/any_cmu_84_06": {
-      "status": "cut",
-      "cuts": [
-        [
-          36,
-          46
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 1/81) with the scan's cuts",
+      "note": "the same motion as cmu/fight_cmu_74_06 (a duplicate in the CMU set)",
       "frames": 81,
       "by": "agent"
     },
     "cmu/any_cmu_84_07": {
       "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 45/78 frames); scan: floor -0.22 m; 63% cut",
+      "note": "the same motion as cmu/carry_cmu_74_07 (a duplicate in the CMU set)",
       "frames": 78,
       "by": "agent"
     },
-    "cmu/any_cmu_84_13": {
-      "status": "cut",
-      "cuts": [
-        [
-          280,
-          300
-        ],
-        [
-          304,
-          323
-        ],
-        [
-          345,
-          358
-        ],
-        [
-          361,
-          395
-        ],
-        [
-          402,
-          419
-        ],
-        [
-          421,
-          437
-        ],
-        [
-          462,
-          475
-        ],
-        [
-          531,
-          549
-        ],
-        [
-          555,
-          569
-        ],
-        [
-          584,
-          608
-        ]
-      ],
+    "cmu/any_cmu_84_08": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 90/631) with the scan's cuts",
+      "note": "the same motion as cmu/carry_cmu_74_08 (a duplicate in the CMU set)",
+      "frames": 42,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_09": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_09 (a duplicate in the CMU set)",
+      "frames": 50,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_10": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_10 (a duplicate in the CMU set)",
+      "frames": 84,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_11 (a duplicate in the CMU set)",
+      "frames": 87,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_12": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_12 (a duplicate in the CMU set)",
+      "frames": 76,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_13": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_13 (a duplicate in the CMU set)",
       "frames": 631,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_14": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_14 (a duplicate in the CMU set)",
+      "frames": 112,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_15": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_15 (a duplicate in the CMU set)",
+      "frames": 110,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_16": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_16 (a duplicate in the CMU set)",
+      "frames": 123,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_17": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_17 (a duplicate in the CMU set)",
+      "frames": 130,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_18": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_18 (a duplicate in the CMU set)",
+      "frames": 123,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_19": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/any_cmu_74_19 (a duplicate in the CMU set)",
+      "frames": 122,
+      "by": "agent"
+    },
+    "cmu/any_cmu_84_20": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_74_20 (a duplicate in the CMU set)",
+      "frames": 144,
       "by": "agent"
     },
     "cmu/any_cmu_85_03": {
@@ -4019,12 +5170,16 @@
           404
         ],
         [
+          413,
+          425
+        ],
+        [
           471,
           476
         ],
         [
           499,
-          518
+          520
         ],
         [
           554,
@@ -4034,7 +5189,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 41/639) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 46/639) with the scan's cuts",
       "frames": 639,
       "by": "agent"
     },
@@ -4093,8 +5248,8 @@
           706
         ],
         [
-          741,
-          746
+          739,
+          751
         ],
         [
           783,
@@ -4116,7 +5271,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 29/1125) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.abduction, hip.rotation, leg.backwards, 32/1125) with the scan's cuts",
       "frames": 1125,
       "by": "agent"
     },
@@ -4129,13 +5284,13 @@
         ],
         [
           258,
-          276
+          277
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 7/362) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, 10/362) with the scan's cuts",
       "frames": 362,
       "by": "agent"
     },
@@ -4144,7 +5299,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, 40/197 frames); scan: 98% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, hip.abduction, leg.backwards, 40/197 frames); scan: 98% cut",
       "frames": 197,
       "by": "agent"
     },
@@ -4162,7 +5317,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 252/445 frames (ankle.flexion, hip.abduction, leg.backwards)",
+      "note": "impossible pose in 252/445 frames (ankle.abduction, ankle.flexion, hip.abduction, leg.backwards)",
       "frames": 445,
       "by": "agent"
     },
@@ -4171,7 +5326,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, 221/339 frames); scan: floor -0.29 m",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, hip.abduction, leg.backwards, 221/339 frames); scan: floor -0.29 m",
       "frames": 339,
       "by": "agent"
     },
@@ -4206,7 +5361,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 35/371) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, shoulder.flexion, 35/371) with the scan's cuts",
       "frames": 371,
       "by": "agent"
     },
@@ -4352,7 +5507,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, 28/835) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards, 28/835) with the scan's cuts",
       "frames": 835,
       "by": "agent"
     },
@@ -4518,7 +5673,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 30/864) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.rotation, 30/864) with the scan's cuts",
       "frames": 864,
       "by": "agent"
     },
@@ -4747,6 +5902,15 @@
       "frames": 411,
       "by": "agent"
     },
+    "cmu/carry_cmu_139_05": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/standing_cmu_77_05 (a duplicate in the CMU set)",
+      "frames": 128,
+      "by": "agent"
+    },
     "cmu/carry_cmu_26_09": {
       "status": "cut",
       "cuts": [
@@ -4767,7 +5931,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 45/78 frames); scan: floor -0.22 m; 63% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 45/78 frames); scan: floor -0.22 m; 63% cut",
       "frames": 78,
       "by": "agent"
     },
@@ -4776,7 +5940,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 285/285 frames (ankle.flexion, hip.rotation, leg.backwards)",
+      "note": "impossible pose in 285/285 frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 285,
       "by": "agent"
     },
@@ -4931,7 +6095,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 48/180 frames (ankle.flexion, hip.abduction, leg.backwards)",
+      "note": "impossible pose in 48/180 frames (ankle.abduction, ankle.flexion, hip.abduction, leg.backwards)",
       "frames": 180,
       "by": "agent"
     },
@@ -4998,13 +6162,13 @@
         ],
         [
           66,
-          85
+          86
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, 14/148) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards, 15/148) with the scan's cuts",
       "frames": 148,
       "by": "agent"
     },
@@ -5209,6 +6373,51 @@
       "frames": 274,
       "by": "agent"
     },
+    "cmu/dance_cmu_103_03": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/dance_cmu_93_03 (a duplicate in the CMU set)",
+      "frames": 111,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_103_04": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/dance_cmu_93_04 (a duplicate in the CMU set)",
+      "frames": 127,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_103_05": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/dance_cmu_93_05 (a duplicate in the CMU set)",
+      "frames": 137,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_103_06": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/dance_cmu_93_06 (a duplicate in the CMU set)",
+      "frames": 101,
+      "by": "agent"
+    },
+    "cmu/dance_cmu_103_08": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/dance_cmu_93_08 (a duplicate in the CMU set)",
+      "frames": 139,
+      "by": "agent"
+    },
     "cmu/dance_cmu_137_06": {
       "status": "cut",
       "cuts": [
@@ -5340,6 +6549,25 @@
       "frames": 1339,
       "by": "agent"
     },
+    "cmu/dance_cmu_14_20": {
+      "status": "cut",
+      "cuts": [
+        [
+          809,
+          839
+        ],
+        [
+          1051,
+          1057
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 21/1161) with the scan's cuts",
+      "frames": 1161,
+      "by": "agent"
+    },
     "cmu/dance_cmu_54_25": {
       "status": "cut",
       "cuts": [
@@ -5370,7 +6598,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 47/561) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 47/561) with the scan's cuts",
       "frames": 561,
       "by": "agent"
     },
@@ -5385,7 +6613,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 17/525) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 17/525) with the scan's cuts",
       "frames": 525,
       "by": "agent"
     },
@@ -5405,14 +6633,14 @@
           739
         ],
         [
-          761,
-          779
+          760,
+          780
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, trunk.rotation, 9/855) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards, trunk.rotation, 11/855) with the scan's cuts",
       "frames": 855,
       "by": "agent"
     },
@@ -5467,13 +6695,13 @@
         ],
         [
           445,
-          456
+          457
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (leg.backwards, trunk.rotation, 3/535) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, leg.backwards, trunk.rotation, 4/535) with the scan's cuts",
       "frames": 535,
       "by": "agent"
     },
@@ -5547,7 +6775,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 167/358 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 170/358 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 358,
       "by": "agent"
     },
@@ -5556,7 +6784,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 152/245 frames); scan: 56% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 154/245 frames); scan: 56% cut",
       "frames": 245,
       "by": "agent"
     },
@@ -5614,7 +6842,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 38/144 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 38/144 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 144,
       "by": "agent"
     },
@@ -5777,7 +7005,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/99) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 3/99) with the scan's cuts",
       "frames": 99,
       "by": "agent"
     },
@@ -5815,14 +7043,14 @@
       "status": "cut",
       "cuts": [
         [
-          36,
+          35,
           46
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 1/81) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 2/81) with the scan's cuts",
       "frames": 81,
       "by": "agent"
     },
@@ -5907,14 +7135,22 @@
       "status": "cut",
       "cuts": [
         [
-          53,
+          52,
           65
+        ],
+        [
+          77,
+          87
+        ],
+        [
+          114,
+          124
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/154) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 6/154) with the scan's cuts",
       "frames": 154,
       "by": "agent"
     },
@@ -6027,7 +7263,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 52/615) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 54/615) with the scan's cuts",
       "frames": 615,
       "by": "agent"
     },
@@ -6062,7 +7298,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 24/581) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, 25/581) with the scan's cuts",
       "frames": 581,
       "by": "agent"
     },
@@ -6166,8 +7402,8 @@
       "status": "cut",
       "cuts": [
         [
-          267,
-          271
+          264,
+          275
         ],
         [
           295,
@@ -6194,7 +7430,7 @@
           484
         ],
         [
-          516,
+          504,
           541
         ],
         [
@@ -6217,7 +7453,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.rotation, shoulder.flexion, 38/742) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.abduction, hip.rotation, shoulder.flexion, 44/742) with the scan's cuts",
       "frames": 742,
       "by": "agent"
     },
@@ -6226,7 +7462,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 10/62 frames (ankle.flexion, hip.abduction, leg.backwards)",
+      "note": "impossible pose in 10/62 frames (ankle.abduction, ankle.flexion, hip.abduction, leg.backwards)",
       "frames": 62,
       "by": "agent"
     },
@@ -6235,7 +7471,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 9/54 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 9/54 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 54,
       "by": "agent"
     },
@@ -6244,7 +7480,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 12/128 frames); scan: 63% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 16/128 frames); scan: 63% cut",
       "frames": 128,
       "by": "agent"
     },
@@ -6253,7 +7489,7 @@
       "cuts": [
         [
           107,
-          117
+          120
         ],
         [
           124,
@@ -6275,7 +7511,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 5/310) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, 6/310) with the scan's cuts",
       "frames": 310,
       "by": "agent"
     },
@@ -6284,7 +7520,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 5/37 frames); scan: 70% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 5/37 frames); scan: 70% cut",
       "frames": 37,
       "by": "agent"
     },
@@ -6293,7 +7529,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 4/39 frames (ankle.flexion)",
+      "note": "impossible pose in 5/39 frames (ankle.abduction, ankle.flexion)",
       "frames": 39,
       "by": "agent"
     },
@@ -6323,8 +7559,8 @@
           38
         ],
         [
-          99,
-          109
+          98,
+          111
         ],
         [
           167,
@@ -6346,7 +7582,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation, leg.backwards, 75/479) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.abduction, hip.flexion, hip.rotation, leg.backwards, 78/479) with the scan's cuts",
       "frames": 479,
       "by": "agent"
     },
@@ -6355,7 +7591,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.rotation, 113/1112 frames); scan: 52% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, hip.rotation, 134/1112 frames); scan: 52% cut",
       "frames": 1112,
       "by": "agent"
     },
@@ -6376,14 +7612,14 @@
           92
         ],
         [
-          104,
+          94,
           131
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 23/221) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 26/221) with the scan's cuts",
       "frames": 221,
       "by": "agent"
     },
@@ -6421,7 +7657,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/84) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 5/84) with the scan's cuts",
       "frames": 84,
       "by": "agent"
     },
@@ -6455,7 +7691,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, shoulder.flexion, 16/232) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, shoulder.flexion, 16/232) with the scan's cuts",
       "frames": 232,
       "by": "agent"
     },
@@ -6464,7 +7700,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, hip.abduction, leg.backwards, shoulder.flexion, 171/260 frames); scan: floor -0.21 m",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, hip.abduction, leg.backwards, shoulder.flexion, 171/260 frames); scan: floor -0.21 m",
       "frames": 260,
       "by": "agent"
     },
@@ -6509,6 +7745,29 @@
       "frames": 75,
       "by": "agent"
     },
+    "cmu/gesture_cmu_28_04": {
+      "status": "cut",
+      "cuts": [
+        [
+          236,
+          260
+        ],
+        [
+          1477,
+          1504
+        ],
+        [
+          1847,
+          1869
+        ]
+      ],
+      "tags": [
+        "range-of-motion"
+      ],
+      "note": "cut impossible pose frames (ankle.abduction, 46/1975) with the scan's cuts",
+      "frames": 1975,
+      "by": "agent"
+    },
     "cmu/gesture_cmu_31_04": {
       "status": "cut",
       "cuts": [
@@ -6533,7 +7792,7 @@
       "cuts": [
         [
           62,
-          98
+          101
         ],
         [
           186,
@@ -6547,7 +7806,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 32/381) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, 35/381) with the scan's cuts",
       "frames": 381,
       "by": "agent"
     },
@@ -6573,12 +7832,16 @@
         [
           208,
           211
+        ],
+        [
+          261,
+          273
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (hip.abduction, hip.rotation, 48/381) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, hip.abduction, hip.rotation, 51/381) with the scan's cuts",
       "frames": 381,
       "by": "agent"
     },
@@ -6652,33 +7915,30 @@
       "frames": 252,
       "by": "agent"
     },
-    "cmu/ground_cmu_139_17": {
-      "status": "cut",
-      "cuts": [
-        [
-          31,
-          45
-        ]
-      ],
+    "cmu/ground_cmu_139_16": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 4/180) with the scan's cuts",
+      "note": "the same motion as cmu/ground_cmu_77_16 (a duplicate in the CMU set)",
+      "frames": 163,
+      "by": "agent"
+    },
+    "cmu/ground_cmu_139_17": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/ground_cmu_77_17 (a duplicate in the CMU set)",
       "frames": 180,
       "by": "agent"
     },
     "cmu/ground_cmu_139_18": {
-      "status": "cut",
-      "cuts": [
-        [
-          77,
-          88
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (hip.abduction, 2/214) with the scan's cuts",
+      "note": "the same motion as cmu/ground_cmu_77_18 (a duplicate in the CMU set)",
       "frames": 214,
       "by": "agent"
     },
@@ -6762,7 +8022,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 149/224 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 152/224 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 224,
       "by": "agent"
     },
@@ -6781,7 +8041,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 34/210) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 34/210) with the scan's cuts",
       "frames": 210,
       "by": "agent"
     },
@@ -6790,7 +8050,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 87/174 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 93/174 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 174,
       "by": "agent"
     },
@@ -6799,8 +8059,134 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 114/164 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 116/164 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 164,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_39": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_39 (a duplicate in the CMU set)",
+      "frames": 112,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_40": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_40 (a duplicate in the CMU set)",
+      "frames": 117,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_41": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_41 (a duplicate in the CMU set)",
+      "frames": 126,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_42": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_42 (a duplicate in the CMU set)",
+      "frames": 140,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_43": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_43 (a duplicate in the CMU set)",
+      "frames": 57,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_44": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_44 (a duplicate in the CMU set)",
+      "frames": 85,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_45": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_45 (a duplicate in the CMU set)",
+      "frames": 93,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_46": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_46 (a duplicate in the CMU set)",
+      "frames": 81,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_47": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_47 (a duplicate in the CMU set)",
+      "frames": 117,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_48": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_48 (a duplicate in the CMU set)",
+      "frames": 110,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_49": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_49 (a duplicate in the CMU set)",
+      "frames": 121,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_50": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_50 (a duplicate in the CMU set)",
+      "frames": 166,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_51": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_51 (a duplicate in the CMU set)",
+      "frames": 121,
+      "by": "agent"
+    },
+    "cmu/jump_cmu_105_52": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/jump_cmu_91_52 (a duplicate in the CMU set)",
+      "frames": 127,
       "by": "agent"
     },
     "cmu/jump_cmu_141_04": {
@@ -6913,7 +8299,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 2/95) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 2/95) with the scan's cuts",
       "frames": 95,
       "by": "agent"
     },
@@ -6922,7 +8308,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 147/147 frames (ankle.flexion, hip.rotation, leg.backwards)",
+      "note": "impossible pose in 147/147 frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 147,
       "by": "agent"
     },
@@ -6956,7 +8342,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 9/149) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 9/149) with the scan's cuts",
       "frames": 149,
       "by": "agent"
     },
@@ -6965,7 +8351,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 17/156 frames); scan: 76% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 17/156 frames); scan: 76% cut",
       "frames": 156,
       "by": "agent"
     },
@@ -6974,7 +8360,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 14/132 frames); scan: 77% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 15/132 frames); scan: 77% cut",
       "frames": 132,
       "by": "agent"
     },
@@ -6989,7 +8375,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 7/102) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 8/102) with the scan's cuts",
       "frames": 102,
       "by": "agent"
     },
@@ -6997,14 +8383,14 @@
       "status": "cut",
       "cuts": [
         [
-          66,
+          65,
           78
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 3/119) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 4/119) with the scan's cuts",
       "frames": 119,
       "by": "agent"
     },
@@ -7012,15 +8398,51 @@
       "status": "cut",
       "cuts": [
         [
-          102,
+          101,
           118
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 6/145) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 8/145) with the scan's cuts",
       "frames": 145,
+      "by": "agent"
+    },
+    "cmu/run_cmu_102_05": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_78_06 (a duplicate in the CMU set)",
+      "frames": 27,
+      "by": "agent"
+    },
+    "cmu/run_cmu_102_06": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_78_07 (a duplicate in the CMU set)",
+      "frames": 35,
+      "by": "agent"
+    },
+    "cmu/run_cmu_102_07": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_78_08 (a duplicate in the CMU set)",
+      "frames": 28,
+      "by": "agent"
+    },
+    "cmu/run_cmu_102_08": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_78_10 (a duplicate in the CMU set)",
+      "frames": 35,
       "by": "agent"
     },
     "cmu/run_cmu_104_01": {
@@ -7028,7 +8450,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 44/96 frames); scan: floor -0.91 m; 62% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 44/96 frames); scan: floor -0.91 m; 62% cut",
       "frames": 96,
       "by": "agent"
     },
@@ -7037,7 +8459,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (leg.backwards, 18/50 frames); scan: 90% cut",
+      "note": "impossible pose (ankle.abduction, leg.backwards, 20/50 frames); scan: 90% cut",
       "frames": 50,
       "by": "agent"
     },
@@ -7046,7 +8468,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (leg.backwards, 17/84 frames); scan: 58% cut",
+      "note": "impossible pose (ankle.abduction, leg.backwards, 18/84 frames); scan: 58% cut",
       "frames": 84,
       "by": "agent"
     },
@@ -7055,7 +8477,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 13/79 frames (leg.backwards)",
+      "note": "impossible pose in 16/79 frames (ankle.abduction, leg.backwards)",
       "frames": 79,
       "by": "agent"
     },
@@ -7064,7 +8486,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 13/87 frames (leg.backwards)",
+      "note": "impossible pose in 13/87 frames (ankle.abduction, leg.backwards)",
       "frames": 87,
       "by": "agent"
     },
@@ -7073,7 +8495,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 10/84 frames (leg.backwards)",
+      "note": "impossible pose in 10/84 frames (ankle.abduction, leg.backwards)",
       "frames": 84,
       "by": "agent"
     },
@@ -7082,7 +8504,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (leg.backwards, 16/38 frames); scan: 97% cut",
+      "note": "impossible pose (ankle.abduction, leg.backwards, 17/38 frames); scan: 97% cut",
       "frames": 38,
       "by": "agent"
     },
@@ -7091,7 +8513,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 11/30 frames); scan: 87% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 12/30 frames); scan: 87% cut",
       "frames": 30,
       "by": "agent"
     },
@@ -7100,7 +8522,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 13/75 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 14/75 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 75,
       "by": "agent"
     },
@@ -7109,7 +8531,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 10/62 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 10/62 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 62,
       "by": "agent"
     },
@@ -7122,13 +8544,13 @@
         ],
         [
           73,
-          104
+          105
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 11/126) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 12/126) with the scan's cuts",
       "frames": 126,
       "by": "agent"
     },
@@ -7143,7 +8565,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (leg.backwards, 4/92) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, leg.backwards, 4/92) with the scan's cuts",
       "frames": 92,
       "by": "agent"
     },
@@ -7152,13 +8574,13 @@
       "cuts": [
         [
           0,
-          23
+          24
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (leg.backwards, 7/96) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, leg.backwards, 8/96) with the scan's cuts",
       "frames": 96,
       "by": "agent"
     },
@@ -7215,6 +8637,42 @@
       ],
       "note": "cut impossible pose frames (hip.abduction, 14/107) with the scan's cuts",
       "frames": 107,
+      "by": "agent"
+    },
+    "cmu/run_cmu_139_10": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_77_10 (a duplicate in the CMU set)",
+      "frames": 173,
+      "by": "agent"
+    },
+    "cmu/run_cmu_139_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_77_11 (a duplicate in the CMU set)",
+      "frames": 80,
+      "by": "agent"
+    },
+    "cmu/run_cmu_139_12": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_77_12 (a duplicate in the CMU set)",
+      "frames": 245,
+      "by": "agent"
+    },
+    "cmu/run_cmu_139_13": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/run_cmu_77_13 (a duplicate in the CMU set)",
+      "frames": 347,
       "by": "agent"
     },
     "cmu/run_cmu_141_02": {
@@ -7288,7 +8746,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 4/73 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 5/73 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 73,
       "by": "agent"
     },
@@ -7369,7 +8827,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, trunk.rotation, 6/165) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, trunk.rotation, 6/165) with the scan's cuts",
       "frames": 165,
       "by": "agent"
     },
@@ -7378,7 +8836,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 44/140 frames); scan: 57% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 45/140 frames); scan: 57% cut",
       "frames": 140,
       "by": "agent"
     },
@@ -7411,7 +8869,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 54/124 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 55/124 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 124,
       "by": "agent"
     },
@@ -7428,6 +8886,15 @@
       ],
       "note": "cut impossible pose frames (trunk.rotation, 1/1773) with the scan's cuts",
       "frames": 1773,
+      "by": "agent"
+    },
+    "cmu/sports_cmu_102_10": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_78_12 (a duplicate in the CMU set)",
+      "frames": 24,
       "by": "agent"
     },
     "cmu/sports_cmu_141_10": {
@@ -7505,6 +8972,15 @@
       "frames": 676,
       "by": "agent"
     },
+    "cmu/sports_cmu_64_01": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/sports_cmu_63_01 (a duplicate in the CMU set)",
+      "frames": 112,
+      "by": "agent"
+    },
     "cmu/sports_cmu_79_79": {
       "status": "reject",
       "tags": [
@@ -7519,7 +8995,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 125/125 frames (ankle.flexion, hip.rotation, leg.backwards)",
+      "note": "impossible pose in 125/125 frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 125,
       "by": "agent"
     },
@@ -7528,7 +9004,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 160/160 frames (ankle.flexion, hip.rotation, leg.backwards)",
+      "note": "impossible pose in 160/160 frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards)",
       "frames": 160,
       "by": "agent"
     },
@@ -7616,7 +9092,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 6/197 frames); scan: 61% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 6/197 frames); scan: 61% cut",
       "frames": 197,
       "by": "agent"
     },
@@ -7625,7 +9101,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 8/317 frames); scan: 97% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 8/317 frames); scan: 97% cut",
       "frames": 317,
       "by": "agent"
     },
@@ -7701,6 +9177,42 @@
       "frames": 1279,
       "by": "agent"
     },
+    "cmu/standing_cmu_139_01": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/standing_cmu_77_01 (a duplicate in the CMU set)",
+      "frames": 273,
+      "by": "agent"
+    },
+    "cmu/standing_cmu_139_04": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/standing_cmu_77_04 (a duplicate in the CMU set)",
+      "frames": 221,
+      "by": "agent"
+    },
+    "cmu/standing_cmu_139_26": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_26 (a duplicate in the CMU set)",
+      "frames": 163,
+      "by": "agent"
+    },
+    "cmu/standing_cmu_139_27": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_27 (a duplicate in the CMU set)",
+      "frames": 182,
+      "by": "agent"
+    },
     "cmu/standing_cmu_141_20": {
       "status": "reject",
       "tags": [
@@ -7724,7 +9236,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 395/1024 frames (ankle.flexion, hip.abduction, hip.flexion, hip.rotation)",
+      "note": "impossible pose in 395/1024 frames (ankle.abduction, ankle.flexion, hip.abduction, hip.flexion, hip.rotation)",
       "frames": 1024,
       "by": "agent"
     },
@@ -7747,45 +9259,11 @@
       "by": "agent"
     },
     "cmu/stretch_cmu_113_29": {
-      "status": "cut",
-      "cuts": [
-        [
-          182,
-          248
-        ],
-        [
-          321,
-          465
-        ],
-        [
-          628,
-          649
-        ],
-        [
-          651,
-          656
-        ],
-        [
-          658,
-          663
-        ],
-        [
-          672,
-          677
-        ],
-        [
-          779,
-          784
-        ],
-        [
-          809,
-          821
-        ]
-      ],
+      "status": "reject",
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, 204/1080) with the scan's cuts",
+      "note": "impossible pose in 292/1080 frames (ankle.abduction, ankle.flexion, hip.rotation)",
       "frames": 1080,
       "by": "agent"
     },
@@ -7885,7 +9363,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 26/177) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, 26/177) with the scan's cuts",
       "frames": 177,
       "by": "agent"
     },
@@ -7939,11 +9417,11 @@
           711
         ],
         [
-          735,
+          734,
           752
         ],
         [
-          849,
+          848,
           870
         ],
         [
@@ -7966,7 +9444,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 106/1343) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 108/1343) with the scan's cuts",
       "frames": 1343,
       "by": "agent"
     },
@@ -8005,7 +9483,7 @@
           83
         ],
         [
-          160,
+          149,
           179
         ],
         [
@@ -8040,8 +9518,35 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 15/507) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 19/507) with the scan's cuts",
       "frames": 507,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_102_16": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_78_18 (a duplicate in the CMU set)",
+      "frames": 53,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_102_17": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_78_19 (a duplicate in the CMU set)",
+      "frames": 44,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_103_07": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_93_07 (a duplicate in the CMU set)",
+      "frames": 59,
       "by": "agent"
     },
     "cmu/walk_cmu_104_12": {
@@ -8049,13 +9554,13 @@
       "cuts": [
         [
           54,
-          66
+          67
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (leg.backwards, 3/105) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, leg.backwards, 4/105) with the scan's cuts",
       "frames": 105,
       "by": "agent"
     },
@@ -8063,14 +9568,14 @@
       "status": "cut",
       "cuts": [
         [
-          99,
+          98,
           137
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 16/138) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 17/138) with the scan's cuts",
       "frames": 138,
       "by": "agent"
     },
@@ -8085,7 +9590,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 4/177) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 4/177) with the scan's cuts",
       "frames": 177,
       "by": "agent"
     },
@@ -8094,292 +9599,313 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 18/82 frames); scan: 57% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 20/82 frames); scan: 57% cut",
       "frames": 82,
       "by": "agent"
     },
     "cmu/walk_cmu_105_01": {
-      "status": "cut",
-      "cuts": [
-        [
-          409,
-          420
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/684) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_01 (a duplicate in the CMU set)",
       "frames": 684,
       "by": "agent"
     },
-    "cmu/walk_cmu_105_03": {
-      "status": "cut",
-      "cuts": [
-        [
-          186,
-          196
-        ],
-        [
-          215,
-          227
-        ],
-        [
-          273,
-          284
-        ],
-        [
-          331,
-          341
-        ],
-        [
-          344,
-          354
-        ],
-        [
-          358,
-          368
-        ],
-        [
-          372,
-          382
-        ]
-      ],
+    "cmu/walk_cmu_105_02": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 10/466) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_02 (a duplicate in the CMU set)",
+      "frames": 437,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_03": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_03 (a duplicate in the CMU set)",
       "frames": 466,
       "by": "agent"
     },
     "cmu/walk_cmu_105_05": {
-      "status": "cut",
-      "cuts": [
-        [
-          351,
-          367
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 7/675) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_05 (a duplicate in the CMU set)",
       "frames": 675,
       "by": "agent"
     },
     "cmu/walk_cmu_105_09": {
-      "status": "cut",
-      "cuts": [
-        [
-          1020,
-          1033
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 4/1351) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_09 (a duplicate in the CMU set)",
       "frames": 1351,
       "by": "agent"
     },
-    "cmu/walk_cmu_105_11": {
-      "status": "cut",
-      "cuts": [
-        [
-          379,
-          392
-        ]
-      ],
+    "cmu/walk_cmu_105_10": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 4/466) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_10 (a duplicate in the CMU set)",
+      "frames": 794,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_11": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_11 (a duplicate in the CMU set)",
       "frames": 466,
       "by": "agent"
     },
     "cmu/walk_cmu_105_12": {
-      "status": "cut",
-      "cuts": [
-        [
-          117,
-          128
-        ],
-        [
-          219,
-          232
-        ],
-        [
-          239,
-          250
-        ],
-        [
-          417,
-          428
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 10/556) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_12 (a duplicate in the CMU set)",
       "frames": 556,
       "by": "agent"
     },
     "cmu/walk_cmu_105_13": {
-      "status": "cut",
-      "cuts": [
-        [
-          280,
-          292
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 3/740) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_13 (a duplicate in the CMU set)",
       "frames": 740,
       "by": "agent"
     },
-    "cmu/walk_cmu_105_16": {
-      "status": "cut",
-      "cuts": [
-        [
-          442,
-          459
-        ]
-      ],
+    "cmu/walk_cmu_105_14": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 4/473) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_14 (a duplicate in the CMU set)",
+      "frames": 692,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_15": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_15 (a duplicate in the CMU set)",
+      "frames": 773,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_16": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_16 (a duplicate in the CMU set)",
       "frames": 473,
       "by": "agent"
     },
-    "cmu/walk_cmu_105_23": {
-      "status": "cut",
-      "cuts": [
-        [
-          292,
-          310
-        ],
-        [
-          503,
-          513
-        ]
-      ],
+    "cmu/walk_cmu_105_17": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 10/667) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_17 (a duplicate in the CMU set)",
+      "frames": 380,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_18": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_18 (a duplicate in the CMU set)",
+      "frames": 841,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_19": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_19 (a duplicate in the CMU set)",
+      "frames": 471,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_20": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_20 (a duplicate in the CMU set)",
+      "frames": 694,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_21": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_21 (a duplicate in the CMU set)",
+      "frames": 968,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_22": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_22 (a duplicate in the CMU set)",
+      "frames": 527,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_23": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_23 (a duplicate in the CMU set)",
       "frames": 667,
       "by": "agent"
     },
-    "cmu/walk_cmu_105_25": {
-      "status": "cut",
-      "cuts": [
-        [
-          144,
-          155
-        ]
-      ],
+    "cmu/walk_cmu_105_24": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/784) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_24 (a duplicate in the CMU set)",
+      "frames": 951,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_25": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_25 (a duplicate in the CMU set)",
       "frames": 784,
       "by": "agent"
     },
-    "cmu/walk_cmu_105_27": {
-      "status": "cut",
-      "cuts": [
-        [
-          333,
-          361
-        ]
-      ],
+    "cmu/walk_cmu_105_26": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 19/724) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_26 (a duplicate in the CMU set)",
+      "frames": 521,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_27": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_27 (a duplicate in the CMU set)",
       "frames": 724,
       "by": "agent"
     },
     "cmu/walk_cmu_105_28": {
-      "status": "cut",
-      "cuts": [
-        [
-          220,
-          232
-        ],
-        [
-          403,
-          406
-        ],
-        [
-          419,
-          437
-        ],
-        [
-          774,
-          790
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 19/827) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_28 (a duplicate in the CMU set)",
       "frames": 827,
       "by": "agent"
     },
     "cmu/walk_cmu_105_29": {
-      "status": "cut",
-      "cuts": [
-        [
-          213,
-          223
-        ],
-        [
-          232,
-          243
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 3/545) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_29 (a duplicate in the CMU set)",
       "frames": 545,
       "by": "agent"
     },
     "cmu/walk_cmu_105_30": {
-      "status": "cut",
-      "cuts": [
-        [
-          278,
-          288
-        ]
-      ],
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 1/785) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_30 (a duplicate in the CMU set)",
       "frames": 785,
       "by": "agent"
     },
-    "cmu/walk_cmu_105_62": {
-      "status": "cut",
-      "cuts": [
-        [
-          172,
-          182
-        ],
-        [
-          240,
-          251
-        ]
-      ],
+    "cmu/walk_cmu_105_31": {
+      "status": "reject",
       "tags": [
-        "range-of-motion"
+        "duplicate"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 3/462) with the scan's cuts",
+      "note": "the same motion as cmu/walk_cmu_91_31 (a duplicate in the CMU set)",
+      "frames": 498,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_32": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_32 (a duplicate in the CMU set)",
+      "frames": 931,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_33": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_33 (a duplicate in the CMU set)",
+      "frames": 675,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_34": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_34 (a duplicate in the CMU set)",
+      "frames": 552,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_35": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_35 (a duplicate in the CMU set)",
+      "frames": 763,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_36": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_36 (a duplicate in the CMU set)",
+      "frames": 222,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_57": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_57 (a duplicate in the CMU set)",
+      "frames": 294,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_105_62": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_91_62 (a duplicate in the CMU set)",
       "frames": 462,
       "by": "agent"
     },
@@ -8407,7 +9933,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 81/202 frames); scan: 62% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 86/202 frames); scan: 62% cut",
       "frames": 202,
       "by": "agent"
     },
@@ -8416,7 +9942,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 76/195 frames); scan: 59% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 77/195 frames); scan: 59% cut",
       "frames": 195,
       "by": "agent"
     },
@@ -8425,7 +9951,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 58/170 frames); scan: 54% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 60/170 frames); scan: 54% cut",
       "frames": 170,
       "by": "agent"
     },
@@ -8434,7 +9960,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 76/175 frames); scan: 67% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 83/175 frames); scan: 67% cut",
       "frames": 175,
       "by": "agent"
     },
@@ -8443,7 +9969,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 45/93 frames); scan: 68% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 46/93 frames); scan: 68% cut",
       "frames": 93,
       "by": "agent"
     },
@@ -8452,7 +9978,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 54/100 frames); scan: 68% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 57/100 frames); scan: 68% cut",
       "frames": 100,
       "by": "agent"
     },
@@ -8461,7 +9987,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 48/96 frames); scan: 70% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 50/96 frames); scan: 70% cut",
       "frames": 96,
       "by": "agent"
     },
@@ -8470,7 +9996,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 48/100 frames); scan: 65% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 49/100 frames); scan: 65% cut",
       "frames": 100,
       "by": "agent"
     },
@@ -8479,7 +10005,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 53/107 frames); scan: 67% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 54/107 frames); scan: 67% cut",
       "frames": 107,
       "by": "agent"
     },
@@ -8488,8 +10014,107 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose (ankle.flexion, leg.backwards, 49/109 frames); scan: 69% cut",
+      "note": "impossible pose (ankle.abduction, ankle.flexion, leg.backwards, 51/109 frames); scan: 69% cut",
       "frames": 109,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_19": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_19 (a duplicate in the CMU set)",
+      "frames": 250,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_20": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_20 (a duplicate in the CMU set)",
+      "frames": 393,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_22": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_22 (a duplicate in the CMU set)",
+      "frames": 356,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_23": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_23 (a duplicate in the CMU set)",
+      "frames": 398,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_24": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_24 (a duplicate in the CMU set)",
+      "frames": 179,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_28": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_28 (a duplicate in the CMU set)",
+      "frames": 743,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_29": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_29 (a duplicate in the CMU set)",
+      "frames": 526,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_30": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_30 (a duplicate in the CMU set)",
+      "frames": 315,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_31": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_31 (a duplicate in the CMU set)",
+      "frames": 527,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_32": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_32 (a duplicate in the CMU set)",
+      "frames": 474,
+      "by": "agent"
+    },
+    "cmu/walk_cmu_139_33": {
+      "status": "reject",
+      "tags": [
+        "duplicate"
+      ],
+      "note": "the same motion as cmu/walk_cmu_77_33 (a duplicate in the CMU set)",
+      "frames": 749,
       "by": "agent"
     },
     "cmu/walk_cmu_141_07": {
@@ -8506,7 +10131,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 16/83 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 16/83 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 83,
       "by": "agent"
     },
@@ -8515,7 +10140,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "impossible pose in 9/59 frames (ankle.flexion, leg.backwards)",
+      "note": "impossible pose in 9/59 frames (ankle.abduction, ankle.flexion, leg.backwards)",
       "frames": 59,
       "by": "agent"
     },
@@ -8567,7 +10192,7 @@
         ],
         [
           74,
-          94
+          95
         ],
         [
           109,
@@ -8577,7 +10202,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 22/154) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, 23/154) with the scan's cuts",
       "frames": 154,
       "by": "agent"
     },
@@ -8704,7 +10329,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, trunk.rotation, 9/2452) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.rotation, leg.backwards, trunk.rotation, 9/2452) with the scan's cuts",
       "frames": 2452,
       "by": "agent"
     },
@@ -8935,7 +10560,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 6/131) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, leg.backwards, 6/131) with the scan's cuts",
       "frames": 131,
       "by": "agent"
     },
@@ -9296,7 +10921,7 @@
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, hip.rotation, leg.backwards, 3/180) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, hip.rotation, knee.flexion, leg.backwards, 3/180) with the scan's cuts",
       "frames": 180,
       "by": "agent"
     },
@@ -9308,14 +10933,14 @@
           53
         ],
         [
-          65,
+          64,
           76
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, 2/180) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.abduction, ankle.flexion, 3/180) with the scan's cuts",
       "frames": 180,
       "by": "agent"
     },
@@ -9404,14 +11029,14 @@
       "status": "cut",
       "cuts": [
         [
-          62,
-          72
+          61,
+          74
         ]
       ],
       "tags": [
         "range-of-motion"
       ],
-      "note": "cut impossible pose frames (ankle.flexion, leg.backwards, 1/240) with the scan's cuts",
+      "note": "cut impossible pose frames (ankle.flexion, knee.flexion, leg.backwards, 4/240) with the scan's cuts",
       "frames": 240,
       "by": "agent"
     },
