@@ -2,14 +2,7 @@
 
 HumanMotionCraft is a standalone, pure-Rust humanoid keyframe animation application with a native `wgpu` + `egui` UI. It combines a 104-bone humanoid rig, two-bone and full-body IK, timeline layers and motion-matching travel, a physics-assisted solver, and a pure-Rust learned in-betweener—all built on a deterministic, command-first core that can be driven from the desktop UI, headless CLI (`ac`), or an MCP agent (`ac mcp`).
 
-<p align="center">
-  <img src="docs/media/hero.gif" width="640" alt="The demo clip in the app: the mannequin walks to a box, salutes, steps up onto the box and salutes again">
-</p>
 
-<p align="center">
-  <img src="docs/media/text-to-motion.gif" width="720" alt="Motion from text: the prompt &quot;a person jogging&quot; is typed into the panel, Generate is pressed, and the mannequin jogs">
-  <br><em>Motion from text (optional install): type what the body does, press Generate.</em>
-</p>
 
 ---
 
