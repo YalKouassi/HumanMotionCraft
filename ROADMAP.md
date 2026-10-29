@@ -48,8 +48,10 @@ propose one and wait for the owner to agree before building it.
    *Acceptance:* the zip runs on a clean Windows machine with no Rust, Python or ffmpeg installed
    (video export then explains what is missing).
 6. [x] **Install motion from text from the app.** The Motion from text panel lists what the
-   install needs (`text.install` checks the source tree, `uv`, Git, the C++ build tools and the
-   GPU), names the licences installing accepts, and Install runs `setup_textmotion.py` in the
+   install needs (`text.install` checks the source tree, `uv`, the C++ build tools and the
+   GPU; without a `uv` of the person's own the install fetches a pinned, hash-checked one, uv
+   brings its own Python into the install, and Kimodo comes as GitHub's archive checked by hash,
+   so neither Python nor Git nor any account is needed), names the licences installing accepts, and Install runs `setup_textmotion.py` in the
    background (through `uv run`), with its numbered step, Stop and the log (owner's decision,
    2026-10-29). The setup stops when the app closes its stdin, and starting again resumes. It
    needs the source tree (the setup copies training's rig maths), so packaging (row 5) must ship

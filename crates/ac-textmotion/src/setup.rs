@@ -8,6 +8,9 @@
 //! What the app can see is checked before it starts ([`requirements`]); the setup checks the free
 //! disk itself and fails at once when there is too little. The setup needs the source tree it
 //! sits in (it copies the rig maths from `training/`), found next to the assets folder.
+//!
+//! Without a uv of the person's own, the install first fetches one ([`uv_fetch`]): the download
+//! and the unpacking run as children too, one after the other, then the setup.
 
 use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
@@ -19,7 +22,7 @@ use std::time::{Duration, Instant};
 use serde::Serialize;
 use serde_json::{Value, json};
 
-use crate::install;
+use crate::{install, uv_fetch};
 
 /// The setup, from the source tree's root.
 pub const SCRIPT: &str = "tools/textmotion/setup_textmotion.py";
@@ -123,9 +126,24 @@ fn line(p: &mut Progress, raw: &str) {
     }
 }
 
+/// What a run's child is doing.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Stage {
+    FetchUv,
+    UnpackUv,
+    Setup,
+}
+
 /// A setup started by this process.
 struct Run {
     child: Child,
+    stage: Stage,
+    /// The install folder.
+    dir: PathBuf,
+    /// The source tree the setup is in.
+    root: PathBuf,
+    /// Why a stage before the setup failed (the log says it too).
+    failed: Option<String>,
     /// Closed (dropped) to stop it.
     stdin: Option<ChildStdin>,
     log: PathBuf,
@@ -154,7 +172,10 @@ impl Run {
     fn poll(&mut self) {
         if self.exit.is_none() {
             match self.child.try_wait() {
-                Ok(Some(s)) => self.exit = Some(s),
+                Ok(Some(s)) => {
+                    self.exit = Some(s);
+                    self.advance();
+                }
                 Ok(None) => {
                     if self.stop_asked.is_some_and(|t| t.elapsed() > STOP_GRACE) {
                         let _ = self.child.kill();
@@ -177,6 +198,106 @@ impl Run {
     }
 }
 
+impl Run {
+    /// A stage before the setup ended: start the next one, or say why it can't go on.
+    fn advance(&mut self) {
+        let Some(status) = self.exit else {
+            return;
+        };
+        if self.stage == Stage::Setup || self.stop_asked.is_some() {
+            return;
+        }
+        let next = if status.success() {
+            match self.stage {
+                Stage::FetchUv => uv_fetch::unpack(&self.dir).map(|c| (c, Stage::UnpackUv)),
+                _ => uv_fetch::finish(&self.dir)
+                    .and_then(|uv| setup_command(&uv, &self.root, &self.dir))
+                    .map(|c| (c, Stage::Setup)),
+            }
+        } else {
+            let what = if self.stage == Stage::FetchUv {
+                "downloaded: check the internet connection and press Install again"
+            } else {
+                "unpacked: press Install again"
+            };
+            Err(format!("uv could not be {what} ({status})"))
+        };
+        let started = next.and_then(|(cmd, stage)| {
+            let (child, stdin) = launch(cmd, &self.log)?;
+            Ok((child, stdin, stage))
+        });
+        match started {
+            Ok((child, stdin, stage)) => {
+                self.child = child;
+                self.stdin = stdin;
+                self.stage = stage;
+                self.exit = None;
+            }
+            Err(e) => {
+                // in the log too, where a later run of the app reads why it ended
+                self.failed = Some(match append(&self.log, &format!("{e}\n")) {
+                    Ok(()) => e,
+                    Err(w) => format!("{e} ({w})"),
+                });
+            }
+        }
+    }
+}
+
+fn append(log: &Path, text: &str) -> Result<(), String> {
+    use std::io::Write;
+    std::fs::OpenOptions::new()
+        .append(true)
+        .create(true)
+        .open(log)
+        .and_then(|mut f| f.write_all(text.as_bytes()))
+        .map_err(|e| format!("can't write {}: {e}", log.display()))
+}
+
+/// Start `cmd` with its output going to the end of `log`, and a pipe for its stdin.
+fn launch(mut cmd: Command, log: &Path) -> Result<(Child, Option<ChildStdin>), String> {
+    let open = || {
+        std::fs::OpenOptions::new()
+            .append(true)
+            .create(true)
+            .open(log)
+            .map_err(|e| format!("can't write {}: {e}", log.display()))
+    };
+    cmd.stdin(Stdio::piped())
+        .stdout(Stdio::from(open()?))
+        .stderr(Stdio::from(open()?));
+    let mut child = quiet(&mut cmd)
+        .spawn()
+        .map_err(|e| format!("can't start {}: {e}", cmd.get_program().to_string_lossy()))?;
+    let stdin = child.stdin.take();
+    Ok((child, stdin))
+}
+
+/// The setup in the tree at `root`, run by `uv` into `dir`.
+fn setup_command(uv: &Path, root: &Path, dir: &Path) -> Result<Command, String> {
+    // the setup calls `uv` by name: put this one first on PATH
+    let mut path = vec![uv.parent().map(Path::to_path_buf).unwrap_or_default()];
+    path.extend(std::env::split_paths(
+        &std::env::var_os("PATH").unwrap_or_default(),
+    ));
+    let path = std::env::join_paths(path).map_err(|e| e.to_string())?;
+    let mut cmd = Command::new(uv);
+    // a Python uv downloads into the install, whatever is (or isn't) installed and however the
+    // person's uv is set up
+    cmd.args(["run", "--no-project", "--managed-python", "--python", PYTHON])
+        .arg(script(root))
+        .arg("--dir")
+        .arg(dir)
+        .arg("--stop-on-eof")
+        .env("PATH", path)
+        .env("UV_PYTHON_INSTALL_DIR", dir.join("python"))
+        .env("UV_PYTHON_DOWNLOADS", "automatic")
+        .env("PYTHONUNBUFFERED", "1")
+        .env("PYTHONUTF8", "1")
+        .current_dir(root);
+    Ok(cmd)
+}
+
 /// The source tree's root: the assets folder's parent, when the setup is in it.
 fn tree(assets: Option<&Path>) -> Option<PathBuf> {
     let root = assets?.parent()?.to_path_buf();
@@ -188,7 +309,7 @@ fn script(root: &Path) -> PathBuf {
     SCRIPT.split('/').fold(root.to_path_buf(), |p, part| p.join(part))
 }
 
-fn exe(name: &str) -> String {
+pub(crate) fn exe(name: &str) -> String {
     if cfg!(windows) {
         format!("{name}.exe")
     } else {
@@ -197,23 +318,46 @@ fn exe(name: &str) -> String {
 }
 
 /// `name` on PATH.
-fn on_path(name: &str) -> Option<PathBuf> {
+pub(crate) fn on_path(name: &str) -> Option<PathBuf> {
     let file = exe(name);
     std::env::split_paths(&std::env::var_os("PATH")?)
         .map(|d| d.join(&file))
         .find(|p| p.is_file())
 }
 
-/// `uv`: on PATH, or where its own installer puts it.
-fn uv() -> Option<PathBuf> {
+/// `uv`: on PATH, where its own installer puts it, or the one fetched into the install `dir`.
+fn uv(dir: &Path) -> Option<PathBuf> {
     on_path("uv").or_else(|| {
-        let home = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" })?;
-        let home = PathBuf::from(home);
-        [home.join(".local/bin"), home.join(".cargo/bin")]
-            .into_iter()
+        let home = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" }).map(PathBuf::from);
+        home.iter()
+            .flat_map(|h| [h.join(".local/bin"), h.join(".cargo/bin")])
             .map(|d| d.join(exe("uv")))
+            .chain([uv_fetch::exe(dir)])
             .find(|p| p.is_file())
     })
+}
+
+/// The uv requirement: found, or fetched by the install (else what to do).
+fn uv_need(dir: &Path) -> Need {
+    let (ok, note) = match (uv(dir), uv_fetch::possible()) {
+        (Some(p), _) => (true, p.display().to_string()),
+        (None, Ok(())) => (
+            true,
+            format!(
+                "not installed: the install downloads uv {} (about {} MB) into {}",
+                uv_fetch::VERSION,
+                uv_fetch::MB,
+                uv_fetch::home(dir).display()
+            ),
+        ),
+        (None, Err(why)) => (false, format!("not found, and {why}")),
+    };
+    Need {
+        name: "uv",
+        ok,
+        required: true,
+        note,
+    }
 }
 
 fn quiet(cmd: &mut Command) -> &mut Command {
@@ -270,8 +414,8 @@ fn msvc() -> Result<String, String> {
     })
 }
 
-/// What the install needs, checked now.
-pub fn requirements(assets: Option<&Path>) -> Vec<Need> {
+/// What the install into `dir` needs, checked now.
+pub fn requirements(assets: Option<&Path>, dir: &Path) -> Vec<Need> {
     let mut needs = vec![
         Need {
             name: "Source tree",
@@ -279,35 +423,12 @@ pub fn requirements(assets: Option<&Path>) -> Vec<Need> {
             required: true,
             note: match tree(assets) {
                 Some(root) => script(&root).display().to_string(),
-                None => format!(
-                    "{SCRIPT} is not next to the assets folder: run the app from its source tree"
-                ),
+                None => {
+                    format!("{SCRIPT} is not next to the assets folder: run the app from its source tree")
+                }
             },
         },
-        Need {
-            name: "uv",
-            ok: uv().is_some(),
-            required: true,
-            note: uv().map_or_else(
-                || {
-                    if cfg!(windows) {
-                        "not found: install it with `winget install astral-sh.uv` (https://docs.astral.sh/uv/)".into()
-                    } else {
-                        "not found: install it from https://docs.astral.sh/uv/".into()
-                    }
-                },
-                |p| p.display().to_string(),
-            ),
-        },
-        Need {
-            name: "Git",
-            ok: on_path("git").is_some(),
-            required: true,
-            note: on_path("git").map_or_else(
-                || "not found: install Git (https://git-scm.com)".into(),
-                |p| p.display().to_string(),
-            ),
-        },
+        uv_need(dir),
     ];
     if cfg!(windows) {
         let m = msvc();
@@ -343,6 +464,7 @@ pub fn status(dir: &Path) -> Value {
             r.poll();
             out["seconds"] = json!(r.since.elapsed().as_secs());
             let state = match (r.exit, r.stop_asked) {
+                _ if r.failed.is_some() => "failed",
                 (None, None) => "installing",
                 (None, Some(_)) => "stopping",
                 // finished: a crash while Python shuts down mustn't hide that
@@ -357,6 +479,7 @@ pub fn status(dir: &Path) -> Value {
                 (Some(_), _) => "failed",
             };
             let error = match state {
+                "failed" if r.failed.is_some() => r.failed.clone().unwrap_or_default(),
                 "failed" if r.progress.last.is_empty() => "the setup ended without saying why".into(),
                 "failed" => r.progress.last.clone(),
                 _ => String::new(),
@@ -424,7 +547,7 @@ pub fn start(dir: &Path, assets: Option<&Path>, repair: bool) -> Result<(), Stri
             "pass repair: true to run the setup again (it updates or repairs the install)",
         ));
     }
-    let missing: Vec<String> = requirements(assets)
+    let missing: Vec<String> = requirements(assets, dir)
         .into_iter()
         .filter(|n| n.required && !n.ok)
         .map(|n| format!("{}: {}", n.name, n.note))
@@ -433,38 +556,23 @@ pub fn start(dir: &Path, assets: Option<&Path>, repair: bool) -> Result<(), Stri
         return Err(format!("the install can't start yet. {}", missing.join("; ")));
     }
     let root = tree(assets).ok_or("the source tree was not found")?;
-    let uv = uv().ok_or("uv was not found")?;
     std::fs::create_dir_all(dir).map_err(|e| format!("can't make {}: {e}", dir.display()))?;
     let log = dir.join(LOG);
-    let out = std::fs::File::create(&log).map_err(|e| format!("can't write {}: {e}", log.display()))?;
-    let err = out
-        .try_clone()
-        .map_err(|e| format!("can't write {}: {e}", log.display()))?;
-    // the setup calls `uv` by name: put the one found first on PATH
-    let mut path = vec![uv.parent().map(Path::to_path_buf).unwrap_or_default()];
-    path.extend(std::env::split_paths(
-        &std::env::var_os("PATH").unwrap_or_default(),
-    ));
-    let path = std::env::join_paths(path).map_err(|e| e.to_string())?;
-    let mut cmd = Command::new(&uv);
-    cmd.args(["run", "--no-project", "--python", PYTHON])
-        .arg(script(&root))
-        .arg("--dir")
-        .arg(dir)
-        .arg("--stop-on-eof")
-        .env("PATH", path)
-        .env("PYTHONUNBUFFERED", "1")
-        .env("PYTHONUTF8", "1")
-        .current_dir(&root)
-        .stdin(Stdio::piped())
-        .stdout(Stdio::from(out))
-        .stderr(Stdio::from(err));
-    let mut child = quiet(&mut cmd)
-        .spawn()
-        .map_err(|e| format!("can't start the setup with {}: {e}", uv.display()))?;
-    let stdin = child.stdin.take();
+    std::fs::File::create(&log).map_err(|e| format!("can't write {}: {e}", log.display()))?;
+    let (cmd, stage) = match uv(dir) {
+        Some(uv) => (setup_command(&uv, &root, dir)?, Stage::Setup),
+        None => {
+            append(&log, &uv_fetch::announce())?;
+            (uv_fetch::download(dir)?, Stage::FetchUv)
+        }
+    };
+    let (child, stdin) = launch(cmd, &log)?;
     *g = Some(Run {
         child,
+        stage,
+        dir: dir.to_path_buf(),
+        root,
+        failed: None,
         stdin,
         log,
         read: 0,
@@ -488,6 +596,15 @@ pub fn stop() -> Result<(), String> {
     if r.stop_asked.is_none() {
         r.stdin = None;
         r.stop_asked = Some(Instant::now());
+        if r.stage != Stage::Setup {
+            // a download or unpacking has nothing to tidy: it ends now, and Install starts it
+            // again (a kill fails only when it has ended already)
+            let _ = r.child.kill();
+            append(
+                &r.log,
+                "== stopped: the app ended the install (run it again to carry on)\n",
+            )?;
+        }
     }
     Ok(())
 }

@@ -23,6 +23,7 @@ pub mod helper;
 pub mod install;
 pub mod setup;
 pub mod stand_in;
+mod uv_fetch;
 
 use ac_core::Document;
 use ac_core::clip::{Clip, Interp, Key, KeySource, LayerMode, LayerSource};
@@ -233,7 +234,7 @@ fn text_install(doc: &mut Document, p: &P) -> Out {
         out["state"].as_str(),
         Some("not installed" | "failed" | "stopped")
     ) {
-        let needs = setup::requirements(assets.as_deref());
+        let needs = setup::requirements(assets.as_deref(), &dir);
         out["ready"] = json!(needs.iter().all(|n| n.ok || !n.required));
         out["requirements"] = serde_json::to_value(needs).map_err(|e| e.to_string())?;
     }

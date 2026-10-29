@@ -82,8 +82,9 @@ The **Motion from text** panel (and the `text.generate` / `text.fill` commands) 
 a prompt such as "A person waves hello with their right hand.": a new stretch from the playhead, or
 the gap between two of your keys, held to both. It needs a one-time install, best with an NVIDIA
 GPU (12 GB is enough), 32 GB of RAM, and about 35 GB of free disk (the install is 22 GB). Press **Install** in
-the panel: it lists what the install needs first (`uv`, Git and, on Windows, the Visual Studio
-C++ build tools, the same ones Rust uses), then downloads and sets everything up in the
+the panel: it lists what the install needs first (on Windows, the Visual Studio C++ build tools,
+the same ones Rust uses; nothing else need be installed and no account is needed: without `uv`
+the install downloads it, and uv brings its own Python), then downloads and sets everything up in the
 background with its progress, Stop and the log, and the window stays usable meanwhile (an hour or
 more). Stop, or quitting the app, ends it; Install carries on from where it stopped. The same
 setup runs from a terminal too:
