@@ -153,6 +153,7 @@
             "feet.lock",
             "feet.phases",
             "feet.plant",
+            "feet.roll",
             "frame.set",
             "key.channel",
             "key.copy",
@@ -2821,6 +2822,31 @@
                   "from",
                   "to"
                 ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "feet.roll"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Roll feet; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
                 "additionalProperties": false
               }
             }
@@ -6274,6 +6300,7 @@
             "feet.lock",
             "feet.phases",
             "feet.plant",
+            "feet.roll",
             "frame.set",
             "key.channel",
             "key.copy",

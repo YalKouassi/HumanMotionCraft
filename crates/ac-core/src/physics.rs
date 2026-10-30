@@ -203,6 +203,15 @@ impl Body {
         out
     }
 
+    /// One foot's heel point from a posed rig.
+    pub fn heel(&self, foot: usize, world: &[Mat3], pos: &[Vec3]) -> Option<Vec3> {
+        let f = self.feet.get(foot)?;
+        Some(quat::add3(
+            *pos.get(f.ankle)?,
+            quat::mat3_vec(world.get(f.ankle)?, f.heel),
+        ))
+    }
+
     /// The centre of mass (metres, rig world) of a posed rig.
     pub fn com(&self, pos: &[Vec3]) -> Vec3 {
         let mut c = [0.0; 3];

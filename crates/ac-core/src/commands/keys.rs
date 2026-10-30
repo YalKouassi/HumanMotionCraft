@@ -177,6 +177,10 @@ pub static SPECS: &[CommandSpec] = &[
         .icon("foot")
         .undoable()
         .outputs(returns::FEET_LOCK),
+    CommandSpec::new("feet.roll", "Roll feet", feet_roll)
+        .icon("foot")
+        .undoable()
+        .outputs(returns::FEET_ROLL),
     CommandSpec::new("ai.keep", "Keep AI keys", ai_keep)
         .icon("keep")
         .undoable()
@@ -528,6 +532,11 @@ fn clip_loop(doc: &mut Document, p: &P) -> Out {
 
 fn feet_lock(doc: &mut Document, _: &P) -> Out {
     Ok(json!({ "frames": doc.lock_feet()? }))
+}
+
+fn feet_roll(doc: &mut Document, _: &P) -> Out {
+    let (frames, short) = doc.roll_feet()?;
+    Ok(json!({ "frames": frames, "short": short }))
 }
 
 /// A frame range from `from` and `to`; refuses one that runs backwards.

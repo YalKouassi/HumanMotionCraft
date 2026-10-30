@@ -1210,6 +1210,19 @@ Outputs:
 | `frames` | integer | yes |  | frames changed (planted or freed) |
 | `notes` | list of text | yes |  | what stays as it was |
 
+### `feet.roll`: Roll feet
+
+undoable, icon `foot`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frames` | integer | yes |  | frames changed |
+| `short` | integer | yes |  | frames a leg still can't reach at the most a foot rolls |
+
 ## frame
 
 ### `frame.set`: Go to frame

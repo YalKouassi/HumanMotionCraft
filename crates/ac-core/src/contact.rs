@@ -15,7 +15,8 @@
 
 use crate::clip::Surface;
 use crate::physics;
-use crate::quat::Vec3;
+use crate::quat::{Quat, Vec3};
+use crate::rig::Skeleton;
 
 /// A foot's lowest point past this height (m) lifts it off.
 pub const LEAVE_HEIGHT: f64 = 0.08;
@@ -55,6 +56,35 @@ impl Phase {
 /// physics pass; a clip keyed above the floor passes its lowest point).
 pub fn phases(frames: &[Vec<(usize, Vec3)>], fps: f64, surfaces: &[Surface], lift: f64) -> [Vec<Phase>; 2] {
     [0, 1].map(|foot| one_foot(frames, foot, fps, surfaces, lift))
+}
+
+/// Each foot's phase on each frame of a sampled clip, which may be keyed above the floor: its lowest
+/// foot point then counts as the ground.
+pub fn clip_phases(
+    body: &physics::Body,
+    sk: &Skeleton,
+    rots: &[Vec<Quat>],
+    roots: &[Vec3],
+    fps: f64,
+    surfaces: &[Surface],
+) -> Result<[Vec<Phase>; 2], String> {
+    let mut feet = Vec::with_capacity(rots.len());
+    for (r, o) in rots.iter().zip(roots) {
+        let (w, p) = sk.fk(r, *o).map_err(|e| e.to_string())?;
+        let pts = body.points(&w, &p);
+        feet.push(
+            pts.into_iter()
+                .enumerate()
+                .map(|(k, q)| (body.foot_of(k), q))
+                .collect::<Vec<_>>(),
+        );
+    }
+    let lowest = feet
+        .iter()
+        .flatten()
+        .map(|(_, p)| p[2] - physics::ground(surfaces, p[0], p[1]))
+        .fold(f64::INFINITY, f64::min);
+    Ok(phases(&feet, fps, surfaces, lowest.max(0.0)))
 }
 
 fn one_foot(

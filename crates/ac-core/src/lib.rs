@@ -26,6 +26,7 @@ pub mod ease;
 pub mod editor;
 pub mod edits;
 pub mod error;
+pub mod footroll;
 pub mod fullbody;
 pub mod gait;
 pub mod gaps;
