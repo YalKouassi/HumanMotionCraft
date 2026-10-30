@@ -13,6 +13,8 @@ use serde_json::{Value, json};
 
 /// How far a number may differ before it counts (they are rounded to this).
 const TOL: f64 = 0.01;
+/// The most `feet.lock` may raise the worst velocity change at a key (m/s).
+const LOCK_DV_LIMIT: f64 = 2.0;
 
 fn clips(dir: &Path, root: &Path, out: &mut Vec<String>) {
     for e in std::fs::read_dir(dir).unwrap() {
@@ -69,7 +71,11 @@ fn measure(s: &mut Session, id: &str) -> Value {
         })
     };
     let (shown, keys) = (one(s, "shown"), one(s, "keys"));
-    json!({ "shown": shown, "keys": keys, "root_jump_ms": round(root_jump(s)) })
+    let jump = round(root_jump(s));
+    // what the review's most common fix does to the keys
+    s.run("feet.lock", &json!({})).unwrap();
+    let locked = one(s, "keys");
+    json!({ "shown": shown, "keys": keys, "root_jump_ms": jump, "after_lock": locked })
 }
 
 /// Where `now` differs from `was`, as readable lines.
@@ -118,6 +124,21 @@ fn builtin_motion_quality_only_improves() {
     .into_iter()
     .flatten()
     .collect();
+
+    // feet.lock is what the review suggests for a slide: it must help, or at least do no harm
+    for (id, m) in &measured {
+        let (k, l) = (&m["keys"], &m["after_lock"]);
+        let slide = |v: &Value| v["slide_cm"].as_f64().unwrap();
+        let dv = |v: &Value| v["worst_dv"].as_f64().unwrap();
+        assert!(
+            slide(l) <= slide(k) + TOL,
+            "{id}: feet.lock raised the slide: {k} -> {l}"
+        );
+        assert!(
+            dv(l) <= dv(k) + LOCK_DV_LIMIT,
+            "{id}: feet.lock made a pop: {k} -> {l}"
+        );
+    }
 
     let table = repo.join("tests/quality/builtins.json");
     if std::env::var_os("AC_BLESS_QUALITY").is_some_and(|v| v == "1") {

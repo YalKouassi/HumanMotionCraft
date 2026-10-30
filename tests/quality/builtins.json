@@ -14,7 +14,14 @@
       "pops": 15,
       "worst_dv": 14.49
     },
-    "root_jump_ms": 0.35
+    "root_jump_ms": 0.35,
+    "after_lock": {
+      "slide_cm": 1.62,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 27,
+      "worst_dv": 14.49
+    }
   },
   "Action/Jump 13": {
     "shown": {
@@ -31,7 +38,14 @@
       "pops": 33,
       "worst_dv": 5.4
     },
-    "root_jump_ms": 0.47
+    "root_jump_ms": 0.47,
+    "after_lock": {
+      "slide_cm": 4.85,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 61,
+      "worst_dv": 5.4
+    }
   },
   "Dance/Dance 8": {
     "shown": {
@@ -48,7 +62,14 @@
       "pops": 43,
       "worst_dv": 5.66
     },
-    "root_jump_ms": 0.38
+    "root_jump_ms": 0.38,
+    "after_lock": {
+      "slide_cm": 15.39,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 83,
+      "worst_dv": 5.66
+    }
   },
   "Falls/Fall and get up 1": {
     "shown": {
@@ -65,7 +86,14 @@
       "pops": 30,
       "worst_dv": 6.4
     },
-    "root_jump_ms": 0.0
+    "root_jump_ms": 0.0,
+    "after_lock": {
+      "slide_cm": 0.0,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 45,
+      "worst_dv": 7.95
+    }
   },
   "Gestures/Nod": {
     "shown": {
@@ -82,7 +110,14 @@
       "pops": 0,
       "worst_dv": 0.11
     },
-    "root_jump_ms": 0.0
+    "root_jump_ms": 0.0,
+    "after_lock": {
+      "slide_cm": 0.0,
+      "penetration_cm": 0.64,
+      "balance_frames": 0,
+      "pops": 0,
+      "worst_dv": 0.11
+    }
   },
   "Gestures/Shrug": {
     "shown": {
@@ -99,7 +134,14 @@
       "pops": 0,
       "worst_dv": 0.53
     },
-    "root_jump_ms": 0.0
+    "root_jump_ms": 0.0,
+    "after_lock": {
+      "slide_cm": 0.0,
+      "penetration_cm": 0.63,
+      "balance_frames": 0,
+      "pops": 0,
+      "worst_dv": 0.54
+    }
   },
   "Gestures/Wave": {
     "shown": {
@@ -116,7 +158,14 @@
       "pops": 13,
       "worst_dv": 1.68
     },
-    "root_jump_ms": 0.0
+    "root_jump_ms": 0.0,
+    "after_lock": {
+      "slide_cm": 0.02,
+      "penetration_cm": 0.63,
+      "balance_frames": 0,
+      "pops": 14,
+      "worst_dv": 1.68
+    }
   },
   "Interaction/Open door 5": {
     "shown": {
@@ -133,7 +182,14 @@
       "pops": 1,
       "worst_dv": 1.01
     },
-    "root_jump_ms": 0.24
+    "root_jump_ms": 0.24,
+    "after_lock": {
+      "slide_cm": 8.25,
+      "penetration_cm": 0.16,
+      "balance_frames": 0,
+      "pops": 15,
+      "worst_dv": 2.1
+    }
   },
   "Locomotion/Crouch walk 10": {
     "shown": {
@@ -150,7 +206,14 @@
       "pops": 3,
       "worst_dv": 1.16
     },
-    "root_jump_ms": 0.29
+    "root_jump_ms": 0.29,
+    "after_lock": {
+      "slide_cm": 3.81,
+      "penetration_cm": 0.39,
+      "balance_frames": 0,
+      "pops": 15,
+      "worst_dv": 1.71
+    }
   },
   "Locomotion/Crouch walk 5": {
     "shown": {
@@ -167,7 +230,14 @@
       "pops": 0,
       "worst_dv": 0.86
     },
-    "root_jump_ms": 0.3
+    "root_jump_ms": 0.3,
+    "after_lock": {
+      "slide_cm": 4.09,
+      "penetration_cm": 1.28,
+      "balance_frames": 0,
+      "pops": 7,
+      "worst_dv": 1.16
+    }
   },
   "Locomotion/Crouch walk 6": {
     "shown": {
@@ -184,7 +254,14 @@
       "pops": 0,
       "worst_dv": 0.87
     },
-    "root_jump_ms": 0.32
+    "root_jump_ms": 0.32,
+    "after_lock": {
+      "slide_cm": 3.36,
+      "penetration_cm": 1.13,
+      "balance_frames": 0,
+      "pops": 9,
+      "worst_dv": 1.15
+    }
   },
   "Locomotion/Crouch walk 7": {
     "shown": {
@@ -201,7 +278,14 @@
       "pops": 0,
       "worst_dv": 0.97
     },
-    "root_jump_ms": 0.35
+    "root_jump_ms": 0.35,
+    "after_lock": {
+      "slide_cm": 3.91,
+      "penetration_cm": 1.34,
+      "balance_frames": 0,
+      "pops": 8,
+      "worst_dv": 1.23
+    }
   },
   "Locomotion/Crouch walk 8": {
     "shown": {
@@ -218,7 +302,14 @@
       "pops": 6,
       "worst_dv": 1.55
     },
-    "root_jump_ms": 0.33
+    "root_jump_ms": 0.33,
+    "after_lock": {
+      "slide_cm": 4.79,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 14,
+      "worst_dv": 1.85
+    }
   },
   "Locomotion/Crouch walk 9": {
     "shown": {
@@ -235,7 +326,14 @@
       "pops": 2,
       "worst_dv": 1.31
     },
-    "root_jump_ms": 0.22
+    "root_jump_ms": 0.22,
+    "after_lock": {
+      "slide_cm": 4.28,
+      "penetration_cm": 0.38,
+      "balance_frames": 0,
+      "pops": 15,
+      "worst_dv": 1.85
+    }
   },
   "Locomotion/Run": {
     "shown": {
@@ -252,7 +350,14 @@
       "pops": 7,
       "worst_dv": 2.66
     },
-    "root_jump_ms": 0.28
+    "root_jump_ms": 0.28,
+    "after_lock": {
+      "slide_cm": 0.0,
+      "penetration_cm": 0.41,
+      "balance_frames": 0,
+      "pops": 10,
+      "worst_dv": 4.38
+    }
   },
   "Locomotion/Run 10": {
     "shown": {
@@ -269,7 +374,14 @@
       "pops": 10,
       "worst_dv": 1.38
     },
-    "root_jump_ms": 0.45
+    "root_jump_ms": 0.45,
+    "after_lock": {
+      "slide_cm": 2.8,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 32,
+      "worst_dv": 2.06
+    }
   },
   "Locomotion/Run 11": {
     "shown": {
@@ -286,7 +398,14 @@
       "pops": 26,
       "worst_dv": 2.28
     },
-    "root_jump_ms": 0.37
+    "root_jump_ms": 0.37,
+    "after_lock": {
+      "slide_cm": 5.99,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 45,
+      "worst_dv": 3.05
+    }
   },
   "Locomotion/Run 12": {
     "shown": {
@@ -303,7 +422,14 @@
       "pops": 18,
       "worst_dv": 2.11
     },
-    "root_jump_ms": 0.38
+    "root_jump_ms": 0.38,
+    "after_lock": {
+      "slide_cm": 5.63,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 33,
+      "worst_dv": 2.55
+    }
   },
   "Locomotion/Run 13": {
     "shown": {
@@ -320,7 +446,14 @@
       "pops": 23,
       "worst_dv": 2.08
     },
-    "root_jump_ms": 0.4
+    "root_jump_ms": 0.4,
+    "after_lock": {
+      "slide_cm": 4.81,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 41,
+      "worst_dv": 2.77
+    }
   },
   "Locomotion/Run 9": {
     "shown": {
@@ -337,7 +470,14 @@
       "pops": 13,
       "worst_dv": 2.05
     },
-    "root_jump_ms": 0.43
+    "root_jump_ms": 0.43,
+    "after_lock": {
+      "slide_cm": 2.73,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 27,
+      "worst_dv": 2.61
+    }
   },
   "Locomotion/Side step 10": {
     "shown": {
@@ -354,7 +494,14 @@
       "pops": 0,
       "worst_dv": 0.94
     },
-    "root_jump_ms": 0.21
+    "root_jump_ms": 0.21,
+    "after_lock": {
+      "slide_cm": 2.85,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 7,
+      "worst_dv": 1.47
+    }
   },
   "Locomotion/Side step 11": {
     "shown": {
@@ -371,7 +518,14 @@
       "pops": 0,
       "worst_dv": 0.93
     },
-    "root_jump_ms": 0.14
+    "root_jump_ms": 0.14,
+    "after_lock": {
+      "slide_cm": 5.21,
+      "penetration_cm": 0.0,
+      "balance_frames": 1,
+      "pops": 5,
+      "worst_dv": 1.32
+    }
   },
   "Locomotion/Side step 12": {
     "shown": {
@@ -388,7 +542,14 @@
       "pops": 7,
       "worst_dv": 1.29
     },
-    "root_jump_ms": 0.15
+    "root_jump_ms": 0.15,
+    "after_lock": {
+      "slide_cm": 7.82,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 19,
+      "worst_dv": 1.75
+    }
   },
   "Locomotion/Side step 13": {
     "shown": {
@@ -405,7 +566,14 @@
       "pops": 0,
       "worst_dv": 0.45
     },
-    "root_jump_ms": 0.18
+    "root_jump_ms": 0.18,
+    "after_lock": {
+      "slide_cm": 7.3,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 0,
+      "worst_dv": 0.71
+    }
   },
   "Locomotion/Side step 14": {
     "shown": {
@@ -422,7 +590,14 @@
       "pops": 0,
       "worst_dv": 0.21
     },
-    "root_jump_ms": 0.14
+    "root_jump_ms": 0.14,
+    "after_lock": {
+      "slide_cm": 1.99,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 0,
+      "worst_dv": 0.3
+    }
   },
   "Locomotion/Side step 9": {
     "shown": {
@@ -439,7 +614,14 @@
       "pops": 0,
       "worst_dv": 0.88
     },
-    "root_jump_ms": 2.01
+    "root_jump_ms": 2.01,
+    "after_lock": {
+      "slide_cm": 3.06,
+      "penetration_cm": 0.0,
+      "balance_frames": 4,
+      "pops": 7,
+      "worst_dv": 1.47
+    }
   },
   "Locomotion/Small steps 3": {
     "shown": {
@@ -456,7 +638,14 @@
       "pops": 2,
       "worst_dv": 1.18
     },
-    "root_jump_ms": 0.13
+    "root_jump_ms": 0.13,
+    "after_lock": {
+      "slide_cm": 4.97,
+      "penetration_cm": 0.47,
+      "balance_frames": 0,
+      "pops": 18,
+      "worst_dv": 1.87
+    }
   },
   "Locomotion/Small steps 4": {
     "shown": {
@@ -473,7 +662,14 @@
       "pops": 5,
       "worst_dv": 1.5
     },
-    "root_jump_ms": 0.35
+    "root_jump_ms": 0.35,
+    "after_lock": {
+      "slide_cm": 4.66,
+      "penetration_cm": 0.4,
+      "balance_frames": 0,
+      "pops": 19,
+      "worst_dv": 1.92
+    }
   },
   "Locomotion/Small steps 5": {
     "shown": {
@@ -490,7 +686,14 @@
       "pops": 2,
       "worst_dv": 1.23
     },
-    "root_jump_ms": 0.25
+    "root_jump_ms": 0.25,
+    "after_lock": {
+      "slide_cm": 3.73,
+      "penetration_cm": 0.51,
+      "balance_frames": 0,
+      "pops": 9,
+      "worst_dv": 1.63
+    }
   },
   "Locomotion/Sprint 5": {
     "shown": {
@@ -507,7 +710,14 @@
       "pops": 39,
       "worst_dv": 3.71
     },
-    "root_jump_ms": 0.44
+    "root_jump_ms": 0.44,
+    "after_lock": {
+      "slide_cm": 3.57,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 77,
+      "worst_dv": 3.85
+    }
   },
   "Locomotion/Sprint 6": {
     "shown": {
@@ -524,7 +734,14 @@
       "pops": 36,
       "worst_dv": 3.38
     },
-    "root_jump_ms": 0.49
+    "root_jump_ms": 0.49,
+    "after_lock": {
+      "slide_cm": 4.66,
+      "penetration_cm": 0.41,
+      "balance_frames": 0,
+      "pops": 68,
+      "worst_dv": 4.26
+    }
   },
   "Locomotion/Sprint 7": {
     "shown": {
@@ -541,7 +758,14 @@
       "pops": 44,
       "worst_dv": 4.42
     },
-    "root_jump_ms": 0.44
+    "root_jump_ms": 0.44,
+    "after_lock": {
+      "slide_cm": 5.59,
+      "penetration_cm": 0.81,
+      "balance_frames": 0,
+      "pops": 79,
+      "worst_dv": 4.28
+    }
   },
   "Locomotion/Stop 5": {
     "shown": {
@@ -558,7 +782,14 @@
       "pops": 29,
       "worst_dv": 3.02
     },
-    "root_jump_ms": 0.46
+    "root_jump_ms": 0.46,
+    "after_lock": {
+      "slide_cm": 4.34,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 59,
+      "worst_dv": 3.45
+    }
   },
   "Locomotion/Stop 6": {
     "shown": {
@@ -575,7 +806,14 @@
       "pops": 26,
       "worst_dv": 3.1
     },
-    "root_jump_ms": 0.41
+    "root_jump_ms": 0.41,
+    "after_lock": {
+      "slide_cm": 5.14,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 48,
+      "worst_dv": 3.5
+    }
   },
   "Locomotion/Stop 7": {
     "shown": {
@@ -592,7 +830,14 @@
       "pops": 22,
       "worst_dv": 2.45
     },
-    "root_jump_ms": 0.41
+    "root_jump_ms": 0.41,
+    "after_lock": {
+      "slide_cm": 3.96,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 39,
+      "worst_dv": 2.76
+    }
   },
   "Locomotion/Stop 8": {
     "shown": {
@@ -609,7 +854,14 @@
       "pops": 13,
       "worst_dv": 2.08
     },
-    "root_jump_ms": 0.29
+    "root_jump_ms": 0.29,
+    "after_lock": {
+      "slide_cm": 4.07,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 30,
+      "worst_dv": 2.26
+    }
   },
   "Locomotion/Turn in place 5": {
     "shown": {
@@ -626,7 +878,14 @@
       "pops": 0,
       "worst_dv": 0.69
     },
-    "root_jump_ms": 0.3
+    "root_jump_ms": 0.3,
+    "after_lock": {
+      "slide_cm": 9.84,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 1,
+      "worst_dv": 1.02
+    }
   },
   "Locomotion/Turn in place 6": {
     "shown": {
@@ -643,7 +902,14 @@
       "pops": 0,
       "worst_dv": 0.94
     },
-    "root_jump_ms": 0.17
+    "root_jump_ms": 0.17,
+    "after_lock": {
+      "slide_cm": 10.03,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 3,
+      "worst_dv": 1.15
+    }
   },
   "Locomotion/Turn in place 7": {
     "shown": {
@@ -660,7 +926,14 @@
       "pops": 0,
       "worst_dv": 0.91
     },
-    "root_jump_ms": 0.2
+    "root_jump_ms": 0.2,
+    "after_lock": {
+      "slide_cm": 6.62,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 2,
+      "worst_dv": 1.13
+    }
   },
   "Locomotion/Turn in place 8": {
     "shown": {
@@ -677,7 +950,14 @@
       "pops": 0,
       "worst_dv": 0.51
     },
-    "root_jump_ms": 0.13
+    "root_jump_ms": 0.13,
+    "after_lock": {
+      "slide_cm": 3.58,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 0,
+      "worst_dv": 0.89
+    }
   },
   "Locomotion/Walk": {
     "shown": {
@@ -694,7 +974,14 @@
       "pops": 0,
       "worst_dv": 0.91
     },
-    "root_jump_ms": 0.27
+    "root_jump_ms": 0.27,
+    "after_lock": {
+      "slide_cm": 1.64,
+      "penetration_cm": 0.7,
+      "balance_frames": 0,
+      "pops": 2,
+      "worst_dv": 1.22
+    }
   },
   "Locomotion/Walk 12": {
     "shown": {
@@ -711,7 +998,14 @@
       "pops": 1,
       "worst_dv": 1.03
     },
-    "root_jump_ms": 0.23
+    "root_jump_ms": 0.23,
+    "after_lock": {
+      "slide_cm": 3.97,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 13,
+      "worst_dv": 1.36
+    }
   },
   "Locomotion/Walk 13": {
     "shown": {
@@ -728,7 +1022,14 @@
       "pops": 0,
       "worst_dv": 0.93
     },
-    "root_jump_ms": 0.23
+    "root_jump_ms": 0.23,
+    "after_lock": {
+      "slide_cm": 4.68,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 10,
+      "worst_dv": 1.53
+    }
   },
   "Locomotion/Walk 14": {
     "shown": {
@@ -745,7 +1046,14 @@
       "pops": 20,
       "worst_dv": 1.82
     },
-    "root_jump_ms": 0.18
+    "root_jump_ms": 0.18,
+    "after_lock": {
+      "slide_cm": 3.94,
+      "penetration_cm": 0.68,
+      "balance_frames": 0,
+      "pops": 45,
+      "worst_dv": 3.04
+    }
   },
   "Locomotion/Walk 15": {
     "shown": {
@@ -762,7 +1070,14 @@
       "pops": 26,
       "worst_dv": 2.17
     },
-    "root_jump_ms": 0.31
+    "root_jump_ms": 0.31,
+    "after_lock": {
+      "slide_cm": 5.13,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 41,
+      "worst_dv": 2.94
+    }
   },
   "Locomotion/Walk 16": {
     "shown": {
@@ -779,7 +1094,14 @@
       "pops": 6,
       "worst_dv": 1.33
     },
-    "root_jump_ms": 0.46
+    "root_jump_ms": 0.46,
+    "after_lock": {
+      "slide_cm": 2.63,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 21,
+      "worst_dv": 1.93
+    }
   },
   "Locomotion/Walk 17": {
     "shown": {
@@ -796,7 +1118,14 @@
       "pops": 12,
       "worst_dv": 1.72
     },
-    "root_jump_ms": 0.29
+    "root_jump_ms": 0.29,
+    "after_lock": {
+      "slide_cm": 5.38,
+      "penetration_cm": 0.25,
+      "balance_frames": 0,
+      "pops": 26,
+      "worst_dv": 2.38
+    }
   },
   "Locomotion/Walk in a circle 5": {
     "shown": {
@@ -813,7 +1142,14 @@
       "pops": 26,
       "worst_dv": 2.72
     },
-    "root_jump_ms": 0.48
+    "root_jump_ms": 0.48,
+    "after_lock": {
+      "slide_cm": 4.6,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 56,
+      "worst_dv": 3.36
+    }
   },
   "Locomotion/Walk in a circle 6": {
     "shown": {
@@ -830,7 +1166,14 @@
       "pops": 22,
       "worst_dv": 2.67
     },
-    "root_jump_ms": 0.3
+    "root_jump_ms": 0.3,
+    "after_lock": {
+      "slide_cm": 5.73,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 41,
+      "worst_dv": 3.32
+    }
   },
   "Locomotion/Walk in a circle 7": {
     "shown": {
@@ -847,7 +1190,14 @@
       "pops": 21,
       "worst_dv": 2.38
     },
-    "root_jump_ms": 0.44
+    "root_jump_ms": 0.44,
+    "after_lock": {
+      "slide_cm": 5.62,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 38,
+      "worst_dv": 2.97
+    }
   },
   "Martial arts/Fight 7": {
     "shown": {
@@ -864,7 +1214,14 @@
       "pops": 16,
       "worst_dv": 4.74
     },
-    "root_jump_ms": 0.53
+    "root_jump_ms": 0.53,
+    "after_lock": {
+      "slide_cm": 20.25,
+      "penetration_cm": 0.88,
+      "balance_frames": 0,
+      "pops": 31,
+      "worst_dv": 4.74
+    }
   },
   "On the floor/On the ground 10": {
     "shown": {
@@ -881,7 +1238,14 @@
       "pops": 0,
       "worst_dv": 0.93
     },
-    "root_jump_ms": 0.5
+    "root_jump_ms": 0.5,
+    "after_lock": {
+      "slide_cm": 8.79,
+      "penetration_cm": 1.02,
+      "balance_frames": 1,
+      "pops": 1,
+      "worst_dv": 1.26
+    }
   },
   "Sitting/Sit down and stand up 5": {
     "shown": {
@@ -898,7 +1262,14 @@
       "pops": 0,
       "worst_dv": 0.21
     },
-    "root_jump_ms": 1.34
+    "root_jump_ms": 1.34,
+    "after_lock": {
+      "slide_cm": 4.81,
+      "penetration_cm": 0.0,
+      "balance_frames": 50,
+      "pops": 0,
+      "worst_dv": 0.26
+    }
   },
   "Standing/Idle": {
     "shown": {
@@ -915,7 +1286,14 @@
       "pops": 0,
       "worst_dv": 0.07
     },
-    "root_jump_ms": 0.0
+    "root_jump_ms": 0.0,
+    "after_lock": {
+      "slide_cm": 0.01,
+      "penetration_cm": 0.64,
+      "balance_frames": 0,
+      "pops": 0,
+      "worst_dv": 0.08
+    }
   },
   "Walk styles/Zombie": {
     "shown": {
@@ -932,6 +1310,13 @@
       "pops": 0,
       "worst_dv": 0.68
     },
-    "root_jump_ms": 0.38
+    "root_jump_ms": 0.38,
+    "after_lock": {
+      "slide_cm": 4.68,
+      "penetration_cm": 0.0,
+      "balance_frames": 0,
+      "pops": 4,
+      "worst_dv": 1.29
+    }
   }
 }

@@ -1,6 +1,6 @@
 # Lock feet makes motion worse
 
-- **Status:** not started; the acceptance line needs the owner's agreement
+- **Status:** built, waiting for the owner (2026-10-30)
 - **Requires:** 115300
 - **Source:** 115100 (measured)
 
@@ -20,3 +20,20 @@ keys, so check that with the key frames held fixed.
 On every built-in, `feet.lock` never raises the worst slide, and raises the largest velocity change
 at a key by no more than a stated limit; a new `fixtures/bug-feet-lock-pop.json` checks a clip with a
 step; the existing lock fixtures pass.
+
+## Result
+2026-10-30. The main cause wasn't the missing blend. The lock forced the ankle to the mean place in
+three directions, so when a heel rose it pulled the leg straight, and the knee popped on release.
+Blending alone left the worst rise at 6 m/s. `lock_moves` now holds the ball of the foot, across the
+floor only, and eases over 4 frames either side; a one-frame run is no contact.
+
+| On the keys of the 55 built-ins | Before | After |
+|---|---|---|
+| Worst slide raised on | 9 clips | 0 |
+| Worst slide lowered on | 31 | 46 |
+| Largest rise in the worst velocity change at a key | 8.2 m/s | 1.72 |
+
+The limit is 2 m/s, and `builtin_motion_quality_only_improves` asserts both lines on every clip. The
+worst velocity change still rises on 22 clips, and pop counts rise from 618 to 1320. Pops are counted
+at keys and the lock adds keys, so that count isn't comparable; 118600 changes how pops are measured.
+It still writes a key on each frame it changes.

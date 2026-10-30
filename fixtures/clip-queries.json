@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "clip-queries",
   "feature": "clip.sample",
-  "description": "Linear keys: root offset 0 on 0 and (0, 0, 1) on 10. Samples at 0, 5, 10 are 0, 0.5, 1. The root's curves (3 rotation angles, 3 root offsets) rise 0.1 a frame. Feet: lowest and still only on frame 0 (from then on the body rises 0.087 m a frame, 2.6 m/s, above the 0.04 m / 0.5 m/s contact limits), so each foot has one contact frame, and locking the feet changes that one frame. No AI keys: nothing to keep or clear.",
+  "description": "Linear keys: root offset 0 on 0 and (0, 0, 1) on 10. Samples at 0, 5, 10 are 0, 0.5, 1. The root's curves (3 rotation angles, 3 root offsets) rise 0.1 a frame. Feet: lowest and still only on frame 0 (from then on the body rises 0.087 m a frame, 2.6 m/s, above the 0.04 m / 0.5 m/s contact limits), so each foot has one contact frame, which is no contact to hold, and locking the feet changes nothing. No AI keys: nothing to keep or clear.",
   "script": [
     {
       "command": "pose.set_root",
@@ -208,7 +208,7 @@
       "command": "feet.lock",
       "params": {},
       "expect": {
-        "frames": 1
+        "frames": 0
       }
     },
     {
