@@ -111,6 +111,8 @@ pub struct Metrics {
     pub balance: Spans,
     /// Frames a moving body's capture point is outside the feet it has or is about to have.
     pub capture: Spans,
+    /// Keys where a body joint's change of speed stands out from the frames near it.
+    pub spikes: Vec<Pop>,
     /// Frames out of balance while moving (not counted as problems).
     pub moving_outside: usize,
     /// Per bone past its limits; `None`: no limits loaded.
@@ -154,8 +156,10 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
     }
     // one frame either side, for speeds and velocity changes at the ends
     let (lo, hi) = ((a - 1).max(0), (b + 1).min(last));
-    let fr: Vec<f64> = (lo..=hi).map(|f| f as f64).collect();
-    let poses: Vec<Pose> = if shown {
+    // and more, for a pop against the frames near it
+    let (wide_lo, wide_hi) = ((a - 3).max(0), (b + 3).min(last));
+    let fr: Vec<f64> = (wide_lo..=wide_hi).map(|f| f as f64).collect();
+    let wide_poses: Vec<Pose> = if shown {
         doc.shown_poses(&fr)?
     } else {
         let (r, o) = doc.clip.sample_with(&fr, &doc.links)?;
@@ -166,7 +170,7 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
     };
     let sk = &doc.skeleton;
     let body = Body::new(sk)?;
-    let frames = poses
+    let wide = wide_poses
         .iter()
         .map(|p| {
             let (world, pos) = sk.fk(&p.rotations, p.root).map_err(|e| e.to_string())?;
@@ -180,19 +184,23 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
             Ok(Frame { pos, feet, com })
         })
         .collect::<R<Vec<Frame>>>()?;
+    let (skip, take) = ((lo - wide_lo) as usize, (hi - lo + 1) as usize);
+    let frames = wide.get(skip..skip + take).unwrap_or(&wide);
+    let poses = wide_poses.get(skip..skip + take).unwrap_or(&wide_poses);
     let fps = doc.clip.fps;
     let at = |f: i64| frames.get((f - lo) as usize);
     let mut m = Metrics {
         from: a,
         to: b,
         shown,
-        sliding: sliding(doc, &frames, lo, a, b, fps),
+        sliding: sliding(doc, frames, lo, a, b, fps),
         penetration: Spans::default(),
         balance: Spans::default(),
         capture: Spans::default(),
         moving_outside: 0,
         limits: None,
         keys: Vec::new(),
+        spikes: Vec::new(),
         notes: Vec::new(),
     };
     // the physics pass's own test of a body standing
@@ -236,12 +244,13 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
         }
     }
     match doc.limits.as_deref() {
-        Some(l) => m.limits = Some(limits(doc, l, &poses, lo, a, b)),
+        Some(l) => m.limits = Some(limits(doc, l, poses, lo, a, b)),
         None => m
             .notes
             .push("joint limits are not loaded (assets/rig/limits.json): limits were not checked".into()),
     }
-    m.keys = pops(doc, &frames, lo, a, b, fps);
+    m.keys = pops(doc, frames, lo, a, b, fps);
+    m.spikes = spikes(doc, &wide, wide_lo, a, b, fps);
     if shown && !doc.physics_shown() {
         m.notes
             .push("the physics pass is off: the motion shown is the keys".into());
@@ -494,6 +503,73 @@ fn pops(doc: &Document, frames: &[Frame], lo: i64, a: i64, b: i64, fps: f64) -> 
                 let dv = quat::len3(quat::sub3(v1, v0));
                 if best.is_none_or(|(d, _)| dv > d + 1e-12) {
                     best = Some((dv, j));
+                }
+            }
+            let (dv, j) = best?;
+            Some(Pop {
+                frame: k,
+                dv,
+                joint: names.get(j).cloned().unwrap_or_default(),
+            })
+        })
+        .collect()
+}
+
+/// The joints a person sees as the body: a finger or an eye only moves with what it hangs from.
+const BODY_JOINTS: [&str; 13] = [
+    "root", "pelvis", "spine", "neck", "head", "clavicle", "shoulder", "upperarm", "lowerarm", "wrist",
+    "upperleg", "lowerleg", "foot",
+];
+
+/// How much a joint changes speed at frame `at` (m/s).
+fn change_at(frames: &[Frame], at: i64, lo: i64, fps: f64, joint: usize) -> Option<f64> {
+    let p = |f: i64| {
+        let i = usize::try_from(f - lo).ok()?;
+        frames.get(i)?.pos.get(joint).copied()
+    };
+    let (x0, x1, x2) = (p(at - 1)?, p(at)?, p(at + 1)?);
+    let v0 = quat::scale3(quat::sub3(x1, x0), fps);
+    let v1 = quat::scale3(quat::sub3(x2, x1), fps);
+    Some(quat::len3(quat::sub3(v1, v0)))
+}
+
+/// What a person sees as a pop: at each key, the body joint whose change of speed most stands out
+/// from its own two frames either side. A swinging arm changes speed on every frame of a recording;
+/// that isn't one.
+fn spikes(doc: &Document, frames: &[Frame], lo: i64, a: i64, b: i64, fps: f64) -> Vec<Pop> {
+    let mut keyed: Vec<i64> = doc
+        .clip
+        .layers
+        .iter()
+        .flat_map(|l| l.keys.iter().map(|k| k.frame))
+        .filter(|f| *f >= a && *f <= b)
+        .collect();
+    keyed.sort_unstable();
+    keyed.dedup();
+    let names = &doc.skeleton.names;
+    let joints: Vec<usize> = (0..names.len())
+        .filter(|&j| {
+            names
+                .get(j)
+                .is_some_and(|n| BODY_JOINTS.iter().any(|b| n.starts_with(b)))
+        })
+        .collect();
+    keyed
+        .into_iter()
+        .filter_map(|k| {
+            let mut best: Option<(f64, usize)> = None;
+            for &j in &joints {
+                let dv = change_at(frames, k, lo, fps, j)?;
+                let near = [k - 2, k + 2].map(|f| change_at(frames, f, lo, fps, j));
+                let known: Vec<f64> = near.into_iter().flatten().collect();
+                let usual = if known.is_empty() {
+                    0.0
+                } else {
+                    known.iter().sum::<f64>() / known.len() as f64
+                };
+                let excess = dv - usual;
+                if best.is_none_or(|(d, _)| excess > d + 1e-12) {
+                    best = Some((excess, j));
                 }
             }
             let (dv, j) = best?;

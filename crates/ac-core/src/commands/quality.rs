@@ -141,7 +141,7 @@ pub static SPECS: &[CommandSpec] = &[
             ParamSpec::new(
                 "findings",
                 Kind::Text,
-                "[{kind, severity: high|medium|low, score, frames: [a, b], message, command, params, batch: [{id, params}]}] worst first",
+                "[{kind, severity: high|medium|low, score, frames: [a, b], message, command, params, batch: [{id, params}]}] worst first; a batch is offered only if, tried on a copy, it helped (none: empty, and command is null)",
             )
             .json()
             .required(),

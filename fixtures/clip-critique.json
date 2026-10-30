@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "clip-critique",
   "feature": "clip.critique",
-  "description": "A review ranks what clip.metrics measures into findings with a fix. The clip of clip-metrics (physics off; linear keys at 0, 10 (slid 12 cm along +X), 20 and 30 (also lowered 5 cm)): both feet slide 12 cm while planted on frames 0–30 (high: 10 cm or more; score 12 / 10 = 1.2; fix feet.lock), and both feet go 3 cm into the floor on frames 25–30 (high: 2 cm or more; score 3 / 2 = 1.5, so it comes first; fix: on frame 30 lift each foot 3 + 0.5 cm with pose.drag and key it). The velocity changes at the keys (0.36 and 0.15 m/s) are under 1 m/s: no pop findings. Following the penetration finding's batch through edit.batch makes one undo step and puts the left ankle, 0.0734171 m up at rest, at 0.0734171 - 0.05 + 0.035 = 0.0584171 m on frame 30 (it was 0.0234171). With `limit` 1 only the first finding comes back.",
+  "description": "A review ranks what clip.metrics measures into findings with a fix. The clip of clip-metrics (physics off; linear keys at 0, 10 (slid 12 cm along +X), 20 and 30 (also lowered 5 cm)): both feet slide 12 cm while planted on frames 0–30 (high: 10 cm or more; score 12 / 10 = 1.2; fix feet.lock), and both feet go 3 cm into the floor on frames 25–30 (high: 2 cm or more; score 3 / 2 = 1.5, so it comes first). A fix is offered only if, run on a copy, it lessens its own finding and worsens no other: lifting each foot 3 + 0.5 cm on frame 30 clears the floor but stretches the slide from 12 to 13.15 cm (measured), so that finding offers no fix and says so, while feet.lock is offered. The velocity changes at the keys (0.36 and 0.15 m/s) are under 1 m/s: no pop findings. Making that lift by hand through edit.batch makes one undo step and puts the left ankle, 0.0734171 m up at rest, at 0.0734171 - 0.05 + 0.035 = 0.0584171 m on frame 30 (it was 0.0234171). With `limit` 1 only the first finding comes back.",
   "script": [
     {
       "command": "physics.set",
@@ -109,49 +109,8 @@
               25,
               30
             ],
-            "command": "pose.drag",
-            "params": {
-              "bone": "foot.L",
-              "by": [
-                0,
-                0,
-                0.035
-              ]
-            },
-            "batch": [
-              {
-                "id": "frame.set",
-                "params": {
-                  "frame": 30
-                }
-              },
-              {
-                "id": "pose.drag",
-                "params": {
-                  "bone": "foot.L",
-                  "by": [
-                    0,
-                    0,
-                    0.035
-                  ]
-                }
-              },
-              {
-                "id": "pose.drag",
-                "params": {
-                  "bone": "foot.R",
-                  "by": [
-                    0,
-                    0,
-                    0.035
-                  ]
-                }
-              },
-              {
-                "id": "key.set",
-                "params": {}
-              }
-            ]
+            "command": null,
+            "batch": []
           },
           {
             "kind": "sliding",

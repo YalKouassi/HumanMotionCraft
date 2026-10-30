@@ -8,8 +8,8 @@
 //! - A frame's gap is how far the capture point is outside that support, across the way the body
 //!   is going over a second (ahead of the feet, the next step catches it).
 //!
-//! No gap is measured in flight, on a body resting on more than its feet, or on one that stands
-//! still (static balance covers it).
+//! No gap is measured in flight, on a body resting on more than its feet, on one that stands still
+//! (static balance covers it), or on a walk on the spot (no foot is planted).
 
 use std::collections::BTreeSet;
 
@@ -25,6 +25,9 @@ pub const LOOK_AHEAD: f64 = 0.5;
 pub const TOLERATED: f64 = 0.08;
 /// Over a second, a body that goes less than this (m) isn't going anywhere: it sways or stands.
 const MIN_TRAVEL: f64 = 0.3;
+/// The share of a second a foot must slide on the floor for a body going nowhere to be walking on
+/// the spot.
+const ON_THE_SPOT: f64 = 0.75;
 const ROUNDS: usize = 3;
 /// How many times a field of moves is softened.
 const SOFTEN: usize = 12;
@@ -116,6 +119,9 @@ pub fn gaps(frames: &[Sample], fps: f64, surfaces: &[Surface]) -> Vec<Option<Gap
                 *coms.get(f.saturating_sub(half))?,
             );
             let l = t[0].hypot(t[1]);
+            if l < MIN_TRAVEL && on_the_spot(&feet, f, half, fps, surfaces, lift) {
+                return None;
+            }
             let by = if l < MIN_TRAVEL {
                 by
             } else {
@@ -127,6 +133,40 @@ pub fn gaps(frames: &[Sample], fps: f64, surfaces: &[Surface]) -> Vec<Option<Gap
             (outside > 1e-9).then_some(Gap { outside, by })
         })
         .collect()
+}
+
+/// Under a body going nowhere, a foot on the floor is moving as a swinging foot does for most of the
+/// second around frame `f`: a walk on the spot. The feet slide back beneath it, none is planted, so
+/// there is no support to measure against. (A foot that only skims the floor isn't one.)
+fn on_the_spot(
+    feet: &[Vec<(usize, Vec3)>],
+    f: usize,
+    half: usize,
+    fps: f64,
+    surfaces: &[Surface],
+    lift: f64,
+) -> bool {
+    let (a, b) = (
+        f.saturating_sub(half),
+        (f + half).min(feet.len().saturating_sub(1)),
+    );
+    let sliding = (a..=b).filter(|&g| skates(feet, g, fps, surfaces, lift)).count();
+    sliding as f64 >= ON_THE_SPOT * (b - a + 1) as f64
+}
+
+/// A foot point on the floor is moving as a swinging foot does on frame `f`.
+fn skates(feet: &[Vec<(usize, Vec3)>], f: usize, fps: f64, surfaces: &[Surface], lift: f64) -> bool {
+    let (a, b) = (f.saturating_sub(1), (f + 1).min(feet.len().saturating_sub(1)));
+    let (Some(now), Some(p0), Some(p1)) = (feet.get(f), feet.get(a), feet.get(b)) else {
+        return false;
+    };
+    let dt = (b - a).max(1) as f64 / fps;
+    now.iter()
+        .zip(p0.iter().zip(p1))
+        .any(|((_, p), ((_, x), (_, y)))| {
+            let height = p[2] - physics::ground(surfaces, p[0], p[1]) - lift;
+            height < physics::NEAR && (y[0] - x[0]).hypot(y[1] - x[1]) / dt > physics::PLANT_SPEED
+        })
 }
 
 /// Soften a field of moves, so the hips don't gain speed from them.

@@ -338,7 +338,7 @@ Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `findings` | JSON | yes |  | [{kind, severity: high\|medium\|low, score, frames: [a, b], message, command, params, batch: [{id, params}]}] worst first |
+| `findings` | JSON | yes |  | [{kind, severity: high\|medium\|low, score, frames: [a, b], message, command, params, batch: [{id, params}]}] worst first; a batch is offered only if, tried on a copy, it helped (none: empty, and command is null) |
 | `count` | integer | yes |  | findings returned |
 | `metrics` | JSON | yes |  | the measurements (clip.metrics) |
 

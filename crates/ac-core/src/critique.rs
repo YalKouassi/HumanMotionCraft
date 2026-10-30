@@ -11,8 +11,11 @@
 //! | penetration (cm below the ground) | 0.1 | 0.5 | 2 |
 //! | balance (cm outside the support, still frames) | 0 | 2 | 5 |
 //! | capture (cm to the side of the feet, moving frames) | 8 | 15 | 30 |
-//! | limits (degrees past a joint's range) | 1 | 10 | 30 |
-//! | pop (m/s velocity change at a key) | 1 | 1.5 | 3 |
+//! | limits (`clip.possible`'s level) | unusual | | impossible |
+//! | pop (m/s a body joint's change of speed at a key stands out from the frames near it) | 1 | 1.5 | 3 |
+//!
+//! A suggested fix is tried on a copy first ([`MAX_CHECKED`] of them at most): it is offered only if
+//! it lessens its own finding and worsens no other kind. Otherwise the finding says it has none.
 //!
 //! Findings are ordered by severity, then by how far past the high line they go (`score`:
 //! amount / high line), then by kind and first frame, so the order is deterministic.
@@ -47,6 +50,82 @@ fn severity(x: f64, lines: [f64; 3]) -> Option<usize> {
     }
 }
 
+/// Most fixes tried on a copy.
+pub const MAX_CHECKED: usize = 20;
+/// How much (in each kind's unit) a number may rise and not count as worse: rounding, not a change.
+const WORSE: f64 = 0.05;
+
+/// One number per kind, as `KINDS` orders them; a kind with several findings counts each's own.
+#[derive(Clone, Copy)]
+struct Amounts([f64; 6]);
+
+fn amounts(doc: &Document, m: &Metrics) -> Amounts {
+    let slide = m.sliding.iter().map(|s| s.slide_cm).fold(0.0, f64::max);
+    let past = crate::possible::measure(doc, Some(m.from), Some(m.to), m.shown).map_or(0.0, |v| {
+        v["impossible"]["max_deg"].as_f64().unwrap_or(0.0) + v["unusual"]["max_deg"].as_f64().unwrap_or(0.0)
+    });
+    let pop = m.spikes.iter().map(|k| k.dv).fold(0.0, f64::max);
+    Amounts([
+        m.penetration.worst,
+        slide,
+        m.balance.worst,
+        m.capture.worst,
+        past,
+        pop,
+    ])
+}
+
+/// What a fix should lessen: the sum for sliding (a fix for one foot needn't move the other's worst);
+/// this key's own for a pop.
+fn own_amount(f: &Finding, m: &Metrics, all: &Amounts, kind: usize) -> f64 {
+    match f.kind {
+        "sliding" => m.sliding.iter().map(|s| s.slide_cm).sum(),
+        "pop" => m
+            .spikes
+            .iter()
+            .find(|k| k.frame == f.frames[0])
+            .map_or(0.0, |k| k.dv),
+        _ => all.0.get(kind).copied().unwrap_or(0.0),
+    }
+}
+
+/// Whether a finding's batch, run on a copy, lessens the finding and worsens no other kind.
+fn helps(doc: &Document, m: &Metrics, f: &Finding) -> bool {
+    if f.batch.is_empty() {
+        return false;
+    }
+    let mut copy = doc.clone();
+    for (id, params) in &f.batch {
+        let spec = crate::commands::AREAS
+            .iter()
+            .flat_map(|area| area.iter())
+            .find(|s| s.id == *id);
+        let Some(spec) = spec else {
+            return false;
+        };
+        let Ok(checked) = crate::command::check(spec, params) else {
+            return false;
+        };
+        if (spec.run)(&mut copy, &checked).is_err() {
+            return false;
+        }
+    }
+    let Ok(after) = metrics::measure(&copy, Some(m.from), Some(m.to), m.shown) else {
+        return false;
+    };
+    let (before_all, after_all) = (amounts(doc, m), amounts(&copy, &after));
+    let kind = KINDS.iter().position(|k| *k == f.kind).unwrap_or(KINDS.len());
+    if own_amount(f, &after, &after_all, kind) >= own_amount(f, m, &before_all, kind) - WORSE {
+        return false;
+    }
+    before_all
+        .0
+        .iter()
+        .zip(&after_all.0)
+        .enumerate()
+        .all(|(k, (b, a))| k == kind || *a <= *b + WORSE)
+}
+
 const SEVERITY: [&str; 3] = ["low", "medium", "high"];
 const KINDS: [&str; 6] = ["penetration", "sliding", "balance", "capture", "limits", "pop"];
 
@@ -79,7 +158,7 @@ pub fn findings(doc: &Document, m: &Metrics, limit: usize) -> Vec<Value> {
             score: s.slide_cm / lines[2],
             frames: [s.from, s.to],
             message: format!(
-                "The {} foot slides {:.1} cm while it is planted on {}. Locking the feet holds each planted foot in one spot for its whole contact.",
+                "The {} foot slides {:.1} cm while it is planted on {}. The keys carry it across the floor while it holds weight. Locking the feet holds each planted foot in one spot for its whole contact.",
                 side(s.foot),
                 s.slide_cm,
                 span_text(s.from, s.to)
@@ -153,7 +232,7 @@ pub fn findings(doc: &Document, m: &Metrics, limit: usize) -> Vec<Value> {
             score: bal.worst / 5.0,
             frames: [a, b],
             message: format!(
-                "The body stands still but its centre of mass is {:.1} cm outside its feet on {} (worst on frame {w}): it would fall. {}",
+                "The body stands still but its centre of mass is {:.1} cm outside its feet on {} (worst on frame {w}): the hips are past the feet and nothing is catching it. {}",
                 bal.worst,
                 span_text(a, b),
                 if physics_off {
@@ -183,38 +262,8 @@ pub fn findings(doc: &Document, m: &Metrics, limit: usize) -> Vec<Value> {
             batch: vec![("hips.transfer".to_string(), json!({}))],
         });
     }
-    for s in m.limits.iter().flatten() {
-        let (Some(w), Some(sev)) = (
-            s.worst_frame,
-            severity(s.worst, [metrics::LIMIT_SLACK_DEG, 10.0, 30.0]),
-        ) else {
-            continue;
-        };
-        let runs = s.runs();
-        let (a, b) = (runs.first().map_or(w, |r| r[0]), runs.last().map_or(w, |r| r[1]));
-        let mut batch = vec![("frame.set".to_string(), json!({ "frame": w }))];
-        if let Some(q) = s.clamped {
-            batch.push((
-                "pose.set_bone".to_string(),
-                json!({ "bone": s.at, "rotation": q.map(r6) }),
-            ));
-            batch.push(("key.set".to_string(), json!({})));
-        }
-        out.push(Finding {
-            kind: "limits",
-            severity: sev,
-            score: s.worst / 30.0,
-            frames: [a, b],
-            message: format!(
-                "{} turns {:.1}° past its range on {} (worst on frame {w}). Turning it back to the edge of its range and keying it fixes the worst frame.",
-                s.at,
-                s.worst,
-                span_text(a, b)
-            ),
-            batch,
-        });
-    }
-    for k in &m.keys {
+    out.extend(limit_finding(doc, m));
+    for k in &m.spikes {
         let Some(sev) = severity(k.dv, [metrics::POP_SPEED, 1.5, 3.0]) else {
             continue;
         };
@@ -244,12 +293,68 @@ pub fn findings(doc: &Document, m: &Metrics, limit: usize) -> Vec<Value> {
             score: k.dv / 3.0,
             frames: [k.frame, k.frame],
             message: format!(
-                "{} changes speed by {:.2} m/s at the key on frame {}: a visible pop. {tail}",
+                "{} changes speed {:.2} m/s more than the frames around it at the key on frame {}: a visible pop, because the motion turns on the key instead of through it. {tail}",
                 k.joint, k.dv, k.frame
             ),
             batch,
         });
     }
+    finish(doc, m, out, limit)
+}
+
+/// What `clip.possible` says of the joints, so the two never disagree: unusual is low, impossible
+/// is high, typical is no finding. If it can't say, the finding says that.
+fn limit_finding(doc: &Document, m: &Metrics) -> Option<Finding> {
+    let v = match crate::possible::measure(doc, Some(m.from), Some(m.to), m.shown) {
+        Ok(v) => v,
+        Err(e) => {
+            return Some(Finding {
+                kind: "limits",
+                severity: 0,
+                score: 0.0,
+                frames: [m.from, m.to],
+                message: format!("The joints' range could not be checked: {e}"),
+                batch: Vec::new(),
+            });
+        }
+    };
+    let level = v["level"].as_str()?;
+    let (part, sev) = match level {
+        "impossible" => ("impossible", 2),
+        "unusual" => ("unusual", 0),
+        _ => return None,
+    };
+    let w = v[part]["worst_frame"].as_i64()?;
+    let spans = v[part]["spans"].as_array().cloned().unwrap_or_default();
+    let (a, b) = (
+        spans.first().and_then(|r| r[0].as_i64()).unwrap_or(w),
+        spans.last().and_then(|r| r[1].as_i64()).unwrap_or(w),
+    );
+    let deg = v[part]["max_deg"].as_f64().unwrap_or(0.0);
+    let message = if sev == 2 {
+        let joint = v["breaches"][0]["joint"].as_str().unwrap_or("A joint");
+        format!(
+            "{joint} goes {deg:.1}° past what a body can do on {} (worst on frame {w}): no recording reaches it. Bend it back on that frame and key it.",
+            span_text(a, b)
+        )
+    } else {
+        format!(
+            "A joint goes {deg:.1}° past the usual clinical range on {} (worst on frame {w}). A body can do this: athletes and dancers do. Check it is meant.",
+            span_text(a, b)
+        )
+    };
+    Some(Finding {
+        kind: "limits",
+        severity: sev,
+        score: deg / 30.0,
+        frames: [a, b],
+        message,
+        batch: Vec::new(),
+    })
+}
+
+/// Rank the findings, keep the worst `limit`, and offer only the fixes that help.
+fn finish(doc: &Document, m: &Metrics, mut out: Vec<Finding>, limit: usize) -> Vec<Value> {
     let rank = |k: &str| KINDS.iter().position(|x| *x == k).unwrap_or(KINDS.len());
     out.sort_by(|x, y| {
         y.severity
@@ -259,6 +364,19 @@ pub fn findings(doc: &Document, m: &Metrics, limit: usize) -> Vec<Value> {
             .then(x.frames[0].cmp(&y.frames[0]))
     });
     out.truncate(limit.min(MAX_FINDINGS));
+    for (i, f) in out.iter_mut().enumerate() {
+        if f.batch.is_empty() {
+            continue;
+        }
+        if i >= MAX_CHECKED {
+            f.batch.clear();
+            f.message.push_str(" (Its fix was not tried: too many findings.)");
+        } else if !helps(doc, m, f) {
+            f.batch.clear();
+            f.message
+                .push_str(" (The usual fix was tried on a copy and didn't help, so none is offered.)");
+        }
+    }
     out.into_iter()
         .map(|f| {
             // the suggested command: the step that changes something (not the frame.set before it)
@@ -284,8 +402,4 @@ pub fn findings(doc: &Document, m: &Metrics, limit: usize) -> Vec<Value> {
 
 fn r4(x: f64) -> f64 {
     (x * 1e4).round() / 1e4
-}
-
-fn r6(x: f64) -> f64 {
-    (x * 1e9).round() / 1e9
 }

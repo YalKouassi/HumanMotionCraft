@@ -1084,7 +1084,7 @@
       "slide_cm": 0.0,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "capture_cm": 20.59,
+      "capture_cm": 0.0,
       "pops": 0,
       "worst_dv": 0.88
     },
@@ -1092,7 +1092,7 @@
       "slide_cm": 0.0,
       "penetration_cm": 0.75,
       "balance_frames": 0,
-      "capture_cm": 20.59,
+      "capture_cm": 0.0,
       "pops": 0,
       "worst_dv": 0.91
     },
@@ -1101,7 +1101,7 @@
       "slide_cm": 1.71,
       "penetration_cm": 0.7,
       "balance_frames": 0,
-      "capture_cm": 13.74,
+      "capture_cm": 0.0,
       "pops": 2,
       "worst_dv": 1.22
     }

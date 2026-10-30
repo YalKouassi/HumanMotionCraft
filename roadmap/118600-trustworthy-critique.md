@@ -1,6 +1,6 @@
 # A review that can be trusted
 
-- **Status:** not started; the acceptance line needs the owner's agreement
+- **Status:** built, waiting for the owner (2026-10-30); the clean list below needs agreeing
 - **Requires:** 116200
 - **Source:** 115100 (measured)
 
@@ -21,3 +21,32 @@ On the built-ins: the owner agrees a clean list (at least `Locomotion/Walk` once
 the recorded walks) that gets no medium or high finding; no limit finding contradicts `clip.possible`;
 a test runs every suggested batch on every built-in and checks each improves its finding and worsens
 none; `fixtures/clip-critique.json` is updated by hand-worked numbers.
+
+## Built (2026-10-30)
+`crates/ac-cli/tests/critique_builtins.rs` runs the acceptance over all 55 built-ins, headless. Nobody
+has judged the remaining findings by eye.
+
+| Worst finding per clip | Before | Now |
+|---|---|---|
+| high | 26 | 6 |
+| medium | 25 | 18 |
+| low | 1 | 26 |
+| none | 3 | 5 |
+
+- **Limits:** now `clip.possible`'s own level: unusual is low, impossible is high, typical is nothing.
+- **Pops:** measured on body joints only, as the change of speed at a key beyond the frames near it.
+- **Fixes:** each runs on a copy first (20 at most), and is dropped, with a note in the message, if it
+  doesn't lessen its own finding or worsens another kind. 14 are offered across the built-ins; the
+  test runs each for real.
+- **Clean list, proposed:** `Locomotion/Walk` and the recorded `Locomotion/Walk 12` to `17`.
+- **`Locomotion/Walk`:** its medium was a false alarm. A foot on the floor slid back at about 0.9 m/s
+  under a body going nowhere, so no foot counted as planted and the gap was measured against the
+  wrong foot. A body that does this for three quarters of a second now has no gap (`weight.rs`;
+  by-hand test in `crates/ac-core/tests/weight.rs`). Only this clip's rows changed in the ratchet.
+- **Lifting the feet:** in the fixture's clip it stretches the slide from 12 to 13.15 cm, so that
+  finding now offers no fix.
+- **Still flagged:** high on 6 clips: a pop on `Action/Jump`, and sliding on `Dance/Dance 8`,
+  `Locomotion/Side step 13`, `Locomotion/Turn in place 5`, `Martial arts/Fight 7` and
+  `On the floor/On the ground 10`. A turn pivots on its foot, so some of these may be false alarms
+  the owner should judge. Capture stays medium on `Action/Jump`, `Locomotion/Side step 9`,
+  `Locomotion/Walk in a circle 5` and `Sitting/Sit down and stand up 5`, not investigated.
