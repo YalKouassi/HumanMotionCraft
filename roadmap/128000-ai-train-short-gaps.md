@@ -1,6 +1,6 @@
 # Train on short gaps (1–4 frames)
 
-- **Status:** not started
+- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
 - **Requires:** 126000
 - **Source:** 115000 (review 1 §2, review 2 §9)
 
@@ -13,3 +13,8 @@ but the final mix must keep 1–4.
 ## Acceptance
 On held-out takes, the 1–4 bin is no worse than plain interpolation and better than today's model;
 the other bins are no worse than today's.
+
+## Result
+2026-10-30. Training draws a gap bin by `--gap-mix` (default 0.15 / 0.2 / 0.2 / 0.2 / 0.25 for 1–4,
+5–10, 11–20, 21–30, 31–45), then a length in it (`train.sample_gap`, `tests/test_train.py`). The
+shipped model's 1–4 bin is 5.5 mm against the interpolation's 4.1 mm (126000): the number to beat.

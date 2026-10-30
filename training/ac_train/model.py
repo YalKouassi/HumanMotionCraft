@@ -35,6 +35,8 @@ CONTEXT = 10
 MAX_GAP = 45
 WINDOW = CONTEXT + MAX_GAP + 1
 FEAT = len(BONES) * 6 + 3
+#: the root-path channel's width: x, y, z and the flag
+PATH = 4
 
 
 # ---- rotations (torch, batched) -----------------------------------------------------------------
@@ -157,24 +159,50 @@ def given_features(gmask):
     return torch.cat([f, gmask[:, :1].expand(-1, 3)], -1)[:, None]
 
 
+def path_inputs(path, pmask):
+    """The root-path channel (141000): (N, T, 3) root positions / hip height and (N, T, 1) 1 where
+    one is given -> (N, T, 4), the positions zeroed where none is."""
+    return torch.cat([path * pmask, pmask], -1)
+
+
+def smooth_path(pos, width):
+    """Root positions (N, T, 3) box-smoothed over ``width`` frames (odd; the ends repeated): a path
+    rounder than the recording, as a spline through the keys is."""
+    if width <= 1:
+        return pos
+    h = width // 2
+    x = torch.cat([pos[:, :1].expand(-1, h, -1), pos, pos[:, -1:].expand(-1, h, -1)], 1)
+    return x.unfold(1, width, 1).mean(-1)
+
+
 class Inbetweener(nn.Module):
-    def __init__(self, d=256, layers=6, heads=8, styles=0, given=False):
+    def __init__(self, d=256, layers=6, heads=8, styles=0, given=False, contacts=False, path=False):
         super().__init__()
         self.given = given  # takes a per-bone mask of bones another layer drives (known in the gap)
+        # takes the root path across the gap (141000): positions and a per-frame "given" flag
+        self.path = path
+        # also says, per frame, whether each foot is planted (left, right: logits); the app plants
+        # the feet the network says are down inside the gap
+        self.contacts = contacts
         self.style = nn.Embedding(styles, d) if styles else None
-        self.inp = nn.Linear(FEAT * 2 + 2 + (len(BONES) if given else 0), d)
+        self.inp = nn.Linear(FEAT * 2 + 2 + (len(BONES) if given else 0) + (PATH if path else 0), d)
         self.pos = nn.Parameter(torch.randn(WINDOW, d) * 0.02)
         enc = nn.TransformerEncoderLayer(d, heads, 4 * d, dropout=0.1, batch_first=True, norm_first=True)
         self.body = nn.TransformerEncoder(enc, layers)
         self.out = nn.Sequential(nn.LayerNorm(d), nn.Linear(d, FEAT))
         nn.init.zeros_(self.out[1].weight)
         nn.init.zeros_(self.out[1].bias)
+        self.contact = nn.Linear(d, 2) if contacts else None
 
-    def forward(self, known, interp, mask, ttg, style=None, gmask=None):
+    def forward(self, known, interp, mask, ttg, style=None, gmask=None, with_contacts=False, path=None, pmask=None):
         """known/interp (N, T, FEAT), mask (N, T, 1) 1 = known frame, ttg (N, T, 1) time to key B,
         style (N,) style indices or (N, S) weights over the styles (several styles add up; 0 = any;
         ignored by a model trained without styles), gmask (N, J)
-        1 = a bone known on every frame (another layer drives it; given back unchanged)."""
+        1 = a bone known on every frame (another layer drives it; given back unchanged).
+        ``with_contacts``: also return the contact logits (N, T, 2), left and right foot (a model
+        with the head; ``None`` without it). ``path`` (N, T, 3) root positions / hip height the root
+        should follow and ``pmask`` (N, T, 1) 1 on the frames that have one (a model with ``path``;
+        none given: no path)."""
         if self.given:
             g = gmask if gmask is not None else torch.zeros(known.shape[0], len(BONES), device=known.device)
             fm = given_features(g)
@@ -182,15 +210,21 @@ class Inbetweener(nn.Module):
             x = torch.cat([known * m, interp, mask, ttg, g[:, None].expand(-1, known.shape[1], -1)], -1)
         else:
             x = torch.cat([known * mask, interp, mask, ttg], -1)
+        if self.path:
+            if path is None or pmask is None:
+                path, pmask = torch.zeros_like(known[..., :3]), torch.zeros_like(mask)
+            x = torch.cat([x, path_inputs(path, pmask)], -1)
         t = self.inp(x) + self.pos[: x.shape[1]]
         if self.style is not None:
             st = style if style is not None else torch.zeros(x.shape[0], dtype=torch.long, device=x.device)
             e = st.to(self.style.weight.dtype) @ self.style.weight if st.dim() == 2 else self.style(st)
             t = t + e[:, None]
-        h = self.body(t)
-        out = interp + self.out(h)
+        h = self.out[0](self.body(t))
+        out = interp + self.out[1](h)
         if self.given and gmask is not None:
             out = out * (1 - fm) + known * fm
+        if with_contacts:
+            return out, (self.contact(h) if self.contact is not None else None)
         return out
 
 

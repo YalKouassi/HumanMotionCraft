@@ -1,6 +1,6 @@
 # Train on the part masks the app sends
 
-- **Status:** not started
+- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
 - **Requires:** 126000
 - **Source:** 115000 (review 2 §4, corrected)
 
@@ -16,3 +16,9 @@ not the fix: the app never makes them, and pins and `parts.lock` don't use the m
 ## Acceptance
 In 126000's part-layer evaluation (each part group's complement as given), the free bones' error
 drops against today's model, and full-body fills are no worse.
+
+## Result
+2026-10-30. `train.given_mask`: half the windows get a mask; of those, 60 % give every bone outside
+a part group (what a part layer sends) and 40 % the group itself, over every group in
+`PART_GROUPS` including the unions (`tests/test_train.py`). The shipped model on the part layers
+(126000, free bones): legs 18.5 mm against 37.8 for a plain fill, arms 7.0 against 8.5.

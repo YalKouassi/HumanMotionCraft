@@ -21,7 +21,7 @@ pub mod net;
 
 use std::path::Path;
 
-use ac_core::ai::{FillSettings, Inbetweener, ModelInfo};
+use ac_core::ai::{Contacts, FillSettings, FillWithContacts, Inbetweener, ModelInfo};
 use ac_core::clip::{Clip, Interp, Links};
 use ac_core::quat::{self, Quat, Vec3};
 use ac_core::rig::Skeleton;
@@ -268,6 +268,20 @@ impl Inbetweener for Model {
         s: &FillSettings,
         given: Option<&[String]>,
     ) -> R<(Vec<Vec<Quat>>, Vec<Vec3>)> {
+        let (r, o, _) = self.fill_contacts(sk, clip, links, a, b, s, given)?;
+        Ok((r, o))
+    }
+
+    fn fill_contacts(
+        &self,
+        sk: &Skeleton,
+        clip: &Clip,
+        links: &dyn Links,
+        a: i64,
+        b: i64,
+        s: &FillSettings,
+        given: Option<&[String]>,
+    ) -> R<FillWithContacts> {
         let info = &self.info;
         let gap = b - a - 1;
         if gap < 1 || gap > info.max_gap as i64 {
@@ -358,19 +372,69 @@ impl Inbetweener for Model {
             ));
         }
         let net = self.net();
+        // the keys' own root path, with stepped keys smoothed (a Hold kept the root still and
+        // dropped it into the next key in one frame)
+        let keys_path: Option<Vec<Vec3>> = if s.trajectory > 0.0 {
+            let mut smooth = clip.clone();
+            let e = smooth.edit;
+            if let Some(l) = smooth.layers.get_mut(e) {
+                l.keys
+                    .iter_mut()
+                    .filter(|k| k.interp == Interp::Step)
+                    .for_each(|k| k.interp = Interp::Smooth);
+            }
+            let fr: Vec<f64> = (a + 1..b).map(|f| f as f64).collect();
+            Some(smooth.sample_with(&fr, links)?.1)
+        } else {
+            None
+        };
+        // a model trained with the path is given it on the gap frames, in key a's frame (141000)
+        let path_in: Option<(Vec<f32>, Vec<f32>)> = keys_path.as_ref().filter(|_| net.path).map(|kp| {
+            let mut p = vec![0.0f32; t * 3];
+            let mut pm = vec![0.0f32; t];
+            for (k, o) in kp.iter().enumerate().take(gap) {
+                let c = mv(&to_key, quat::sub3(o.map(|v| v * hip), origin));
+                let i = ctx + k;
+                (0..3).for_each(|j| p[i * 3 + j] = (c[j] / hip) as f32);
+                pm[i] = 1.0;
+            }
+            (p, pm)
+        });
+        let path = path_in.as_ref().map(|(p, pm)| (p.as_slice(), pm.as_slice()));
         let styled = s.style != "any" && s.style_force != 0.0;
         let any = (!info.styles.is_empty()).then_some(0);
-        let mut pred = if styled {
-            let st = info.styles.iter().position(|x| *x == s.style);
-            let cond = net.forward(&known, &interp, &mask, &ttg, st, gmask.as_deref())?;
-            let free = net.forward(&known, &interp, &mask, &ttg, any, gmask.as_deref())?;
+        let blend = |free: &[f32], cond: &[f32]| -> Vec<f32> {
             free.iter()
-                .zip(&cond)
+                .zip(cond)
                 .map(|(f, c)| f + s.style_force as f32 * (c - f))
                 .collect()
-        } else {
-            net.forward(&known, &interp, &mask, &ttg, any, gmask.as_deref())?
         };
+        let (mut pred, logits) = if styled {
+            let st = info.styles.iter().position(|x| *x == s.style);
+            let (cond, lc) =
+                net.forward_contacts(&known, &interp, &mask, &ttg, st, gmask.as_deref(), path)?;
+            let (free, lf) =
+                net.forward_contacts(&known, &interp, &mask, &ttg, any, gmask.as_deref(), path)?;
+            let logits = match (lf, lc) {
+                (Some(f), Some(c)) => Some(blend(&f, &c)),
+                _ => None,
+            };
+            (blend(&free, &cond), logits)
+        } else {
+            net.forward_contacts(&known, &interp, &mask, &ttg, any, gmask.as_deref(), path)?
+        };
+        // the feet the network says are planted on the gap frames (none for the plain
+        // interpolation: ai_force 0)
+        let contacts: Option<Contacts> = logits.filter(|_| s.ai_force > 0.0).map(|l| {
+            (ctx..ctx + gap)
+                .map(|i| {
+                    [
+                        l.get(i * 2).is_some_and(|&v| v > 0.0),
+                        l.get(i * 2 + 1).is_some_and(|&v| v > 0.0),
+                    ]
+                })
+                .collect()
+        });
         let af = s.ai_force as f32;
         pred.iter_mut()
             .zip(&interp)
@@ -404,19 +468,9 @@ impl Inbetweener for Model {
             let p = [row[nb * 6] * hip, row[nb * 6 + 1] * hip, row[nb * 6 + 2] * hip];
             out_o.push(quat::add3(mv(&from_key, p), origin).map(|v| v / hip));
         }
-        if s.trajectory > 0.0 {
-            // the keys' own path, with stepped keys smoothed
-            let mut smooth = clip.clone();
-            let e = smooth.edit;
-            if let Some(l) = smooth.layers.get_mut(e) {
-                l.keys
-                    .iter_mut()
-                    .filter(|k| k.interp == Interp::Step)
-                    .for_each(|k| k.interp = Interp::Smooth);
-            }
-            let fr: Vec<f64> = (a + 1..b).map(|f| f as f64).collect();
-            let path = smooth.sample_with(&fr, links)?.1;
-            for (o, p) in out_o.iter_mut().zip(&path) {
+        if let Some(path) = &keys_path {
+            // the blend is what puts the root on the path
+            for (o, p) in out_o.iter_mut().zip(path) {
                 *o = [0, 1, 2].map(|k| o[k] + s.trajectory * (p[k] - o[k]));
             }
         }
@@ -429,7 +483,7 @@ impl Inbetweener for Model {
                 }
             }
         }
-        Ok((out_r, out_o))
+        Ok((out_r, out_o, contacts))
     }
 }
 

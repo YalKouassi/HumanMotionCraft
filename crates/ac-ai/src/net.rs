@@ -1,10 +1,13 @@
 //! The in-betweener network (the prototype's `Inbetweener`), forward pass only, in f32.
 //!
-//! Per frame the input is `[known * mask, interp, mask, time-to-go, given bones]`; a linear layer
+//! Per frame the input is `[known * mask, interp, mask, time-to-go, given bones, root path]` (the
+//! path: x, y, z times its flag, and the flag; models whose card says `path`, 141000); a linear layer
 //! takes it to `d` wide, plus a learned position (and style) embedding; then pre-norm transformer
 //! encoder layers (full self-attention over the window, ReLU feed-forward); then a layer norm and a
-//! linear layer give a change to the plain interpolation. Weights come from `weights.bin` +
-//! `weights.json` (written by `training/`: `python -m ac_train.export`).
+//! linear layer give a change to the plain interpolation. A model with a contact head (`contact`)
+//! also says, from the same normed rows, whether each foot is planted on each frame (left, right
+//! logits). Weights come from `weights.bin` + `weights.json` (written by `training/`:
+//! `python -m ac_train.export`).
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -78,14 +81,21 @@ pub struct Net {
     layers: Vec<Layer>,
     out_norm: Norm,
     out: Linear,
+    /// Foot contacts per frame (left, right), on models trained with them.
+    contact: Option<Linear>,
     d: usize,
     heads: usize,
     /// Features per frame (bones x 6 + 3).
     pub feat: usize,
     /// Bones the given mask covers (0 when the model takes none).
     pub given: usize,
+    /// Takes the root path across the gap ([`Net::forward_contacts`]'s `path`).
+    pub path: bool,
     pub styles: usize,
 }
+
+/// The root-path channel's width: x, y, z and the flag.
+const PATH: usize = 4;
 
 struct Tensors {
     index: BTreeMap<String, (Vec<usize>, usize)>,
@@ -176,8 +186,9 @@ impl Net {
             Some([dd, i]) if *dd == d => *i,
             _ => return Err("weights: bad input layer".into()),
         };
+        let path = card["path"].as_bool().unwrap_or(false);
         let given = inp_w
-            .checked_sub(feat * 2 + 2)
+            .checked_sub(feat * 2 + 2 + if path { PATH } else { 0 })
             .ok_or("weights: input narrower than the features")?;
         let style = t.shape("style.weight").map(|s| s.to_vec());
         let styles = style.as_ref().map_or(0, |s| s[0]);
@@ -220,10 +231,15 @@ impl Net {
             layers,
             out_norm: t.norm("out.0", d)?,
             out: t.linear("out.1", feat, d)?,
+            contact: match t.shape("contact.weight") {
+                Some(_) => Some(t.linear("contact", 2, d)?),
+                None => None,
+            },
             d,
             heads,
             feat,
             given,
+            path,
             styles,
         };
         Ok((net, card))
@@ -234,6 +250,11 @@ impl Net {
         let mut f: Vec<f32> = gmask.iter().flat_map(|&g| [g; 6]).collect();
         f.extend([gmask.first().copied().unwrap_or(0.0); 3]);
         f
+    }
+
+    /// Whether the network says where the feet are planted ([`Net::forward_contacts`]).
+    pub fn has_contacts(&self) -> bool {
+        self.contact.is_some()
     }
 
     /// One pass. `known`, `interp`: T x feat; `mask`, `ttg`: T; `style`: an index (models with
@@ -247,6 +268,26 @@ impl Net {
         style: Option<usize>,
         gmask: Option<&[f32]>,
     ) -> R<Vec<f32>> {
+        Ok(self
+            .forward_contacts(known, interp, mask, ttg, style, gmask, None)?
+            .0)
+    }
+
+    /// [`Net::forward`], and the contact logits (T x 2: left, right foot; above 0 is planted) on
+    /// a model with the contact head (`None` without it). `path`: the root path (T x 3, hip
+    /// heights in the window's frame) and per frame 1 where it is given (T), on a model that takes
+    /// it ([`Net::path`]; ignored on one that doesn't).
+    #[allow(clippy::too_many_arguments)]
+    pub fn forward_contacts(
+        &self,
+        known: &[f32],
+        interp: &[f32],
+        mask: &[f32],
+        ttg: &[f32],
+        style: Option<usize>,
+        gmask: Option<&[f32]>,
+        path: Option<(&[f32], &[f32])>,
+    ) -> R<(Vec<f32>, Option<Vec<f32>>)> {
         let (f, d) = (self.feat, self.d);
         let t = mask.len();
         if t == 0 || t > self.pos_rows || known.len() != t * f || interp.len() != t * f || ttg.len() != t {
@@ -262,8 +303,17 @@ impl Net {
             None => &zeros,
         };
         let fm = (self.given > 0).then(|| self.given_features(g));
+        let path = match path {
+            Some((p, pm)) if p.len() != t * 3 || pm.len() != t => {
+                return Err(format!(
+                    "network input: a root path of {t} frames, not {}",
+                    pm.len()
+                ));
+            }
+            p => p.filter(|_| self.path),
+        };
         // input rows
-        let w = f * 2 + 2 + self.given;
+        let w = f * 2 + 2 + self.given + if self.path { PATH } else { 0 };
         let mut x = Vec::with_capacity(t * w);
         for i in 0..t {
             for k in 0..f {
@@ -274,6 +324,14 @@ impl Net {
             x.push(mask[i]);
             x.push(ttg[i]);
             x.extend_from_slice(g);
+            if self.path {
+                let (p, m) = path.map_or(([0.0; 3], 0.0), |(p, pm)| {
+                    let m = pm[i];
+                    ([p[i * 3] * m, p[i * 3 + 1] * m, p[i * 3 + 2] * m], m)
+                });
+                x.extend_from_slice(&p);
+                x.push(m);
+            }
         }
         let mut h = self.inp.apply(&x);
         let st = match (&self.style, style) {
@@ -299,7 +357,9 @@ impl Net {
             let ff = l.ff2.apply(&ff);
             h.iter_mut().zip(&ff).for_each(|(x, y)| *x += y);
         }
-        let mut out = self.out.apply(&self.out_norm.apply(&h));
+        let normed = self.out_norm.apply(&h);
+        let mut out = self.out.apply(&normed);
+        let contacts = self.contact.as_ref().map(|c| c.apply(&normed));
         out.iter_mut().zip(interp).for_each(|(o, i)| *o += i);
         if let (Some(fm), Some(_)) = (&fm, gmask) {
             for (j, o) in out.iter_mut().enumerate() {
@@ -307,7 +367,7 @@ impl Net {
                 *o = *o * (1.0 - m) + known[j] * m;
             }
         }
-        Ok(out)
+        Ok((out, contacts))
     }
 
     fn attention(&self, l: &Layer, x: &[f32], t: usize) -> Vec<f32> {

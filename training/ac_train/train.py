@@ -7,14 +7,36 @@ the model in ``assets/models`` carries no non-commercial terms. Every set the re
 A set you add yourself under a non-commercial licence is read only with ``--noncommercial``; such
 a model stays on your machine (``ac_train.export`` refuses to write it into the repo).
 
-Validation holds out 5 % of each set's takes. The styles are the labels the training takes have (:mod:`ac_train.labels`: each take's
-motion type and style words, with the review's ``type`` and ``tags``) that have at least
-``--min-style-minutes`` of motion. What each take gives is ``review.py``'s plan: the quality scan's cuts and rejections, with
-the review's decisions (``training/review/decisions.json``) over them; no window touches a cut.
-Every set must be scanned first (``python -m ac_train.quality``), unless ``--unscanned``. The report compares the network with the plain interpolation it starts from: mean joint
-position error over the gap frames (metres) at gaps of 5, 15 and 30 frames.
+Validation holds out whole subjects (:mod:`ac_train.split`), the same ones however the sets
+change, and the card lists them. A real run with nothing held out stops; a quick ``--steps`` run
+then validates on its training takes and its card says so. The styles are the labels the training
+takes have (:mod:`ac_train.labels`: each take's motion type and style words, with the review's
+``type`` and ``tags``) that have at least ``--min-style-minutes`` of motion. What each take gives is
+``review.py``'s plan: the quality scan's cuts and rejections, with the review's decisions
+(``training/review/decisions.json``) over them; no window touches a cut. Every set must be scanned
+first (``python -m ac_train.quality``), unless ``--unscanned``.
 
-Output: ``training/data/models/<tag>/model.pt`` and ``model.json`` (sets and licences, ``commercial``, metrics).
+What a training window looks like, to match what the app sends:
+
+- **gaps** of every length the app fills (1 to 45 frames), drawn by bin (``--gap-mix``);
+- **context** before key A as the app samples it (:mod:`ac_train.context`, ``--context``): clean
+  mocap, a spline through a few sparse keys (smooth, linear, step), or key A held still (the clip
+  start); some contexts get a little noise, as keys set by eye do;
+- **part layers** (``--given``): the bones a layer leaves alone come in as given, as the app sends
+  them: every bone outside one part group (a left-arm layer) or a part group alone;
+- **root path** (141000): half the windows get the recorded root path across the gap, some of
+  them smoothed (the app sends the keys' spline, rounder than a recording); the rest get none, so
+  a fill without a path still works;
+- **augmentation**: mirrored left/right; tumbled (the whole body turned over the window) only for
+  motion where a spinning root happens (acrobatic, fall, ground); a mild speed change (0.8 to 1.25
+  times) except for jumps, flips and falls, since gravity doesn't scale.
+
+The loss is :mod:`ac_train.losses` (each term logged). Every ``--eval-every`` steps a quick
+evaluation (:mod:`ac_train.evaluate`) scores the model; the best is kept as ``best.pt`` beside the
+last (``model.pt``). The full evaluation of both goes into the card.
+
+Output: ``training/data/models/<tag>/model.pt``, ``best.pt`` and ``model.json`` (sets and licences,
+``commercial``, the held-out subjects, the evaluation).
 """
 
 from __future__ import annotations
@@ -28,23 +50,41 @@ from collections import Counter
 import numpy as np
 import torch
 
-from . import MODELS, labels, review
+from . import MODELS, context, evaluate, labels, losses, review, split
 from .datasets import REGISTRY, RIG
+from .kinematics import Body
 from .model import (
     BONES,
     CONTEXT,
     MAX_GAP,
+    WINDOW,
     Inbetweener,
-    SubSkeleton,
     canonical,
     features,
-    given_features,
     interpolate,
     mat_to_quat,
     quat_to_mat,
+    slerp,
+    smooth_path,
     time_to_go,
-    unfeatures,
 )
+
+#: share of training windows per gap bin (:data:`ac_train.evaluate.BINS`)
+GAP_MIX = (0.15, 0.2, 0.2, 0.2, 0.25)
+#: share of training windows per context (:data:`ac_train.context.MODES`)
+CONTEXT_MIX = {"clean": 0.4, "smooth": 0.25, "linear": 0.1, "step": 0.1, "still": 0.15}
+#: share of the spline contexts that get noise, and how much (degrees, metres)
+NOISE = (0.5, 2.0, 0.01)
+#: motion types whose windows may be tumbled, and how often
+TUMBLE_TYPES = ("acrobatic", "fall", "ground")
+TUMBLE = 0.25
+#: motion types kept at their own speed (gravity doesn't scale)
+STEADY_TYPES = ("jump", "acrobatic", "fall")
+WARP = (0.8, 1.25)
+#: share of windows with a part mask, and of those, the share given as a complement (a part layer)
+GIVEN = (0.5, 0.6)
+#: share of windows given the root path, and the smoothing widths (frames) it is drawn with
+PATH_GIVEN = (0.5, (1, 1, 5, 9, 15))
 
 
 class Sets:
@@ -64,9 +104,9 @@ class Sets:
         self.label_frames: Counter = Counter()
         self.used = []
         self.plans: list[review.Plan] = []
-        window = CONTEXT + MAX_GAP + 1
+        #: per set, the groups (subjects, sessions) validation holds out
+        self.held: dict[str, list[str]] = {}
         offset = 0
-        rng = np.random.default_rng(0)
         for n in names:
             path = RIG / f"{n}.npz"
             if not path.exists():
@@ -77,10 +117,11 @@ class Sets:
             own = d["labels"] if "labels" in d.files else takes
             plan = review.plan_set(n, len(rot), starts, takes, decisions, scanned, npz=d)
             self.plans.append(plan)
+            self.held.update(split.holdout({n: [str(t) for t in takes]}))
             for s, take, own_label, t in zip(starts, takes, own, plan.takes):
-                held = rng.random() < 0.05
+                held = split.held_out(n, str(take))
                 e = s + t.frames
-                fine = review.starts(t, window)  # none for a take left out or too short
+                fine = review.starts(t, WINDOW)  # none for a take left out or too short
                 if held != val or not len(fine):
                     continue
                 q.append(rot[s:e])
@@ -94,10 +135,14 @@ class Sets:
                 ok.append(offset + fine)
                 offset += e - s
             self.used.append(n)
+        if not q:
+            raise ValueError("no takes: " + ("nothing is held out for validation" if val else "every take is held out or left out"))
         self.q = torch.tensor(np.concatenate(q), device=device)
         self.root = torch.tensor(np.concatenate(r), device=device)
         self.starts = torch.tensor(np.concatenate(ok), device=device)
         self.take = torch.tensor(np.concatenate(tk), device=device)
+        self.tumbles = torch.tensor([t in TUMBLE_TYPES for t in self.types], device=device)
+        self.steady = torch.tensor([t in STEADY_TYPES for t in self.types], device=device)
 
     def learn(self, styles: list[str], counts: Counter):
         """Each take's style weights over ``styles`` (its labels that are styles; "any" when none
@@ -113,14 +158,31 @@ class Sets:
         w = torch.tensor(labels.weights(self.types, counts, styles), dtype=torch.float32, device=self.device)
         self.weights = w[self.take[self.starts]]
 
-    def batch(self, n, gap, gen=None):
+    def batch(self, n, gap, gen=None, warp=None):
+        """``n`` windows of ``CONTEXT + gap + 1`` frames: rotations, root offsets, style weights and
+        each window's take. ``gen``: the evaluation's plain uniform windows, seeded (else drawn by
+        the takes' weights). ``warp`` (lo, hi): play each window at a random speed in that range
+        (takes of :data:`STEADY_TYPES` at their own)."""
         if gen is None:
             s = self.starts[torch.multinomial(self.weights, n, replacement=True)]
-        else:  # evaluation: plain uniform windows, seeded
+        else:
             s = self.starts[torch.randint(len(self.starts), (n,), device=self.starts.device, generator=gen)]
         T = CONTEXT + gap + 1
-        i = s[:, None] + torch.arange(T, device=s.device)
-        return self.q[i], self.root[i], self.style[self.take[s]]
+        take = self.take[s]
+        if warp is None:
+            i = s[:, None] + torch.arange(T, device=s.device)
+            return self.q[i], self.root[i], self.style[take], take
+        lo, hi = warp
+        top = (WINDOW - 1) / max(T - 1, 1)  # the window must stay inside the clean frames
+        rate = (lo + torch.rand(n, device=s.device) * (hi - lo)).clamp(max=top)
+        rate = torch.where(self.steady[take], torch.ones_like(rate), rate)
+        at = s[:, None].float() + torch.arange(T, device=s.device)[None].float() * rate[:, None]
+        i0 = at.floor().long()
+        i1 = torch.minimum(i0 + 1, s[:, None] + WINDOW - 1)
+        f = (at - i0.float())
+        q = slerp(self.q[i0], self.q[i1], f[..., None, None])
+        root = self.root[i0] + (self.root[i1] - self.root[i0]) * f[..., None]
+        return q, root, self.style[take], take
 
 
 def qmul(a, b):
@@ -130,10 +192,11 @@ def qmul(a, b):
                         aw * bz + ax * by - ay * bx + az * bw, aw * bw - ax * bx - ay * by - az * bz], -1)
 
 
-def augment(q, root, style, mirror, device):
+def augment(q, root, style, mirror, device, tumbles=None):
     """Mirror half the windows left <-> right (their styles too: ``style @ mirror``), and tumble
-    some: the whole body turned about a horizontal axis over the window (flips and falls with any
-    rotation, so the fill does not fight a spinning root)."""
+    some of those whose motion has a spinning root (``tumbles``, (N,) bool; every window when
+    ``None``): the whole body turned about a horizontal axis over the window, so a flip or a fall
+    with any rotation does not fight the fill. A tumbled walk is motion no body makes."""
     from .model import MIRROR
 
     N, T = q.shape[:2]
@@ -143,7 +206,9 @@ def augment(q, root, style, mirror, device):
     q = torch.where(flip[:, None, None, None], mq, q)
     root = torch.where(flip[:, None, None], mr, root)
     style = torch.where(flip[:, None], style @ mirror, style)
-    tumble = torch.rand(N, device=device) < 0.15
+    tumble = torch.rand(N, device=device) < TUMBLE
+    if tumbles is not None:
+        tumble &= tumbles
     a = torch.rand(N, device=device) * 2 * np.pi
     axis = torch.stack([torch.cos(a), torch.sin(a), torch.zeros_like(a)], -1)  # horizontal
     turns = (torch.rand(N, device=device) * 2 - 1) * 2 * np.pi * tumble  # up to a full turn
@@ -163,22 +228,48 @@ def drop_styles(style, p=0.25):
     return keep
 
 
-def given_mask(n, device, p=0.5):
-    """Random part masks: half the windows hand a part group over as given (another layer)."""
+def given_mask(n, device, p=GIVEN[0], complement=GIVEN[1]):
+    """Part masks as the app makes them. A share ``p`` of the windows get one: a part group
+    (:data:`ac_train.model.PART_GROUPS`, the unions too) picked at random, and with probability
+    ``complement`` every bone *outside* it is given (a layer that animates that part: the app
+    passes the rest as given), else the group itself is (the rest of the body animated over a
+    layer that drives the part)."""
     from .model import PART_GROUPS
 
-    g = torch.zeros(n, len(BONES), device=device)
     groups = list(PART_GROUPS.values())
-    pick = torch.randint(len(groups), (n,), device=device)
-    on = torch.rand(n, device=device) < p
+    inside = torch.zeros(len(groups), len(BONES), device=device)
     for i, grp in enumerate(groups):
-        rows = on & (pick == i)
-        g[rows.nonzero().flatten()[:, None], torch.tensor(grp, device=device)[None]] = 1.0
-    return g
+        inside[i, list(grp)] = 1.0
+    pick = torch.randint(len(groups), (n,), device=device)
+    g = inside[pick]
+    flip = torch.rand(n, device=device) < complement
+    g = torch.where(flip[:, None], 1 - g, g)
+    on = torch.rand(n, device=device) < p
+    return g * on[:, None]
+
+
+def path_given(truth, mask, p=PATH_GIVEN[0], widths=PATH_GIVEN[1]):
+    """The root path the app sends with ``trajectory`` (141000), for a share ``p`` of the windows:
+    the recorded root (features' last 3, hip heights), box-smoothed by a width drawn from
+    ``widths``, on the gap frames. Returns path (N, T, 3) and its mask (N, T, 1)."""
+    N, device = truth.shape[0], truth.device
+    root = truth[..., -3:]
+    w = widths[int(torch.randint(len(widths), (1,)))]
+    path = smooth_path(root, w)
+    on = (torch.rand(N, device=device) < p).to(truth.dtype)
+    return path, (1 - mask) * on[:, None, None]
+
+
+def sample_gap(mix=GAP_MIX) -> int:
+    """A gap length: a bin by ``mix``, then a length in it (uniform)."""
+    b = int(torch.multinomial(torch.tensor(mix, dtype=torch.float), 1))
+    lo, hi = evaluate.BINS[b]
+    return int(torch.randint(lo, hi + 1, (1,)))
 
 
 def prepare(q, root, gap, sub, device):
-    """Canonical window, inputs and truth for a batch of quaternion windows."""
+    """Canonical window, inputs and truth for a batch of quaternion windows. ``sub``: anything
+    with the rig's ``hip_height``."""
     N, T = q.shape[:2]
     a = torch.full((N,), CONTEXT - 1, device=device)
     b = a + gap + 1
@@ -193,25 +284,20 @@ def prepare(q, root, gap, sub, device):
     return truth, interp, mask, ttg, rot, pos
 
 
-def positions_error(f_pred, rot_true, pos_true, sub, gapslice):
-    R, P = unfeatures(f_pred, sub.hip_height)
-    a = sub.positions(R[:, gapslice], P[:, gapslice])
-    b = sub.positions(rot_true[:, gapslice], pos_true[:, gapslice])
-    return (a - b).norm(dim=-1).mean()
+def _floats(text: str, n: int, what: str) -> tuple[float, ...]:
+    v = tuple(float(x) for x in text.split(","))
+    if len(v) != n or any(x < 0 for x in v) or not sum(v):
+        raise SystemExit(f"{what}: {n} shares, not negative, not all 0")
+    return v
 
 
-@torch.no_grad()
-def evaluate(model, sets, sub, device, gaps=(5, 15, 30), n=512):
-    model.eval()
+def _named(text: str, known, what: str) -> dict[str, float]:
     out = {}
-    gen = torch.Generator(device=device).manual_seed(1)
-    for g in gaps:
-        q, root, style = sets.batch(n, g, gen)
-        truth, interp, mask, ttg, rot, pos = prepare(q, root, g, sub, device)
-        pred = model(truth, interp, mask, ttg, style)
-        sl = slice(CONTEXT, CONTEXT + g)
-        out[g] = {"model_m": float(positions_error(pred, rot, pos, sub, sl)), "interp_m": float(positions_error(interp, rot, pos, sub, sl))}
-    model.train()
+    for part in filter(None, text.split(",")):
+        k, _, v = part.partition("=")
+        if k not in known:
+            raise SystemExit(f"{what}: {k!r} is not one of {', '.join(known)}")
+        out[k] = float(v)
     return out
 
 
@@ -224,15 +310,29 @@ def main(argv=None):
     ap.add_argument("--batch", type=int, default=128)
     ap.add_argument("--tag", default=None)
     ap.add_argument("--steps", type=int, default=None, help="stop after this many steps (a quick check)")
-    ap.add_argument("--eval-windows", type=int, default=2048, help="validation windows per gap at the end")
+    ap.add_argument("--eval-windows", type=int, default=512, help="validation windows per gap bin at the end")
+    ap.add_argument("--eval-every", type=int, default=1000, help="steps between quick evaluations (and the best checkpoint)")
     ap.add_argument("--decisions", default=str(review.DECISIONS), help="the review's decisions file")
     ap.add_argument("--min-style-minutes", type=float, default=labels.MIN_MINUTES,
                     help="a label becomes a style with this much training motion (minutes)")
     ap.add_argument("--unscanned", action="store_true",
                     help="train on sets that have no quality scan, every frame (says so for each)")
+    ap.add_argument("--gap-mix", default=",".join(map(str, GAP_MIX)),
+                    help="shares of the gap bins " + " ".join(evaluate.bin_name(*b) for b in evaluate.BINS))
+    ap.add_argument("--context", default=",".join(f"{k}={v}" for k, v in CONTEXT_MIX.items()),
+                    help="shares of the contexts: " + ", ".join(context.MODES))
+    ap.add_argument("--loss-weights", default="", help="change loss weights: pos=2,vel=0.5 (" + ", ".join(losses.WEIGHTS) + ")")
+    ap.add_argument("--no-contacts", action="store_true", help="no foot-contact head (the network's output as before)")
+    ap.add_argument("--no-warp", action="store_true", help="no speed change")
     args = ap.parse_args(argv)
 
     from .rig import Skeleton
+
+    gap_mix = _floats(args.gap_mix, len(evaluate.BINS), "--gap-mix")
+    ctx_mix = _named(args.context, context.MODES, "--context")
+    weights = {**losses.WEIGHTS, **_named(args.loss_weights, losses.WEIGHTS, "--loss-weights")}
+    contacts = not args.no_contacts
+    warp = None if args.no_warp else WARP
 
     torch.manual_seed(0)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -248,7 +348,8 @@ def main(argv=None):
         names = [n for n in REGISTRY if REGISTRY[n].commercial or args.noncommercial]
     print(f"sets: {', '.join(names)}" + ("" if args.noncommercial else " (the free-licence sets; --noncommercial adds non-commercial sets you added)"),
           flush=True)
-    sub = SubSkeleton(Skeleton.load(), device)
+    skel = Skeleton.load()
+    body = Body(skel, device)
     decisions = review.load_decisions(pathlib.Path(args.decisions))
     if args.unscanned:
         print("--unscanned: no set's scan is read; every frame of every take is used, glitches and all", flush=True)
@@ -257,13 +358,17 @@ def main(argv=None):
         print(plan.summary(), flush=True)
         for note in plan.notes:
             print(f"  {note}", flush=True)
+    validated_on = "held-out subjects"
     try:
         val = Sets(names, device, val=True, decisions=decisions, scanned=not args.unscanned)
     except ValueError:
-        # a handful of takes (a quick run) can leave no take held out
-        print("no validation takes in these sets: validating on the training takes (the metrics flatter it)", flush=True)
-        val = train
+        if args.steps is None:
+            raise SystemExit("no validation takes: these sets hold out no subject (ac_train.split). A real run "
+                             "must validate on takes it doesn't train on; add a set with more subjects")
+        print("no validation takes in these sets: a quick run validates on its training takes (the numbers flatter it)", flush=True)
+        val, validated_on = train, "training takes (a quick --steps run: the numbers flatter it)"
     print(f"sets {train.used}: {len(train.q)} train frames, {len(val.q)} val frames on {device}", flush=True)
+    print(f"held out: {json.dumps(train.held)}", flush=True)
     styles, rare = labels.vocabulary(train.label_frames, args.min_style_minutes)
     train.learn(styles, train.label_frames)
     if val is not train:
@@ -277,58 +382,97 @@ def main(argv=None):
     if lost:
         print(f"mirrored windows drop {lost}: their other side isn't a style", flush=True)
 
-    model = Inbetweener(styles=len(styles), given=True).to(device)
+    tag = args.tag or ("parts-own" if args.noncommercial else "parts")
+    out = MODELS / tag
+    out.mkdir(parents=True, exist_ok=True)
+    model = Inbetweener(styles=len(styles), given=True, contacts=contacts, path=True).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=1e-4)
     t0, step, log = time.time(), 0, []
+    best = {"step": None, "score": None}
     total = args.minutes * 60
+    a = CONTEXT - 1
+    running: Counter = Counter()
     while time.time() - t0 < total and (args.steps is None or step < args.steps):
         frac = (time.time() - t0) / total
         if args.steps:
             frac = max(frac, step / args.steps)
         for grp in opt.param_groups:
             grp["lr"] = 3e-4 * min(1.0, step / 500) * (0.5 * (1 + np.cos(np.pi * frac)))
-        g = int(torch.randint(5, MAX_GAP + 1, (1,)))
-        q, root, style = train.batch(args.batch, g)
-        q, root, style = augment(q, root, style, mirror, device)
+        g = sample_gap(gap_mix)
+        b = a + g + 1
+        q, root, style, take = train.batch(args.batch, g, warp=warp)
+        q, root, style = augment(q, root, style, mirror, device, train.tumbles[take])
         style = drop_styles(style)
-        truth, interp, mask, ttg, rot, pos = prepare(q, root, g, sub, device)
+        q, root, mode = context.mixed(q, root, a, ctx_mix)
+        noisy = (mode != context.MODES.index("clean")) & (torch.rand(len(mode), device=device) < NOISE[0])
+        if noisy.any():
+            rows = noisy.nonzero().flatten()
+            q[rows], root[rows] = context.noise(q[rows], root[rows], a, NOISE[1], NOISE[2], skel.hip_height)
+        truth, interp, mask, ttg, _, _ = prepare(q, root, g, body, device)
         gm = given_mask(q.shape[0], device)
-        pred = model(truth, interp, mask, ttg, style, gmask=gm)
-        sl = slice(CONTEXT, CONTEXT + g)
-        free = 1 - given_features(gm)  # the given bones are copied: no loss on them
-        loss = ((pred[:, sl] - truth[:, sl]).abs() * free).sum() / (free.sum() * g).clamp(min=1) \
-            + 2.0 * positions_error(pred, rot, pos, sub, sl) / sub.hip_height
+        path, pmask = path_given(truth, mask)
+        pred, logits = model(truth, interp, mask, ttg, style, gmask=gm, with_contacts=True, path=path, pmask=pmask)
+        parts = losses.terms(pred, truth, gm, a, b, body, logits)
+        loss = losses.total(parts, weights)
         opt.zero_grad(set_to_none=True)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         opt.step()
         step += 1
-        if step % 500 == 0:
-            m = evaluate(model, val, sub, device)
-            log.append({"step": step, "minutes": round((time.time() - t0) / 60, 1), "loss": float(loss), "val": m})
-            print(json.dumps(log[-1]), flush=True)
+        for k, v in parts.items():
+            running[k] += float(v.detach())
+        running["n"] += 1
+        if step % args.eval_every == 0:
+            ev = evaluate.run(model, val, body, device, windows=64, inputs=("clean", "smooth", "still"), parts=False, breakdown=False)
+            n = running.pop("n")
+            entry = {"step": step, "minutes": round((time.time() - t0) / 60, 1), "loss": float(loss),
+                     "terms": {k: round(v / n, 6) for k, v in running.items()}, "score": ev["score"],
+                     "joint_mm": {k: round(r["model"]["joint_m"] * 1000, 2) for k, r in ev["bins"].items()}}
+            running.clear()
+            log.append(entry)
+            print(json.dumps(entry), flush=True)
+            if ev["score"] is not None and (best["score"] is None or ev["score"] < best["score"]):
+                best = {"step": step, "score": ev["score"]}
+                torch.save(model.state_dict(), out / "best.pt")
 
-    metrics = evaluate(model, val, sub, device, n=args.eval_windows)
-    commercial = all(REGISTRY[n].commercial for n in train.used)
-    tag = args.tag or ("parts-own" if args.noncommercial else "parts")
-    out = MODELS / tag
-    out.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), out / "model.pt")
+    if best["step"] is None:
+        torch.save(model.state_dict(), out / "best.pt")
+        best = {"step": step, "score": None}
+    print(f"evaluating the last step ({step}) and the best ({best['step']}) on {validated_on}", flush=True)
+    evaluation = evaluate.run(model, val, body, device, windows=args.eval_windows)
+    best_model = Inbetweener(styles=len(styles), given=True, contacts=contacts, path=True).to(device)
+    best_model.load_state_dict(torch.load(out / "best.pt", map_location=device, weights_only=True))
+    evaluation_best = evaluate.run(best_model, val, body, device, windows=args.eval_windows)
+    print(evaluate.report(evaluation), flush=True)
+    for ev in (evaluation, evaluation_best):
+        ev.update({"checkpoint": "model" if ev is evaluation else "best", "holdout": train.held, "sets": val.used})
+    commercial = all(REGISTRY[n].commercial for n in train.used)
     card = {
         "tag": tag, "steps": step, "minutes": round((time.time() - t0) / 60, 1), "bones": list(BONES),
         "context": CONTEXT, "max_gap": MAX_GAP, "styles": styles, "style_frames": style_frames,
         "styles_left_out": rare, "min_style_minutes": args.min_style_minutes,
-        "given": True, "augment": ["mirror 0.5 (side styles swapped)", "tumble 0.15", "given parts 0.5",
-                                   "each style dropped 0.25", "rare motion types up to x3"],
+        "given": True, "contacts": contacts, "path": True,
+        "augment": ["mirror 0.5 (side styles swapped)", f"tumble {TUMBLE} ({', '.join(TUMBLE_TYPES)} only)",
+                    f"speed {WARP[0]}-{WARP[1]}x (not {', '.join(STEADY_TYPES)})" if warp else "no speed change",
+                    f"given parts {GIVEN[0]} ({GIVEN[1]} of them the complement of a part, as a part layer sends)",
+                    f"root path {PATH_GIVEN[0]} (smoothed over {', '.join(map(str, PATH_GIVEN[1]))} frames)",
+                    f"context {json.dumps(ctx_mix)}", f"noise on {NOISE[0]} of the spline contexts ({NOISE[1]} deg, {NOISE[2]} m)",
+                    f"gaps by bin {dict(zip((evaluate.bin_name(*x) for x in evaluate.BINS), gap_mix))}",
+                    "each style dropped 0.25", "rare motion types up to x3"],
+        "loss_weights": weights,
         "sets": [{"name": n, "title": REGISTRY[n].title, "licence": REGISTRY[n].licence, "commercial": REGISTRY[n].commercial} for n in train.used],
         "commercial": commercial,
         "warning": "" if commercial else "Trained on non-commercial data: do not ship this model or its output in a commercial product.",
         "data": {"scanned": not args.unscanned, "decisions": len(decisions),
                  "plans": [p.summary() for p in train.plans]},
-        "metrics": metrics, "log": log,
+        "split": "subjects", "holdout": train.held, "validated_on": validated_on,
+        "best": best,
+        "metrics": {k: {"model_m": r["model"]["joint_m"], "interp_m": r["interp"]["joint_m"]} for k, r in evaluation["bins"].items()},
+        "evaluation": evaluation, "evaluation_best": evaluation_best, "log": log,
     }
     (out / "model.json").write_text(json.dumps(card, indent=1), encoding="utf-8")
-    print(json.dumps({"saved": str(out), "metrics": metrics, "commercial": commercial}))
+    print(json.dumps({"saved": str(out), "score": evaluation["score"], "best": best, "commercial": commercial}))
 
 
 if __name__ == "__main__":

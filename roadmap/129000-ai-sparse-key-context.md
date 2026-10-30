@@ -1,6 +1,6 @@
 # Train on the context the app gives
 
-- **Status:** not started
+- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
 - **Requires:** 126000
 - **Source:** 115000 (review 1 §1, review 2 §8 context noise)
 
@@ -22,3 +22,11 @@ whatever speed the motion came in with", so neighbouring fills kink at a shared 
 In the 126000 realistic-input evaluation, error and seam velocity improve on sparse-key and still
 contexts, with clean-context numbers no worse; a fill_all over a walk shows a smaller kink at
 shared keys with the ease turned off.
+
+## Result
+2026-10-30. `training/ac_train/context.py` ports the app's interpolation (smooth, linear, step) to
+batched torch; `tests/test_context.py` checks it matches `Clip.sample` key for key. Each window's
+context is clean (0.4), a spline through sparse keys (key A, key B, often the window's first frame,
+0 to 3 more at random: smooth 0.25, linear 0.1, step 0.1) or held still (0.15), `--context` to
+change; key A, the gap and key B stay recorded. The shipped model on these contexts (126000): 13.6
+mm clean, 17.6 smooth, 56.8 step, 45.6 still. Not modelled: a context that is an earlier fill.

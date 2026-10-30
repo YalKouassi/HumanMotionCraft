@@ -1,6 +1,6 @@
 # Augmentation that matches the task
 
-- **Status:** not started
+- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
 - **Requires:** 126000
 - **Source:** 115000 (review 2 §8)
 
@@ -16,3 +16,9 @@ Not needed: shifting the window by ±1 frame. Windows already start on any valid
 
 ## Acceptance
 126000's numbers are no worse on locomotion and better or equal on acrobatic and fall takes.
+
+## Result
+2026-10-30. Tumbling only for acrobatic, fall and ground takes (0.25 of their windows); noise on
+half the spline contexts' frames before key A (about 2 degrees, 1 cm), key A exact; a speed change
+of 0.8–1.25 times except for jump, acrobatic and fall takes, kept inside the window's clean frames
+(`Sets.batch(warp=...)`, `--no-warp`). The card's `augment` lists them.

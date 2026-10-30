@@ -63,24 +63,39 @@ fn network_matches_the_reference() {
     let mut gmask = vec![0.0f32; net.given];
     given.iter().for_each(|&i| gmask[i] = 1.0);
     let style = g["style"].as_u64().map(|s| s as usize);
-    let out = net
-        .forward(
+    // a model with the root path pins it too
+    assert_eq!(net.path, g.get("path").is_some());
+    let (path, pmask) = match net.path {
+        true => (floats(&g["path"]), floats(&g["pmask"])),
+        false => (Vec::new(), Vec::new()),
+    };
+    let path = net.path.then_some((path.as_slice(), pmask.as_slice()));
+    let (out, contacts) = net
+        .forward_contacts(
             &floats(&g["known"]),
             &floats(&g["interp"]),
             &floats(&g["mask"]),
             &floats(&g["ttg"]),
             style,
             Some(&gmask),
+            path,
         )
         .unwrap();
-    let want = floats(&g["out"]);
-    assert_eq!(out.len(), want.len());
-    let worst = out
-        .iter()
-        .zip(&want)
-        .map(|(a, b)| (a - b).abs())
-        .fold(0.0f32, f32::max);
-    assert!(worst < 1e-4, "largest difference {worst}");
+    let worst = |got: &[f32], want: &[f32]| {
+        assert_eq!(got.len(), want.len());
+        got.iter()
+            .zip(want)
+            .map(|(a, b)| (a - b).abs())
+            .fold(0.0f32, f32::max)
+    };
+    let w = worst(&out, &floats(&g["out"]));
+    assert!(w < 1e-4, "largest difference {w}");
+    // a model with the contact head pins its foot contacts too
+    assert_eq!(contacts.is_some(), g.get("contacts").is_some());
+    if let Some(c) = contacts {
+        let w = worst(&c, &floats(&g["contacts"]));
+        assert!(w < 1e-4, "largest contact difference {w}");
+    }
 }
 
 #[test]
@@ -100,6 +115,7 @@ fn fills_match_the_reference() {
             style: case["style"].as_str().unwrap().into(),
             style_force: case["style_force"].as_f64().unwrap(),
             ai_force: case["ai_force"].as_f64().unwrap(),
+            trajectory: case["trajectory"].as_f64().unwrap_or(0.0),
             ..FillSettings::default()
         };
         let (rots, roots) = m

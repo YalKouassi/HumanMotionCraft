@@ -515,6 +515,91 @@ impl Document {
         Ok(changed.len())
     }
 
+    /// Plant the steps a model says happen inside a filled span: `contacts` holds, per frame
+    /// `a+1 .. b-1`, whether the left and the right foot is down. On each run of two or more frames
+    /// a foot is down, its ankle stays where it is on the run's middle frame (leg IK), so a step
+    /// inside the gap doesn't slide. A run whose foot is more than `ground` (m) above the keys'
+    /// lowest foot is left alone (the model was wrong about it being down). Returns the frames
+    /// changed.
+    pub fn plant_steps(&mut self, a: i64, b: i64, contacts: &[[bool; 2]], ground: f64) -> R<usize> {
+        let additive = self
+            .clip
+            .layers
+            .get(self.clip.edit)
+            .is_some_and(|l| l.mode == LayerMode::Additive);
+        if b - a < 2 || additive {
+            return Ok(0);
+        }
+        if contacts.len() as i64 != b - a - 1 {
+            return Err(format!(
+                "foot contacts for {} frames, the span {a}-{b} has {}",
+                contacts.len(),
+                b - a - 1
+            ));
+        }
+        let sk = self.skeleton.clone();
+        let frames: Vec<f64> = (a..=b).map(|f| f as f64).collect();
+        let (mut rots, roots) = self.clip.sample_with(&frames, &self.links)?;
+        let p: Vec<Vec<Vec3>> = rots
+            .iter()
+            .zip(&roots)
+            .map(|(r, o)| sk.fk(r, *o).map(|x| x.1))
+            .collect::<Result<_, _>>()
+            .map_err(|e| e.to_string())?;
+        let idx = |n: &str| sk.bone(n).ok_or_else(|| format!("no bone {n}"));
+        let (first, last) = (p.first().ok_or("no frames")?, p.last().ok_or("no frames")?);
+        let mut floor = f64::INFINITY;
+        for s in ["L", "R"] {
+            for n in ["foot", "toe3-1"] {
+                let i = idx(&format!("{n}.{s}"))?;
+                for fr in [first, last] {
+                    floor = floor.min(fr.get(i).map_or(f64::INFINITY, |j| j[2]));
+                }
+            }
+        }
+        let mut changed = BTreeSet::new();
+        for (side, s) in ["L", "R"].into_iter().enumerate() {
+            let (i, t) = (idx(&format!("foot.{s}"))?, idx(&format!("toe3-1.{s}"))?);
+            let down: Vec<bool> = contacts.iter().map(|c| c[side]).collect();
+            let mut k = 0;
+            while k < down.len() {
+                if !down[k] {
+                    k += 1;
+                    continue;
+                }
+                let start = k;
+                while k < down.len() && down[k] {
+                    k += 1;
+                }
+                if k - start < 2 {
+                    continue;
+                }
+                // frame `n` of the span is p[n + 1] (p[0] is key a)
+                let mid = p.get((start + k - 1) / 2 + 1).ok_or("frame")?;
+                let at = *mid.get(i).ok_or("joint")?;
+                let low = mid.get(t).map_or(at[2], |x| x[2]).min(at[2]);
+                if low - floor > ground {
+                    continue;
+                }
+                for n in start + 1..k + 1 {
+                    let (Some(r), Some(o)) = (rots.get(n), roots.get(n)) else {
+                        continue;
+                    };
+                    let leg = format!("leg.{s}");
+                    let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
+                    let solved = ik::two_bone(&sk, r, *o, &leg, at, pole, None).map_err(|e| e.to_string())?;
+                    if let Some(slot) = rots.get_mut(n) {
+                        *slot = solved;
+                    }
+                    changed.insert(n);
+                }
+            }
+        }
+        self.write_solved(&changed, a, &rots, &roots, "foot-plant")?;
+        self.go_to(self.frame)?;
+        Ok(changed.len())
+    }
+
     pub(crate) fn write_solved(
         &mut self,
         changed: &BTreeSet<usize>,

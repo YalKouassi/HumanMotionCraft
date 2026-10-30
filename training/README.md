@@ -9,6 +9,10 @@ clips. Nothing here runs at app time.
 | `ac_train.datasets` | the dataset registry (source, licence, joint map), readers (BVH, `.b3d`, glb) and the retarget to `training/data/rig/<set>.npz` |
 | `ac_train.b3d` | pure-Python `.b3d` (`SubjectOnDisk`) reader and HTTP-Range fetcher for AddBiomechanics 1.0 |
 | `ac_train.train` | trains the network on the retargeted sets into `training/data/models/<tag>/` |
+| `ac_train.evaluate` | the evaluation suite: gap bins, pose, feet, continuity, impossible joints, realistic contexts, part layers; writes it into the card, and contact sheets |
+| `ac_train.split` | which subjects validation holds out (whole subjects, stable however the sets change) |
+| `ac_train.context` | the context before key A as the app gives it: a spline through sparse keys (the app's interpolation, batched), or held still |
+| `ac_train.kinematics`, `ac_train.losses` | body points, feet, contacts and joint angles in torch; training's loss terms |
 | `ac_train.export` | writes `assets/models/<tag>/` (the weights the app loads) and the `ac-ai` goldens |
 | `ac_train.library` | cuts 3-second clips from the retargeted sets into a library folder |
 | `ac_train.infer` | the reference fill (PyTorch) that the goldens pin the Rust port to |
@@ -286,14 +290,54 @@ scan, or one rebuilt since, stops training with the command that fixes it (`--un
 every frame instead, and says so). `model.json` records what each set gave (`data`). The library
 (step 6) reads them the same way.
 
-Validation holds out 5 % of the takes (the same ones every run). Every 500 steps it
-prints the mean joint error of the network against plain interpolation on gaps of 5, 15 and 30
-frames. Writes `data/models/<tag>/model.pt` and `model.json` (sets, licences, metrics).
+Validation holds out whole subjects (`ac_train/split.py`: a CMU subject, an ACCAD recording session, an
+AddBiomechanics study subject, a generated prompt with all its seeds), about 5 % of each set's,
+picked by a hash of the name so the split stays the same when sets are added or takes dropped. The
+card lists them (`holdout`). A real run that holds nothing out stops; a quick `--steps` run then
+validates on its training takes and its card says so (`validated_on`).
+
+Each training window is made to look like what the app sends (`ac_train/train.py` says how):
+gaps of 1 to 45 frames drawn by bin (`--gap-mix`), the context before key A rebuilt from sparse
+keys with the app's interpolation or held still (`--context`), part masks as a part layer sends
+them, tumbling only for acrobatic, fall and ground motion, and a mild speed change except for
+jumps, flips and falls. The loss terms (`ac_train/losses.py`: features, joint positions with the
+hands and feet weighted up, velocity across both keys, extra jerk, per-bone rotation, degrees past
+the possible joint limits, and the foot-contact head's contact, skate and floor terms) are logged
+each on its own; `--loss-weights pos=2,vel=0.5` changes them. `--no-contacts` trains without the
+contact head.
+Half the windows also get the recorded root path across the gap (some smoothed, as the app's
+keys' spline is): a model trained so (`"path"` in its card) is given the keys' path when the app's
+`trajectory` is above 0 (roadmap 141000).
+
+Every `--eval-every` steps (1000) a quick evaluation scores the model (one number, the model's
+share of the plain interpolation's error, lower is better) and the best is kept as `best.pt`
+beside the last step's `model.pt`. At the end both are evaluated in full into `model.json`
+(`evaluation`, `evaluation_best`).
+
+### 4b. Evaluate
+
+```bash
+uv run python -m ac_train.evaluate --tag parts                       # into data/models/parts/model.json
+uv run python -m ac_train.evaluate --tag parts --checkpoint best     # best.pt (into evaluation_best)
+uv run python -m ac_train.evaluate --tag parts --sheets              # and contact sheets (needs ac built)
+```
+
+The same held-out windows for every model (seeded), each filled by the model and by the plain
+interpolation, measured (`ac_train/evaluate.py` lists every number): joint, wrist and foot error,
+root error at mid-gap, rotation error per bone; foot slide where the recorded foot is planted and
+floor penetration; the velocity error leaving key A and arriving at key B, and jerk; frames past the
+possible joint limits. By gap bin (1–4, 5–10, 11–20, 21–30, 31–45), for every context the app gives
+(clean, smooth, linear and step keys, held still), by motion type and style, on a hard slice
+(a foot plants or lifts in the gap, or the path turns), and for each part layer. It prints a table
+and writes it all into the card. `--sheets` draws six fixed hard fills (the recording, the model,
+the interpolation) as contact sheets with physics off, under `data/models/<tag>/sheets-<checkpoint>/`,
+so two model versions can be compared side by side.
 
 ### 5. Export to the app
 
 ```bash
-uv run python -m ac_train.export parts
+uv run python -m ac_train.export parts                       # the last step (model.pt)
+uv run python -m ac_train.export parts --checkpoint best     # or the best evaluation's (best.pt)
 ```
 
 Writes `assets/models/parts/weights.{bin,json}` and the goldens

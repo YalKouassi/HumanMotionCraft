@@ -109,7 +109,30 @@ pub trait Inbetweener: Send + Sync + std::fmt::Debug {
         settings: &FillSettings,
         given: Option<&[String]>,
     ) -> R<(Vec<Vec<Quat>>, Vec<Vec3>)>;
+
+    /// [`Inbetweener::fill`], and the feet the model says are planted on each filled frame
+    /// (`[left, right]`), when it says so (`None`: a model without foot contacts).
+    #[allow(clippy::too_many_arguments)]
+    fn fill_contacts(
+        &self,
+        sk: &Skeleton,
+        clip: &Clip,
+        links: &dyn Links,
+        a: i64,
+        b: i64,
+        settings: &FillSettings,
+        given: Option<&[String]>,
+    ) -> R<FillWithContacts> {
+        let (r, o) = self.fill(sk, clip, links, a, b, settings, given)?;
+        Ok((r, o, None))
+    }
 }
+
+/// Per filled frame, whether the left and the right foot is planted.
+pub type Contacts = Vec<[bool; 2]>;
+
+/// What [`Inbetweener::fill_contacts`] gives: rotations, root offsets and the foot contacts.
+pub type FillWithContacts = (Vec<Vec<Quat>>, Vec<Vec3>, Option<Contacts>);
 
 /// The style a key's model label names ("parts walk": "walk"), or "any" when it names none.
 pub fn label_style(label: &str) -> &str {
@@ -137,9 +160,17 @@ pub struct AiFiller {
     pub skeleton: Arc<Skeleton>,
     pub links: BTreeMap<String, Clip>,
     pub settings: FillSettings,
+    /// The foot contacts of each span it filled (models that predict them), for
+    /// [`Document::plant_steps`].
+    pub contacts: std::sync::Mutex<BTreeMap<(i64, i64), Contacts>>,
 }
 
 impl AiFiller {
+    /// The foot contacts the model gave for the span `a..b` it filled last (`None`: none).
+    pub fn contacts_of(&self, a: i64, b: i64) -> Option<Contacts> {
+        self.contacts.lock().ok().and_then(|mut m| m.remove(&(a, b)))
+    }
+
     /// The key label: the tag, and the style when the model honours one.
     pub fn label(&self) -> String {
         let info = self.model.info();
@@ -173,7 +204,7 @@ impl Filler for AiFiller {
             }
             _ => None,
         };
-        let (r, o) = self.model.fill(
+        let (r, o, contacts) = self.model.fill_contacts(
             &self.skeleton,
             clip,
             &self.links,
@@ -182,6 +213,12 @@ impl Filler for AiFiller {
             &self.settings,
             given.as_deref(),
         )?;
+        if let Ok(mut m) = self.contacts.lock() {
+            match contacts {
+                Some(c) => m.insert((a, b), c),
+                None => m.remove(&(a, b)),
+            };
+        }
         Ok((r, o, self.label()))
     }
 }
@@ -198,13 +235,15 @@ impl crate::document::Document {
             skeleton: self.skeleton.clone(),
             links: self.links.clone(),
             settings: self.ai_settings.clone(),
+            contacts: Default::default(),
         })
     }
 
     /// Fill between two manual keys (`None`: the ones around the playhead) with the model, ease it
-    /// through a key it shares with another filled span (`ease.rs`), then plant the feet that
-    /// stand still in both keys, and bend any impossible pose the model made back inside the
-    /// possible limits (`crate::possible`). Returns the span, the model label and notes.
+    /// through a key it shares with another filled span (`ease.rs`), plant the steps the model
+    /// says happen inside the gap ([`Document::plant_steps`], models with foot contacts), then the
+    /// feet that stand still in both keys, and bend any impossible pose the model made back inside
+    /// the possible limits (`crate::possible`). Returns the span, the model label and notes.
     pub fn ai_fill(&mut self, span: Option<(i64, i64)>) -> R<Filled> {
         let out = self.fill_clip(span)?;
         let f = self.frame;
@@ -234,6 +273,9 @@ impl crate::document::Document {
             return Err(note);
         }
         self.ease_borders(a, b)?;
+        if let Some(c) = filler.contacts_of(a, b) {
+            self.plant_steps(a, b, &c, PLANT_GROUND)?;
+        }
         self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
         let notes = self.keep_possible(a, b)?;
         Ok(Filled {
@@ -375,6 +417,9 @@ impl crate::document::Document {
                 && crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?.is_empty()
             {
                 self.ease_borders(a, b)?;
+                if let Some(c) = filler.contacts_of(a, b) {
+                    self.plant_steps(a, b, &c, PLANT_GROUND)?;
+                }
                 self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
                 notes.extend(self.keep_possible(a, b)?);
             }

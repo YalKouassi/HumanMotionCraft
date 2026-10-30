@@ -14,3 +14,15 @@ regenerate the `ac-ai` goldens on export.
 The new model is no worse than today's in any 126000 bin on the held-out subjects; the card and
 `assets/models/MANIFEST.json` list both sets; `ATTRIBUTION.md` and `NOTICE` credit them; the
 goldens are regenerated; the owner tests and accepts it.
+
+## Notes
+2026-10-30: the prerequisites are built (126000, 128000–133000), and 135000 and 136000 too, so
+one run measures them all. Their acceptance lines are checked against this run's `evaluation` in
+the card. Compare it with the shipped model's numbers in 126000; that model may have seen some
+held-out subjects (per-take split), which flatters it. Training is still the owner's go-ahead. A
+3-hour run makes about 135,000 steps at 12.5 a second (the shipped model had 166,755).
+
+Also measured by this run: 141000 (the root path as an input; the card's `trajectory`), 136000
+on the posed keys (`posed`, against the shipped model's 17 per 1,000), and ACCAD now in the
+validation (two sessions held out, 131000). The new model's card has `path`, so the app gives it
+the keys' path when `trajectory` is above 0.

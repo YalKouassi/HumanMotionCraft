@@ -58,10 +58,12 @@ def read_weights(folder: pathlib.Path) -> tuple[dict[str, np.ndarray], dict]:
     return tensors, meta["card"]
 
 
-def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None = None) -> None:
+def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None = None, checkpoint: str = "model") -> None:
     """Write ``tag``'s weights to ``out`` (default ``assets/models/<tag>``) and its goldens to
-    ``gold`` (default ``crates/ac-ai/tests/golden``) as ``<tag>-net.json`` and ``<tag>-fill.json``."""
-    net, card = infer.load(tag)
+    ``gold`` (default ``crates/ac-ai/tests/golden``) as ``<tag>-net.json`` and ``<tag>-fill.json``.
+    ``checkpoint``: ``model`` (training's last step) or ``best`` (its best evaluation score)."""
+    net, card = infer.load(tag, checkpoint)
+    card = {**card, "checkpoint": checkpoint}
     out = out or ASSETS / "models" / tag
     gold = gold or REPO / "crates" / "ac-ai" / "tests" / "golden"
     if not card.get("commercial"):
@@ -75,7 +77,7 @@ def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None 
 
     gold.mkdir(parents=True, exist_ok=True)
 
-    # 1. the network alone: smooth made-up inputs, a style, two given bones
+    # 1. the network alone: smooth made-up inputs, a style, two given bones (and a path)
     T, J = 16, len(BONES)
     f = lambda k: [[math.sin(0.37 * i + 0.11 * j + k) * 0.5 for j in range(FEAT)] for i in range(T)]  # noqa: E731
     known = torch.tensor([f(0.0)], dtype=torch.float32)
@@ -87,23 +89,31 @@ def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None 
     style = min(2, len(card["styles"]) - 1) if card.get("styles") else None
     gmask = torch.zeros(1, J)
     gmask[0, [3, 7]] = 1
+    # a model with the root path: a made-up path on the gap frames
+    path = torch.tensor([[[math.cos(0.21 * i + k) * 0.3 for k in range(3)] for i in range(T)]], dtype=torch.float32)
+    pmask = 1 - mask
     with torch.no_grad():
-        y = net(known, interp, mask, ttg, torch.tensor([style]) if style is not None else None, gmask if card.get("given") else None)
+        y, contacts = net(known, interp, mask, ttg, torch.tensor([style]) if style is not None else None,
+                          gmask if card.get("given") else None, with_contacts=True,
+                          path=path if card.get("path") else None, pmask=pmask if card.get("path") else None)
     (gold / f"{tag}-net.json").write_text(json.dumps({
         "T": T, "style": style, "given": [3, 7] if card.get("given") else [],
         "known": known[0].tolist(), "interp": interp[0].tolist(), "mask": mask[0, :, 0].tolist(), "ttg": ttg[0, :, 0].tolist(),
+        **({"path": path[0].tolist(), "pmask": pmask[0, :, 0].tolist()} if card.get("path") else {}),
         "out": y[0].tolist(),
+        # the foot-contact logits (a model with the contact head)
+        **({"contacts": contacts[0].tolist()} if contacts is not None else {}),
     }), encoding="utf-8", newline="\n")
 
-    # 2. the pipeline: fill frames 21..38 of a library walk from its keys 20 and 39
+    # 2. the pipeline: fills of a library walk between two of its frames (the last on the keys' path)
     skel = Skeleton.load()
     clip = Clip.load(ASSETS / "library" / "animations" / (GOLDEN_CLIP + ".clip.json"))
     cases = []
     styles = card.get("styles", [])
     styled = "walk" if "walk" in styles else styles[1] if len(styles) > 1 else "any"
-    for a, b, style, sf, af in [(20, 39, "any", 1.0, 1.0), (5, 12, styled, 1.5, 0.8)]:
-        r, o = infer.fill(clip, a, b, skel, tag, style=style, style_force=sf, ai_force=af)
-        cases.append({"a": a, "b": b, "style": style, "style_force": sf, "ai_force": af,
+    for a, b, style, sf, af, tr in [(20, 39, "any", 1.0, 1.0, 0.0), (5, 12, styled, 1.5, 0.8, 0.0), (8, 30, "any", 1.0, 1.0, 1.0)]:
+        r, o = infer.fill(clip, a, b, skel, tag, style=style, style_force=sf, ai_force=af, trajectory=tr, checkpoint=checkpoint)
+        cases.append({"a": a, "b": b, "style": style, "style_force": sf, "ai_force": af, "trajectory": tr,
                       "rotations": np.round(r, 7).tolist(), "roots": np.round(o, 7).tolist()})
     (gold / f"{tag}-fill.json").write_text(json.dumps({"clip": GOLDEN_CLIP, "cases": cases}), encoding="utf-8", newline="\n")
     print(f"goldens written -> {gold}")
@@ -114,8 +124,10 @@ def main(argv=None):
     ap.add_argument("tag", nargs="?", default="parts", help="training/data/models/<tag>")
     ap.add_argument("--out", type=pathlib.Path, help="weights folder (default assets/models/<tag>)")
     ap.add_argument("--golden", type=pathlib.Path, help="goldens folder (default crates/ac-ai/tests/golden)")
+    ap.add_argument("--checkpoint", default="model", choices=("model", "best"),
+                    help="model.pt (the last step) or best.pt (the best evaluation score; the card says which step)")
     args = ap.parse_args(argv)
-    export(args.tag, args.out, args.golden)
+    export(args.tag, args.out, args.golden, args.checkpoint)
 
 
 if __name__ == "__main__":

@@ -49,37 +49,53 @@ def _card(path: str, stamp: int) -> dict:
         return {}
 
 
-def load(tag: str):
-    """(network on the CPU in eval mode, its model card); reloads when training writes a new one."""
-    return _load(tag, (MODELS / tag / "model.pt").stat().st_mtime_ns)
+def load(tag: str, checkpoint: str = "model"):
+    """(network on the CPU in eval mode, its model card); reloads when training writes a new one.
+    ``checkpoint``: ``model`` (the last step) or ``best`` (the best by the evaluation's score)."""
+    return _load(tag, checkpoint, (MODELS / tag / f"{checkpoint}.pt").stat().st_mtime_ns)
 
 
 @functools.lru_cache(maxsize=4)
-def _load(tag: str, stamp: int):
+def _load(tag: str, checkpoint: str, stamp: int):
     d = MODELS / tag
     card = json.loads((d / "model.json").read_text(encoding="utf-8"))
-    net = Inbetweener(styles=len(card.get("styles", [])), given=bool(card.get("given")))
-    net.load_state_dict(torch.load(d / "model.pt", map_location="cpu", weights_only=True))
+    net = Inbetweener(styles=len(card.get("styles", [])), given=bool(card.get("given")), contacts=bool(card.get("contacts")),
+                      path=bool(card.get("path")))
+    net.load_state_dict(torch.load(d / f"{checkpoint}.pt", map_location="cpu", weights_only=True))
     net.eval()
     return net, card
 
 
+def _keys_path(clip: Clip, a: int, b: int) -> np.ndarray:
+    """The keys' own root path (the clip's spline) on frames a+1 .. b-1, never a Hold: a Hold key
+    kept the root still and dropped it into the next key in one frame (2026-10-06, "Carry 4")."""
+    import copy
+
+    smooth = copy.deepcopy(clip)
+    for k in smooth.keys:
+        if k.interp == "step":
+            k.interp = "smooth"
+    return smooth.sample(list(range(a + 1, b)))[1]
+
+
 @torch.no_grad()
 def fill(clip: Clip, a: int, b: int, skel: Skeleton, tag: str, style: str | list[str] = "any", style_force: float = 1.0,
-         ai_force: float = 1.0, trajectory: float = 0.0, head: float = 0.0, given=None) -> tuple[np.ndarray, np.ndarray]:
+         ai_force: float = 1.0, trajectory: float = 0.0, head: float = 0.0, given=None,
+         checkpoint: str = "model") -> tuple[np.ndarray, np.ndarray]:
     """Rotations (b-a-1, B, 4) and root offsets (b-a-1, 3) for frames a+1 .. b-1.
 
     The network sets the solved bones (:data:`BONES`); the others follow the keys' own spline.
     Forces: ``style`` (one of the card's styles, or a list of them, added up) with ``style_force``
     (guidance: 0 = no style, 1 = the style, >1 = stronger);
     ``ai_force`` scales the network's change to the plain interpolation (0 = interpolation, 1 = the
-    network); ``trajectory`` pulls the root onto the keys' own path; ``head`` keeps the neck and head
-    on the keys' spline. ``given``: names of solved bones another layer drives; they keep the
-    clip's own motion and the network fills the rest around them. Deterministic: CPU, float32, eval mode."""
+    network); ``trajectory`` pulls the root onto the keys' own path (a model trained with the path,
+    141000, is also given it, so the legs and lean follow it; the blend afterwards still puts the
+    root on it); ``head`` keeps the neck and head on the keys' spline. ``given``: names of solved
+    bones another layer drives; they keep the clip's own motion and the network fills the rest around them. Deterministic: CPU, float32, eval mode."""
     gap = b - a - 1
     if gap < 1 or gap > MAX_GAP:
         raise ValueError(f"AI fill needs 1..{MAX_GAP} frames between the keys, not {gap}")
-    net, _ = load(tag)
+    net, _ = load(tag, checkpoint)
     frames = [max(0, f) for f in range(a - CONTEXT + 1, a + 1)] + list(range(a + 1, b)) + [b]
     rots, roots = clip.sample(frames)
     idx = [skel.index[n] for n in BONES]
@@ -96,8 +112,17 @@ def fill(clip: Clip, a: int, b: int, skel: Skeleton, tag: str, style: str | list
     mask[:, :CONTEXT] = 1
     mask[:, -1] = 1
     ttg, _ = time_to_go(ia, ib, T, "cpu")
-    _, cd = load(tag)
+    _, cd = load(tag, checkpoint)
     gmask = torch.tensor([[1.0 if b in (given or ()) else 0.0 for b in BONES]]) if given else None
+    path = pmask = None
+    if trajectory > 0:
+        keys_path = _keys_path(clip, a, b)
+        if net.path:
+            pm = (keys_path * skel.hip_height - origin[0].double().numpy()) @ yaw_mat(-yaw)[0].double().numpy().T
+            path = torch.zeros(1, T, 3)
+            path[0, CONTEXT : CONTEXT + gap] = torch.tensor(pm / skel.hip_height, dtype=torch.float32)
+            pmask = torch.zeros(1, T, 1)
+            pmask[0, CONTEXT : CONTEXT + gap] = 1
     styles = cd.get("styles", [])
     chosen = [s for s in ([style] if isinstance(style, str) else style) if s != "any"]
     unknown = [s for s in chosen if s not in styles]
@@ -106,11 +131,11 @@ def fill(clip: Clip, a: int, b: int, skel: Skeleton, tag: str, style: str | list
     if chosen and style_force != 0:
         w = torch.zeros(1, len(styles))
         w[0, [styles.index(s) for s in chosen]] = 1.0
-        cond = net(truth, interp, mask, ttg, w, gmask=gmask)
-        free = net(truth, interp, mask, ttg, torch.tensor([0]), gmask=gmask)
+        cond = net(truth, interp, mask, ttg, w, gmask=gmask, path=path, pmask=pmask)
+        free = net(truth, interp, mask, ttg, torch.tensor([0]), gmask=gmask, path=path, pmask=pmask)
         pred = free + style_force * (cond - free)
     else:
-        pred = net(truth, interp, mask, ttg, torch.tensor([0]) if styles else None, gmask=gmask)
+        pred = net(truth, interp, mask, ttg, torch.tensor([0]) if styles else None, gmask=gmask, path=path, pmask=pmask)
     pred = interp + ai_force * (pred - interp)
     if gmask is not None:  # given bones stay exactly as the clip has them (also with an older model)
         from .model import given_features
@@ -126,16 +151,8 @@ def fill(clip: Clip, a: int, b: int, skel: Skeleton, tag: str, style: str | list
     spline_r = out_r.copy()
     out_r[:, idx] = mat_to_quat(R[0, sl]).double().numpy()
     out_o = (P[0, sl] / skel.hip_height).double().numpy()
-    if trajectory > 0:  # the keys' own root path (the clip's spline), never a Hold: a Hold key
-        # kept the root still and dropped it into the next key in one frame (2026-10-06, "Carry 4")
-        import copy
-
-        smooth = copy.deepcopy(clip)
-        for k in smooth.keys:
-            if k.interp == "step":
-                k.interp = "smooth"
-        path = smooth.sample(list(range(a + 1, b)))[1]
-        out_o = out_o + trajectory * (path - out_o)
+    if trajectory > 0:
+        out_o = out_o + trajectory * (keys_path - out_o)
     if head > 0:
         from . import quat
 
