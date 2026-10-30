@@ -273,6 +273,8 @@ pub struct FilesPrefs {
     pub preview_dir: Option<String>,
     /// mp4 or gif.
     pub preview_format: Option<String>,
+    /// Where a project file was opened or saved last.
+    pub project_dir: Option<String>,
     pub welcome_seen: bool,
     pub tips_seen: bool,
     /// The next-step window after a block-out was asked not to show again.

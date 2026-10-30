@@ -1,6 +1,7 @@
 //! Getting files in: drag-and-drop on the window, File → Import file… (Ctrl+I), and File → Recent.
 //!
-//! A dropped `.clip.json` or `.pose.json` goes into the library's Imported group
+//! A dropped `.project.json` opens as the project. A dropped `.clip.json` or `.pose.json` goes
+//! into the library's Imported group
 //! (`library.add_file`); a dropped folder imports like Import library → From a folder
 //! (`library.import`). One animation dropped alone is opened; a pose is shown under Poses.
 
@@ -49,6 +50,13 @@ impl App {
 
     /// Import files and folders; say what came in and what didn't.
     pub(super) fn import_paths(&mut self, paths: &[PathBuf]) {
+        // one project file dropped alone opens it
+        if let [one] = paths
+            && super::project::is_project_file(one)
+        {
+            self.open_project(one);
+            return;
+        }
         let mut anims = Vec::new();
         let mut poses = Vec::new();
         let mut problems = Vec::new();

@@ -250,3 +250,65 @@ pub const ASSETS_RELOAD: &[ParamSpec] = &[
     ParamSpec::new("library", K::Text, "{animations, poses, part_sets}").json(),
     ParamSpec::new("samples", K::Text, "{samples, recipes}").json(),
 ];
+
+pub const PROJECT_SAVE: &[ParamSpec] = &[
+    ParamSpec::new("path", K::Text, "the file written").required(),
+    ParamSpec::new("bytes", K::Integer, "its size").required(),
+    ParamSpec::new(
+        "hash",
+        K::Text,
+        "FNV-1a of its bytes (the same document gives the same hash)",
+    )
+    .required(),
+    ParamSpec::new("links", K::TextList, "the linked clips embedded, by library id").required(),
+    ParamSpec::new(
+        "clips",
+        K::Integer,
+        "clips in the file (the animation and its links)",
+    )
+    .required(),
+];
+
+pub const PROJECT_OPEN: &[ParamSpec] = &[
+    ParamSpec::new("path", K::Text, "the file opened").required(),
+    ParamSpec::new("name", K::Text, "the animation's name").required(),
+    ParamSpec::new("length", K::Integer, "frames").required(),
+    ParamSpec::new("frame", K::Number, "the playhead, as saved").required(),
+    ParamSpec::new("links", K::TextList, "the linked clips it carries, by library id").required(),
+    ParamSpec::new("layers", K::Integer, "layers, the base included").required(),
+    ParamSpec::new("boxes", K::Integer, "scene boxes").required(),
+    ParamSpec::new("version", K::Integer, "the version the file was written with").required(),
+    ParamSpec::new(
+        "migrated",
+        K::Bool,
+        "an older version, brought up to date on opening",
+    )
+    .required(),
+    ParamSpec::new(
+        "notes",
+        K::TextList,
+        "what the open session can't honour (an unknown AI style)",
+    )
+    .required(),
+];
+
+pub const PROJECT_INFO: &[ParamSpec] = &[
+    ParamSpec::new("path", K::Text, "the file read").required(),
+    ParamSpec::new("version", K::Integer, "the version it was written with").required(),
+    ParamSpec::new(
+        "current",
+        K::Bool,
+        "whether that is the version this build writes",
+    )
+    .required(),
+    ParamSpec::new("name", K::Text, "the animation's name").required(),
+    ParamSpec::new("group", K::Text, "its group").required(),
+    ParamSpec::new("fps", K::Number, "frames per second").required(),
+    ParamSpec::new("frames", K::Integer, "its length").required(),
+    ParamSpec::new("layers", K::Integer, "layers, the base included").required(),
+    ParamSpec::new("boxes", K::Integer, "scene boxes").required(),
+    ParamSpec::new("links", K::TextList, "the linked clips it carries, by library id").required(),
+    ParamSpec::new("clips", K::Integer, "clips in the file").required(),
+    ParamSpec::new("bytes", K::Integer, "its size").required(),
+    ParamSpec::new("hash", K::Text, "FNV-1a of its bytes").required(),
+];

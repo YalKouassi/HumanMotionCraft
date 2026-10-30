@@ -1,9 +1,11 @@
 //! Files around the open animation: autosave and crash recovery, the Export and Export preview
 //! dialogs, importing by drag-and-drop or File → Import file, recent animations and reopening the
-//! last one, the first-run welcome and tips, the block-out wizard and hot-reloading assets.
+//! last one, the first-run welcome and tips, the block-out wizard, hot-reloading assets, and
+//! project files (`project.rs`: one self-contained file for the whole document).
 //!
 //! Everything here acts through commands (`recovery.*`, `clip.export*`, `clip.video`,
-//! `clip.sheet`, `library.add_file`, `library.import`, `anim.block`, `assets.reload`); this module
+//! `clip.sheet`, `library.add_file`, `library.import`, `anim.block`, `assets.reload`,
+//! `project.*`); this module
 //! only keeps the window's state and draws the dialogs. The window calls four hooks:
 //! [`App::files_start`] once, [`App::files_input`] before its shortcuts, [`App::files_windows`]
 //! after its panels, and [`App::file_menu`] inside File.
@@ -14,6 +16,7 @@ mod drop;
 mod export;
 mod guide;
 mod preview;
+pub mod project;
 mod state;
 mod watch;
 mod welcome;
@@ -48,6 +51,8 @@ pub struct Files {
     pub dropping: bool,
     /// The library's keyboard selection and its small dialogs.
     pub nav: super::library::menu::Nav,
+    /// The window title last set (the project's name while one is open).
+    pub title: Option<String>,
 }
 
 /// `explorer /select`, `open -R` or the folder: show a written file to the person.
@@ -207,6 +212,7 @@ impl App {
         self.track_recent();
         self.autosave_tick();
         self.watch_tick();
+        self.project_title(ctx);
         // the watch and the autosave look at the clock: wake up to do so while idle
         ctx.request_repaint_after(std::time::Duration::from_millis(watch::POLL_MS));
     }

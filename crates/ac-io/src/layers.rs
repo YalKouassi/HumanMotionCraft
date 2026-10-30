@@ -275,11 +275,17 @@ fn layer_add(doc: &mut Document, p: &P) -> Out {
     doc.clip.layers.push(lay);
     if is_link {
         let lib = anims(doc)?;
-        let links = load_links(&lib, &doc.clip)?;
+        let mut links = load_links(&lib, &doc.clip)?;
         if let Some(me) = &doc.clip_id
             && links.contains_key(me)
         {
             return Err("that animation plays this one: the link would loop".into());
+        }
+        if doc.project.is_some() {
+            // a project plays the clips it carries; the library only fills in what it lacks
+            for (id, c) in std::mem::take(&mut doc.links) {
+                links.insert(id, c);
+            }
         }
         doc.links = links;
     } else {

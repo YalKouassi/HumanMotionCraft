@@ -14,6 +14,8 @@ use super::{App, library};
 pub enum Switch {
     Open(String),
     New(Value),
+    /// Open a project file (`project.open`).
+    Project(std::path::PathBuf),
     /// Quit the app (the window's close, File > Exit).
     Quit,
 }
@@ -60,12 +62,20 @@ impl App {
         }
     }
 
-    /// Save the open animation (a built-in: your own copy). Whether it was saved; a refusal is in
-    /// the status bar.
+    /// Save the open animation (a built-in: your own copy; a project document: its file). Whether
+    /// it was saved; a refusal is in the status bar.
     pub(super) fn save(&mut self) -> bool {
         if !self.session.document.unsaved() {
-            self.status = "nothing to save: the library has every change".into();
+            self.status = if self.session.document.project.is_some() {
+                "nothing to save: the project file has every change".into()
+            } else {
+                "nothing to save: the library has every change".into()
+            };
             return true;
+        }
+        // a project document saves to its file
+        if self.session.document.project.is_some() {
+            return self.save_project(None);
         }
         let builtin = self.open_is_builtin();
         let (id, what) = if builtin {
@@ -142,6 +152,10 @@ impl App {
             Switch::New(params) => {
                 self.run("clip.new", params);
             }
+            Switch::Project(path) => {
+                self.do_open_project(&path);
+                return;
+            }
             Switch::Quit => {
                 self.shell.quit_ok = true;
                 self.shell.close_now = true;
@@ -176,7 +190,9 @@ impl App {
             match &confirm {
                 Confirm::Switch(_) => {
                     ui.heading(format!("Save changes to “{name}”?"));
-                    ui.label(if builtin {
+                    ui.label(if self.session.document.project.is_some() {
+                        "Your changes aren't in the project file yet."
+                    } else if builtin {
                         "It's a built-in: saving keeps your own copy under Animations."
                     } else {
                         "Your changes to this animation aren't saved."

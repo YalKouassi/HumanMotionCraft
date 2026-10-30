@@ -219,6 +219,9 @@
             "pose.set_bone",
             "pose.set_root",
             "pose.spread_bend",
+            "project.info",
+            "project.open",
+            "project.save",
             "recovery.clear",
             "recovery.list",
             "recovery.restore",
@@ -5680,6 +5683,106 @@
           "if": {
             "properties": {
               "command": {
+                "const": "project.info"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Project file info"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a project file (.project.json)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "project.open"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Open project; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a project file (.project.json)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "project.save"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Save project; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "where to write it (default: the file the project was opened from or saved to)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "recovery.clear"
               }
             },
@@ -6424,6 +6527,9 @@
             "pose.set_bone",
             "pose.set_root",
             "pose.spread_bend",
+            "project.info",
+            "project.open",
+            "project.save",
             "recovery.clear",
             "recovery.list",
             "recovery.restore",

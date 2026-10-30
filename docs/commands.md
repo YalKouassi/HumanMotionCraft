@@ -2369,6 +2369,81 @@ Outputs:
 |---|---|---|---|---|
 | `degrees` | number | yes |  | the lean moved into the back |
 
+## project
+
+### `project.info`: Project file info
+
+not undoable, icon `info`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | a project file (.project.json) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file read |
+| `version` | integer | yes |  | the version it was written with |
+| `current` | bool | yes |  | whether that is the version this build writes |
+| `name` | text | yes |  | the animation's name |
+| `group` | text | yes |  | its group |
+| `fps` | number | yes |  | frames per second |
+| `frames` | integer | yes |  | its length |
+| `layers` | integer | yes |  | layers, the base included |
+| `boxes` | integer | yes |  | scene boxes |
+| `links` | list of text | yes |  | the linked clips it carries, by library id |
+| `clips` | integer | yes |  | clips in the file |
+| `bytes` | integer | yes |  | its size |
+| `hash` | text | yes |  | FNV-1a of its bytes |
+
+### `project.open`: Open project
+
+undoable, shortcut `Ctrl+Shift+O`, icon `open`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | a project file (.project.json) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file opened |
+| `name` | text | yes |  | the animation's name |
+| `length` | integer | yes |  | frames |
+| `frame` | number | yes |  | the playhead, as saved |
+| `links` | list of text | yes |  | the linked clips it carries, by library id |
+| `layers` | integer | yes |  | layers, the base included |
+| `boxes` | integer | yes |  | scene boxes |
+| `version` | integer | yes |  | the version the file was written with |
+| `migrated` | bool | yes |  | an older version, brought up to date on opening |
+| `notes` | list of text | yes |  | what the open session can't honour (an unknown AI style) |
+
+### `project.save`: Save project
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), shortcut `Ctrl+Shift+S`, icon `save`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text |  |  | where to write it (default: the file the project was opened from or saved to) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file written |
+| `bytes` | integer | yes |  | its size |
+| `hash` | text | yes |  | FNV-1a of its bytes (the same document gives the same hash) |
+| `links` | list of text | yes |  | the linked clips embedded, by library id |
+| `clips` | integer | yes |  | clips in the file (the animation and its links) |
+
 ## recovery
 
 ### `recovery.clear`: Discard unsaved work

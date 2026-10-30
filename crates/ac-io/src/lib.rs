@@ -20,6 +20,7 @@ pub mod import;
 pub mod layer_tools;
 pub mod layers;
 pub mod library;
+pub mod project;
 pub mod recovery;
 pub mod reload;
 mod returns;
@@ -39,6 +40,7 @@ pub const ALL: &[&[ac_core::CommandSpec]] = &[
     export_batch::SPECS,
     recovery::SPECS,
     reload::SPECS,
+    project::SPECS,
 ];
 
 /// Register every command of this crate; returns the clashes (empty: all registered).

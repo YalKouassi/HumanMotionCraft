@@ -1,0 +1,471 @@
+{
+  "$schema": "./schema.json",
+  "name": "project-files",
+  "feature": "project.save",
+  "description": "One self-contained project file for the whole working document. A new animation Mine/Hop gets a key at frame 0 with the root at [0, 0, 1] and one at frame 10 with the root at [0.2, 0, 1.1]; a link layer plays the built-in Locomotion/Walk on the upper body; a scene box Step (1 x 0.5 m, top 0.3 m); the AI settings have trajectory 0.5 and head 0.25; the left arm is locked, wrist.L pinned; the playhead sits at frame 4. project.save writes it: 2 clips (Hop and the embedded Walk), the document is now the project's (editor.state: no library id, the project path, nothing unsaved). After session.reset, project.open brings everything back: 11 frames, the playhead at 4, 2 layers, 1 box, version 1 and no migration; the sampled roots at frames 0 and 10 are the keyed ones, the box, the link (not missing: it plays the embedded clip, no library needed), the settings, the lock and the pin all read back. Saving again gives the very same bytes: the two saves and project.info report one hash (pinned: a content hash can't be worked by hand; the check is that the three agree). Migration: fixtures/data/project-v0.project.json is a hand-written version-0 file (identity rotations throughout; links as a [{id, clip}] list, the playhead as `playhead`, no ai block): project.info reads its version 0 (not current); project.open migrates it (`migrated`), the playhead at 7, keys at 0 and 20 with the roots [0, 0, 1] and [1, 0, 1] interpolated linearly, so frame 10 samples [0.5, 0, 1]; its Ledge box spans [-1, -1]..[1, 0] (centre [0, -0.5], top 0.4), its link Mine/Base is embedded, the AI settings are the defaults. Undo takes the migrated project back off: the Hop project is open again as it was (playhead 4, the lock and the pin). The session is then reset, so the refusals below run on a fresh document. Refused, with the document unchanged: a missing file, a rig file (not a project), a corrupt one (a clip with one bone and a 3-number rotation), one written by a newer version (99), and a save with no path when the document has no project file.",
+  "script": [
+    {
+      "command": "clip.new",
+      "params": {
+        "name": "Hop",
+        "group": "Mine"
+      },
+      "expect": {
+        "id": "Mine/Hop"
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {}
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0.2,
+          0,
+          1.1
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {}
+    },
+    {
+      "command": "layer.add",
+      "params": {
+        "source": "link",
+        "link": "Locomotion/Walk",
+        "parts": [
+          "Upper body"
+        ]
+      }
+    },
+    {
+      "command": "surface.add",
+      "params": {
+        "name": "Step",
+        "width": 1,
+        "depth": 0.5,
+        "top": 0.3
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "trajectory": 0.5,
+        "head": 0.25
+      }
+    },
+    {
+      "command": "parts.lock",
+      "params": {
+        "parts": [
+          "Left arm"
+        ]
+      }
+    },
+    {
+      "command": "pin.set",
+      "params": {
+        "bone": "wrist.L"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 4
+      }
+    },
+    {
+      "command": "project.save",
+      "params": {
+        "path": "{tmp}/hop.project.json"
+      },
+      "expect": {
+        "links": [
+          "Locomotion/Walk"
+        ],
+        "clips": 2,
+        "hash": "c8591468c957e18c"
+      },
+      "pinned": "the hash of the file's bytes; the same hash below proves the second save is byte-identical"
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "id": null,
+        "unsaved": false,
+        "frame": 4
+      }
+    },
+    {
+      "command": "session.reset",
+      "params": {}
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "length": 0,
+        "project": null
+      }
+    },
+    {
+      "command": "project.open",
+      "params": {
+        "path": "{tmp}/hop.project.json"
+      },
+      "expect": {
+        "name": "Hop",
+        "length": 11,
+        "frame": 4,
+        "links": [
+          "Locomotion/Walk"
+        ],
+        "layers": 2,
+        "boxes": 1,
+        "version": 1,
+        "migrated": false,
+        "notes": []
+      }
+    },
+    {
+      "command": "clip.sample",
+      "params": {
+        "from": 0,
+        "to": 10,
+        "step": 10
+      },
+      "expect": {
+        "frames": [
+          0,
+          10
+        ],
+        "roots": [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0.2,
+            0,
+            1.1
+          ]
+        ]
+      }
+    },
+    {
+      "command": "layers.list",
+      "params": {},
+      "expect": {
+        "layers": [
+          {
+            "i": 0,
+            "name": "Base",
+            "source": "keys",
+            "keys": 2
+          },
+          {
+            "i": 1,
+            "name": "Walk",
+            "source": "link",
+            "link": "Locomotion/Walk",
+            "part": "Upper body",
+            "missing": false
+          }
+        ],
+        "surfaces": [
+          {
+            "name": "Step",
+            "top": 0.3,
+            "turn": 0
+          }
+        ],
+        "physics": true
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {},
+      "expect": {
+        "style": "any",
+        "style_force": 1,
+        "ai_force": 1,
+        "trajectory": 0.5,
+        "head": 0.25
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "name": "Hop",
+        "group": "Mine",
+        "id": null,
+        "unsaved": false,
+        "frame": 4,
+        "locked": [
+          "Left arm"
+        ],
+        "pins": [
+          "wrist.L"
+        ],
+        "edit_layer": 0
+      }
+    },
+    {
+      "command": "project.save",
+      "params": {},
+      "expect": {
+        "links": [
+          "Locomotion/Walk"
+        ],
+        "clips": 2,
+        "hash": "c8591468c957e18c"
+      },
+      "pinned": "the same hash as the first save: byte-identical"
+    },
+    {
+      "command": "project.info",
+      "params": {
+        "path": "{tmp}/hop.project.json"
+      },
+      "expect": {
+        "version": 1,
+        "current": true,
+        "name": "Hop",
+        "group": "Mine",
+        "fps": 30,
+        "frames": 11,
+        "layers": 2,
+        "boxes": 1,
+        "links": [
+          "Locomotion/Walk"
+        ],
+        "clips": 2,
+        "hash": "c8591468c957e18c"
+      },
+      "pinned": "the same hash again"
+    },
+    {
+      "command": "project.info",
+      "params": {
+        "path": "{assets}/../fixtures/data/project-v0.project.json"
+      },
+      "expect": {
+        "version": 0,
+        "current": false,
+        "name": "Old",
+        "fps": 24,
+        "frames": 21,
+        "layers": 2,
+        "boxes": 1,
+        "links": [
+          "Mine/Base"
+        ],
+        "clips": 2
+      }
+    },
+    {
+      "command": "project.open",
+      "params": {
+        "path": "{assets}/../fixtures/data/project-v0.project.json"
+      },
+      "expect": {
+        "name": "Old",
+        "length": 21,
+        "frame": 7,
+        "links": [
+          "Mine/Base"
+        ],
+        "layers": 2,
+        "boxes": 1,
+        "version": 0,
+        "migrated": true,
+        "notes": []
+      }
+    },
+    {
+      "command": "clip.sample",
+      "params": {
+        "from": 0,
+        "to": 20,
+        "step": 10
+      },
+      "expect": {
+        "frames": [
+          0,
+          10,
+          20
+        ],
+        "roots": [
+          [
+            0,
+            0,
+            1
+          ],
+          [
+            0.5,
+            0,
+            1
+          ],
+          [
+            1,
+            0,
+            1
+          ]
+        ]
+      }
+    },
+    {
+      "command": "layers.list",
+      "params": {},
+      "expect": {
+        "layers": [
+          {
+            "i": 0,
+            "name": "Base",
+            "keys": 2
+          },
+          {
+            "i": 1,
+            "name": "Base link",
+            "source": "link",
+            "link": "Mine/Base",
+            "missing": false
+          }
+        ],
+        "surfaces": [
+          {
+            "name": "Ledge",
+            "min": [
+              -1,
+              -1
+            ],
+            "max": [
+              1,
+              0
+            ],
+            "centre": [
+              0,
+              -0.5
+            ],
+            "top": 0.4,
+            "turn": 0
+          }
+        ]
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {},
+      "expect": {
+        "style": "any",
+        "style_force": 1,
+        "ai_force": 1,
+        "trajectory": 0,
+        "head": 0
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "name": "Old",
+        "frame": 7,
+        "locked": [
+          "Left arm"
+        ],
+        "pins": [],
+        "unsaved": false
+      }
+    },
+    {
+      "command": "edit.undo",
+      "params": {},
+      "expect": {
+        "command": "project.open"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "name": "Hop",
+        "length": 11,
+        "frame": 4,
+        "locked": ["Left arm"],
+        "pins": ["wrist.L"]
+      }
+    },
+    {
+      "command": "session.reset",
+      "params": {}
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-9
+  },
+  "errors": [
+    {
+      "command": "project.open",
+      "params": {
+        "path": "{tmp}/nowhere.project.json"
+      }
+    },
+    {
+      "command": "project.open",
+      "params": {
+        "path": "{assets}/rig/default_rig.json"
+      }
+    },
+    {
+      "command": "project.open",
+      "params": {
+        "path": "{assets}/../fixtures/data/project-corrupt.project.json"
+      }
+    },
+    {
+      "command": "project.open",
+      "params": {
+        "path": "{assets}/../fixtures/data/project-future.project.json"
+      }
+    },
+    {
+      "command": "project.info",
+      "params": {
+        "path": "{assets}/../fixtures/data/project-future.project.json"
+      }
+    },
+    {
+      "command": "project.info",
+      "params": {
+        "path": ""
+      }
+    },
+    {
+      "command": "project.save",
+      "params": {}
+    }
+  ]
+}
