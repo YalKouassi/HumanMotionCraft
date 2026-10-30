@@ -287,6 +287,13 @@ pub const AI_FILL_ALL: &[ParamSpec] = &[
     .json()
     .required(),
     ParamSpec::new(
+        "passes",
+        Kind::Text,
+        "the gaps filled several at once, with a model trained with several keys in a window (ai.info's multi_key): one list of keys per pass, [[from, key, ..., to]] (empty: every gap on its own)",
+    )
+    .json()
+    .required(),
+    ParamSpec::new(
         "diagnostics",
         Kind::Text,
         "one per gap filled, in order, as ai.fill's: [{from, to, sliding, sliding_max_cm, path, seams, bent, flags, notes}]",

@@ -102,6 +102,7 @@ Outputs:
 | `model` | text | yes |  | the model label |
 | `notes` | list of text | yes |  | impossible poses the fills made and bent back to the possible limit, or left (each starts with its gap, from–to; empty: none) |
 | `anchors` | JSON | yes |  | the anchor poses placed in gaps over the model's limit: [{from, to, frame, id, source_frame}] (empty: none needed) |
+| `passes` | JSON | yes |  | the gaps filled several at once, with a model trained with several keys in a window (ai.info's multi_key): one list of keys per pass, [[from, key, ..., to]] (empty: every gap on its own) |
 | `diagnostics` | JSON | yes |  | one per gap filled, in order, as ai.fill's: [{from, to, sliding, sliding_max_cm, path, seams, bent, flags, notes}] |
 
 ### `ai.gaps`: AI gaps

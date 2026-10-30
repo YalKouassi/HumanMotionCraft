@@ -91,3 +91,43 @@ pub fn gaps(doc: &Document) -> Vec<Gap> {
 pub fn gap_at(doc: &Document, frame: i64) -> Option<Gap> {
     gaps(doc).into_iter().find(|g| g.from <= frame && frame < g.to)
 }
+
+/// The passes `ai.fill_all` makes with a model that takes several keys in a window
+/// ([`crate::ai::ModelInfo::multi_key`], roadmap 142000): `spans` are the gaps it is about to
+/// fill, `(from, to)` in frame order; neighbouring ones (sharing a key) join one pass while the
+/// stretch from the pass's first key to the gap's last holds at most `max_gap` frames. Each
+/// pass is its keys in order; a gap on its own is a pass of two keys.
+pub fn passes(spans: &[(i64, i64)], max_gap: i64) -> Vec<Vec<i64>> {
+    let mut out: Vec<Vec<i64>> = Vec::new();
+    for &(a, b) in spans {
+        match out.last_mut() {
+            Some(last) if last.last() == Some(&a) && last.first().is_some_and(|&f| b - f - 1 <= max_gap) => {
+                last.push(b);
+            }
+            _ => out.push(vec![a, b]),
+        }
+    }
+    out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::passes;
+
+    #[test]
+    fn neighbouring_gaps_join_a_pass_while_the_stretch_fits_the_window() {
+        // 0–10 and 10–20 share key 10 and hold 19 frames: one pass; 20–50 would make 49
+        assert_eq!(
+            passes(&[(0, 10), (10, 20), (20, 50)], 45),
+            vec![vec![0, 10, 20], vec![20, 50]]
+        );
+        // three short gaps in one pass, the fourth starts another
+        assert_eq!(
+            passes(&[(0, 5), (5, 12), (12, 20), (20, 60), (60, 70)], 45),
+            vec![vec![0, 5, 12, 20], vec![20, 60], vec![60, 70]]
+        );
+        // gaps that don't share a key never join
+        assert_eq!(passes(&[(0, 10), (20, 30)], 45), vec![vec![0, 10], vec![20, 30]]);
+        assert!(passes(&[], 45).is_empty());
+    }
+}
