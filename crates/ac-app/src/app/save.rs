@@ -79,7 +79,7 @@ impl App {
         };
         self.status = format!("{what} {}", r["id"].as_str().unwrap_or_default());
         if builtin {
-            self.lib_tab = library::Tab::Animations;
+            self.lib_reveal(library::Tab::Animations);
         }
         // the library has the work now: its recovery file goes (under the id it was kept by,
         // when saving gave it another)

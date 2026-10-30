@@ -125,14 +125,14 @@ impl App {
         self.status = status;
         match (anims.as_slice(), poses.as_slice()) {
             ([one], []) => {
-                self.lib_tab = Tab::Animations;
+                self.lib_reveal(Tab::Animations);
                 self.switch(Switch::Open(one.clone()));
             }
             ([], [one, ..]) => {
-                self.lib_tab = Tab::Poses;
+                self.lib_reveal(Tab::Poses);
                 self.lib_select(false, one);
             }
-            (_, _) if !anims.is_empty() => self.lib_tab = Tab::Animations,
+            (_, _) if !anims.is_empty() => self.lib_reveal(Tab::Animations),
             _ => {}
         }
     }
@@ -152,7 +152,7 @@ impl App {
                         .tag(format!("menu.File.Recent.{id}"), id.as_str())
                         .clicked()
                     {
-                        self.lib_tab = Tab::Animations;
+                        self.lib_reveal(Tab::Animations);
                         if self.session.document.clip_id.as_deref() != Some(id.as_str()) {
                             self.switch(Switch::Open(id.clone()));
                         }

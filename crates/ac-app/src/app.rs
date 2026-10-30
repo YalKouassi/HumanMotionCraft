@@ -73,6 +73,8 @@ pub struct App {
     lib_tab: library::Tab,
     lib_filter: String,
     thumbs: library::Thumbs,
+    /// The library panel's filters, folds and preview.
+    lib_view: library::View,
     /// An AI setting changed while a preview is live: preview again.
     ai_dirty: bool,
     ai_previewed: Option<std::time::Instant>,
@@ -276,6 +278,7 @@ impl App {
             lib_tab: library::Tab::Animations,
             lib_filter: String::new(),
             thumbs: library::Thumbs::default(),
+            lib_view: library::View::default(),
             ai_dirty: false,
             ai_previewed: None,
             injected: input::Injected::default(),
@@ -311,11 +314,17 @@ impl App {
             "tab" => {
                 self.lib_tab = match value {
                     "animations" => library::Tab::Animations,
-                    "builtin" => library::Tab::Builtin,
+                    // the built-ins were a tab of their own: now the animations, built-ins only
+                    "builtin" => {
+                        self.lib_view.filters.source = ac_io::find::Source::Builtin;
+                        library::Tab::Animations
+                    }
                     "poses" => library::Tab::Poses,
                     _ => return Err("animations, builtin or poses".into()),
                 }
             }
+            "source" => self.lib_view.filters.source = library::filter::parse_source(value)?,
+            "sort" => self.lib_view.filters.order = library::filter::Order::parse(value)?,
             "search" => self.lib_filter = value.to_string(),
             "dope" => self.timeline.dope = on()?,
             "overlay" => self.show_overlay = on()?,
@@ -336,10 +345,14 @@ impl App {
     }
 
     fn refresh_library(&mut self) {
-        self.library = self
-            .session
-            .run("library.list", &json!({}))
-            .unwrap_or(Value::Null);
+        self.library = match self.session.run("library.list", &json!({})) {
+            Ok(v) => v,
+            Err(e) => {
+                self.status = format!("the library can't be listed: {e}");
+                Value::Null
+            }
+        };
+        self.lib_view.preview.cache.clear();
         // items may have changed: thumbnails come back from the disk cache, or are redrawn
         self.thumbs.cache.clear();
         self.library_synced();

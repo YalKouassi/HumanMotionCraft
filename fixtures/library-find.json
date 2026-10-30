@@ -1,0 +1,61 @@
+{
+  "$schema": "./schema.json",
+  "name": "library-find",
+  "feature": "library.find",
+  "description": "Finding in the library, as the library panel does. Three animations of your own at 30 fps: Mine/Hop keyed on 0 and 29 (30 frames, 1 s: short), Other/Turn keyed on 0 and 89 (90 frames, 3 s: medium) and Mine/Long walk keyed on 0 and 239 (240 frames, 8 s: long), which loops. With source mine (the built-ins left out): the words \"walk LONG\" must all match, in any case, so only Long walk is found; length short finds Hop, medium Turn and long Long walk; loop true finds Long walk only; sort length orders Hop (1 s), Turn (3 s), Long walk (8 s), and sort name goes by group then name, giving groups Mine (2) then Other (1). A star on Mine/Hop finds it with favourites true, and the star follows it when it moves to Other (Other/Hop); taking the star off finds none. Length and loop are refused for poses, part for animations, and a star on a missing item is refused.",
+  "script": [
+    { "command": "clip.new", "params": { "name": "Hop", "group": "Mine", "fps": 30 }, "expect": { "id": "Mine/Hop" } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 29 } },
+    { "command": "key.set", "params": {} },
+    { "command": "clip.save", "params": {}, "expect": { "id": "Mine/Hop" } },
+    { "command": "clip.new", "params": { "name": "Turn", "group": "Other", "fps": 30 }, "expect": { "id": "Other/Turn" } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 89 } },
+    { "command": "key.set", "params": {} },
+    { "command": "clip.save", "params": {}, "expect": { "id": "Other/Turn" } },
+    { "command": "clip.new", "params": { "name": "Long walk", "group": "Mine", "fps": 30 }, "expect": { "id": "Mine/Long walk" } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 239 } },
+    { "command": "key.set", "params": {} },
+    { "command": "clip.loop", "params": { "on": true } },
+    { "command": "clip.save", "params": {}, "expect": { "id": "Mine/Long walk" } },
+    {
+      "command": "library.find",
+      "params": { "source": "mine", "query": "walk LONG" },
+      "expect": { "count": 1, "items": [{ "id": "Mine/Long walk", "frames": 240, "seconds": 8, "loop": true, "builtin": false }] }
+    },
+    { "command": "library.find", "params": { "source": "mine", "length": "short" }, "expect": { "count": 1, "items": [{ "id": "Mine/Hop", "seconds": 1 }] } },
+    { "command": "library.find", "params": { "source": "mine", "length": "medium" }, "expect": { "count": 1, "items": [{ "id": "Other/Turn", "seconds": 3 }] } },
+    { "command": "library.find", "params": { "source": "mine", "length": "long" }, "expect": { "count": 1, "items": [{ "id": "Mine/Long walk" }] } },
+    { "command": "library.find", "params": { "source": "mine", "loop": true }, "expect": { "count": 1, "items": [{ "id": "Mine/Long walk" }] } },
+    {
+      "command": "library.find",
+      "params": { "source": "mine", "sort": "length" },
+      "expect": { "count": 3, "items": [{ "id": "Mine/Hop" }, { "id": "Other/Turn" }, { "id": "Mine/Long walk" }] }
+    },
+    {
+      "command": "library.find",
+      "params": { "source": "mine" },
+      "expect": {
+        "items": [{ "id": "Mine/Hop" }, { "id": "Mine/Long walk" }, { "id": "Other/Turn" }],
+        "groups": [{ "group": "Mine", "count": 2 }, { "group": "Other", "count": 1 }]
+      }
+    },
+    { "command": "library.favourite", "params": { "id": "Mine/Hop" }, "expect": { "id": "Mine/Hop", "favourite": true } },
+    { "command": "library.find", "params": { "favourites": true }, "expect": { "count": 1, "items": [{ "id": "Mine/Hop", "favourite": true }] } },
+    { "command": "clip.group", "params": { "id": "Mine/Hop", "group": "Other" }, "expect": { "id": "Other/Hop" } },
+    { "command": "library.find", "params": { "favourites": true }, "expect": { "count": 1, "items": [{ "id": "Other/Hop" }] } },
+    { "command": "library.favourite", "params": { "id": "Other/Hop", "on": false }, "expect": { "favourite": false } },
+    { "command": "library.find", "params": { "favourites": true }, "expect": { "count": 0, "items": [] } }
+  ],
+  "expect": { "tolerance": 1e-9 },
+  "errors": [
+    { "command": "library.find", "params": { "kind": "poses", "length": "short" } },
+    { "command": "library.find", "params": { "kind": "poses", "loop": true } },
+    { "command": "library.find", "params": { "part": "Left arm" } },
+    { "command": "library.find", "params": { "sort": "size" } },
+    { "command": "library.favourite", "params": { "id": "Mine/Nobody" } }
+  ],
+  "views": []
+}

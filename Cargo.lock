@@ -70,6 +70,7 @@ dependencies = [
  "craft-atomic",
  "glam",
  "gltf",
+ "serde",
  "serde_json",
  "tracing",
  "tracing-subscriber",

@@ -7,14 +7,14 @@ pub const LIBRARY_LIST: &[ParamSpec] = &[
     ParamSpec::new(
         "animations",
         K::Text,
-        "[{id, name, group, current, builtin, edited, ...}]",
+        "[{id, name, group, current, builtin, edited, favourite, frames, fps, seconds, loop, modified, ...}]",
     )
     .json()
     .required(),
     ParamSpec::new(
         "poses",
         K::Text,
-        "[{id, name, group, part, builtin, edited, ...}]",
+        "[{id, name, group, part, builtin, edited, favourite, modified, ...}]",
     )
     .json()
     .required(),
@@ -22,6 +22,25 @@ pub const LIBRARY_LIST: &[ParamSpec] = &[
     ParamSpec::new("custom_parts", K::Text, "your part sets")
         .json()
         .required(),
+];
+
+pub const LIBRARY_FIND: &[ParamSpec] = &[
+    ParamSpec::new(
+        "items",
+        K::Text,
+        "the items found, as library.list lists them, in order",
+    )
+    .json()
+    .required(),
+    ParamSpec::new("count", K::Integer, "how many").required(),
+    ParamSpec::new("groups", K::Text, "[{group, count}] of the items found, in order")
+        .json()
+        .required(),
+];
+
+pub const LIBRARY_FAVOURITE: &[ParamSpec] = &[
+    ParamSpec::new("id", K::Text, "the item").required(),
+    ParamSpec::new("favourite", K::Bool, "whether it is starred now").required(),
 ];
 
 pub const LIBRARY_INSTALL: &[ParamSpec] = &[ParamSpec::new("copied", K::Integer, "files copied").required()];

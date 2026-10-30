@@ -13,6 +13,7 @@ pub mod commands;
 pub mod data_folder;
 pub mod export;
 pub mod export_batch;
+pub mod find;
 pub mod import;
 pub mod layer_tools;
 pub mod layers;
@@ -28,6 +29,7 @@ pub use commands::SPECS;
 pub const ALL: &[&[ac_core::CommandSpec]] = &[
     commands::SPECS,
     import::SPECS,
+    find::SPECS,
     layers::SPECS,
     layer_tools::SPECS,
     export::SPECS,

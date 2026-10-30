@@ -283,8 +283,10 @@ impl DockContent<DockPanel> for DockAdapter<'_> {
         })
     }
 
+    /// Palettes stay above the main window while the app has focus (a `Normal` window could open
+    /// or fall behind it), and drop to the normal level, still shown, while another app has focus.
     fn window_kind(&self, _panel: &DockPanel) -> WindowKind {
-        WindowKind::Normal
+        WindowKind::Palette
     }
 
     fn group_header_width(

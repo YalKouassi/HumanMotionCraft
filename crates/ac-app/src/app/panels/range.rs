@@ -15,7 +15,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use ac_core::clip::Clip;
 use ac_core::possible::Possible;
-use ac_core::ranges::{BandPoint, PairSpec, Probe, judge};
+use ac_core::ranges::{BandPoint, Judged, PairSpec, Probe, judge};
 use egui::{Color32, Pos2, Rect, Sense, Stroke, Vec2};
 use serde_json::{Value, json};
 
@@ -23,6 +23,9 @@ use crate::app::App;
 use crate::app::theme::{Palette, faded};
 use crate::app::timeline::marks::Mark;
 use crate::app::ui_ids::Tag;
+
+/// The side choice that shows the left and right charts side by side.
+pub(super) const BOTH: &str = "Both";
 
 #[derive(PartialEq)]
 pub(super) struct MadeFor {
@@ -36,8 +39,12 @@ pub(super) struct MadeFor {
 /// The Range panel's window state between frames.
 pub struct RangeState {
     pub pair: String,
+    /// `"L"`, `"R"` or `"Both"` (the two charts side by side).
     pub side: String,
+    /// `clip.range` for the chosen side (the left one when `side` is `"Both"`).
     report: Option<Value>,
+    /// `clip.range` for the right side when `side` is `"Both"`.
+    report_right: Option<Value>,
     /// `clip.possible` over the same motion: the clip's level and its impossible frames.
     possible: Option<Value>,
     error: Option<String>,
@@ -52,6 +59,7 @@ impl Default for RangeState {
             pair: "hip_knee".into(),
             side: "L".into(),
             report: None,
+            report_right: None,
             possible: None,
             error: None,
             made_for: None,
@@ -84,20 +92,31 @@ impl App {
         st.made_for = Some(made_for);
 
         let motion = if shown { "shown" } else { "keys" };
+        let both = side == BOTH;
+        let first = if both { "L" } else { side.as_str() };
         let measured = self
             .session
             .run(
                 "clip.range",
-                &json!({ "pair": pair, "side": side, "motion": motion }),
+                &json!({ "pair": pair, "side": first, "motion": motion }),
             )
             .and_then(|r| {
+                let right = if both {
+                    Some(self.session.run(
+                        "clip.range",
+                        &json!({ "pair": pair, "side": "R", "motion": motion }),
+                    )?)
+                } else {
+                    None
+                };
                 Ok((
                     r,
+                    right,
                     self.session.run("clip.possible", &json!({ "motion": motion }))?,
                 ))
             });
         match measured {
-            Ok((r, possible)) => {
+            Ok((r, right, possible)) => {
                 let mut total_outside = 0usize;
                 let mut marks = Vec::new();
                 let (warn_col, err_col) = (self.palette().warning, self.palette().error);
@@ -142,6 +161,7 @@ impl App {
                 let st = &mut self.panels.range;
                 st.outside_frames = total_outside;
                 st.report = Some(r);
+                st.report_right = right;
                 st.possible = Some(possible);
                 st.error = None;
                 self.timeline.marks.set("range", marks);
@@ -149,6 +169,7 @@ impl App {
             Err(e) => {
                 let st = &mut self.panels.range;
                 st.report = None;
+                st.report_right = None;
                 st.possible = None;
                 st.outside_frames = 0;
                 st.error = Some(format!("range check failed: {e}"));
@@ -208,11 +229,15 @@ impl App {
                 .tag("panel.range.pair", &spec.label);
 
             if spec.sided {
-                for s in ["L", "R"] {
+                for (s, tip) in [
+                    ("L", "Left side"),
+                    ("R", "Right side"),
+                    (BOTH, "Left and right side by side"),
+                ] {
                     let chosen = self.panels.range.side == s;
                     if ui
                         .selectable_label(chosen, s)
-                        .on_hover_text(if s == "L" { "Left side" } else { "Right side" })
+                        .on_hover_text(tip)
                         .tag(format!("panel.range.side.{s}"), s)
                         .clicked()
                     {
@@ -234,21 +259,31 @@ impl App {
             self.range_level(ui, &level);
         }
 
-        let eff_side: String = if spec.sided {
+        let both = spec.sided && self.panels.range.side == BOTH;
+        let eff_side: String = if spec.sided && !both {
             self.panels.range.side.clone()
         } else {
             "L".into()
+        };
+        let sides: Vec<String> = if both {
+            vec!["L".into(), "R".into()]
+        } else {
+            vec![eff_side.clone()]
         };
 
         // Live current pose coordinates so viewport drags move the playhead dot at 60 fps.
         let doc = &self.session.document;
         let sk = &doc.skeleton;
-        let (cur_x, cur_y) = Probe::new(sk, &spec, &eff_side)
-            .and_then(|p| p.point(sk, &doc.pose.rotations))
-            .unwrap_or((0.0, 0.0));
-        let j = judge(&spec, cur_x, cur_y);
-        let (ch_lo, ch_hi, cur_close) = (j.hard_lo, j.hard_hi, j.closeness);
-        let (cur_past_hard, cur_past_typ) = (j.past_hard, j.past_typical);
+        let heads: Vec<(String, f64, f64, Judged)> = sides
+            .into_iter()
+            .map(|s| {
+                let (x, y) = Probe::new(sk, &spec, &s)
+                    .and_then(|p| p.point(sk, &doc.pose.rotations))
+                    .unwrap_or((0.0, 0.0));
+                let j = judge(&spec, x, y);
+                (s, x, y, j)
+            })
+            .collect();
         let live = Possible::new(sk, &ranges)
             .and_then(|p| p.breaches(sk, &doc.pose.rotations))
             .unwrap_or_default();
@@ -270,71 +305,111 @@ impl App {
             .collect();
 
         let pal = self.palette();
-        let jump_frame = draw_chart(
-            ui,
-            pal,
-            &spec,
-            self.panels.range.report.as_ref(),
-            &impossible,
-            (cur_x, cur_y, cur_past_hard, cur_past_typ, live_worst.is_some()),
-        );
+        let st = &self.panels.range;
+        let reports = [st.report.as_ref(), st.report_right.as_ref()];
+        let playhead = |(_, x, y, j): &(String, f64, f64, Judged)| {
+            (*x, *y, j.past_hard, j.past_typical, live_worst.is_some())
+        };
+        let mut jump_frame = None;
+        if both {
+            ui.columns(2, |cols| {
+                for ((col, head), report) in cols.iter_mut().zip(&heads).zip(reports) {
+                    let name = if head.0 == "L" { "Left" } else { "Right" };
+                    col.label(egui::RichText::new(name).small().strong());
+                    let tag = format!("panel.range.chart.{}", head.0);
+                    if let Some(f) = draw_chart(col, pal, &spec, &tag, report, &impossible, playhead(head)) {
+                        jump_frame = Some(f);
+                    }
+                }
+            });
+        } else if let Some(head) = heads.first() {
+            jump_frame = draw_chart(
+                ui,
+                pal,
+                &spec,
+                "panel.range.chart",
+                reports[0],
+                &impossible,
+                playhead(head),
+            );
+        }
         if let Some(f) = jump_frame {
             self.playing = false;
             self.run("frame.set", json!({ "frame": f }));
         }
 
-        // Compact legend, two rows: a nested horizontal does not wrap on a narrow panel
-        for row in [
-            [
-                (pal.range, "Clinical limit"),
-                (pal.key_ai, "Typical mocap (1–99%)"),
+        // Compact legend, in short rows: a nested horizontal does not wrap on a narrow panel
+        let legend: [&[(Key, &str)]; 4] = [
+            &[
+                (Key::Swatch(pal.range), "Clinical limit"),
+                (Key::Swatch(pal.key_ai), "Typical mocap (1–99%)"),
             ],
-            [(pal.warning, "Unusual / athletic"), (pal.error, "Impossible")],
-        ] {
+            &[
+                (Key::Head, "You are here"),
+                (Key::Dot(Dot::Within), "Within limits"),
+            ],
+            &[
+                (Key::Dot(Dot::PastTypical), "Past typical mocap"),
+                (Key::Dot(Dot::Impossible), "Impossible"),
+            ],
+            &[(
+                Key::Dot(Dot::PastClinical),
+                "Past clinical limit (unusual, still possible)",
+            )],
+        ];
+        for row in legend {
             ui.horizontal(|ui| {
                 ui.spacing_mut().item_spacing.x = 8.0;
-                for (colour, text) in row {
-                    legend_dot(ui, colour, text);
+                for (key, text) in row {
+                    legend_item(ui, pal, *key, text);
                 }
             });
         }
 
-        // Live playhead readout
-        let pct = (cur_close * 100.0).round() as i64;
-        let (status_txt, status_col) = if let Some(w) = &live_worst {
-            (
-                format!(
-                    "Now: impossible: {} {} {:.0}° (possible {:.0}° to {:.0}°)",
-                    w.joint, w.component, w.value, w.lo, w.hi
-                ),
-                pal.error,
-            )
-        } else if cur_past_hard > 1.0 {
-            (
-                format!(
-                    "Now: {:.1}°, {:.1}°: {:.1}° past the clinical limit [{:.0}°, {:.0}°]. Realistic, but unusual or athletic",
-                    cur_x, cur_y, cur_past_hard, ch_lo, ch_hi
-                ),
-                pal.warning,
-            )
-        } else if cur_past_typ > 1.0 {
-            (
-                format!(
-                    "Now: {:.1}°, {:.1}° — {pct}% of hard [{:.0}°, {:.0}°] (+{:.1}° past typical mocap)",
-                    cur_x, cur_y, ch_lo, ch_hi, cur_past_typ
-                ),
-                pal.warning,
-            )
+        // Live playhead readout (one line a side when both are shown)
+        if let Some(w) = &live_worst {
+            let txt = format!(
+                "Now: impossible: {} {} {:.0}° (possible {:.0}° to {:.0}°)",
+                w.joint, w.component, w.value, w.lo, w.hi
+            );
+            ui.label(egui::RichText::new(txt).small().color(pal.error));
         } else {
-            (
-                format!(
-                    "Now: {:.1}°, {:.1}° — {pct}% of hard limit [{:.0}°, {:.0}°]",
-                    cur_x, cur_y, ch_lo, ch_hi
-                ),
-                pal.surface.ink,
-            )
-        };
-        ui.label(egui::RichText::new(status_txt).small().color(status_col));
+            for (side, cur_x, cur_y, j) in &heads {
+                let now = if both {
+                    format!("Now ({side})")
+                } else {
+                    "Now".into()
+                };
+                let (ch_lo, ch_hi) = (j.hard_lo, j.hard_hi);
+                let pct = (j.closeness * 100.0).round() as i64;
+                let (status_txt, status_col) = if j.past_hard > 1.0 {
+                    (
+                        format!(
+                            "{now}: {:.1}°, {:.1}°: {:.1}° past the clinical limit [{:.0}°, {:.0}°]. Realistic, but unusual or athletic",
+                            cur_x, cur_y, j.past_hard, ch_lo, ch_hi
+                        ),
+                        pal.warning,
+                    )
+                } else if j.past_typical > 1.0 {
+                    (
+                        format!(
+                            "{now}: {:.1}°, {:.1}° — {pct}% of hard [{:.0}°, {:.0}°] (+{:.1}° past typical mocap)",
+                            cur_x, cur_y, ch_lo, ch_hi, j.past_typical
+                        ),
+                        pal.warning,
+                    )
+                } else {
+                    (
+                        format!(
+                            "{now}: {:.1}°, {:.1}° — {pct}% of hard limit [{:.0}°, {:.0}°]",
+                            cur_x, cur_y, ch_lo, ch_hi
+                        ),
+                        pal.surface.ink,
+                    )
+                };
+                ui.label(egui::RichText::new(status_txt).small().color(status_col));
+            }
+        }
 
         // Summary across all pairs & sides (click a row to switch pair/side and jump to its extreme frame)
         if let Some(rep) = self.panels.range.report.clone()
@@ -381,7 +456,7 @@ impl App {
                         },
                     )
                 };
-                let selected = pid == spec.id && (!spec.sided || side_str == eff_side);
+                let selected = pid == spec.id && (!spec.sided || both || side_str == eff_side);
                 if ui
                     .selectable_label(selected, egui::RichText::new(&row_txt).small().color(col))
                     .on_hover_text(format!("Switch to {name} and go to frame {target_frame}"))
@@ -393,7 +468,10 @@ impl App {
             }
             if let Some((pid, s, f)) = pick_target {
                 self.panels.range.pair = pid;
-                self.panels.range.side = s;
+                // Showing both sides already shows the row's side: stay on Both.
+                if !both {
+                    self.panels.range.side = s;
+                }
                 self.playing = false;
                 self.run("frame.set", json!({ "frame": f }));
                 self.range_refresh();
@@ -495,11 +573,73 @@ impl App {
     }
 }
 
-fn legend_dot(ui: &mut egui::Ui, colour: Color32, text: &str) {
+/// How far a frame on the path is from typical. Colour on the chart means only this: frames
+/// inside the limits are neutral, so the ones that need a look stand out.
+#[derive(Clone, Copy)]
+enum Dot {
+    Within,
+    PastTypical,
+    PastClinical,
+    Impossible,
+}
+
+impl Dot {
+    fn draw(self, painter: &egui::Painter, pal: &Palette, pos: Pos2) {
+        match self {
+            Dot::Within => {
+                painter.circle_filled(pos, 2.2, faded(pal.surface.ink, 140));
+            }
+            Dot::PastTypical => {
+                painter.circle_filled(pos, 2.8, pal.surface.track);
+                painter.circle_stroke(pos, 2.8, Stroke::new(1.4, pal.warning));
+            }
+            Dot::PastClinical => {
+                painter.circle_filled(pos, 3.4, pal.warning);
+                painter.circle_stroke(pos, 3.4, Stroke::new(1.0, pal.surface.outline));
+            }
+            Dot::Impossible => {
+                painter.circle_filled(pos, 3.8, pal.error);
+                painter.circle_stroke(pos, 3.8, Stroke::new(1.0, pal.surface.outline));
+            }
+        }
+    }
+}
+
+/// The playhead: a ring with crosshair ticks, so it reads as "you are here" and not as a level.
+/// It is filled only when the pose now is unusual or impossible.
+fn draw_head(painter: &egui::Painter, pal: &Palette, pos: Pos2, fill: Option<Color32>) {
+    let ink = pal.surface.ink;
+    if let Some(c) = fill {
+        painter.circle_filled(pos, 5.0, c);
+    }
+    painter.circle_stroke(pos, 5.5, Stroke::new(1.6, ink));
+    for d in [Vec2::X, -Vec2::X, Vec2::Y, -Vec2::Y] {
+        painter.line_segment([pos + d * 7.0, pos + d * 10.0], Stroke::new(1.4, ink));
+    }
+}
+
+/// One legend entry's mark.
+#[derive(Clone, Copy)]
+enum Key {
+    /// A band or limit line's colour.
+    Swatch(Color32),
+    Dot(Dot),
+    Head,
+}
+
+fn legend_item(ui: &mut egui::Ui, pal: &Palette, key: Key, text: &str) {
     ui.horizontal(|ui| {
         ui.spacing_mut().item_spacing.x = 4.0;
-        let (rect, _) = ui.allocate_exact_size(Vec2::new(8.0, 8.0), Sense::hover());
-        ui.painter().circle_filled(rect.center(), 3.5, colour);
+        let side = if matches!(key, Key::Head) { 20.0 } else { 8.0 };
+        let (rect, _) = ui.allocate_exact_size(Vec2::splat(side), Sense::hover());
+        let painter = ui.painter_at(rect.expand(1.0));
+        match key {
+            Key::Swatch(colour) => {
+                painter.circle_filled(rect.center(), 3.5, colour);
+            }
+            Key::Dot(dot) => dot.draw(&painter, pal, rect.center()),
+            Key::Head => draw_head(&painter, pal, rect.center(), None),
+        }
         ui.label(egui::RichText::new(text).small().weak());
     });
 }
@@ -509,14 +649,15 @@ fn draw_chart(
     ui: &mut egui::Ui,
     pal: &Palette,
     spec: &PairSpec,
+    tag: &str,
     report: Option<&Value>,
     impossible: &BTreeSet<i64>,
     playhead: (f64, f64, f64, f64, bool),
 ) -> Option<i64> {
-    let width = ui.available_width().max(180.0);
+    let width = ui.available_width().max(120.0);
     let height = 185.0;
     let (rect, response) = ui.allocate_exact_size(Vec2::new(width, height), Sense::click_and_drag());
-    let response = response.tag("panel.range.chart", &spec.label);
+    let response = response.tag(tag, &spec.label);
     let painter = ui.painter_at(rect);
 
     painter.rect_filled(rect, 4.0, pal.surface.track);
@@ -610,19 +751,16 @@ fn draw_chart(
             let past_hard = pt["past_hard_deg"].as_f64().unwrap_or(0.0);
             let past_typ = pt["past_typical_deg"].as_f64().unwrap_or(0.0);
             let gone = impossible.contains(&f);
-            let (col, rad) = if gone {
-                (pal.error, 3.8)
+            let dot = if gone {
+                Dot::Impossible
             } else if past_hard > 1.0 {
-                (pal.warning, 3.2)
+                Dot::PastClinical
             } else if past_typ > 1.0 {
-                (pal.warning, 2.8)
+                Dot::PastTypical
             } else {
-                (pal.key_manual, 2.2)
+                Dot::Within
             };
-            painter.circle_filled(pos, rad, col);
-            if gone || past_hard > 1.0 {
-                painter.circle_stroke(pos, rad, Stroke::new(1.0, pal.surface.outline));
-            }
+            dot.draw(&painter, pal, pos);
             if let Some(ptr) = pointer {
                 let d = ptr.distance(pos);
                 if d < best_dist {
@@ -639,9 +777,13 @@ fn draw_chart(
                         format!(
                             "Frame {f}: ({x:.1}°, {y:.1}°)\n+{past_hard:.1}° past the clinical limit [{h_lo:.0}°, {h_hi:.0}°]: unusual or athletic, still realistic\nClick to go to frame {f}"
                         )
+                    } else if past_typ > 1.0 {
+                        format!(
+                            "Frame {f}: ({x:.1}°, {y:.1}°)\n+{past_typ:.1}° past typical mocap, inside the clinical limit [{h_lo:.0}°, {h_hi:.0}°]\nClick to go to frame {f}"
+                        )
                     } else {
                         format!(
-                            "Frame {f}: ({x:.1}°, {y:.1}°)\nHard limit [{h_lo:.0}°, {h_hi:.0}°]\nClick to go to frame {f}"
+                            "Frame {f}: ({x:.1}°, {y:.1}°)\nWithin limits (clinical [{h_lo:.0}°, {h_hi:.0}°])\nClick to go to frame {f}"
                         )
                     });
                     if response.clicked() || response.dragged() {
@@ -652,18 +794,16 @@ fn draw_chart(
         }
     }
 
-    // 7. Playhead dot
+    // 7. Playhead
     let (cur_x, cur_y, cur_past_hard, cur_past_typ, cur_impossible) = playhead;
-    let cur_pos = to_pos(cur_x, cur_y);
-    let head_col = if cur_impossible {
-        pal.error
+    let head_fill = if cur_impossible {
+        Some(pal.error)
     } else if cur_past_hard > 1.0 || cur_past_typ > 1.0 {
-        pal.warning
+        Some(pal.warning)
     } else {
-        pal.playhead
+        None
     };
-    painter.circle_filled(cur_pos, 5.2, head_col);
-    painter.circle_stroke(cur_pos, 5.2, Stroke::new(1.5, pal.key_selected));
+    draw_head(&painter, pal, to_pos(cur_x, cur_y), head_fill);
 
     // 8. Axis labels
     let font = egui::FontId::proportional(10.5);
@@ -674,10 +814,17 @@ fn draw_chart(
         font.clone(),
         pal.surface.ink,
     );
+    // A narrow chart (both sides shown) drops the span rather than cut the name off.
+    let x_text = format!("{} ({x_min:.0}°..{x_max:.0}°)", spec.x.label);
+    let fits = painter
+        .layout_no_wrap(x_text.clone(), font.clone(), pal.surface.ink)
+        .size()
+        .x
+        <= plot.width() - 8.0;
     painter.text(
         Pos2::new(plot.right() - 4.0, plot.bottom() - 2.0),
         egui::Align2::RIGHT_BOTTOM,
-        format!("{} ({x_min:.0}°..{x_max:.0}°)", spec.x.label),
+        if fits { x_text } else { spec.x.label.clone() },
         font,
         pal.surface.ink,
     );

@@ -28,6 +28,7 @@ const ALLOWED: &[&str] = &[
     "crates",
     "docs",
     "fixtures",
+    "roadmap",
     "rustfmt.toml",
     "target",
     "tests",

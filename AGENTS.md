@@ -8,8 +8,10 @@ comments saying "a port of cf-animate's ..." name where code came from. `CLAUDE.
 this file is the single source of agent rules.
 
 ## Start every session here
-1. Read `ROADMAP.md`: what is built, the next rows with their acceptance lines, and the open
-   decisions.
+1. Read the roadmap: `ls roadmap` lists `!README.md` (the naming convention) and then one file per
+   piece of work, the not-done ones first in pickup order (`DONE_` files are finished, `OBSOLETE_`
+   files were dropped). Load the `roadmap` skill
+   (`.claude/skills/roadmap/SKILL.md`) before adding, reordering or finishing an item.
 2. **For any feature, fix or refactor, load the `ac-feature` skill**
    (`.claude/skills/ac-feature/SKILL.md`).
 3. The feature loop and fixture format: `docs/llm-guidelines.md`. What the tests are:
@@ -160,7 +162,11 @@ For UI work, look at the result: run the app with `--screenshot PATH` (or the MC
 `cargo clean` removes them). Never write them outside the repo.
 
 ## Roadmap
-The rows are in `ROADMAP.md`. Mark a row `[~]` when it is built and its images are ready, `[x]` only after the owner confirms.
+Every piece of work is a file in `roadmap/`, named `roadmap/<number>-<slug>.md` (six digits, spaced by 1000,
+the midpoint to insert between two) and renamed `roadmap/DONE_<number>-<slug>.md` when finished, or
+`roadmap/OBSOLETE_<number>-<slug>.md` when dropped (by the owner); no subfolders, and prerequisites are named by number (`Requires:`). The `roadmap` skill has the full
+rules. Set an item's status to "built, waiting for the owner" when it is built and its images are
+ready, and add the `DONE_` prefix only after the owner confirms.
 Commit after every feature arc that builds.
 
 ## MCP

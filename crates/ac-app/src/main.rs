@@ -7,7 +7,7 @@
 //!                [--ui <name>=<value> ...]
 //! ```
 //! `--ui` sets the window's own state (for screenshots): `tab=animations|builtin|poses`,
-//! `search=<text>`, `dope=on|off`, `overlay=on|off|perf`, `ghost=on|off`,
+//! `source=all|mine|builtin`, `sort=name|recent|modified|length`, `search=<text>`, `dope=on|off`, `overlay=on|off|perf`, `ghost=on|off`,
 //! `tool=drag|reach|move|rotate`, `camera=<view>` (front, back, side, left, top, bottom,
 //! three-quarter: looking at the body), `zoom=<metres>`, `ortho=on|off`, `follow=on|off`,
 //! `onion=on|off|keys|frames`, `onion_count=1..5`, `onion_step=<frames>`, `trails=on|off`,
@@ -18,7 +18,8 @@
 //! `palette=<search>`, `theme=dark|light`, `scale=<0.5..3>`, `colours=standard|safe`,
 //! `units=frames|seconds|timecode`, `maximise=on|off`, `library|inspector|timeline=on|off`,
 //! `side=left|right`, `perf=on|off`; the inspector panels': `joint=<bone>`, `box=<n>`,
-//! `layer=<n>`, `travel=preview|off`, `prompt=<text>` (motion from text).
+//! `layer=<n>`, `travel=preview|off`, `prompt=<text>` (motion from text), `range_pair=<pair>`,
+//! `range_side=L|R|Both` (the Range panel).
 //! `--control <port>` opens the control port an agent drives the window through (`control.rs`;
 //! `ac mcp --live <port>` makes MCP tools of it).
 //! `--prefs` says where the saved preferences live; without it they are the app's config folder,

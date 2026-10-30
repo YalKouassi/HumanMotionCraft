@@ -28,7 +28,7 @@ descriptions say "the app", not the name.
 3. Rewrite the `format` lines in `assets/rig/*.json` and `assets/models/MANIFEST.json`. Rewrite
    the samples with `ac samples --bless`. (The built-in library's clips and poses use the earlier
    prototype's `cf-animate.*` formats and have nothing to change.)
-4. Change the prose in `README.md`, `AGENTS.md`, `ROADMAP.md`, `docs/`, `training/`, the `ac-feature`
+4. Change the prose in `README.md`, `AGENTS.md`, `ROADMAP.md`, `roadmap/`, `docs/`, `training/`, the `ac-feature`
    skill and `NOTICE` (`git grep -i -I "<old name>"` finds every place).
 
 ## The `ac` prefix

@@ -1490,6 +1490,52 @@ Outputs:
 | `id` | text | yes |  | its library id |
 | `already` | bool | yes |  | the same item was in the library already (nothing written) |
 
+### `library.favourite`: Star in library
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `star`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | a library id, <group>/<name> |
+| `kind` | one of animations \| poses |  |  | animations (default) or poses |
+| `on` | bool |  |  | star it (default true) or take the star off |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the item |
+| `favourite` | bool | yes |  | whether it is starred now |
+
+### `library.find`: Find in library
+
+not undoable, icon `search`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `kind` | one of animations \| poses |  |  | animations (default) or poses |
+| `query` | text |  |  | words that must all be in the name, group or part (any case) |
+| `source` | one of all \| mine \| builtin |  |  | all (default), your own, or the built-ins |
+| `group` | text |  |  | only this group |
+| `length` | one of short \| medium \| long |  |  | animations only: short (under 2 s), medium (2 to 6 s) or long (over 6 s) |
+| `loop` | bool |  |  | animations only: true for loops only, false for the others |
+| `edited` | bool |  |  | true: only built-ins changed in your library |
+| `part` | text |  |  | poses only: this body part (Whole body, Left arm, ...) |
+| `favourites` | bool |  |  | true: only starred items |
+| `sort` | one of name \| length \| modified |  |  | name (by group, the default), length (shortest first) or modified (newest first) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `items` | JSON | yes |  | the items found, as library.list lists them, in order |
+| `count` | integer | yes |  | how many |
+| `groups` | JSON | yes |  | [{group, count}] of the items found, in order |
+
 ### `library.import`: Import library
 
 not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `import`.
@@ -1539,8 +1585,8 @@ Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `animations` | JSON | yes |  | [{id, name, group, current, builtin, edited, ...}] |
-| `poses` | JSON | yes |  | [{id, name, group, part, builtin, edited, ...}] |
+| `animations` | JSON | yes |  | [{id, name, group, current, builtin, edited, favourite, frames, fps, seconds, loop, modified, ...}] |
+| `poses` | JSON | yes |  | [{id, name, group, part, builtin, edited, favourite, modified, ...}] |
 | `groups` | list of text | yes |  | every group |
 | `custom_parts` | JSON | yes |  | your part sets |
 

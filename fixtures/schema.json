@@ -168,6 +168,8 @@
             "layer.travel_preview",
             "layers.list",
             "library.add_file",
+            "library.favourite",
+            "library.find",
             "library.import",
             "library.install",
             "library.list",
@@ -3605,6 +3607,144 @@
           "if": {
             "properties": {
               "command": {
+                "const": "library.favourite"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Star in library; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a library id, <group>/<name>"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "animations",
+                      "poses"
+                    ],
+                    "description": "animations (default) or poses"
+                  },
+                  "on": {
+                    "type": "boolean",
+                    "description": "star it (default true) or take the star off",
+                    "default": true
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "library.find"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Find in library"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "animations",
+                      "poses"
+                    ],
+                    "description": "animations (default) or poses"
+                  },
+                  "query": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "words that must all be in the name, group or part (any case)"
+                  },
+                  "source": {
+                    "type": "string",
+                    "enum": [
+                      "all",
+                      "mine",
+                      "builtin"
+                    ],
+                    "description": "all (default), your own, or the built-ins"
+                  },
+                  "group": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "only this group"
+                  },
+                  "length": {
+                    "type": "string",
+                    "enum": [
+                      "short",
+                      "medium",
+                      "long"
+                    ],
+                    "description": "animations only: short (under 2 s), medium (2 to 6 s) or long (over 6 s)"
+                  },
+                  "loop": {
+                    "type": "boolean",
+                    "description": "animations only: true for loops only, false for the others"
+                  },
+                  "edited": {
+                    "type": "boolean",
+                    "description": "true: only built-ins changed in your library"
+                  },
+                  "part": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "poses only: this body part (Whole body, Left arm, ...)"
+                  },
+                  "favourites": {
+                    "type": "boolean",
+                    "description": "true: only starred items"
+                  },
+                  "sort": {
+                    "type": "string",
+                    "enum": [
+                      "name",
+                      "length",
+                      "modified"
+                    ],
+                    "description": "name (by group, the default), length (shortest first) or modified (newest first)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "library.import"
               }
             },
@@ -5690,6 +5830,8 @@
             "layer.travel_preview",
             "layers.list",
             "library.add_file",
+            "library.favourite",
+            "library.find",
             "library.import",
             "library.install",
             "library.list",

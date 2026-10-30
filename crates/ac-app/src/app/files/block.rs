@@ -226,7 +226,7 @@ impl App {
                 self.run("edit.undo", json!({}));
                 self.run("clip.delete", json!({ "id": id }));
             }
-            self.lib_tab = Tab::Animations;
+            self.lib_reveal(Tab::Animations);
             self.refresh_library();
             blocked
         } else {

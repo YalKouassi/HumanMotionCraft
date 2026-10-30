@@ -4,8 +4,8 @@
 //!   delete`); built-ins: open and duplicate (your own copy).
 //! - Poses: apply, apply to the selected joint's part or any part only (`pose.apply {parts}`),
 //!   save the current pose, rename, move to group, delete (`pose.save/rename/group/delete`).
-//! - Keys while the library has focus (it is clicked): arrows move the selection, Enter opens or
-//!   applies, F2 renames, Delete deletes (asked first).
+//! - Keys while the library has focus (it is clicked): arrows move the selection (and its
+//!   preview), Enter opens or applies, F2 renames, Delete deletes (asked first).
 
 use serde_json::json;
 
@@ -107,6 +107,7 @@ impl App {
             }
         } else if self.run("pose.apply", json!({ "id": id })).is_some() {
             self.status = format!("applied {id}");
+            self.lib_pose_used(id);
         }
     }
 
@@ -315,17 +316,17 @@ impl App {
         }
     }
 
-    fn lib_duplicate(&mut self, id: &str) {
+    pub(in super::super) fn lib_duplicate(&mut self, id: &str) {
         if let Some(r) = self.run("clip.duplicate", json!({ "id": id })) {
             let new = r["id"].as_str().unwrap_or_default().to_string();
             self.status = format!("duplicated {id} as {new}");
             self.refresh_library();
-            self.lib_tab = super::Tab::Animations;
+            self.lib_reveal(super::Tab::Animations);
             self.lib_select(true, &new);
         }
     }
 
-    fn lib_group(&mut self, anims: bool, id: &str, group: &str) {
+    pub(in super::super) fn lib_group(&mut self, anims: bool, id: &str, group: &str) {
         let cmd = if anims { "clip.group" } else { "pose.group" };
         if let Some(r) = self.run(cmd, json!({ "id": id, "group": group })) {
             let new = r["id"].as_str().unwrap_or_default().to_string();
@@ -451,7 +452,7 @@ impl App {
                     let id = r["id"].as_str().unwrap_or_default().to_string();
                     self.status = format!("saved the pose as {id}");
                     self.refresh_library();
-                    self.lib_tab = super::Tab::Poses;
+                    self.lib_reveal(super::Tab::Poses);
                     self.lib_select(false, &id);
                 }
             }

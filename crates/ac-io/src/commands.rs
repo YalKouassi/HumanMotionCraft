@@ -279,12 +279,13 @@ pub fn open(doc: &mut Document, clip: Clip, id: Option<String>) -> Result<(), St
     doc.go_to(0.0)
 }
 
-fn library_list(doc: &mut Document, _: &P) -> Out {
+pub(crate) fn library_list(doc: &mut Document, _: &P) -> Out {
     let (a, p) = (anims(doc)?, poses(doc)?);
+    let stars = crate::find::load_favourites(root(doc)?)?;
     let mut groups: BTreeSet<String> = a.groups().into_iter().collect();
     groups.extend(p.groups());
     let sk = doc.skeleton.clone();
-    let poses: Vec<Value> = p
+    let mut poses: Vec<Value> = p
         .items()
         .into_iter()
         .map(|mut it| {
@@ -300,7 +301,7 @@ fn library_list(doc: &mut Document, _: &P) -> Out {
         .collect();
     let items = a.items();
     let current = doc.clip_id.clone();
-    let animations: Vec<Value> = items
+    let mut animations: Vec<Value> = items
         .into_iter()
         .map(|mut it| {
             it["current"] = json!(it.get("id").and_then(Value::as_str) == current.as_deref());
@@ -308,6 +309,8 @@ fn library_list(doc: &mut Document, _: &P) -> Out {
             it
         })
         .collect();
+    crate::find::mark_favourites(&stars, Kind::Animations, &mut animations);
+    crate::find::mark_favourites(&stars, Kind::Poses, &mut poses);
     Ok(
         json!({ "animations": animations, "poses": poses, "groups": groups, "custom_parts": doc.custom_parts }),
     )

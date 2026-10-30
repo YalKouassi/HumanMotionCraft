@@ -34,6 +34,8 @@ pub struct Prefs {
     /// Files: export and preview choices, the welcome and tips, and per library its recent
     /// animations and the one open last.
     pub files: FilesPrefs,
+    /// The library panel: per library its folded groups and recent poses.
+    pub library_panel: LibraryPanel,
     /// The user's changes to the default shortcuts (Help > Keyboard shortcuts).
     #[serde(with = "craft_keymap::keymap::overrides_list")]
     pub shortcuts: Overrides,
@@ -154,8 +156,12 @@ pub struct View {
     pub ghost: bool,
     /// The dope sheet's part rows.
     pub dope: bool,
-    /// `animations`, `builtin` or `poses`.
+    /// `animations` or `poses` (`builtin`, from older builds: the animations, built-ins only).
     pub library_tab: String,
+    /// The library's source switch: `all`, `mine` or `builtin`.
+    pub library_source: String,
+    /// The library's order: `name`, `recent`, `modified` or `length`.
+    pub library_sort: String,
     pub camera: CameraPrefs,
     /// The performance HUD.
     pub perf: bool,
@@ -169,6 +175,8 @@ impl Default for View {
             ghost: true,
             dope: false,
             library_tab: "animations".into(),
+            library_source: "all".into(),
+            library_sort: "name".into(),
             camera: CameraPrefs::default(),
             perf: false,
         }
@@ -270,6 +278,16 @@ pub struct FilesPrefs {
 pub struct LibraryPrefs {
     pub recent: Vec<String>,
     pub last_open: Option<String>,
+}
+
+/// The library panel, per library folder (by [`library_key`]): the groups folded away
+/// (`animations/<group>`, `poses/<group>`, `animations/@starred`, ...) and the poses applied
+/// last, newest first. Stars are the library's own (`favourites.json`, `library.favourite`).
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug, Default)]
+#[serde(default)]
+pub struct LibraryPanel {
+    pub folded: BTreeMap<String, Vec<String>>,
+    pub recent_poses: BTreeMap<String, Vec<String>>,
 }
 
 /// How a library folder is named in [`FilesPrefs::libraries`]: its full path where it can be

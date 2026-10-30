@@ -11,7 +11,7 @@ prototype (cf-animate) already did it, and is
 confirmed by a person from images.
 
 ## 1. Orient
-- Read the `ROADMAP.md` row and its acceptance line. No acceptance line: propose
+- Read the item's file in `roadmap/` (the `roadmap` skill has the naming rules) and its acceptance line. No acceptance line: propose
   one and wait for the owner to agree.
 
 ## 2. Design check (before any code)

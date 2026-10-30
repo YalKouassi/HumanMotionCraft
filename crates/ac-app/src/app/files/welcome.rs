@@ -74,12 +74,13 @@ impl App {
         self.files.state.welcome_seen = true;
         match choice {
             "walk" => {
-                self.lib_tab = Tab::Builtin;
+                self.lib_reveal(Tab::Animations);
+                self.lib_view.filters.source = ac_io::find::Source::All;
                 self.switch(Switch::Open(WALK.into()));
             }
             "block" => self.open_block(),
             "blank" => {
-                self.lib_tab = Tab::Animations;
+                self.lib_reveal(Tab::Animations);
                 self.switch(Switch::New(
                     json!({ "name": "Untitled", "group": "My animations" }),
                 ));

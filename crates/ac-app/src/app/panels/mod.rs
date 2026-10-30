@@ -63,7 +63,11 @@ impl super::App {
                     self.panels.range.side = "R".into();
                     self.panels.range.made_for = None;
                 }
-                _ => return Err("L or R".into()),
+                "Both" | "both" | "B" | "b" => {
+                    self.panels.range.side = range::BOTH.into();
+                    self.panels.range.made_for = None;
+                }
+                _ => return Err("L, R or Both".into()),
             },
             "travel" => match value {
                 "preview" => self.preview_travel(),

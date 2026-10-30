@@ -147,8 +147,9 @@ impl Library {
         self.path(id).is_ok_and(|p| p.is_file())
     }
 
-    /// Every item: `{id, name, group, origin}` (+ `frames` for animations, `only` for part poses),
-    /// sorted by group then name. Unreadable files are listed with an `error`, never skipped.
+    /// Every item: `{id, name, group, origin, modified}` (+ `frames`, `fps`, `seconds` and `loop`
+    /// for animations, `only` for part poses; `modified`: the file's time, Unix seconds), sorted
+    /// by group then name. Unreadable files are listed with an `error`, never skipped.
     pub fn items(&self) -> Vec<Value> {
         let mut out = Vec::new();
         let Ok(groups) = std::fs::read_dir(&self.root) else {
@@ -174,6 +175,13 @@ impl Library {
         files.sort_by(|a, b| natural_cmp(&a.0, &b.0).then_with(|| natural_cmp(&a.1, &b.1)));
         for (group, name, path) in files {
             let mut meta = json!({ "id": format!("{group}/{name}"), "name": name, "group": group });
+            if let Some(t) = std::fs::metadata(&path)
+                .and_then(|m| m.modified())
+                .ok()
+                .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            {
+                meta["modified"] = json!(t.as_secs());
+            }
             match std::fs::read_to_string(&path)
                 .map_err(|e| e.to_string())
                 .and_then(|t| serde_json::from_str::<Value>(&t).map_err(|e| e.to_string()))
@@ -190,6 +198,12 @@ impl Library {
                             .max()
                             .unwrap_or(-1);
                         meta["frames"] = json!(last + 1);
+                        let fps = d.get("fps").and_then(Value::as_f64).filter(|f| *f >= 1.0);
+                        if let Some(fps) = fps {
+                            meta["fps"] = json!(fps);
+                            meta["seconds"] = json!((last + 1).max(0) as f64 / fps);
+                        }
+                        meta["loop"] = json!(d.get("loop").and_then(Value::as_bool).unwrap_or(false));
                     } else if let Some(only) = d.get("only") {
                         meta["only"] = only.clone();
                     }
@@ -293,6 +307,8 @@ impl Library {
             &serde_json::to_string_pretty(&d).map_err(|e| e.to_string())?,
         )?;
         self.delete(id)?;
+        // a star follows its item
+        crate::find::rename_favourite(self, id, &new_id)?;
         Ok(new_id)
     }
 

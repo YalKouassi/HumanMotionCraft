@@ -135,6 +135,8 @@ impl App {
         for (name, value) in [
             ("tool", p.view.tool.as_str()),
             ("tab", p.view.library_tab.as_str()),
+            ("source", p.view.library_source.as_str()),
+            ("sort", p.view.library_sort.as_str()),
         ] {
             if let Err(e) = self.set_ui(name, value) {
                 self.shell.messages.push(
@@ -247,7 +249,6 @@ impl App {
         };
         let tab = match self.lib_tab {
             super::library::Tab::Animations => "animations",
-            super::library::Tab::Builtin => "builtin",
             super::library::Tab::Poses => "poses",
         };
         let c = &self.camera;
@@ -257,6 +258,8 @@ impl App {
             ghost: self.show_ghost,
             dope: self.timeline.dope,
             library_tab: tab.into(),
+            library_source: super::library::filter::source_name(self.lib_view.filters.source).into(),
+            library_sort: self.lib_view.filters.order.name().into(),
             camera: prefs::CameraPrefs {
                 yaw: c.yaw,
                 pitch: c.pitch,
