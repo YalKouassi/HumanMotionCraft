@@ -26,6 +26,11 @@
 //!    `a` and reaches `b` in that time: `z(t) = z_a + (z_b - z_a) t / T + g t (T - t) / 2`.
 //!    The take-off and landing frames are kept exactly; so is every pose in the air.
 //!
+//!    After a landing faster than [`MIN_ABSORB_SPEED`], the hips carry the arriving speed `v` down
+//!    into a compression and recover, the feet held: `dip(t) = v t exp(-t / ABSORB_TAU)`, faded out
+//!    by [`ABSORB_TIME`] or the next take-off. Keys whose hips already dip [`KEYED_DIP`] after
+//!    landing compress on their own and aren't doubled.
+//!
 //! Foot points are the heads of the toe joints and a heel under each ankle. The mass model is
 //! de Leva's (1996) segment table. Deterministic, f64.
 
@@ -69,6 +74,17 @@ const RESTING_JOINTS: &[&str] = &[
     "lowerarm01",
     "wrist",
 ];
+/// How long (s) a landing's compression lasts at most.
+pub const ABSORB_TIME: f64 = 0.4;
+/// The compression's time constant (s): the hips are lowest this long after landing, by the arriving
+/// speed times this over e.
+pub const ABSORB_TAU: f64 = 0.06;
+/// A landing slower than this (m/s) doesn't compress: a run's stride, not a jump.
+pub const MIN_ABSORB_SPEED: f64 = 1.5;
+/// The most arriving speed (m/s) a compression absorbs.
+pub const MAX_ABSORB_SPEED: f64 = 5.0;
+/// Keys whose hips already dip this far (m) after a landing compress on their own.
+pub const KEYED_DIP: f64 = 0.03;
 /// How far inside the support's edge (m) balance puts the centre of mass.
 pub const BALANCE_MARGIN: f64 = 0.01;
 /// How far behind the ankle (m, along the foot) the heel point is.
@@ -516,6 +532,29 @@ pub(crate) fn shift_hips(
     Ok(())
 }
 
+/// Lower the hips by `dip` (metres), the feet held.
+fn lower_hips(
+    sk: &Skeleton,
+    body: &Body,
+    pose: (&mut Vec<Quat>, &mut Vec3),
+    dip: f64,
+    surfaces: &[Surface],
+    limits: Option<&Limits>,
+) -> R<()> {
+    let (rots, root) = pose;
+    let widened = limits.map(|l| l.widened(rots));
+    let (world, pos) = sk.fk(rots, *root).map_err(|e| e.to_string())?;
+    let mut goals = feet_goals(sk, body, &world, &pos, surfaces);
+    goals.push(Goal {
+        bone: 0,
+        target: [pos[0][0], pos[0][1], pos[0][2] - dip],
+    });
+    let s = fullbody::solve(sk, (rots, *root), &goals, widened.as_ref())?;
+    *rots = s.rotations;
+    *root = s.root;
+    Ok(())
+}
+
 /// How far (metres) frame `f`, itself not balanced, moves for the balanced frames near it: between
 /// two close ones it goes from one's move to the other's; otherwise each fades out alone.
 pub(crate) fn faded(balanced: &[usize], moved: &[[f64; 2]], f: usize) -> [f64; 2] {
@@ -706,7 +745,7 @@ pub fn solve(
             }
         }
     }
-    // 5. flights
+    // 5. flights, and the landing each one ends in
     let mut flights = Vec::new();
     let mut k = 0;
     while k < n {
@@ -735,6 +774,28 @@ pub fn solve(
             o[2] = oa[2] + (ob[2] - oa[2]) * s + 0.5 * G * t * (total - t) / h;
         }
         flights.push((a, b));
+    }
+    for (i, &(_, b)) in flights.iter().enumerate() {
+        let until = flights.get(i + 1).map_or(n, |next| next.0 + 1);
+        let arriving = (out[b - 1][2] - out[b][2]) * h * fps;
+        let last = (b + (ABSORB_TIME * fps).round() as usize).min(until);
+        let keyed_dip = roots[b..last.max(b)]
+            .iter()
+            .fold(0.0_f64, |d, o| d.max((roots[b][2] - o[2]) * h));
+        if arriving < MIN_ABSORB_SPEED || keyed_dip >= KEYED_DIP || last <= b + 1 {
+            continue;
+        }
+        let v = arriving.min(MAX_ABSORB_SPEED);
+        for f in (b + 1)..last {
+            if rests[f] {
+                continue;
+            }
+            let t = (f - b) as f64 / fps;
+            let u = (f - b) as f64 / (last - b) as f64;
+            let window = (1.0 - u * u).powi(2);
+            let dip = v * t * (-t / ABSORB_TAU).exp() * window;
+            lower_hips(sk, &body, (&mut out_rots[f], &mut out[f]), dip, surfaces, limits)?;
+        }
     }
     Ok(Report {
         rotations: out_rots,
