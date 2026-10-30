@@ -1,6 +1,6 @@
 # Reliability and realism review: recheck of an outside review
 
-- **Status:** built, waiting for the owner (checked against the code on 2026-10-30, at `78837aa`)
+- **Status:** done (2026-10-30; checked against the code at `78837aa`)
 - **Requires:** none
 - **Source:** an outside review the owner pasted on 2026-10-30, written from a source dump, without
   running the app

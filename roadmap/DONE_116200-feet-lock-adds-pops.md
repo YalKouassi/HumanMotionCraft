@@ -1,6 +1,6 @@
 # Lock feet makes motion worse
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 115300
 - **Source:** 115100 (measured)
 

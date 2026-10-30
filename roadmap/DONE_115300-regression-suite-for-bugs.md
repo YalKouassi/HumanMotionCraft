@@ -1,6 +1,6 @@
 # A regression suite for reproduced bugs
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** none
 - **Source:** 115100
 

@@ -1,6 +1,6 @@
 # Impossible poses
 
-- **Status:** built, waiting for the owner to confirm (then rename to `DONE_120000-impossible-poses.md`)
+- **Status:** done (2026-10-30)
 - **Requires:** 101000, 103000
 - **Source:** old `ROADMAP.md` row 9
 
@@ -19,3 +19,7 @@ recorded twice).
 Every built-in reads typical or unusual in `clip.possible`; `fixtures/clip-possible.json` and
 `crates/ac-core/tests/possible.rs` pass; screenshots of the impossible and unusual banners in
 `target/shots/2026-10-29/possible/`.
+
+## Result
+2026-10-30. Confirmed by the owner. `crates/ac-core/tests/possible.rs` passes (3 tests). Banners:
+`target/shots/2026-10-29/possible/` (`impossible.png`, `unusual.png`).

@@ -1,6 +1,6 @@
 # AI evaluation suite
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 103000
 - **Source:** 115000 (review 1 §3, review 2 §10–11)
 

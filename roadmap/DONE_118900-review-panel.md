@@ -1,6 +1,6 @@
 # Review Animation panel
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 118600
 - **Source:** 115100
 
@@ -21,8 +21,8 @@ Through `drive_ui.py` or `--control`: a clip with a known slide shows its findin
 the playhead into the span, Fix lowers the number shown and one Ctrl+Z restores the clip;
 screenshots of a clean clip and a problem clip for the owner.
 
-## Built (2026-10-30)
-A Review section in the inspector, also dockable (`crates/ac-app/src/app/panels/review.rs`). "Review
+## Result
+2026-10-30. A Review section in the inspector, also dockable (`crates/ac-app/src/app/panels/review.rs`). "Review
 animation" in the File menu and the palette opens the same answer. It runs when asked, because it
 tries fixes on a copy, and its answer is dropped when the animation changes. Findings mark the
 timeline in the physics panel's colours.
@@ -34,6 +34,6 @@ so, and one Ctrl+Z restores the numbers and the keys. The script isn't in CI, as
 Screenshots: `target/shots/2026-10-30/review/` (`review-problem.png`, `review-fixed.png`,
 `review-clean.png`).
 
-For the owner to judge: on `Standing/Idle` the Physics section lists "Feet in the ground 0-178" while
+Accepted by the owner as it stands: on `Standing/Idle` the Physics section lists "Feet in the ground 0-178" while
 Review finds nothing. Both are right as written: Physics reports what its pass corrects in the keys,
 and Review measures what plays. It may still read as a contradiction.

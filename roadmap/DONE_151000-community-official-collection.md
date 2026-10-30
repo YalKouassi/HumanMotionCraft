@@ -1,10 +1,6 @@
 # Built-ins slimmed: most of the collection moves to the community
 
-- **Status:** built, waiting for the owner's look (the owner chose this, 2026-10-30). The owner
-  chose to keep all of Locomotion, since travel matches over every Locomotion clip (13 MB alone):
-  the starter set is the 42 Locomotion clips and 13 others, 55 in all, 17 MB, so the 10 MB line
-  below became about 17 MB. 169 clips are published under the Official account
-  (`services/community/official/ids.txt`, `assets/library/moved.json`).
+- **Status:** done (2026-10-30)
 - **Requires:** 149000, 150000
 - **Source:** owner's choice of option B, 2026-10-30 ("Option B i guess. without C")
 
@@ -30,3 +26,11 @@ generated for it (no option C).
 - `library.sync` on a library from before the move keeps every moved clip as a community install
   and retires nothing (a test in `crates/ac-io/tests/builtins.rs`).
 - `cargo xtask check` passes.
+
+## Result
+2026-10-30. Confirmed by the owner, who chose to keep all of Locomotion, since travel matches over every
+Locomotion clip (13 MB alone): the starter set is the 42 Locomotion clips and 13 others, 55 in all,
+17 MB, so the 10 MB line above became about 17 MB. 169 clips are published under the Official account
+(`services/community/official/ids.txt`, `assets/library/moved.json`); see
+`target/shots/2026-10-30/community/official.png`. The test is in `crates/ac-io/tests/builtins.rs`.
+The script publishes them at once, so they never went through the 150000 checker, which isn't built.
