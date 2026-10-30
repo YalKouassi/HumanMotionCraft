@@ -42,6 +42,7 @@ pub mod parts;
 pub mod physics;
 pub mod placement;
 pub mod posequery;
+pub mod posesource;
 pub mod possible;
 pub mod problems;
 pub mod product;

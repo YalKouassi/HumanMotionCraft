@@ -61,6 +61,9 @@ pub struct Document {
     pub physics_cache: Option<Arc<PhysicsCache>>,
     /// The learned in-betweener the front end loaded (`None`: AI fill is unavailable).
     pub ai: Option<Arc<dyn crate::ai::Inbetweener>>,
+    /// Where poses can be borrowed from (the front end's library; `None`: nowhere), for the
+    /// anchor poses of a long AI fill.
+    pub pose_source: Option<Arc<dyn crate::posesource::PoseSource>>,
     /// The settings AI fills run with.
     pub ai_settings: crate::ai::FillSettings,
     /// A fill shown but not kept yet (`ai.preview`); stale once the clip changes.
@@ -120,6 +123,7 @@ impl Document {
             ranges: None,
             physics_cache: None,
             ai: None,
+            pose_source: None,
             ai_settings: crate::ai::FillSettings::default(),
             ai_preview: None,
             ai_precomputed: None,

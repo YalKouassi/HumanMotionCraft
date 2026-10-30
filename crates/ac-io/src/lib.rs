@@ -8,6 +8,7 @@
     clippy::unreachable
 )]
 
+pub mod anchorlib;
 pub mod builtins;
 pub mod commands;
 pub mod community_record;
