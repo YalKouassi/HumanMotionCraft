@@ -1,6 +1,6 @@
 # Dynamic balance and weight transfer
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 115600, 117400
 - **Source:** 115100
 
@@ -47,3 +47,4 @@ Proof in `target/shots/2026-10-30/weight/` (`before.png`, `after.png`).
   planted `foot.L` doesn't move, but the lifted `foot.R` goes from (-0.177, -0.004, 0.223) to
   (-0.301, -0.067, 0.167): about 15 cm, carried with the hips. The fixture's "feet stay where they are"
   is only true of feet on the floor.
+- **Owner (2026-10-30):** accepted on the video, including the lifted foot moving with the hips and no upper body counterbalance.

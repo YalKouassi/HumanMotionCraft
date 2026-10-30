@@ -1,6 +1,6 @@
 # Heel-to-toe foot roll
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 117400
 - **Source:** 115100
 
@@ -42,3 +42,4 @@ physics pass, so it never runs unasked. `fixtures/feet-roll.json` works a stiff 
 - **Video (2026-10-30):** `target/shots/2026-10-30/videos/117700-foot-roll-feet-close-quarter-speed.mp4`,
   the stride's feet from the side at quarter speed. The toes rising at the start show clearly. The middle
   matches, as it should. The heel rise at the end is hard to see at this size. It is the stride only: it says nothing about a real walk or AI output.
+- **Owner (2026-10-30):** accepted on the video, knowing the pivot was measured on the stride, not a walk or AI output.

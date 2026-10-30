@@ -1,6 +1,6 @@
 # Foot contact phases
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 115600, 116200
 - **Source:** 115100
 
@@ -40,3 +40,4 @@ works a landing, a release and a one-frame skim by hand.
   keys beside physics on, with today's code. They aren't before and after: the old code wasn't built. They
   can show that physics on doesn't slide or jump on these clips, not that the phases made it better. That
   rests on the fixture and the ratchet.
+- **Owner (2026-10-30):** accepted on the videos, with keys beside physics on as the comparison.
