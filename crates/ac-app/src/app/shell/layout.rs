@@ -418,6 +418,7 @@ impl App {
         self.community_share_window(ui.ctx());
         self.physics_refresh();
         self.range_refresh();
+        self.fill_marks_drop_stale();
         self.sync_dock_flags();
 
         let l = self.shell.prefs.get().layout.clone();

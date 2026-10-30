@@ -78,6 +78,7 @@ Outputs:
 | `frames` | integer | yes |  | frames filled |
 | `model` | text | yes |  | the model label |
 | `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left (empty: none) |
+| `diagnostics` | JSON | yes |  | measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding\|path\|pop\|spin\|bent, from, to, text}] what is past a line, notes: what could not be measured} |
 
 ### `ai.fill_all`: AI fill all gaps
 
@@ -97,6 +98,7 @@ Outputs:
 | `skipped` | JSON | yes |  | the gaps left: [{from, to, reason}] |
 | `model` | text | yes |  | the model label |
 | `notes` | list of text | yes |  | impossible poses the fills made and bent back to the possible limit, or left (each starts with its gap, from–to; empty: none) |
+| `diagnostics` | JSON | yes |  | one per gap filled, in order, as ai.fill's: [{from, to, sliding, sliding_max_cm, path, seams, bent, flags, notes}] |
 
 ### `ai.gaps`: AI gaps
 
@@ -212,6 +214,7 @@ Outputs:
 | `cleared` | integer |  |  | plain: AI keys removed |
 | `model` | text |  |  | ai: the model label |
 | `notes` | list of text |  |  | ai: impossible poses the fill made and bent back, or left |
+| `diagnostics` | JSON |  |  | ai: why the fill might look wrong, measured, as ai.fill's |
 
 ## anim
 

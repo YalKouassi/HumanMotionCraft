@@ -80,7 +80,17 @@ pub const AI_FILL: &[ParamSpec] = &[
         "impossible poses the fill made and bent back to the possible limit, or left (empty: none)",
     )
     .required(),
+    DIAGNOSTICS,
 ];
+
+/// Why a fill might look wrong, measured (`crate::filldiag`).
+const DIAGNOSTICS: ParamSpec = ParamSpec::new(
+    "diagnostics",
+    Kind::Text,
+    "measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding|path|pop|spin|bent, from, to, text}] what is past a line, notes: what could not be measured}",
+)
+.json()
+.required();
 
 pub const AI_SETTINGS: &[ParamSpec] = &[
     ParamSpec::new("style", Kind::Text, "the style").required(),
@@ -241,6 +251,13 @@ pub const AI_FILL_ALL: &[ParamSpec] = &[
         "impossible poses the fills made and bent back to the possible limit, or left (each starts with its gap, from–to; empty: none)",
     )
     .required(),
+    ParamSpec::new(
+        "diagnostics",
+        Kind::Text,
+        "one per gap filled, in order, as ai.fill's: [{from, to, sliding, sliding_max_cm, path, seams, bent, flags, notes}]",
+    )
+    .json()
+    .required(),
 ];
 
 pub const AI_TOGGLE: &[ParamSpec] = &[
@@ -254,4 +271,10 @@ pub const AI_TOGGLE: &[ParamSpec] = &[
         Kind::TextList,
         "ai: impossible poses the fill made and bent back, or left",
     ),
+    ParamSpec::new(
+        "diagnostics",
+        Kind::Text,
+        "ai: why the fill might look wrong, measured, as ai.fill's",
+    )
+    .json(),
 ];

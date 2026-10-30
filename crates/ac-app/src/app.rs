@@ -224,6 +224,7 @@ impl App {
         {
             status = format!("couldn't open {id}: {e}");
         }
+        let mut fills: Vec<(String, Value)> = Vec::new();
         if let Some(path) = &args.script {
             let steps = std::fs::read_to_string(path)
                 .map_err(|e| e.to_string())
@@ -237,9 +238,14 @@ impl App {
                 .unwrap_or_default();
             for step in steps {
                 let id = step["command"].as_str().unwrap_or_default();
-                if let Err(e) = session.run(id, &step.get("params").cloned().unwrap_or(json!({}))) {
-                    status = format!("script: {id}: {e}");
-                    break;
+                match session.run(id, &step.get("params").cloned().unwrap_or(json!({}))) {
+                    // a fill's diagnostics mark the timeline once the window exists
+                    Ok(v) if id.starts_with("ai.") => fills.push((id.to_string(), v)),
+                    Ok(_) => {}
+                    Err(e) => {
+                        status = format!("script: {id}: {e}");
+                        break;
+                    }
                 }
             }
         }
@@ -306,6 +312,9 @@ impl App {
         app.refresh_library();
         app.restore_prefs();
         app.files_start(scripted, agent);
+        for (id, v) in &fills {
+            app.fill_marks(id, v);
+        }
         for (k, v) in &args.ui {
             app.set_ui(k, v).map_err(|e| format!("--ui {k}={v}: {e}"))?;
         }
@@ -410,7 +419,10 @@ impl App {
         };
         self.announce(id, "ui", &told);
         match out {
-            Ok(v) => Some(v),
+            Ok(v) => {
+                self.fill_marks(id, &v);
+                Some(v)
+            }
             Err(e) => {
                 self.refused(id, &e);
                 None

@@ -582,7 +582,10 @@ fn ai_fill(doc: &mut Document, p: &P) -> Out {
         _ => return Err("give both `from` and `to`, or neither".into()),
     };
     let f = doc.ai_fill(span)?;
-    Ok(json!({ "from": f.from, "to": f.to, "frames": f.to - f.from - 1, "model": f.model, "notes": f.notes }))
+    let d = crate::filldiag::diagnose(doc, &f).json();
+    Ok(
+        json!({ "from": f.from, "to": f.to, "frames": f.to - f.from - 1, "model": f.model, "notes": f.notes, "diagnostics": d }),
+    )
 }
 
 /// A previewed fill: its span, label and the root head on every frame of it (the ghost path).
