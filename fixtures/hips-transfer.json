@@ -1,0 +1,199 @@
+{
+  "$schema": "./schema.json",
+  "name": "hips-transfer",
+  "feature": "hips.transfer",
+  "description": "Weight on the wrong side, keyed by hand: over 30 frames the hips go 43.5 cm (0.5 hip heights) along +X, past the left foot, then back, with the right foot lifting 15 cm and both feet staying where they are. The body moves at about 0.9 m/s at the hips, so it doesn't count as standing, and over a second it goes less than 30 cm, so it is going nowhere and the whole gap counts. The feet's outer edge is only about 25 cm out, so the capture point is 26.3 cm past it (the formula is worked by hand in crates/ac-core/tests/weight.rs). `hips.transfer` moves the hips back, soft enough not to add speed; the worst gap falls to 15.8 cm and the frames out from 28 to 18, with the feet where they were (the slide is unchanged) and no pops. `left_cm` says how much is left: a round that doesn't help is thrown away, so a clip it can't improve keeps its keys.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "pose.reset",
+      "params": {}
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.8
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "foot.L",
+        "by": [
+          0,
+          0,
+          0.1261
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "foot.R",
+        "by": [
+          0,
+          0,
+          0.1261
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 30
+      }
+    },
+    {
+      "command": "pose.reset",
+      "params": {}
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0.5,
+          0,
+          0.8
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "foot.L",
+        "by": [
+          -0.4349,
+          0,
+          0.1261
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "foot.R",
+        "by": [
+          -0.4349,
+          0,
+          0.2761
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 60
+      }
+    },
+    {
+      "command": "pose.reset",
+      "params": {}
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.8
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "foot.L",
+        "by": [
+          0,
+          0,
+          0.1261
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "foot.R",
+        "by": [
+          0,
+          0,
+          0.1261
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "motion": "keys"
+      },
+      "expect": {
+        "capture": {
+          "frames": 28,
+          "max_cm": 26.257
+        },
+        "sliding_max_cm": 3.5316,
+        "pops": 0
+      }
+    },
+    {
+      "command": "hips.transfer",
+      "params": {},
+      "expect": {
+        "frames": 41,
+        "left_cm": 15.77
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "motion": "keys"
+      },
+      "expect": {
+        "capture": {
+          "frames": 18,
+          "max_cm": 15.77
+        },
+        "sliding_max_cm": 3.5292,
+        "pops": 0
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 0.01
+  },
+  "errors": [
+    {
+      "command": "hips.transfer",
+      "params": {
+        "frames": 5
+      }
+    }
+  ]
+}

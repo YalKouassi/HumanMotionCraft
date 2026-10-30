@@ -10,6 +10,7 @@
 //! | sliding (cm a planted foot slides) | 2 | 4 | 10 |
 //! | penetration (cm below the ground) | 0.1 | 0.5 | 2 |
 //! | balance (cm outside the support, still frames) | 0 | 2 | 5 |
+//! | capture (cm to the side of the feet, moving frames) | 8 | 15 | 30 |
 //! | limits (degrees past a joint's range) | 1 | 10 | 30 |
 //! | pop (m/s velocity change at a key) | 1 | 1.5 | 3 |
 //!
@@ -47,7 +48,7 @@ fn severity(x: f64, lines: [f64; 3]) -> Option<usize> {
 }
 
 const SEVERITY: [&str; 3] = ["low", "medium", "high"];
-const KINDS: [&str; 5] = ["penetration", "sliding", "balance", "limits", "pop"];
+const KINDS: [&str; 6] = ["penetration", "sliding", "balance", "capture", "limits", "pop"];
 
 fn side(foot: &str) -> &'static str {
     if foot == "L" { "left" } else { "right" }
@@ -162,6 +163,24 @@ pub fn findings(doc: &Document, m: &Metrics, limit: usize) -> Vec<Value> {
                 }
             ),
             batch,
+        });
+    }
+    let cap = &m.capture;
+    let tolerated = crate::weight::TOLERATED * 100.0;
+    if let (Some(w), Some(sev)) = (cap.worst_frame, severity(cap.worst, [tolerated, 15.0, 30.0])) {
+        let runs = cap.runs();
+        let (a, b) = (runs.first().map_or(w, |r| r[0]), runs.last().map_or(w, |r| r[1]));
+        out.push(Finding {
+            kind: "capture",
+            severity: sev,
+            score: cap.worst / 30.0,
+            frames: [a, b],
+            message: format!(
+                "The body's weight is heading {:.1} cm to the side of its feet on {} (worst on frame {w}): the feet it has or is about to have can't catch it. Shift the hips over them.",
+                cap.worst,
+                span_text(a, b),
+            ),
+            batch: vec![("hips.transfer".to_string(), json!({}))],
         });
     }
     for s in m.limits.iter().flatten() {

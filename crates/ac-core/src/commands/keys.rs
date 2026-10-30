@@ -181,6 +181,10 @@ pub static SPECS: &[CommandSpec] = &[
         .icon("foot")
         .undoable()
         .outputs(returns::FEET_ROLL),
+    CommandSpec::new("hips.transfer", "Shift weight over the feet", hips_transfer)
+        .icon("foot")
+        .undoable()
+        .outputs(returns::HIPS_TRANSFER),
     CommandSpec::new("ai.keep", "Keep AI keys", ai_keep)
         .icon("keep")
         .undoable()
@@ -537,6 +541,11 @@ fn feet_lock(doc: &mut Document, _: &P) -> Out {
 fn feet_roll(doc: &mut Document, _: &P) -> Out {
     let (frames, short) = doc.roll_feet()?;
     Ok(json!({ "frames": frames, "short": short }))
+}
+
+fn hips_transfer(doc: &mut Document, _: &P) -> Out {
+    let (frames, left) = doc.transfer_weight()?;
+    Ok(json!({ "frames": frames, "left_cm": left }))
 }
 
 /// A frame range from `from` and `to`; refuses one that runs backwards.

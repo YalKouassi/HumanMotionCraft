@@ -402,7 +402,7 @@ fn nearest_on_segment(a: [f64; 2], b: [f64; 2], q: [f64; 2]) -> [f64; 2] {
 }
 
 /// Nearest point of the hull's outline to `q`.
-fn nearest(hull: &[[f64; 2]], q: [f64; 2]) -> [f64; 2] {
+pub(crate) fn nearest(hull: &[[f64; 2]], q: [f64; 2]) -> [f64; 2] {
     match hull.len() {
         0 => q,
         1 => hull[0],
@@ -494,7 +494,7 @@ fn feet_goals(sk: &Skeleton, body: &Body, world: &[Mat3], pos: &[Vec3], surfaces
 }
 
 /// Move the hips by `by` (metres, across the floor), the feet held.
-fn shift_hips(
+pub(crate) fn shift_hips(
     sk: &Skeleton,
     body: &Body,
     pose: (&mut Vec<Quat>, &mut Vec3),
@@ -518,7 +518,7 @@ fn shift_hips(
 
 /// How far (metres) frame `f`, itself not balanced, moves for the balanced frames near it: between
 /// two close ones it goes from one's move to the other's; otherwise each fades out alone.
-fn faded(balanced: &[usize], moved: &[[f64; 2]], f: usize) -> [f64; 2] {
+pub(crate) fn faded(balanced: &[usize], moved: &[[f64; 2]], f: usize) -> [f64; 2] {
     let smooth = |u: f64| u * u * (3.0 - 2.0 * u);
     let reach = BALANCE_FADE + 1;
     let at = balanced.partition_point(|&b| b < f);

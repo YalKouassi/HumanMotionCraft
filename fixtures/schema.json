@@ -155,6 +155,7 @@
             "feet.plant",
             "feet.roll",
             "frame.set",
+            "hips.transfer",
             "key.channel",
             "key.copy",
             "key.delete",
@@ -2881,6 +2882,31 @@
                 "required": [
                   "frame"
                 ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "hips.transfer"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Shift weight over the feet; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
                 "additionalProperties": false
               }
             }
@@ -6302,6 +6328,7 @@
             "feet.plant",
             "feet.roll",
             "frame.set",
+            "hips.transfer",
             "key.channel",
             "key.copy",
             "key.delete",

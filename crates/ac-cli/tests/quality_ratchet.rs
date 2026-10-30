@@ -69,6 +69,7 @@ fn measure(s: &mut Session, id: &str) -> Value {
             "slide_cm": round(m["sliding_max_cm"].as_f64().unwrap()),
             "penetration_cm": round(m["penetration"]["max_cm"].as_f64().unwrap_or(0.0)),
             "balance_frames": m["balance"]["frames"],
+            "capture_cm": round(m["capture"]["max_cm"].as_f64().unwrap_or(0.0)),
             "pops": m["pops"],
             "worst_dv": round(dv),
         })

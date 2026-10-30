@@ -51,6 +51,7 @@ pub mod rig;
 pub mod session;
 pub mod suggest;
 pub mod travel;
+pub mod weight;
 
 pub use command::{CommandSpec, Form, Kind, ParamSpec};
 pub use document::{Document, Pose};

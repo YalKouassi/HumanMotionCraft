@@ -525,6 +525,7 @@ Outputs:
 | `sliding_max_cm` | number | yes |  | the worst slide |
 | `penetration` | JSON | yes |  | {frames, spans: [[a, b]], max_cm, worst_frame, joint}: below the ground |
 | `balance` | JSON | yes |  | {frames, spans, max_cm, worst_frame, moving_frames}: still frames with the centre of mass outside the feet |
+| `capture` | JSON | yes |  | {frames, spans, max_cm, worst_frame}: a moving body's capture point outside the feet it has or is about to have |
 | `limits` | JSON | yes |  | [{bone, frames, spans, max_deg, worst_frame}] past their joint limits, worst first (null: no limits loaded) |
 | `keys` | JSON | yes |  | [{frame, dv, joint}]: at each key, the largest velocity change (m/s) and its joint |
 | `pops` | integer | yes |  | keys whose velocity change is over 1 m/s |
@@ -1240,6 +1241,21 @@ Outputs:
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `frame` | number | yes |  | the playhead |
+
+## hips
+
+### `hips.transfer`: Shift weight over the feet
+
+undoable, icon `foot`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frames` | integer | yes |  | frames changed |
+| `left_cm` | number | yes |  | the worst gap left, to the side of the feet |
 
 ## key
 

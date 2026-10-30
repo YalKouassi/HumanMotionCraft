@@ -25,6 +25,7 @@ use serde_json::{Value, json};
 use crate::document::{Document, Pose};
 use crate::physics::{self, Body};
 use crate::quat::{self, Quat, Vec3};
+use crate::weight;
 
 type R<T> = Result<T, String>;
 
@@ -108,6 +109,8 @@ pub struct Metrics {
     pub sliding: Vec<Slide>,
     pub penetration: Spans,
     pub balance: Spans,
+    /// Frames a moving body's capture point is outside the feet it has or is about to have.
+    pub capture: Spans,
     /// Frames out of balance while moving (not counted as problems).
     pub moving_outside: usize,
     /// Per bone past its limits; `None`: no limits loaded.
@@ -186,6 +189,7 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
         sliding: sliding(doc, &frames, lo, a, b, fps),
         penetration: Spans::default(),
         balance: Spans::default(),
+        capture: Spans::default(),
         moving_outside: 0,
         limits: None,
         keys: Vec::new(),
@@ -198,7 +202,20 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
         .collect();
     let coms: Vec<Vec3> = frames.iter().map(|fr| fr.com).collect();
     let stands = physics::standing(&feet, &coms, fps);
+    let samples: Vec<weight::Sample> = frames
+        .iter()
+        .map(|fr| weight::Sample {
+            feet: fr.feet.clone(),
+            com: fr.com,
+            rests: body.rests(&fr.pos, &doc.clip.surfaces),
+        })
+        .collect();
+    let gaps = weight::gaps(&samples, fps, &doc.clip.surfaces);
     for f in a..=b {
+        if let Some(Some(g)) = gaps.get((f - lo) as usize) {
+            m.capture.add(f, g.outside * 100.0, "");
+        }
+
         let (Some(fr), Some(pose)) = (at(f), poses.get((f - lo) as usize)) else {
             continue;
         };
@@ -533,6 +550,7 @@ impl Metrics {
             "sliding_max_cm": r4(self.sliding.iter().map(|s| s.slide_cm).fold(0.0, f64::max)),
             "penetration": pen,
             "balance": bal,
+            "capture": self.capture.json("cm"),
             "limits": limits,
             "keys": self.keys.iter().map(|p| json!({ "frame": p.frame, "dv": r4(p.dv), "joint": p.joint })).collect::<Vec<_>>(),
             "pops": self.keys.iter().filter(|p| p.dv > POP_SPEED).count(),

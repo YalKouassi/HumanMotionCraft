@@ -47,6 +47,13 @@ const METRICS_OUT: &[ParamSpec] = &[
     .json()
     .required(),
     ParamSpec::new(
+        "capture",
+        Kind::Text,
+        "{frames, spans, max_cm, worst_frame}: a moving body's capture point outside the feet it has or is about to have",
+    )
+    .json()
+    .required(),
+    ParamSpec::new(
         "limits",
         Kind::Text,
         "[{bone, frames, spans, max_deg, worst_frame}] past their joint limits, worst first (null: no limits loaded)",

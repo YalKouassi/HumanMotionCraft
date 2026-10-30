@@ -675,6 +675,26 @@ impl Document {
         Ok(())
     }
 
+    /// As [`Document::write_solved`], where the root moved too.
+    pub(crate) fn write_moved(
+        &mut self,
+        changed: &BTreeSet<usize>,
+        rots: &[Vec<Quat>],
+        roots: &[Vec3],
+        tag: &str,
+    ) -> R<()> {
+        self.write_solved(changed, 0, rots, roots, tag)?;
+        for k in keys_mut(&mut self.clip)?.iter_mut() {
+            let n = k.frame.max(0) as usize;
+            if changed.contains(&n)
+                && let Some(o) = roots.get(n)
+            {
+                k.root = *o;
+            }
+        }
+        Ok(())
+    }
+
     /// Pin each planted foot to one spot for its whole contact, easing in and out of it over
     /// [`LOCK_FADE`] frames either side; returns frames changed.
     pub fn lock_feet(&mut self) -> R<usize> {
