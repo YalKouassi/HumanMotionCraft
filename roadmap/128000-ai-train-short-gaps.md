@@ -18,3 +18,6 @@ the other bins are no worse than today's.
 2026-10-30. Training draws a gap bin by `--gap-mix` (default 0.15 / 0.2 / 0.2 / 0.2 / 0.25 for 1–4,
 5–10, 11–20, 21–30, 31–45), then a length in it (`train.sample_gap`, `tests/test_train.py`). The
 shipped model's 1–4 bin is 5.5 mm against the interpolation's 4.1 mm (126000): the number to beat.
+
+## Measured by the retrain
+2026-10-30 (134000, its Result has the table). Gaps 1-4: 3.1 mm against the old model's 4.9 and interpolation's 4.4, as asked. The other bins are worse than the old model's, so this line is not fully met. 134500 is on them.

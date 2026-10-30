@@ -321,6 +321,7 @@ def main(argv=None):
                     help="shares of the gap bins " + " ".join(evaluate.bin_name(*b) for b in evaluate.BINS))
     ap.add_argument("--context", default=",".join(f"{k}={v}" for k, v in CONTEXT_MIX.items()),
                     help="shares of the contexts: " + ", ".join(context.MODES))
+    ap.add_argument("--given", type=float, default=GIVEN[0], help="share of the windows with a part mask")
     ap.add_argument("--loss-weights", default="", help="change loss weights: pos=2,vel=0.5 (" + ", ".join(losses.WEIGHTS) + ")")
     ap.add_argument("--no-contacts", action="store_true", help="no foot-contact head (the network's output as before)")
     ap.add_argument("--no-warp", action="store_true", help="no speed change")
@@ -409,7 +410,7 @@ def main(argv=None):
             rows = noisy.nonzero().flatten()
             q[rows], root[rows] = context.noise(q[rows], root[rows], a, NOISE[1], NOISE[2], skel.hip_height)
         truth, interp, mask, ttg, _, _ = prepare(q, root, g, body, device)
-        gm = given_mask(q.shape[0], device)
+        gm = given_mask(q.shape[0], device, p=args.given)
         path, pmask = path_given(truth, mask)
         pred, logits = model(truth, interp, mask, ttg, style, gmask=gm, with_contacts=True, path=path, pmask=pmask)
         parts = losses.terms(pred, truth, gm, a, b, body, logits)
@@ -455,7 +456,7 @@ def main(argv=None):
         "given": True, "contacts": contacts, "path": True,
         "augment": ["mirror 0.5 (side styles swapped)", f"tumble {TUMBLE} ({', '.join(TUMBLE_TYPES)} only)",
                     f"speed {WARP[0]}-{WARP[1]}x (not {', '.join(STEADY_TYPES)})" if warp else "no speed change",
-                    f"given parts {GIVEN[0]} ({GIVEN[1]} of them the complement of a part, as a part layer sends)",
+                    f"given parts {args.given} ({GIVEN[1]} of them the complement of a part, as a part layer sends)",
                     f"root path {PATH_GIVEN[0]} (smoothed over {', '.join(map(str, PATH_GIVEN[1]))} frames)",
                     f"context {json.dumps(ctx_mix)}", f"noise on {NOISE[0]} of the spline contexts ({NOISE[1]} deg, {NOISE[2]} m)",
                     f"gaps by bin {dict(zip((evaluate.bin_name(*x) for x in evaluate.BINS), gap_mix))}",

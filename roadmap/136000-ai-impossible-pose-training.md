@@ -28,3 +28,6 @@ The evaluation now has that case (126000, "posed keys": two built-in poses, the 
 turned). The shipped model makes **17** impossible frames per 1,000 there (interpolation 20), so
 this item's acceptance is measured on the posed keys: the retrain's count there against 17, with
 joint error on the recordings no worse.
+
+## Measured by the retrain
+2026-10-30 (134000, its Result has the table). Posed keys: 19.8 impossible frames per 1,000 against the old model's 17. **Not met**.

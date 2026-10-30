@@ -32,3 +32,6 @@ the blend afterwards decides how far the root follows it.
 
 The evaluation's root-path case (126000) puts `given` beside `blend`: the acceptance is `given`'s
 `slide_ms` under `blend`'s in the retrain's card.
+
+## Measured by the retrain
+2026-10-30 (134000, its Result has the table). Foot slide with the path given 0.0738 m/s against 0.0772 with the blend alone: met, by 4 %.
