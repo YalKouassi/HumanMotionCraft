@@ -1,7 +1,9 @@
 //! The in-betweener network (the prototype's `Inbetweener`), forward pass only, in f32.
 //!
 //! Per frame the input is `[known * mask, interp, mask, time-to-go, given bones, root path]` (the
-//! path: x, y, z times its flag, and the flag; models whose card says `path`, 141000); a linear layer
+//! time: one value, to the last key, or two on a model whose card says `multi_key` (142000): to the
+//! next known frame and from the last; the path: x, y, z times its flag, and the flag; models
+//! whose card says `path`, 141000); a linear layer
 //! takes it to `d` wide, plus a learned position (and style) embedding; then pre-norm transformer
 //! encoder layers (full self-attention over the window, ReLU feed-forward); then a layer norm and a
 //! linear layer give a change to the plain interpolation. A model with a contact head (`contact`)
@@ -173,6 +175,10 @@ pub struct Net {
     pub given: usize,
     /// Takes the root path across the gap ([`Net::forward_contacts`]'s `path`).
     pub path: bool,
+    /// Trained with several known frames in a window (the card's `multi_key`, 142000): the time
+    /// channel is two values a frame (to the next known frame, from the last), else one (to the
+    /// last key).
+    pub multi_key: bool,
     pub styles: usize,
 }
 
@@ -269,8 +275,10 @@ impl Net {
             _ => return Err("weights: bad input layer".into()),
         };
         let path = card["path"].as_bool().unwrap_or(false);
+        let multi_key = card["multi_key"].as_bool().unwrap_or(false);
+        let times = if multi_key { 2 } else { 1 };
         let given = inp_w
-            .checked_sub(feat * 2 + 2 + if path { PATH } else { 0 })
+            .checked_sub(feat * 2 + 1 + times + if path { PATH } else { 0 })
             .ok_or("weights: input narrower than the features")?;
         let style = t.shape("style.weight").map(|s| s.to_vec());
         let styles = style.as_ref().map_or(0, |s| s[0]);
@@ -322,9 +330,20 @@ impl Net {
             feat,
             given,
             path,
+            multi_key,
             styles,
         };
         Ok((net, card))
+    }
+
+    /// Time values a frame ([`Net::forward_contacts`]'s `ttg`): 2 on a `multi_key` model, else 1.
+    pub fn times(&self) -> usize {
+        if self.multi_key { 2 } else { 1 }
+    }
+
+    /// Most frames a window holds (the position embedding's rows).
+    pub fn window(&self) -> usize {
+        self.pos_rows
     }
 
     /// Feature mask of the given bones: 6 numbers a bone, the root position goes with bone 0.
@@ -339,8 +358,9 @@ impl Net {
         self.contact.is_some()
     }
 
-    /// One pass. `known`, `interp`: T x feat; `mask`, `ttg`: T; `style`: an index (models with
-    /// styles); `gmask`: one per given bone (models that take them). Returns T x feat.
+    /// One pass. `known`, `interp`: T x feat; `mask`: T; `ttg`: T x [`Net::times`]; `style`: an
+    /// index (models with styles); `gmask`: one per given bone (models that take them). Returns
+    /// T x feat.
     pub fn forward(
         &self,
         known: &[f32],
@@ -371,10 +391,16 @@ impl Net {
         path: Option<(&[f32], &[f32])>,
     ) -> R<(Vec<f32>, Option<Vec<f32>>)> {
         let (f, d) = (self.feat, self.d);
+        let times = self.times();
         let t = mask.len();
-        if t == 0 || t > self.pos_rows || known.len() != t * f || interp.len() != t * f || ttg.len() != t {
+        if t == 0
+            || t > self.pos_rows
+            || known.len() != t * f
+            || interp.len() != t * f
+            || ttg.len() != t * times
+        {
             return Err(format!(
-                "network input: {t} frames (1..{}) with {f} features each",
+                "network input: {t} frames (1..{}) with {f} features and {times} time values each",
                 self.pos_rows
             ));
         }
@@ -395,7 +421,7 @@ impl Net {
             p => p.filter(|_| self.path),
         };
         // input rows
-        let w = f * 2 + 2 + self.given + if self.path { PATH } else { 0 };
+        let w = f * 2 + 1 + times + self.given + if self.path { PATH } else { 0 };
         let mut x = Vec::with_capacity(t * w);
         for i in 0..t {
             for k in 0..f {
@@ -404,7 +430,7 @@ impl Net {
             }
             x.extend_from_slice(&interp[i * f..(i + 1) * f]);
             x.push(mask[i]);
-            x.push(ttg[i]);
+            x.extend_from_slice(&ttg[i * times..(i + 1) * times]);
             x.extend_from_slice(g);
             if self.path {
                 let (p, m) = path.map_or(([0.0; 3], 0.0), |(p, pm)| {

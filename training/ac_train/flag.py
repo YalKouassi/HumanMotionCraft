@@ -126,7 +126,8 @@ def evaluate_set(model, card: dict, name: str, body, device, decisions: dict, ga
     window, and the set's record (takes, frames, digest, evaluated, skipped)."""
     import torch
 
-    from .model import BONES, CONTEXT
+    from .evaluate import window_of
+    from .model import BONES, layout
     from .rig import Skeleton
     from .train import prepare
 
@@ -141,8 +142,8 @@ def evaluate_set(model, card: dict, name: str, body, device, decisions: dict, ga
         log(f"  {note}")
     ends = [*list(starts[1:]), len(rot_np)]
     frames = [int(e - s) for s, e in zip(starts, ends)]
-    T = CONTEXT + gap + 1
-    a, b = CONTEXT - 1, CONTEXT + gap
+    win = window_of(model)
+    a, b, T = layout(gap, win["after"])
     win_take, win_start = [], []
     for i, (s, t) in enumerate(zip(starts, plan.takes)):
         fine = review.starts(t, T)[::stride]
@@ -165,7 +166,7 @@ def evaluate_set(model, card: dict, name: str, body, device, decisions: dict, ga
             st = torch.tensor(win_start[k : k + batch], device=device)
             tk = torch.tensor(win_take[k : k + batch], device=device)
             i = st[:, None] + ar
-            truth, interp, mask, ttg, _, _ = prepare(rot[i], root[i], gap, body, device)
+            truth, interp, mask, ttg, _, _ = prepare(rot[i], root[i], gap, body, device, **win)
             out = model(truth, interp, mask, ttg, style[tk], with_contacts=True)
             pred, logits = out if isinstance(out, tuple) else (out, None)
             terms = losses.window_terms(pred, truth, a, b, body, logits)

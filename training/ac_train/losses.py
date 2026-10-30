@@ -37,17 +37,22 @@ def _point_weights(device):
     return w / w.mean()
 
 
-def terms(pred, truth, gm, a: int, b: int, body: Body, contacts=None) -> dict[str, torch.Tensor]:
+def terms(pred, truth, gm, a: int, b: int, body: Body, contacts=None, mask=None) -> dict[str, torch.Tensor]:
     """The loss terms of a batch. ``pred``, ``truth`` (N, T, FEAT) features of the windows (truth's
     known frames are the inputs), ``gm`` (N, J) the given bones, ``a``, ``b`` key A and key B,
-    ``contacts`` (N, T, 2) the contact logits (models with the head)."""
+    ``contacts`` (N, T, 2) the contact logits (models with the head), ``mask`` (N, T, 1) each
+    window's known frames (default: everything but the gap; a multi-key window also knows some
+    frames inside it, and they count as given back)."""
     hip = body.hip_height
     g = b - a - 1
     gap = slice(a + 1, b)
     # the fill as the app keeps it: the network's gap frames between the known ones (its output on
     # a known frame is never used)
-    known = torch.ones(pred.shape[1], 1, device=pred.device)
-    known[gap] = 0
+    if mask is None:
+        known = torch.ones(pred.shape[1], 1, device=pred.device)
+        known[gap] = 0
+    else:
+        known = mask
     pred = pred * (1 - known) + truth * known
     out = {}
     free = 1 - given_features(gm)  # given bones are copied: no loss on them

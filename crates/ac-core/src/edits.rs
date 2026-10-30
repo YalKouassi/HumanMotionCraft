@@ -33,6 +33,14 @@ pub trait Filler {
     fn long(&self) -> bool {
         false
     }
+    /// Several of your keys at once (a model trained with several keys in a window): the frames
+    /// `keys[0]+1 .. keys[last]-1`, the keys inside given back as they are. The default refuses.
+    fn fill_keys(&self, _clip: &Clip, keys: &[i64]) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
+        Err(format!(
+            "filling the gaps between {} keys in one pass is not supported by this filler",
+            keys.len()
+        ))
+    }
 }
 
 /// Frames either side of a foot's contact over which a lock eases in and out.
@@ -192,25 +200,75 @@ pub fn refill(clip: &mut Clip, a: i64, b: i64, filler: &dyn Filler, links: &dyn 
         return Ok(format!("{a}-{b}: gap over {MAX_FILL} frames, left to the spline"));
     }
     let (mut rots, mut roots, tag) = filler.fill(clip, a, b)?;
+    on_top(clip, a, b, &mut rots, &mut roots, links)?;
+    for (i, (r, o)) in rots.into_iter().zip(roots).enumerate() {
+        let mut k = Key::new(a + 1 + i as i64, r, o, Interp::Smooth);
+        k.source = KeySource::Ai;
+        k.model = tag.clone();
+        clip.set_key(k)?;
+    }
+    Ok(String::new())
+}
+
+/// On an additive layer a fill is a whole pose: keep its turn on top of the layers below.
+/// `rots`, `roots`: the frames `a+1 .. b-1`.
+fn on_top(
+    clip: &Clip,
+    a: i64,
+    b: i64,
+    rots: &mut [Vec<Quat>],
+    roots: &mut [Vec3],
+    links: &dyn Links,
+) -> R<()> {
     let additive = clip
         .layers
         .get(clip.edit)
         .is_some_and(|l| l.mode == LayerMode::Additive);
-    if additive {
-        // the fill is a whole pose: keep its turn on top of the layers below
-        let frames: Vec<f64> = ((a + 1)..b).map(|f| f as f64).collect();
-        let (br, bo) = clip.sample_below(&frames, clip.edit, links)?;
-        for (i, fr) in rots.iter_mut().enumerate() {
-            for (q, base) in fr.iter_mut().zip(br.get(i).into_iter().flatten()) {
-                *q = quat::normalize(quat::mul(quat::conj(*base), *q));
-            }
-            if let (Some(o), Some(base)) = (roots.get_mut(i), bo.get(i)) {
-                *o = quat::sub3(*o, *base);
-            }
+    if !additive {
+        return Ok(());
+    }
+    let frames: Vec<f64> = ((a + 1)..b).map(|f| f as f64).collect();
+    let (br, bo) = clip.sample_below(&frames, clip.edit, links)?;
+    for (i, fr) in rots.iter_mut().enumerate() {
+        for (q, base) in fr.iter_mut().zip(br.get(i).into_iter().flatten()) {
+            *q = quat::normalize(quat::mul(quat::conj(*base), *q));
+        }
+        if let (Some(o), Some(base)) = (roots.get_mut(i), bo.get(i)) {
+            *o = quat::sub3(*o, *base);
         }
     }
+    Ok(())
+}
+
+/// Replace the fills between neighbouring manual keys `keys` (in frame order) in one pass
+/// ([`Filler::fill_keys`]): the keys themselves stay, every frame between them becomes an AI
+/// key. Returns a note ("" when filled).
+pub fn refill_keys(clip: &mut Clip, keys: &[i64], filler: &dyn Filler, links: &dyn Links) -> R<String> {
+    let (Some(&a), Some(&z)) = (keys.first(), keys.last()) else {
+        return Err("a fill over several keys needs two or more".into());
+    };
+    for w in keys.windows(2) {
+        let &[p, q] = w else { continue };
+        clear_ai(clip, p, q)?;
+    }
+    if z - a - 1 < 1 {
+        return Ok(String::new());
+    }
+    let (mut rots, mut roots, tag) = filler.fill_keys(clip, keys)?;
+    if rots.len() != (z - a - 1) as usize || roots.len() != rots.len() {
+        return Err(format!(
+            "the fill over {a}–{z} gave {} frames for {}",
+            rots.len(),
+            z - a - 1
+        ));
+    }
+    on_top(clip, a, z, &mut rots, &mut roots, links)?;
     for (i, (r, o)) in rots.into_iter().zip(roots).enumerate() {
-        let mut k = Key::new(a + 1 + i as i64, r, o, Interp::Smooth);
+        let f = a + 1 + i as i64;
+        if keys.contains(&f) {
+            continue; // a key of yours inside the stretch stays as it is
+        }
+        let mut k = Key::new(f, r, o, Interp::Smooth);
         k.source = KeySource::Ai;
         k.model = tag.clone();
         clip.set_key(k)?;

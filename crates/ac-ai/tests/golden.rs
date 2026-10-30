@@ -126,9 +126,25 @@ fn fills_match_the_reference() {
             .map(|x| x.as_str().unwrap().to_string())
             .collect();
         let given = (!given.is_empty()).then_some(given.as_slice());
-        let (rots, roots) = m
-            .fill(&sk, &clip, &ac_core::clip::NoLinks, a, b, &s, given)
-            .unwrap();
+        // keys inside the stretch (a model trained with several keys in a window): one pass
+        let inner: Vec<i64> = case["keys"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|x| x.as_i64().unwrap())
+            .collect();
+        let (rots, roots) = if inner.is_empty() {
+            m.fill(&sk, &clip, &ac_core::clip::NoLinks, a, b, &s, given)
+                .unwrap()
+        } else {
+            let mut keys = vec![a];
+            keys.extend(&inner);
+            keys.push(b);
+            let (r, o, _) = m
+                .fill_keys(&sk, &clip, &ac_core::clip::NoLinks, &keys, &s, given)
+                .unwrap();
+            (r, o)
+        };
         let want_r = case["rotations"].as_array().unwrap();
         let want_o = case["roots"].as_array().unwrap();
         assert_eq!(rots.len(), want_r.len());
@@ -165,7 +181,7 @@ fn fills_match_the_reference() {
             "case {a}-{b}: root off by {worst_root} hip heights"
         );
         eprintln!("case {a}-{b}: worst bone {worst_angle:.2e} rad, worst root {worst_root:.2e}");
-        if s.ai_force == 0.0 && s.trajectory == 0.0 && s.head == 0.0 && given.is_none() {
+        if s.ai_force == 0.0 && s.trajectory == 0.0 && s.head == 0.0 && given.is_none() && inner.is_empty() {
             plain_interpolation_comes_back(&m, &sk, &clip, a, b, &rots, &roots);
         }
     }

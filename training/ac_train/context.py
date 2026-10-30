@@ -7,8 +7,9 @@ context from a few of its own frames as keys, with the app's interpolation (:mod
 ported here batched in torch: ``step``, ``linear`` and ``smooth``), or holds key A's pose still.
 Key B is a key too: it shapes the smooth curve into key A, as it does in the app.
 
-Only frames before key A change. Key A, the gap and key B stay as recorded: the target is always
-the original motion.
+Only frames before key A change, and (a window with context after key B, roadmap 140000) the
+frames after B, made the same way: sparse keys after B, or B held, as the app holds the last key.
+Key A, the gap and key B stay as recorded: the target is always the original motion.
 """
 
 from __future__ import annotations
@@ -80,14 +81,17 @@ def _slope(d_in, d_out, h_in, h_out):
 
 # ---- keys -----------------------------------------------------------------------------------------
 
-def sparse_keys(n: int, T: int, a: int, device, gen=None, first: float = 0.7, most: int = 3):
-    """(n, T) bool: which frames of each window are keys. Key A (frame ``a``) and key B (the last
-    frame) always; the window's first frame with probability ``first`` (else the earliest key is
-    held back to the start, as before a clip's first key); and 0 to ``most`` more keys at random
-    frames between, so spacing and placement vary."""
+def sparse_keys(n: int, T: int, a: int, device, gen=None, first: float = 0.7, most: int = 3, b: int | None = None):
+    """(n, T) bool: which frames of each window are keys. Key A (frame ``a``) and key B (frame
+    ``b``, the last frame by default) always; the window's first frame with probability ``first``
+    (else the earliest key is held back to the start, as before a clip's first key); and 0 to
+    ``most`` more keys at random frames between, so spacing and placement vary. Frames after B
+    (``b`` before the last frame) get keys the same way: the last frame with probability
+    ``first`` (else B's last key holds, as the app holds the last key), 0 to ``most`` between."""
+    b = T - 1 if b is None else b
     keys = torch.zeros(n, T, dtype=torch.bool, device=device)
     keys[:, a] = True
-    keys[:, T - 1] = True
+    keys[:, b] = True
     if a > 0:
         keys[:, 0] = torch.rand(n, device=device, generator=gen) < first
     if a > 1:
@@ -96,6 +100,13 @@ def sparse_keys(n: int, T: int, a: int, device, gen=None, first: float = 0.7, mo
         order = torch.rand(n, a - 1, device=device, generator=gen).argsort(-1)
         pick = order < count[:, None]
         keys[:, 1:a] |= pick
+    after = T - 1 - b
+    if after > 0:
+        keys[:, T - 1] = torch.rand(n, device=device, generator=gen) < first
+    if after > 1:
+        count = torch.randint(0, most + 1, (n,), device=device, generator=gen)
+        order = torch.rand(n, after - 1, device=device, generator=gen).argsort(-1)
+        keys[:, b + 1 : T - 1] |= order < count[:, None]
     return keys
 
 
@@ -172,26 +183,30 @@ def sample(q, root, keys, mode: str):
 
 # ---- the context a window gets ------------------------------------------------------------------
 
-def rebuild(q, root, a: int, mode: str, gen=None, keys=None):
-    """q (n, T, J, 4), root (n, T, 3) with the frames before ``a`` made the way ``mode`` says
-    (:data:`MODES`); the rest unchanged. ``keys``: the sparse keys to use (default
-    :func:`sparse_keys`)."""
-    if mode == "clean" or a <= 0:
+def rebuild(q, root, a: int, mode: str, gen=None, keys=None, b: int | None = None):
+    """q (n, T, J, 4), root (n, T, 3) with the frames before ``a`` (and after ``b``, when it is
+    before the last frame) made the way ``mode`` says (:data:`MODES`); the rest unchanged.
+    ``keys``: the sparse keys to use (default :func:`sparse_keys`)."""
+    n, T = q.shape[:2]
+    b = T - 1 if b is None else b
+    if mode == "clean" or (a <= 0 and b >= T - 1):
         return q, root
     q, root = q.clone(), root.clone()
     if mode == "still":
         q[:, :a] = q[:, a : a + 1]
         root[:, :a] = root[:, a : a + 1]
+        q[:, b + 1 :] = q[:, b : b + 1]
+        root[:, b + 1 :] = root[:, b : b + 1]
         return q, root
-    n, T = q.shape[:2]
     if keys is None:
-        keys = sparse_keys(n, T, a, q.device, gen)
+        keys = sparse_keys(n, T, a, q.device, gen, b=b)
     sq, sr = sample(q, root, keys, mode)
     q[:, :a], root[:, :a] = sq[:, :a], sr[:, :a]
+    q[:, b + 1 :], root[:, b + 1 :] = sq[:, b + 1 :], sr[:, b + 1 :]
     return q, root
 
 
-def mixed(q, root, a: int, shares: dict[str, float], gen=None):
+def mixed(q, root, a: int, shares: dict[str, float], gen=None, b: int | None = None):
     """Each window's context made by one mode, drawn with ``shares`` (mode -> weight). Returns
     (q, root, the mode index per window into :data:`MODES`)."""
     n = q.shape[0]
@@ -202,20 +217,26 @@ def mixed(q, root, a: int, shares: dict[str, float], gen=None):
         rows = (pick == i).nonzero().flatten()
         if m == "clean" or not len(rows):
             continue
-        rq, rr = rebuild(q[rows], root[rows], a, m, gen)
+        rq, rr = rebuild(q[rows], root[rows], a, m, gen, b=b)
         q[rows], root[rows] = rq, rr
     return q, root, pick
 
 
-def noise(q, root, a: int, deg: float, metres: float, hip: float, gen=None):
+def noise(q, root, a: int, deg: float, metres: float, hip: float, gen=None, b: int | None = None):
     """Small random turns (about ``deg`` degrees) and root shifts (about ``metres``) on the frames
-    before ``a``: keys an animator set by eye, not by mocap. Key A stays exact."""
-    if a <= 0 or (deg <= 0 and metres <= 0):
+    before ``a`` (and after ``b``, when the window has frames there): keys an animator set by
+    eye, not by mocap. Key A and key B stay exact."""
+    T = q.shape[1]
+    b = T - 1 if b is None else b
+    if (a <= 0 and b >= T - 1) or (deg <= 0 and metres <= 0):
         return q, root
     q, root = q.clone(), root.clone()
-    shape = q[:, :a].shape[:-1]
-    v = torch.randn(*shape, 3, device=q.device, generator=gen) * (torch.pi / 180 * deg / 2)
-    q[:, :a] = _norm(_mul(_exp(v), q[:, :a]))
-    root[:, :a] = root[:, :a] + torch.randn(root[:, :a].shape, device=q.device, generator=gen) * (metres / hip)
+    for sl in (slice(0, a), slice(b + 1, T)):
+        if sl.stop <= sl.start:
+            continue
+        shape = q[:, sl].shape[:-1]
+        v = torch.randn(*shape, 3, device=q.device, generator=gen) * (torch.pi / 180 * deg / 2)
+        q[:, sl] = _norm(_mul(_exp(v), q[:, sl]))
+        root[:, sl] = root[:, sl] + torch.randn(root[:, sl].shape, device=q.device, generator=gen) * (metres / hip)
     return q, root
 

@@ -35,14 +35,16 @@ def test_weights_round_trip(tmp_path):
 def test_committed_model_matches_the_golden():
     tensors, card = read_weights(MODEL)
     net = Inbetweener(styles=len(card.get("styles", [])), given=bool(card.get("given")),
-                      contacts=bool(card.get("contacts")), path=bool(card.get("path")))
+                      contacts=bool(card.get("contacts")), path=bool(card.get("path")),
+                      context_after=int(card.get("context_after", 0)), multi_key=bool(card.get("multi_key", False)))
     net.load_state_dict({k: torch.from_numpy(v.copy()) for k, v in tensors.items()})
     net.eval()
     g = json.loads(GOLDEN.read_text(encoding="utf-8"))
     T = g["T"]
     f = lambda k: torch.tensor([g[k]], dtype=torch.float32)  # noqa: E731
     mask = torch.tensor(g["mask"], dtype=torch.float32).reshape(1, T, 1)
-    ttg = torch.tensor(g["ttg"], dtype=torch.float32).reshape(1, T, 1)
+    # one value a frame, or two on a multi_key model (to the next known frame, from the last)
+    ttg = torch.tensor(g["ttg"], dtype=torch.float32).reshape(1, T, -1)
     style = torch.tensor([g["style"]]) if g["style"] is not None else None
     gmask = None
     if card.get("given"):

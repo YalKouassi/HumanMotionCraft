@@ -89,6 +89,14 @@ pub struct ModelInfo {
     pub context: usize,
     /// Most frames it fills between two keys.
     pub max_gap: usize,
+    /// Of its context frames, how many come after the second key instead of before the first
+    /// (roadmap 140000; 0: none, the window as it always was). Where the clip ends first, the
+    /// frames before the first key make up the number.
+    pub context_after: usize,
+    /// Trained with several known frames in a window (roadmap 142000): neighbouring gaps that
+    /// fit one window fill in one pass ([`Inbetweener::fill_keys`]) and agree at the keys they
+    /// share, so no ease runs through those keys.
+    pub multi_key: bool,
     /// Whether its training data allows commercial use.
     pub commercial: bool,
     pub warning: String,
@@ -132,6 +140,28 @@ pub trait Inbetweener: Send + Sync + std::fmt::Debug {
     ) -> R<FillWithContacts> {
         let (r, o) = self.fill(sk, clip, links, a, b, settings, given)?;
         Ok((r, o, None))
+    }
+
+    /// [`Inbetweener::fill_contacts`] over several of your keys at once (`keys`, in frame order,
+    /// the gaps between them filled in one pass, so the fills agree at the keys they share):
+    /// rotations, root offsets and contacts for every frame `keys[0]+1 .. keys[last]-1`, the
+    /// keys inside given back as the clip has them. Only a model trained that way
+    /// ([`ModelInfo::multi_key`]); the default refuses and says so.
+    #[allow(clippy::too_many_arguments)]
+    fn fill_keys(
+        &self,
+        _sk: &Skeleton,
+        _clip: &Clip,
+        _links: &dyn Links,
+        keys: &[i64],
+        _settings: &FillSettings,
+        _given: Option<&[String]>,
+    ) -> R<FillWithContacts> {
+        Err(format!(
+            "model {} fills one gap at a time ({} keys asked for): it was not trained with several keys in a window",
+            self.info().tag,
+            keys.len()
+        ))
     }
 }
 
@@ -292,19 +322,13 @@ impl AiFiller {
     }
 }
 
-impl Filler for AiFiller {
-    fn long(&self) -> bool {
-        self.source.is_some()
-    }
-
-    fn fill(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
-        if b - a - 1 > self.max_gap() {
-            return self.fill_long(clip, a, b);
-        }
+impl AiFiller {
+    /// The model's bones another layer drives when the edited layer animates some parts only:
+    /// they come from the layers it sits on (`None`: the whole body is the model's).
+    fn given_bones(&self, clip: &Clip) -> R<Option<Vec<String>>> {
         let info = self.model.info();
-        // a layer that drives some parts: the model's other bones come from the layers it sits on
         let lay = clip.layers.get(clip.edit).ok_or("no layer to edit")?;
-        let given: Option<Vec<String>> = match (&lay.only, info.given) {
+        Ok(match (&lay.only, info.given) {
             (Some(only), true) => {
                 let mine: Vec<&str> = only
                     .iter()
@@ -319,7 +343,21 @@ impl Filler for AiFiller {
                 (!g.is_empty()).then_some(g)
             }
             _ => None,
-        };
+        })
+    }
+}
+
+impl Filler for AiFiller {
+    fn long(&self) -> bool {
+        self.source.is_some()
+    }
+
+    fn fill(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
+        if b - a - 1 > self.max_gap() {
+            return self.fill_long(clip, a, b);
+        }
+        // a layer that drives some parts: the model's other bones come from the layers it sits on
+        let given = self.given_bones(clip)?;
         let (r, o, contacts) = self.model.fill_contacts(
             &self.skeleton,
             clip,
@@ -334,6 +372,45 @@ impl Filler for AiFiller {
                 Some(c) => m.insert((a, b), c),
                 None => m.remove(&(a, b)),
             };
+        }
+        Ok((r, o, self.label()))
+    }
+
+    /// Several of your keys in one pass (a model with [`ModelInfo::multi_key`]); the contacts
+    /// of each span between two of the keys are kept under that span.
+    fn fill_keys(&self, clip: &Clip, keys: &[i64]) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
+        let (Some(&a), Some(&z)) = (keys.first(), keys.last()) else {
+            return Err("a fill over several keys needs two or more".into());
+        };
+        if z - a - 1 > self.max_gap() {
+            return Err(format!(
+                "the keys {a}–{z} hold {} frames, more than the model fills at once ({})",
+                z - a - 1,
+                self.max_gap()
+            ));
+        }
+        let given = self.given_bones(clip)?;
+        let (r, o, contacts) = self.model.fill_keys(
+            &self.skeleton,
+            clip,
+            &self.links,
+            keys,
+            &self.settings,
+            given.as_deref(),
+        )?;
+        if let Ok(mut m) = self.contacts.lock() {
+            for w in keys.windows(2) {
+                let &[p, q] = w else { continue };
+                // the pass's frames start on a+1: the span's own are p+1 .. q-1
+                let span = contacts
+                    .as_ref()
+                    .and_then(|c| c.get((p - a) as usize..(q - a - 1).max(p - a) as usize))
+                    .map(<[[bool; 2]]>::to_vec);
+                match span {
+                    Some(c) => m.insert((p, q), c),
+                    None => m.remove(&(p, q)),
+                };
+            }
         }
         Ok((r, o, self.label()))
     }
@@ -452,8 +529,19 @@ impl crate::document::Document {
         for an in &placed.anchors {
             crate::ease::ease_through(&mut self.clip, an.frame, crate::ease::EASE_FRAMES)?;
         }
-        // the steps the model saw, over the whole gap at once: a foot down across an anchor is
-        // one contact (planted on one spot), not two meeting there with a jump
+        self.plant_spans(filler, &bounds)?;
+        let notes = placed.notes.clone();
+        Ok((placed, notes))
+    }
+
+    /// Plant the feet of the spans between `bounds` (your keys, anchors): the steps the model
+    /// saw, over the whole stretch at once (a foot down across a key in between is one contact,
+    /// planted on one spot, not two meeting there with a jump), then the feet standing still in
+    /// both keys of each span.
+    fn plant_spans(&mut self, filler: &AiFiller, bounds: &[i64]) -> R<()> {
+        let (Some(&a), Some(&b)) = (bounds.first(), bounds.last()) else {
+            return Ok(());
+        };
         let spans: Vec<Option<Contacts>> = bounds
             .windows(2)
             .map(|w| match w {
@@ -477,8 +565,77 @@ impl crate::document::Document {
             let &[p, q] = w else { continue };
             self.plant_feet(p, q, PLANT_STILL, PLANT_GROUND)?;
         }
-        let notes = placed.notes.clone();
-        Ok((placed, notes))
+        Ok(())
+    }
+
+    /// [`Document::ai_fill`] over several of your keys at once, with a model trained with
+    /// several keys in a window ([`ModelInfo::multi_key`], roadmap 142000): the gaps between
+    /// `keys` (neighbouring keys of yours, in frame order, the whole stretch within the model's
+    /// limit) fill in one pass and agree at the keys they share, so no ease runs through those
+    /// keys; only the outer two are eased where the span next door is filled. Steps are
+    /// planted over the stretch and impossible poses bent back as for one gap. Returns the
+    /// stretch (`from` the first key `to` the last) as one [`Filled`].
+    pub fn ai_fill_keys(&mut self, keys: &[i64]) -> R<Filled> {
+        let filler = self.ai_filler_with(false).ok_or_else(|| {
+            crate::error::hinted(
+                "no AI model is loaded (assets/models)",
+                "install a model under assets/models (ai.info says what is loaded)",
+            )
+        })?;
+        if !filler.model.info().multi_key {
+            return Err(crate::error::hinted(
+                format!(
+                    "model {} fills one gap at a time: it was not trained with several keys in a window",
+                    filler.model.info().tag
+                ),
+                "fill each gap on its own (ai.fill, ai.fill_all)",
+            ));
+        }
+        let (Some(&a), Some(&z)) = (keys.first(), keys.last()) else {
+            return Err("a fill over several keys needs two or more".into());
+        };
+        let m = crate::edits::manual_frames(&self.clip);
+        for w in keys.windows(2) {
+            let &[p, q] = w else { continue };
+            if p >= q || !m.contains(&p) || !m.contains(&q) || m.iter().any(|&f| p < f && f < q) {
+                return Err(format!("{p} and {q} are not neighbouring keys of yours"));
+            }
+        }
+        if z - a - 1 > filler.max_gap() {
+            return Err(format!(
+                "the keys {a}–{z} hold {} frames, more than the model fills at once ({})",
+                z - a - 1,
+                filler.max_gap()
+            ));
+        }
+        let note = crate::edits::refill_keys(&mut self.clip, keys, &filler, &self.links)?;
+        if !note.is_empty() {
+            return Err(note);
+        }
+        self.ease_borders(a, z)?;
+        self.plant_spans(&filler, keys)?;
+        let mut kept = crate::possible::Kept {
+            checked: true,
+            ..Default::default()
+        };
+        for w in keys.windows(2) {
+            let &[p, q] = w else { continue };
+            let k = self.keep_possible_report(p, q)?;
+            kept.checked &= k.checked;
+            kept.notes.extend(k.notes);
+            kept.bent.extend(k.bent);
+        }
+        let f = self.frame;
+        self.go_to(f)?;
+        Ok(Filled {
+            from: a,
+            to: z,
+            model: filler.label(),
+            notes: kept.notes.clone(),
+            kept,
+            anchors: Vec::new(),
+            segment: None,
+        })
     }
 
     /// Work out a fill without keeping it: the clip as it would be is stored as the preview (a

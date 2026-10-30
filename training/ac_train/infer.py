@@ -19,6 +19,8 @@ from .model import (
     canonical,
     features,
     interpolate,
+    interpolate_known,
+    known_times,
     mat_to_quat,
     quat_to_mat,
     time_to_go,
@@ -60,7 +62,8 @@ def _load(tag: str, checkpoint: str, stamp: int):
     d = MODELS / tag
     card = json.loads((d / "model.json").read_text(encoding="utf-8"))
     net = Inbetweener(styles=len(card.get("styles", [])), given=bool(card.get("given")), contacts=bool(card.get("contacts")),
-                      path=bool(card.get("path")))
+                      path=bool(card.get("path")), context_after=int(card.get("context_after", 0)),
+                      multi_key=bool(card.get("multi_key", False)))
     net.load_state_dict(torch.load(d / f"{checkpoint}.pt", map_location="cpu", weights_only=True))
     net.eval()
     return net, card
@@ -78,11 +81,23 @@ def _keys_path(clip: Clip, a: int, b: int) -> np.ndarray:
     return smooth.sample(list(range(a + 1, b)))[1]
 
 
+def window_sides(context_after: int, b: int, length: int, loop: bool) -> tuple[int, int]:
+    """How many context frames a fill ending on key ``b`` takes before key A and after B: ``after``
+    is the model's ``context_after``, fewer where the clip ends first (its frames stop at
+    ``length - 1``; a loop goes on), and the frames before A make up :data:`CONTEXT`."""
+    after = context_after if loop else max(0, min(context_after, length - 1 - b))
+    return CONTEXT - after, after
+
+
 @torch.no_grad()
 def fill(clip: Clip, a: int, b: int, skel: Skeleton, tag: str, style: str | list[str] = "any", style_force: float = 1.0,
          ai_force: float = 1.0, trajectory: float = 0.0, head: float = 0.0, given=None,
-         checkpoint: str = "model") -> tuple[np.ndarray, np.ndarray]:
+         checkpoint: str = "model", keys=None) -> tuple[np.ndarray, np.ndarray]:
     """Rotations (b-a-1, B, 4) and root offsets (b-a-1, 3) for frames a+1 .. b-1.
+
+    ``keys``: frames strictly between ``a`` and ``b`` known too (keys of the clip; a model trained
+    with several keys in a window, ``multi_key``), so the gaps between them fill in one pass;
+    those frames come back as the clip has them.
 
     The network sets the solved bones (:data:`BONES`); the others follow the keys' own spline.
     Forces: ``style`` (one of the card's styles, or a list of them, added up) with ``style_force``
@@ -95,24 +110,35 @@ def fill(clip: Clip, a: int, b: int, skel: Skeleton, tag: str, style: str | list
     gap = b - a - 1
     if gap < 1 or gap > MAX_GAP:
         raise ValueError(f"AI fill needs 1..{MAX_GAP} frames between the keys, not {gap}")
-    net, _ = load(tag, checkpoint)
-    frames = [max(0, f) for f in range(a - CONTEXT + 1, a + 1)] + list(range(a + 1, b)) + [b]
+    net, cd = load(tag, checkpoint)
+    inner = sorted(set(int(k) for k in (keys or ())))
+    if inner and not net.multi_key:
+        raise ValueError(f"model {tag} fills one gap at a time: it was not trained with several keys in a window")
+    if any(k <= a or k >= b for k in inner):
+        raise ValueError(f"keys {inner}: inside {a}..{b} only")
+    before, after = window_sides(net.context_after, b, clip.length, clip.loop)
+    frames = [max(0, f) for f in range(a - before + 1, a + 1)] + list(range(a + 1, b + 1)) + list(range(b + 1, b + after + 1))
     rots, roots = clip.sample(frames)
     idx = [skel.index[n] for n in BONES]
     q = torch.tensor(rots[:, idx], dtype=torch.float32)[None]
     pos = torch.tensor(roots * skel.hip_height, dtype=torch.float32)[None]
-    rot, pos_c, yaw, origin = canonical(quat_to_mat(q), pos, CONTEXT - 1)
+    rot, pos_c, yaw, origin = canonical(quat_to_mat(q), pos, before - 1)
     truth = features(rot, pos_c, skel.hip_height)
-    ia = torch.tensor([CONTEXT - 1])
+    ia = torch.tensor([before - 1])
     ib = ia + gap + 1
-    rot_i, pos_i = interpolate(mat_to_quat(rot), pos_c, ia, ib)
-    interp = features(rot_i, pos_i, skel.hip_height)
     T = q.shape[1]
     mask = torch.zeros(1, T, 1)
-    mask[:, :CONTEXT] = 1
-    mask[:, -1] = 1
-    ttg, _ = time_to_go(ia, ib, T, "cpu")
-    _, cd = load(tag, checkpoint)
+    mask[:, :before] = 1
+    mask[:, before + gap :] = 1  # key B and the frames after it
+    for k in inner:
+        mask[:, before + k - a - 1] = 1
+    if net.multi_key:
+        rot_i, pos_i = interpolate_known(mat_to_quat(rot), pos_c, mask)
+        ttg = known_times(mask)
+    else:
+        rot_i, pos_i = interpolate(mat_to_quat(rot), pos_c, ia, ib)
+        ttg, _ = time_to_go(ia, ib, T, "cpu")
+    interp = features(rot_i, pos_i, skel.hip_height)
     gmask = torch.tensor([[1.0 if b in (given or ()) else 0.0 for b in BONES]]) if given else None
     path = pmask = None
     if trajectory > 0:
@@ -120,9 +146,9 @@ def fill(clip: Clip, a: int, b: int, skel: Skeleton, tag: str, style: str | list
         if net.path:
             pm = (keys_path * skel.hip_height - origin[0].double().numpy()) @ yaw_mat(-yaw)[0].double().numpy().T
             path = torch.zeros(1, T, 3)
-            path[0, CONTEXT : CONTEXT + gap] = torch.tensor(pm / skel.hip_height, dtype=torch.float32)
+            path[0, before : before + gap] = torch.tensor(pm / skel.hip_height, dtype=torch.float32)
             pmask = torch.zeros(1, T, 1)
-            pmask[0, CONTEXT : CONTEXT + gap] = 1
+            pmask[0, before : before + gap] = 1
     styles = cd.get("styles", [])
     chosen = [s for s in ([style] if isinstance(style, str) else style) if s != "any"]
     unknown = [s for s in chosen if s not in styles]
@@ -146,11 +172,14 @@ def fill(clip: Clip, a: int, b: int, skel: Skeleton, tag: str, style: str | list
     Y = yaw_mat(yaw)[:, None]  # back to the clip's frame
     R[:, :, 0] = Y @ R[:, :, 0]
     P = (P.unsqueeze(-1).transpose(-1, -2) @ Y.transpose(-1, -2)).squeeze(-2) + origin[:, None]
-    sl = slice(CONTEXT, CONTEXT + gap)
-    out_r = rots[CONTEXT : CONTEXT + gap].copy()
+    sl = slice(before, before + gap)
+    out_r = rots[before : before + gap].copy()
     spline_r = out_r.copy()
     out_r[:, idx] = mat_to_quat(R[0, sl]).double().numpy()
     out_o = (P[0, sl] / skel.hip_height).double().numpy()
+    for k in inner:  # a key inside the span comes back as the clip has it
+        out_r[k - a - 1] = rots[before + k - a - 1]
+        out_o[k - a - 1] = roots[before + k - a - 1]
     if trajectory > 0:
         out_o = out_o + trajectory * (keys_path - out_o)
     if head > 0:

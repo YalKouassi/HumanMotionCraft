@@ -28,7 +28,7 @@ import torch
 
 from . import ASSETS, REPO, infer
 from .clip import Clip
-from .model import BONES, FEAT, PART_GROUPS
+from .model import BONES, FEAT, PART_GROUPS, known_times
 from .rig import Skeleton
 
 GOLDEN_CLIP = "Locomotion/Walk"  # a CC0 built-in loop, so the golden carries no dataset's terms
@@ -90,7 +90,11 @@ def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None 
     mask = torch.zeros(1, T, 1)
     mask[:, :10] = 1
     mask[:, -1] = 1
-    ttg = ((torch.tensor(T - 1.0) - torch.arange(T)[None].float()) / 45).clamp(min=0)[..., None]
+    if net.multi_key:  # a model that takes several keys: one known frame inside the gap, two time channels
+        mask[:, 12] = 1
+        ttg = known_times(mask)
+    else:
+        ttg = ((torch.tensor(T - 1.0) - torch.arange(T)[None].float()) / 45).clamp(min=0)[..., None]
     style = min(2, len(card["styles"]) - 1) if card.get("styles") else None
     gmask = torch.zeros(1, J)
     gmask[0, [3, 7]] = 1
@@ -103,7 +107,9 @@ def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None 
                           path=path if card.get("path") else None, pmask=pmask if card.get("path") else None)
     (gold / f"{shipped}-net.json").write_text(json.dumps({
         "T": T, "style": style, "given": [3, 7] if card.get("given") else [],
-        "known": known[0].tolist(), "interp": interp[0].tolist(), "mask": mask[0, :, 0].tolist(), "ttg": ttg[0, :, 0].tolist(),
+        "known": known[0].tolist(), "interp": interp[0].tolist(), "mask": mask[0, :, 0].tolist(),
+        # one value a frame, or [to the next known frame, from the last] on a multi_key model
+        "ttg": ttg[0].tolist() if net.multi_key else ttg[0, :, 0].tolist(),
         **({"path": path[0].tolist(), "pmask": pmask[0, :, 0].tolist()} if card.get("path") else {}),
         "out": y[0].tolist(),
         # the foot-contact logits (a model with the contact head)
@@ -119,24 +125,27 @@ def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None 
     # a part layer driving the left arm: the model's other bones are given, as the app builds the
     # list (crates/ac-core/src/ai.rs, AiFiller::fill)
     arm_layer = [b for i, b in enumerate(BONES) if i not in PART_GROUPS["left_arm"]] if card.get("given") else []
-    for a, b, style, sf, af, tr, head, given in [
-        (20, 39, "any", 1.0, 1.0, 0.0, 0.0, []),  # the plain fill, the gap past the loop's end
-        (5, 12, styled, 1.5, 0.8, 0.0, 0.0, []),  # a style, pushed, the network's change scaled down
-        (8, 30, "any", 1.0, 1.0, 1.0, 0.0, []),  # the root put on the keys' own path
-        (10, 12, "any", 1.0, 1.0, 0.0, 0.0, []),  # a gap of 1: the shortest the model takes (127000)
-        (4, 50, "any", 1.0, 1.0, 0.0, 0.0, []),  # a gap of 45: the longest, more than one lap of the loop
-        (6, 22, "any", 1.0, 1.0, 0.0, 0.0, arm_layer),  # a part layer: every bone but the left arm given
-        (14, 36, "any", 1.0, 1.0, 0.5, 0.0, []),  # half way to the keys' path
-        (16, 40, "any", 1.0, 1.0, 0.0, 0.5, []),  # the neck and head half way back to the keys' spline
-        (20, 39, "any", 1.0, 0.0, 0.0, 0.0, []),  # ai_force 0: the plain interpolation, exactly
-        (0, 9, "any", 1.0, 1.0, 0.0, 0.0, []),  # a fill at the clip's start: the context repeats frame 0
+    for a, b, style, sf, af, tr, head, given, keys in [
+        (20, 39, "any", 1.0, 1.0, 0.0, 0.0, [], []),  # the plain fill, the gap past the loop's end
+        (5, 12, styled, 1.5, 0.8, 0.0, 0.0, [], []),  # a style, pushed, the network's change scaled down
+        (8, 30, "any", 1.0, 1.0, 1.0, 0.0, [], []),  # the root put on the keys' own path
+        (10, 12, "any", 1.0, 1.0, 0.0, 0.0, [], []),  # a gap of 1: the shortest the model takes (127000)
+        (4, 50, "any", 1.0, 1.0, 0.0, 0.0, [], []),  # a gap of 45: the longest, more than one lap of the loop
+        (6, 22, "any", 1.0, 1.0, 0.0, 0.0, arm_layer, []),  # a part layer: every bone but the left arm given
+        (14, 36, "any", 1.0, 1.0, 0.5, 0.0, [], []),  # half way to the keys' path
+        (16, 40, "any", 1.0, 1.0, 0.0, 0.5, [], []),  # the neck and head half way back to the keys' spline
+        (20, 39, "any", 1.0, 0.0, 0.0, 0.0, [], []),  # ai_force 0: the plain interpolation, exactly
+        (0, 9, "any", 1.0, 1.0, 0.0, 0.0, [], []),  # a fill at the clip's start: the context repeats frame 0
+        (10, 30, "any", 1.0, 1.0, 0.0, 0.0, [], [17, 24]),  # two keys inside: three gaps in one pass (142000)
     ]:
         if given and not card.get("given"):
             continue  # a model without the given mask cannot fill around a part layer
+        if keys and not net.multi_key:
+            continue  # a model trained on one gap at a time cannot take keys inside the window
         r, o = infer.fill(clip, a, b, skel, tag, style=style, style_force=sf, ai_force=af, trajectory=tr, head=head,
-                          given=given or None, checkpoint=checkpoint)
+                          given=given or None, checkpoint=checkpoint, keys=keys or None)
         cases.append({"a": a, "b": b, "style": style, "style_force": sf, "ai_force": af, "trajectory": tr, "head": head,
-                      "given": given, "rotations": np.round(r, 7).tolist(), "roots": np.round(o, 7).tolist()})
+                      "given": given, "keys": keys, "rotations": np.round(r, 7).tolist(), "roots": np.round(o, 7).tolist()})
     (gold / f"{shipped}-fill.json").write_text(json.dumps({"clip": GOLDEN_CLIP, "cases": cases}), encoding="utf-8", newline="\n")
     print(f"goldens written -> {gold}")
 

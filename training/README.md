@@ -335,6 +335,19 @@ Half the windows also get the recorded root path across the gap (some smoothed, 
 keys' spline is): a model trained so (`"path"` in its card) is given the keys' path when the app's
 `trajectory` is above 0 (roadmap 141000).
 
+Two options change the window itself, and go into the card so the app builds the same window
+(`crates/ac-ai`, `ac_ai::window`); without them the window is as it always was, bit for bit:
+
+- `--context-after N` (roadmap 140000): N of the 10 context frames come after key B instead of
+  before key A (the card's `context` is then 10 − N, `context_after` N), so the model sees how the
+  motion leaves B; the time to go is signed, negative after B. Where a clip ends before them, the
+  window falls back to the frames before A; a fifth of the batches train that way too.
+- `--multi-key` (roadmap 142000): half the windows also know a few frames inside the gap, as the
+  keys between neighbouring gaps; the plain interpolation runs between neighbouring known frames
+  and the time channel is two wide (to the next known frame, from the last). With such a model
+  (`multi_key` in the card) the app's `ai.fill_all` fills neighbouring gaps that fit one window in
+  one pass, so they agree at the key they share without an ease.
+
 Every `--eval-every` steps (1000) a quick evaluation scores the model (one number, the model's
 share of the plain interpolation's error, lower is better) and the best is kept as `best.pt`
 beside the last step's `model.pt`. At the end both are evaluated in full into `model.json`

@@ -1,11 +1,18 @@
 //! The learned in-betweener: our network (first written in cf-animate, the earlier Python prototype),
 //! run in plain Rust (no ML runtime), and the fill around it (a port of the prototype's `fill`).
 //!
-//! A fill looks at [`Model::context`] frames ending on key `a`, and at key `b`; it turns that window
-//! so key `a` stands at the origin facing -Y, encodes each solved bone as the first two columns of
-//! its rotation matrix (6D) plus the root position in hip heights, and asks the network for a change
-//! to the plain interpolation (slerp / lerp) between the keys. Bones the network does not solve
-//! (fingers, toes, twist bones, the head) keep the keys' own spline.
+//! A fill looks at the card's `context` frames ending on key `a`, and at key `b`; it turns that
+//! window so key `a` stands at the origin facing -Y, encodes each solved bone as the first two
+//! columns of its rotation matrix (6D) plus the root position in hip heights, and asks the network
+//! for a change to the plain interpolation (slerp / lerp) between the keys. Bones the network does
+//! not solve (fingers, toes, twist bones, the head) keep the keys' own spline.
+//!
+//! Two card options change the window ([`window`]); a card without them (the shipped model) gets
+//! the window as it always was, bit for bit: `context_after` (140000) puts that many of the
+//! context frames after key `b` instead of before `a` (fewer where the clip ends first), with the
+//! time to go signed; `multi_key` (142000) lets several of your keys share one window
+//! ([`Inbetweener::fill_keys`]): the plain interpolation runs between neighbouring known frames
+//! and the time channel is two a frame (to the next known frame, from the last).
 //!
 //! The card's `commercial` and `warning` travel with every model.
 #![deny(
@@ -100,11 +107,13 @@ impl Model {
             given: net.given != 0,
             context: card["context"].as_u64().unwrap_or(10) as usize,
             max_gap: card["max_gap"].as_u64().unwrap_or(45) as usize,
+            context_after: card["context_after"].as_u64().unwrap_or(0) as usize,
+            multi_key: card["multi_key"].as_bool().unwrap_or(false),
             commercial: card["commercial"].as_bool().unwrap_or(false),
             warning: s("warning").unwrap_or_default(),
         };
-        if info.context == 0 || info.context + info.max_gap + 1 > 56 {
-            return Err("model card: context and max_gap do not fit the network".into());
+        if info.context == 0 || info.context + info.context_after + info.max_gap + 1 > net.window() {
+            return Err("model card: context, context_after and max_gap do not fit the network".into());
         }
         let mut hash = ac_core::hash::Fnv::default();
         for f in ["weights.json", "weights.bin"] {
@@ -249,6 +258,67 @@ fn features(rot: &[M3], pos: Vec3, hip: f64, out: &mut Vec<f32>) {
     out.extend(pos.map(|v| (v / hip) as f32));
 }
 
+/// The frames a fill samples and which of them are known ([`window`]).
+#[derive(Debug, Clone, PartialEq)]
+pub struct Window {
+    /// The clip frames, in window order: the context before the first key (frame 0 repeated
+    /// before the clip's start), every frame from the first key to the last, the context after.
+    pub frames: Vec<f64>,
+    /// Context frames before and on the first key (its index is `before - 1`).
+    pub before: usize,
+    /// Context frames after the last key.
+    pub after: usize,
+    /// Per window frame, whether the network is given it: the context, every key.
+    pub known: Vec<bool>,
+}
+
+/// The window of a fill between `keys` (two or more of your keys in frame order; the frames
+/// between them are filled) of a clip whose frames stop at `end` (`None`: a loop, every frame
+/// exists): the card's `context` frames before the first key, the stretch, and its
+/// `context_after` frames after the last key, fewer where the clip ends first (the frames before
+/// the first key then make up the number: the window keeps its size). A card without
+/// `context_after` gets the window as it always was.
+pub fn window(info: &ModelInfo, end: Option<i64>, keys: &[i64]) -> R<Window> {
+    let (Some(&a), Some(&z)) = (keys.first(), keys.last()) else {
+        return Err("a fill needs two keys".into());
+    };
+    if keys.windows(2).any(|w| w[0] >= w[1]) {
+        return Err(format!("keys {keys:?} are not in frame order"));
+    }
+    let span = z - a - 1;
+    if span < 1 || span > info.max_gap as i64 {
+        return Err(format!(
+            "AI fill needs 1..{} frames between the keys, not {span}",
+            info.max_gap
+        ));
+    }
+    let after = match end {
+        None => info.context_after,
+        Some(e) => info.context_after.min((e - z).max(0) as usize),
+    };
+    let before = info.context + info.context_after - after;
+    let frames: Vec<f64> = (0..before as i64)
+        .map(|i| (a - before as i64 + 1 + i).max(0) as f64)
+        .chain((a + 1..=z).map(|f| f as f64))
+        .chain((1..=after as i64).map(|i| (z + i) as f64))
+        .collect();
+    let span = span as usize;
+    let mut known = vec![false; frames.len()];
+    known.iter_mut().take(before).for_each(|k| *k = true);
+    known.iter_mut().skip(before + span).for_each(|k| *k = true);
+    for &k in keys {
+        if k > a && k < z {
+            known[before + (k - a - 1) as usize] = true;
+        }
+    }
+    Ok(Window {
+        frames,
+        before,
+        after,
+        known,
+    })
+}
+
 impl Inbetweener for Model {
     fn info(&self) -> &ModelInfo {
         &self.info
@@ -282,14 +352,59 @@ impl Inbetweener for Model {
         s: &FillSettings,
         given: Option<&[String]>,
     ) -> R<FillWithContacts> {
-        let info = &self.info;
-        let gap = b - a - 1;
-        if gap < 1 || gap > info.max_gap as i64 {
+        self.fill_window(sk, clip, links, &[a, b], s, given)
+    }
+
+    fn fill_keys(
+        &self,
+        sk: &Skeleton,
+        clip: &Clip,
+        links: &dyn Links,
+        keys: &[i64],
+        s: &FillSettings,
+        given: Option<&[String]>,
+    ) -> R<FillWithContacts> {
+        if !self.info.multi_key {
             return Err(format!(
-                "AI fill needs 1..{} frames between the keys, not {gap}",
-                info.max_gap
+                "model {} fills one gap at a time ({} keys asked for): it was not trained with several keys in a window",
+                self.info.tag,
+                keys.len()
             ));
         }
+        if keys.len() < 2 {
+            return Err("a fill over several keys needs two or more".into());
+        }
+        self.fill_window(sk, clip, links, keys, s, given)
+    }
+}
+
+impl Model {
+    /// One pass of the network over the window of `keys` ([`window`]): the frames between the
+    /// first and the last key, the keys inside given back as the clip has them. With two keys
+    /// this is the fill as it always was.
+    #[allow(clippy::too_many_arguments)]
+    fn fill_window(
+        &self,
+        sk: &Skeleton,
+        clip: &Clip,
+        links: &dyn Links,
+        keys: &[i64],
+        s: &FillSettings,
+        given: Option<&[String]>,
+    ) -> R<FillWithContacts> {
+        let info = &self.info;
+        let (Some(&a), Some(&b)) = (keys.first(), keys.last()) else {
+            return Err("a fill needs two keys".into());
+        };
+        // the clip's last frame, past which there is nothing to look at (a loop goes on)
+        let end = (!clip.loop_).then(|| clip.length_with(links) - 1);
+        let Window {
+            frames,
+            before,
+            known: is_known,
+            ..
+        } = window(info, end, keys)?;
+        let gap = (b - a - 1) as usize;
         for (name, v, lo, hi) in [
             ("style_force", s.style_force, 0.0, 3.0),
             ("ai_force", s.ai_force, 0.0, 1.5),
@@ -303,14 +418,8 @@ impl Inbetweener for Model {
         if s.style != "any" && !info.styles.contains(&s.style) {
             return Err(format!("style {:?}: the model knows {:?}", s.style, info.styles));
         }
-        let gap = gap as usize;
-        let ctx = info.context;
+        let ctx = before;
         let hip = sk.hip_height;
-        // the window: context frames ending on a (frame 0 repeated before the start), the gap, b
-        let frames: Vec<f64> = (0..ctx as i64)
-            .map(|i| (a - ctx as i64 + 1 + i).max(0) as f64)
-            .chain((a + 1..=b).map(|f| f as f64))
-            .collect();
         let t = frames.len();
         let (rots, roots) = clip.sample_with(&frames, links)?;
         let idx: Vec<usize> = info
@@ -332,33 +441,75 @@ impl Inbetweener for Model {
         }
         let origin = [pos[ia][0], pos[ia][1], 0.0];
         let pos_c: Vec<Vec3> = pos.iter().map(|p| mv(&to_key, quat::sub3(*p, origin))).collect();
-        // the plain interpolation between the keys
-        let ib = t - 1;
-        let qa: Vec<Quat> = rot[ia].iter().map(m2q).collect();
-        let qb: Vec<Quat> = rot[ib].iter().map(m2q).collect();
-        let g = (ib - ia) as f64;
+        // the last key's index, and for every frame the known frames either side of it
+        let ib = ctx + gap;
+        let mut prev = vec![0usize; t];
+        let mut next = vec![t - 1; t];
+        let mut last = 0;
+        for i in 0..t {
+            if is_known[i] {
+                last = i;
+            }
+            prev[i] = last;
+        }
+        let mut first = t - 1;
+        for i in (0..t).rev() {
+            if is_known[i] {
+                first = i;
+            }
+            next[i] = first;
+        }
+        // the plain interpolation between neighbouring known frames (with two keys: between them)
+        let qk: Vec<Vec<Quat>> = (0..t)
+            .map(|i| {
+                if is_known[i] {
+                    rot[i].iter().map(m2q).collect()
+                } else {
+                    Vec::new()
+                }
+            })
+            .collect();
         let (mut known, mut interp) = (
             Vec::with_capacity(t * self.net().feat),
             Vec::with_capacity(t * self.net().feat),
         );
         for i in 0..t {
             features(&rot[i], pos_c[i], hip, &mut known);
-            if i > ia && i < ib {
-                let u = (i - ia) as f64 / g;
-                let r: Vec<M3> = qa.iter().zip(&qb).map(|(x, y)| q2m(slerp(*x, *y, u))).collect();
-                let p = [0, 1, 2].map(|k| pos_c[ia][k] + (pos_c[ib][k] - pos_c[ia][k]) * u);
-                features(&r, p, hip, &mut interp);
-            } else {
+            if is_known[i] {
                 let r: Vec<M3> = rot[i].iter().map(|m| q2m(m2q(m))).collect();
                 features(&r, pos_c[i], hip, &mut interp);
+            } else {
+                let (k0, k1) = (prev[i], next[i]);
+                if k0 >= i || k1 <= i {
+                    return Err(format!("window frame {i}: no known frame on both sides"));
+                }
+                let u = (i - k0) as f64 / (k1 - k0) as f64;
+                let r: Vec<M3> = qk[k0]
+                    .iter()
+                    .zip(&qk[k1])
+                    .map(|(x, y)| q2m(slerp(*x, *y, u)))
+                    .collect();
+                let p = [0, 1, 2].map(|k| pos_c[k0][k] + (pos_c[k1][k] - pos_c[k0][k]) * u);
+                features(&r, p, hip, &mut interp);
             }
         }
-        let mask: Vec<f32> = (0..t)
-            .map(|i| if i < ctx || i == ib { 1.0 } else { 0.0 })
-            .collect();
-        let ttg: Vec<f32> = (0..t)
-            .map(|i| ((ib as f32 - i as f32) / info.max_gap as f32).max(0.0))
-            .collect();
+        let mask: Vec<f32> = is_known.iter().map(|&k| if k { 1.0 } else { 0.0 }).collect();
+        // time to go: to the last key (signed: negative on the frames after it), or on a
+        // multi_key model two a frame, to the next known frame and from the last
+        let ttg: Vec<f32> = if info.multi_key {
+            (0..t)
+                .flat_map(|i| {
+                    [
+                        (next[i] - i) as f32 / info.max_gap as f32,
+                        (i - prev[i]) as f32 / info.max_gap as f32,
+                    ]
+                })
+                .collect()
+        } else {
+            (0..t)
+                .map(|i| (ib as f32 - i as f32) / info.max_gap as f32)
+                .collect()
+        };
         let gmask: Option<Vec<f32>> = given.map(|gv| {
             info.bones
                 .iter()
@@ -454,6 +605,11 @@ impl Inbetweener for Model {
         let spline_r = out_r.clone();
         let mut out_o: Vec<Vec3> = Vec::with_capacity(gap);
         for (k, fr) in out_r.iter_mut().enumerate() {
+            if is_known[ctx + k] {
+                // a key of yours inside the stretch: as the clip has it
+                out_o.push(roots[ctx + k]);
+                continue;
+            }
             let row: Vec<f64> = pred[(ctx + k) * f..(ctx + k + 1) * f]
                 .iter()
                 .map(|&v| f64::from(v))
