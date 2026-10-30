@@ -1,0 +1,85 @@
+{
+  "$schema": "./schema.json",
+  "name": "ai-fill-long-gap",
+  "feature": "ai.fill",
+  "description": "A gap over the model's limit (45 frames) is filled in one undo step: anchor poses from the library split it into spans the model takes. A standing key on 0 and, on 90, the built-in walk's pose from its frame 8 (keys.copy from Locomotion/Walk, pasted on 90, then its root set 2 m ahead: y = -2 / 0.8698308 = -2.2993044 hip heights, the walk's own height 0.9027198). ai.gaps says the 89-frame gap is fillable with 2 anchors. The anchor frames are worked by hand: the fewest evenly spaced frames keeping every span at or under 30 frames key to key, ceil(90 / 30) = 3 spans, so 30 and 60. The anchor poses come from the one library segment whose start pose is nearest the stand and whose end pose, speed x 90 frames later, is nearest the walk pose (speeds 0.5..2): the Walk loop itself, from its frame 5 to 140 at 1.5x (140 - 5 = 135 = 1.5 x 90), so the anchors are its frames 5 + 1.5 x 30 = 50 and 5 + 1.5 x 60 = 95 (the loop wraps: 50 is 17, 95 is 29 of its 33 frames), tagged \"anchor Locomotion/Walk @50\" and \"@95\" on the timeline between three bands of the model's keys. The same anchors come back after an undo and a second fill, and the left foot stands on the same spot on frame 45 (pinned: the network's output, checked for determinism; the motion is reviewed in the MP4). The diagnostics cover the whole span: seams at both keys and at each anchor, all under the 1 m/s and 3 rad/s lines (pinned: 0.5748 m/s at 30, 0.3198 at 60; no pop or spin flag), no joint bent back; the planted feet slide at most 11.5 cm over a contact with physics off (pinned; a normal 30-frame fill of the same stand-to-walk slides 2.6 cm and the mocap walks' own keys 4-8 cm, tests/quality/builtins.json). Undo reads \"AI fill 1–89\" and takes the anchors away with the fill. A long gap with anchors \"none\" is refused, as is an unknown anchors choice. Physics is off: this checks the keys. Tolerance 1e-3: planting solves the legs with IK, which moves the foot points by rounding only.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "ai.settings", "params": { "ai_force": 1, "style": "any" }, "expect": { "ai_force": 1, "style": "any" } },
+    { "command": "clip.open", "params": { "id": "Locomotion/Walk" } },
+    { "command": "keys.copy", "params": { "frames": [8] }, "expect": { "copied": 1 } },
+    { "command": "pose.reset" },
+    { "command": "clip.new", "params": { "name": "Long gap", "group": "Mine" }, "expect": { "id": "Mine/Long gap" } },
+    { "command": "keys.paste", "params": { "at": 90 }, "expect": { "frames": [90] } },
+    { "command": "pose.set_root", "params": { "root": [0, -2.2993044, 0.9027198] } },
+    { "command": "key.set", "expect": { "frame": 90 } },
+    {
+      "command": "ai.gaps",
+      "expect": { "max_gap": 45, "gaps": [{ "from": 0, "to": 90, "frames": 89, "filled": false, "refused": null, "anchors": 2 }] }
+    },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 90 },
+      "expect": {
+        "from": 0,
+        "to": 90,
+        "frames": 89,
+        "model": "parts",
+        "notes": [],
+        "anchors": [
+          { "frame": 30, "id": "Locomotion/Walk", "source_frame": 50 },
+          { "frame": 60, "id": "Locomotion/Walk", "source_frame": 95 }
+        ],
+        "anchor_segment": { "id": "Locomotion/Walk", "from": 5, "to": 140, "speed": 1.5, "match_deg": 7.2 },
+        "diagnostics": {
+          "from": 0,
+          "to": 90,
+          "sliding_max_cm": 11.5295,
+          "seams": [
+            { "frame": 0, "dv": null, "dw": null },
+            { "frame": 30, "dv": 0.5748, "dw": 0.658 },
+            { "frame": 60, "dv": 0.3198, "dw": 0.7749 },
+            { "frame": 90, "dv": null, "dw": null }
+          ],
+          "bent": []
+        }
+      }
+    },
+    {
+      "command": "editor.state",
+      "expect": {
+        "bands": [
+          { "from": 1, "to": 29, "model": "parts" },
+          { "from": 30, "to": 30, "model": "anchor Locomotion/Walk @50" },
+          { "from": 31, "to": 59, "model": "parts" },
+          { "from": 60, "to": 60, "model": "anchor Locomotion/Walk @95" },
+          { "from": 61, "to": 89, "model": "parts" }
+        ]
+      }
+    },
+    { "command": "frame.set", "params": { "frame": 45 } },
+    { "command": "bone.world", "params": { "bone": "foot.L" }, "expect": { "position": [0.0811178, -1.1225773, 0.0881823] } },
+    { "command": "edit.undo", "expect": { "command": "ai.fill", "label": "AI fill 1–89" } },
+    { "command": "editor.state", "expect": { "bands": [] } },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 90, "anchors": "auto" },
+      "expect": {
+        "frames": 89,
+        "anchors": [
+          { "frame": 30, "id": "Locomotion/Walk", "source_frame": 50 },
+          { "frame": 60, "id": "Locomotion/Walk", "source_frame": 95 }
+        ]
+      }
+    },
+    { "command": "frame.set", "params": { "frame": 45 } },
+    { "command": "bone.world", "params": { "bone": "foot.L" }, "expect": { "position": [0.0811178, -1.1225773, 0.0881823] } }
+  ],
+  "expect": { "tolerance": 1e-3 },
+  "errors": [
+    { "command": "ai.fill", "params": { "from": 0, "to": 90, "anchors": "none" } },
+    { "command": "ai.fill", "params": { "from": 0, "to": 90, "anchors": "maybe" } },
+    { "command": "ai.fill", "params": { "from": 0, "to": 45 } }
+  ],
+  "views": ["side"]
+}

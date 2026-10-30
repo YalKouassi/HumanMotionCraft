@@ -221,6 +221,11 @@ pub static SPECS: &[CommandSpec] = &[
             )
             .range(0.0, 1e7),
             ParamSpec::new("to", Kind::Integer, "your key after the gap").range(0.0, 1e7),
+            ParamSpec::new(
+                "anchors",
+                Kind::Choice(&["auto", "none"]),
+                "a gap over the model's limit: \"auto\" (default) places anchor poses from the library inside it and fills each span between them; \"none\" refuses it",
+            ),
         ])
         .outputs(returns::AI_FILL),
     CommandSpec::new("ai.settings", "AI fill settings", ai_settings)
@@ -581,11 +586,17 @@ fn ai_fill(doc: &mut Document, p: &P) -> Out {
         (Some(_), Some(_)) => Some(range(p)?),
         _ => return Err("give both `from` and `to`, or neither".into()),
     };
-    let f = doc.ai_fill(span)?;
+    let anchors = match cmd::text(p, "anchors") {
+        None | Some("auto") => true,
+        Some("none") => false,
+        Some(x) => return Err(format!("anchors {x:?}: \"auto\" or \"none\"")),
+    };
+    let f = doc.ai_fill_with(span, anchors)?;
     let d = crate::filldiag::diagnose(doc, &f).json();
-    Ok(
-        json!({ "from": f.from, "to": f.to, "frames": f.to - f.from - 1, "model": f.model, "notes": f.notes, "diagnostics": d }),
-    )
+    Ok(json!({
+        "from": f.from, "to": f.to, "frames": f.to - f.from - 1, "model": f.model, "notes": f.notes,
+        "anchors": f.anchors, "anchor_segment": f.segment, "diagnostics": d,
+    }))
 }
 
 /// A previewed fill: its span, label and the root head on every frame of it (the ghost path).

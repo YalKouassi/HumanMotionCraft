@@ -7,9 +7,11 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use crate::clip::{Clip, Links};
-use crate::edits::Filler;
-use crate::quat::{Quat, Vec3};
+use crate::anchors::{self, Anchor, Segment};
+use crate::clip::{Clip, Interp, Key, KeySource, Links};
+use crate::edits::{self, Filler};
+use crate::posesource::PoseSource;
+use crate::quat::{self, Quat, Vec3};
 use crate::rig::Skeleton;
 
 type R<T> = Result<T, String>;
@@ -23,6 +25,10 @@ pub struct Filled {
     pub model: String,
     pub notes: Vec<String>,
     pub kept: crate::possible::Kept,
+    /// The anchor poses placed inside a gap over the model's limit (`crate::anchors`; empty:
+    /// the model took the gap in one), and the library segment they came from.
+    pub anchors: Vec<Anchor>,
+    pub segment: Option<Segment>,
 }
 
 /// A fill worked out but not kept: `clip` is `base` with the span `from..to` filled.
@@ -164,12 +170,114 @@ pub struct AiFiller {
     /// The foot contacts of each span it filled (models that predict them), for
     /// [`Document::plant_steps`].
     pub contacts: std::sync::Mutex<BTreeMap<(i64, i64), Contacts>>,
+    /// Where anchor poses come from for a gap over the model's limit (`None`: such a gap is
+    /// refused): the document's [`PoseSource`], unless the fill asked for no anchors.
+    pub source: Option<Arc<dyn PoseSource>>,
+    /// The anchors placed in each long span it filled, by span.
+    pub placed: std::sync::Mutex<BTreeMap<(i64, i64), Placed>>,
+}
+
+/// What a long fill placed: its anchors, the library segment they came from, and the notes of
+/// planning them.
+#[derive(Debug, Clone, Default)]
+pub struct Placed {
+    pub anchors: Vec<Anchor>,
+    pub segment: Option<Segment>,
+    pub notes: Vec<String>,
 }
 
 impl AiFiller {
     /// The foot contacts the model gave for the span `a..b` it filled last (`None`: none).
     pub fn contacts_of(&self, a: i64, b: i64) -> Option<Contacts> {
         self.contacts.lock().ok().and_then(|mut m| m.remove(&(a, b)))
+    }
+
+    /// The anchors placed in the span `a..b` it filled last (`None`: the model took it in one).
+    pub fn placed_of(&self, a: i64, b: i64) -> Option<Placed> {
+        self.placed.lock().ok().and_then(|mut m| m.remove(&(a, b)))
+    }
+
+    /// Most frames the model fills in one span.
+    pub fn max_gap(&self) -> i64 {
+        i64::try_from(self.model.info().max_gap)
+            .unwrap_or(i64::MAX)
+            .min(edits::MAX_FILL)
+    }
+
+    /// A gap over the model's limit: anchor poses from the library split it into spans the model
+    /// takes, each filled in turn on a copy of the clip (so the second span sees the first as its
+    /// context), and the frames between the keys are read back from that copy. The anchors are
+    /// kept under [`AiFiller::placed_of`] for the caller to tag, ease and plant around.
+    fn fill_long(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
+        let max = self.max_gap();
+        let Some(source) = &self.source else {
+            return Err(crate::error::hinted(
+                format!(
+                    "the gap {a}–{b} holds {} frames, more than the model fills at once ({max}), and there is no library to take anchor poses from",
+                    b - a - 1
+                ),
+                "run with a library (the app has one; ac --library <folder>), or key a pose inside the gap",
+            ));
+        };
+        let sk = &self.skeleton;
+        let bones: Vec<usize> = self
+            .model
+            .info()
+            .bones
+            .iter()
+            .filter_map(|n| sk.bone(n))
+            .collect();
+        let plan = anchors::plan(sk, clip, &self.links, &bones, source.as_ref(), (a, b), max)?;
+        let mut tmp = clip.clone();
+        let additive = tmp
+            .layers
+            .get(tmp.edit)
+            .is_some_and(|l| l.mode == crate::clip::LayerMode::Additive);
+        let at: Vec<f64> = plan.anchors.iter().map(|x| x.frame as f64).collect();
+        let below = if additive {
+            Some(tmp.sample_below(&at, tmp.edit, &self.links)?)
+        } else {
+            None
+        };
+        for (i, (an, pose)) in plan.anchors.iter().zip(&plan.poses).enumerate() {
+            let (mut r, mut o) = (pose.rotations.clone(), pose.root);
+            if let Some((br, bo)) = &below {
+                // an additive layer keys the turn on top of the layers below
+                for (q, base) in r.iter_mut().zip(br.get(i).into_iter().flatten()) {
+                    *q = quat::normalize(quat::mul(quat::conj(*base), *q));
+                }
+                if let Some(base) = bo.get(i) {
+                    o = quat::sub3(o, *base);
+                }
+            }
+            let mut k = Key::new(an.frame, r, o, Interp::Smooth);
+            k.source = KeySource::Ai;
+            k.model = anchors::tag(an);
+            tmp.set_key(k)?;
+        }
+        let mut bounds = vec![a];
+        bounds.extend(plan.anchors.iter().map(|x| x.frame));
+        bounds.push(b);
+        for w in bounds.windows(2) {
+            let &[p, q] = w else { continue };
+            let note = edits::refill(&mut tmp, p, q, self, &self.links)?;
+            if !note.is_empty() {
+                return Err(note);
+            }
+        }
+        let frames: Vec<f64> = (a + 1..b).map(|f| f as f64).collect();
+        let (r, o) = tmp.sample_with(&frames, &self.links)?;
+        if let Ok(mut m) = self.placed.lock() {
+            m.insert(
+                (a, b),
+                Placed {
+                    anchors: plan.anchors,
+                    segment: Some(plan.segment),
+                    notes: plan.notes,
+                },
+            );
+        }
+        Ok((r, o, self.label()))
     }
 
     /// The key label: the tag, and the style when the model honours one.
@@ -185,7 +293,14 @@ impl AiFiller {
 }
 
 impl Filler for AiFiller {
+    fn long(&self) -> bool {
+        self.source.is_some()
+    }
+
     fn fill(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
+        if b - a - 1 > self.max_gap() {
+            return self.fill_long(clip, a, b);
+        }
         let info = self.model.info();
         // a layer that drives some parts: the model's other bones come from the layers it sits on
         let lay = clip.layers.get(clip.edit).ok_or("no layer to edit")?;
@@ -229,14 +344,23 @@ pub const PLANT_STILL: f64 = 0.25;
 pub const PLANT_GROUND: f64 = 0.15;
 
 impl crate::document::Document {
-    /// A filler with the loaded model and the current settings (`None`: no model loaded).
+    /// A filler with the loaded model and the current settings (`None`: no model loaded). A gap
+    /// over the model's limit gets anchor poses from the document's library.
     pub fn ai_filler(&self) -> Option<AiFiller> {
+        self.ai_filler_with(true)
+    }
+
+    /// [`Document::ai_filler`]; `anchors`: whether a gap over the model's limit gets anchor
+    /// poses (`false`: it is refused).
+    pub fn ai_filler_with(&self, anchors: bool) -> Option<AiFiller> {
         self.ai.as_ref().map(|m| AiFiller {
             model: m.clone(),
             skeleton: self.skeleton.clone(),
             links: self.links.clone(),
             settings: self.ai_settings.clone(),
             contacts: Default::default(),
+            source: self.pose_source.clone().filter(|_| anchors),
+            placed: Default::default(),
         })
     }
 
@@ -244,17 +368,24 @@ impl crate::document::Document {
     /// through a key it shares with another filled span (`ease.rs`), plant the steps the model
     /// says happen inside the gap ([`Document::plant_steps`], models with foot contacts), then the
     /// feet that stand still in both keys, and bend any impossible pose the model made back inside
-    /// the possible limits (`crate::possible`). Returns the span, the model label and notes.
+    /// the possible limits (`crate::possible`). A gap over the model's limit gets anchor poses from
+    /// the library first (`crate::anchors`), and each span between them is treated as a fill of
+    /// its own. Returns the span, the model label, the anchors and notes.
     pub fn ai_fill(&mut self, span: Option<(i64, i64)>) -> R<Filled> {
-        let out = self.fill_clip(span)?;
+        self.ai_fill_with(span, true)
+    }
+
+    /// [`Document::ai_fill`]; `anchors: false` refuses a gap over the model's limit instead.
+    pub fn ai_fill_with(&mut self, span: Option<(i64, i64)>, anchors: bool) -> R<Filled> {
+        let out = self.fill_clip(span, anchors)?;
         let f = self.frame;
         self.go_to(f)?;
         Ok(out)
     }
 
     /// [`Document::ai_fill`] on the clip alone (the pose shown is left as it is).
-    fn fill_clip(&mut self, span: Option<(i64, i64)>) -> R<Filled> {
-        let filler = self.ai_filler().ok_or_else(|| {
+    fn fill_clip(&mut self, span: Option<(i64, i64)>, anchors: bool) -> R<Filled> {
+        let filler = self.ai_filler_with(anchors).ok_or_else(|| {
             crate::error::hinted(
                 "no AI model is loaded (assets/models)",
                 "install a model under assets/models (ai.info says what is loaded); ai.preview with mode \"plain\" interpolates without one",
@@ -269,23 +400,85 @@ impl crate::document::Document {
         if !m.contains(&a) || !m.contains(&b) || m.iter().any(|&f| a < f && f < b) {
             return Err(format!("{a} and {b} are not neighbouring keys of yours"));
         }
+        if !anchors && b - a - 1 > filler.max_gap() {
+            return Err(crate::error::hinted(
+                format!(
+                    "gap {} frames (max {}) and anchors \"none\" was asked for",
+                    b - a - 1,
+                    filler.max_gap()
+                ),
+                "leave `anchors` out (or \"auto\") to place anchor poses from the library inside it, or key a pose inside the gap",
+            ));
+        }
         let note = crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?;
         if !note.is_empty() {
             return Err(note);
         }
-        self.ease_borders(a, b)?;
-        if let Some(c) = filler.contacts_of(a, b) {
-            self.plant_steps(a, b, &c, PLANT_GROUND)?;
-        }
-        self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
+        let (placed, placing) = self.finish_fill(&filler, a, b)?;
         let kept = self.keep_possible_report(a, b)?;
+        let mut notes = kept.notes.clone();
+        notes.extend(placing);
         Ok(Filled {
             from: a,
             to: b,
             model: filler.label(),
-            notes: kept.notes.clone(),
+            notes,
             kept,
+            anchors: placed.anchors,
+            segment: placed.segment,
         })
+    }
+
+    /// After `refill` wrote the span `a..b`: tag the anchor keys of a long fill, ease through
+    /// the keys at both ends and through each anchor, and plant the feet of every span between
+    /// them. Returns what was placed and the notes of placing it.
+    fn finish_fill(&mut self, filler: &AiFiller, a: i64, b: i64) -> R<(Placed, Vec<String>)> {
+        let placed = filler.placed_of(a, b).unwrap_or_default();
+        let e = self.clip.edit;
+        for an in &placed.anchors {
+            if let Some(k) = self
+                .clip
+                .layers
+                .get_mut(e)
+                .and_then(|l| l.keys.iter_mut().find(|k| k.frame == an.frame))
+            {
+                k.model = anchors::tag(an);
+            }
+        }
+        let mut bounds = vec![a];
+        bounds.extend(placed.anchors.iter().map(|x| x.frame));
+        bounds.push(b);
+        self.ease_borders(a, b)?;
+        for an in &placed.anchors {
+            crate::ease::ease_through(&mut self.clip, an.frame, crate::ease::EASE_FRAMES)?;
+        }
+        // the steps the model saw, over the whole gap at once: a foot down across an anchor is
+        // one contact (planted on one spot), not two meeting there with a jump
+        let spans: Vec<Option<Contacts>> = bounds
+            .windows(2)
+            .map(|w| match w {
+                &[p, q] => filler.contacts_of(p, q),
+                _ => None,
+            })
+            .collect();
+        if spans.iter().all(Option::is_some) {
+            let mut merged: Contacts = Vec::with_capacity((b - a - 1).max(0) as usize);
+            let mut last: Option<[bool; 2]> = None;
+            for c in spans.iter().flatten() {
+                if let (Some(prev), Some(next)) = (last, c.first()) {
+                    merged.push([prev[0] && next[0], prev[1] && next[1]]);
+                }
+                merged.extend(c.iter().copied());
+                last = c.last().copied().or(last);
+            }
+            self.plant_steps(a, b, &merged, PLANT_GROUND)?;
+        }
+        for w in bounds.windows(2) {
+            let &[p, q] = w else { continue };
+            self.plant_feet(p, q, PLANT_STILL, PLANT_GROUND)?;
+        }
+        let notes = placed.notes.clone();
+        Ok((placed, notes))
     }
 
     /// Work out a fill without keeping it: the clip as it would be is stored as the preview (a
@@ -311,7 +504,7 @@ impl crate::document::Document {
         if plain {
             self.ai_settings.ai_force = 0.0;
         }
-        let made = self.fill_clip(span);
+        let made = self.fill_clip(span, true);
         self.ai_settings = settings;
         let filled = std::mem::replace(&mut self.clip, base.clone());
         let Filled {
@@ -320,6 +513,8 @@ impl crate::document::Document {
             model: label,
             notes,
             kept: _,
+            anchors: _,
+            segment: _,
         } = made?;
         let p = Arc::new(Preview {
             base,
@@ -419,12 +614,9 @@ impl crate::document::Document {
                 && !crate::edits::generated_in(&self.clip, a, b)
                 && crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?.is_empty()
             {
-                self.ease_borders(a, b)?;
-                if let Some(c) = filler.contacts_of(a, b) {
-                    self.plant_steps(a, b, &c, PLANT_GROUND)?;
-                }
-                self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
+                let (_, placing) = self.finish_fill(&filler, a, b)?;
                 notes.extend(self.keep_possible(a, b)?);
+                notes.extend(placing);
             }
         }
         let fr = self.frame;

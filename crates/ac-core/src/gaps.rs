@@ -1,7 +1,8 @@
 //! The gaps between your keys as an AI fill sees them: how long each one is, whether the model has
-//! filled it, and whether it can (a gap longer than the model takes is left to the spline). The
-//! inspector reads these before anything is clicked; `ai.gaps`, `ai.fill_all` and `ai.toggle`
-//! act on them.
+//! filled it, and whether it can (a gap longer than the model takes gets anchor poses from the
+//! library, `crate::anchors`; without a library, or past [`crate::anchors::MAX_LONG`], it is left
+//! to the spline). The inspector reads these before anything is clicked; `ai.gaps`, `ai.fill_all`
+//! and `ai.toggle` act on them.
 
 use serde::Serialize;
 
@@ -22,6 +23,9 @@ pub struct Gap {
     pub filled: bool,
     /// Why the model can't fill it, in words (`None`: it can).
     pub refused: Option<String>,
+    /// Over the model's limit: how many anchor poses from the library split it (`None`: the
+    /// model takes it in one, or it is refused).
+    pub anchors: Option<i64>,
 }
 
 /// Most frames the loaded model fills in one gap (`None`: no model is loaded).
@@ -46,6 +50,7 @@ pub fn gaps(doc: &Document) -> Vec<Gap> {
         .map(|k| k.frame)
         .collect();
     let max = max_gap(doc);
+    let library = doc.pose_source.is_some();
     manual
         .windows(2)
         .filter_map(|w| match w {
@@ -57,8 +62,18 @@ pub fn gaps(doc: &Document) -> Vec<Gap> {
             let refused = match max {
                 None => Some("no AI model is loaded (assets/models)".to_string()),
                 Some(_) if frames < 1 => Some("the keys are next to each other: nothing to fill".to_string()),
-                Some(m) if frames > m => Some(format!("gap {frames} frames (max {m})")),
+                Some(m) if frames > m && !library => Some(format!(
+                    "gap {frames} frames (max {m}) and no library to take anchor poses from"
+                )),
+                Some(_) if frames > crate::anchors::MAX_LONG => Some(format!(
+                    "gap {frames} frames (max {} with anchor poses): key a pose inside it",
+                    crate::anchors::MAX_LONG
+                )),
                 Some(_) => None,
+            };
+            let anchors = match (max, &refused) {
+                (Some(m), None) if frames > m => Some(crate::anchors::frames(a, b, m).len() as i64),
+                _ => None,
             };
             Gap {
                 from: a,
@@ -66,6 +81,7 @@ pub fn gaps(doc: &Document) -> Vec<Gap> {
                 frames,
                 filled: ai.iter().any(|&f| a < f && f < b),
                 refused,
+                anchors,
             }
         })
         .collect()

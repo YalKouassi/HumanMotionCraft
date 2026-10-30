@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "ai-fill-all",
   "feature": "ai.fill_all",
-  "description": "Gaps are measured before anything is filled, and Fill all fills every gap the model can take in one undo step. Keys of yours on 0, 20, 30 and 90 (linear; the root offset z 0.9450101 on 0 and 90, one hip height (0.8698308 m) higher, 1.9450101, on 20 and 30) make three gaps: 0–20 holds 19 frames, 20–30 holds 9, 30–90 holds 59, more than the model's 45, so it is refused in words: \"gap 59 frames (max 45)\". The playhead on 50 is in that gap. Fill all fills 0–20 and 20–30 and skips 30–90 with the reason; the AI keys make two bands, 1..19 and 21..29 (key 20 is yours). With ai_force 0 the fill is the plain interpolation, so frame 10's root head is halfway: 0.8724132 + 0.8698308 / 2 = 1.3073286. Undo reads \"AI fill all gaps\" and takes both bands away at once. Physics is off: this checks the keys.",
+  "description": "Gaps are measured before anything is filled, and Fill all fills every gap the model can take in one undo step. Keys of yours on 0, 20, 30 and 90 (linear; the root offset z 0.9450101 on 0 and 90, one hip height (0.8698308 m) higher, 1.9450101, on 20 and 30) make three gaps: 0–20 holds 19 frames, 20–30 holds 9, 30–90 holds 59, more than the model's 45, so it gets anchor poses from the library (ai-fill-long-gap): ceil(60 / 30) = 2 spans, one anchor on frame 60 (ai.gaps says anchors 1, refused null). The playhead on 50 is in that gap. Fill all fills all three gaps and skips none; the AI keys make bands 1..19, 21..29 (key 20 is yours), 31..59, the anchor on 60 (from the library segment nearest the two standing keys, Gestures/Shrug frame 67, pinned: the library's content) and 61..89. With ai_force 0 the fill is the plain interpolation, so frame 10's root head is halfway: 0.8724132 + 0.8698308 / 2 = 1.3073286. Undo reads \"AI fill all gaps\" and takes both bands away at once. Physics is off: this checks the keys.",
   "script": [
     { "command": "physics.set", "params": { "on": false } },
     { "command": "ai.settings", "params": { "ai_force": 0 } },
@@ -23,9 +23,9 @@
       "expect": {
         "max_gap": 45,
         "gaps": [
-          { "from": 0, "to": 20, "frames": 19, "filled": false, "refused": null },
-          { "from": 20, "to": 30, "frames": 9, "filled": false, "refused": null },
-          { "from": 30, "to": 90, "frames": 59, "filled": false, "refused": "gap 59 frames (max 45)" }
+          { "from": 0, "to": 20, "frames": 19, "filled": false, "refused": null, "anchors": null },
+          { "from": 20, "to": 30, "frames": 9, "filled": false, "refused": null, "anchors": null },
+          { "from": 30, "to": 90, "frames": 59, "filled": false, "refused": null, "anchors": 1 }
         ],
         "at": { "from": 30, "to": 90, "frames": 59 }
       }
@@ -33,12 +33,13 @@
     {
       "command": "ai.fill_all",
       "expect": {
-        "filled": [[0, 20], [20, 30]],
-        "skipped": [{ "from": 30, "to": 90, "reason": "gap 59 frames (max 45)" }],
+        "filled": [[0, 20], [20, 30], [30, 90]],
+        "skipped": [],
+        "anchors": [{ "from": 30, "to": 90, "frame": 60, "id": "Gestures/Shrug", "source_frame": 67 }],
         "model": "parts"
       }
     },
-    { "command": "editor.state", "expect": { "bands": [{ "from": 1, "to": 19, "model": "parts" }, { "from": 21, "to": 29, "model": "parts" }] } },
+    { "command": "editor.state", "expect": { "bands": [{ "from": 1, "to": 19, "model": "parts" }, { "from": 21, "to": 29, "model": "parts" }, { "from": 31, "to": 59, "model": "parts" }, { "from": 60, "to": 60, "model": "anchor Gestures/Shrug @67" }, { "from": 61, "to": 89, "model": "parts" }] } },
     { "command": "frame.set", "params": { "frame": 10 } },
     { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.3073286] } },
     { "command": "ai.gaps", "expect": { "at": { "from": 0, "to": 20, "filled": true } } },

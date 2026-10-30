@@ -56,6 +56,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
     let mut skipped: Vec<Value> = Vec::new();
     let mut model = String::new();
     let mut notes: Vec<String> = Vec::new();
+    let mut anchors: Vec<Value> = Vec::new();
     let mut diagnostics: Vec<Value> = Vec::new();
     for g in gaps::gaps(doc) {
         if let Some(why) = &g.refused {
@@ -74,6 +75,12 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
         }
         let f = doc.ai_fill(Some((g.from, g.to)))?;
         notes.extend(f.notes.iter().map(|n| format!("{}–{}: {n}", f.from, f.to)));
+        anchors.extend(f.anchors.iter().map(|an| {
+            json!({
+                "from": f.from, "to": f.to, "frame": an.frame, "id": an.id,
+                "source_frame": an.source_frame,
+            })
+        }));
         diagnostics.push(crate::filldiag::diagnose(doc, &f).json());
         model = f.model;
         filled.push(json!([f.from, f.to]));
@@ -96,9 +103,10 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
             format!("nothing to fill ({})", why.join("; "))
         });
     }
-    Ok(
-        json!({ "filled": filled, "skipped": skipped, "model": model, "notes": notes, "diagnostics": diagnostics }),
-    )
+    Ok(json!({
+        "filled": filled, "skipped": skipped, "model": model, "notes": notes, "anchors": anchors,
+        "diagnostics": diagnostics,
+    }))
 }
 
 /// The span: `from` and `to`, else the gap the playhead is in.
@@ -131,7 +139,8 @@ fn ai_toggle(doc: &mut Document, p: &P) -> Out {
     }
     let f = doc.ai_fill(Some((g.from, g.to)))?;
     let d = crate::filldiag::diagnose(doc, &f).json();
-    Ok(
-        json!({ "from": f.from, "to": f.to, "mode": "ai", "model": f.model, "notes": f.notes, "diagnostics": d }),
-    )
+    Ok(json!({
+        "from": f.from, "to": f.to, "mode": "ai", "model": f.model, "notes": f.notes,
+        "anchors": f.anchors, "diagnostics": d,
+    }))
 }

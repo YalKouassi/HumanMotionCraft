@@ -393,6 +393,14 @@
                     "minimum": 0,
                     "maximum": 10000000,
                     "description": "your key after the gap"
+                  },
+                  "anchors": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "none"
+                    ],
+                    "description": "a gap over the model's limit: \"auto\" (default) places anchor poses from the library inside it and fills each span between them; \"none\" refuses it"
                   }
                 },
                 "required": [],

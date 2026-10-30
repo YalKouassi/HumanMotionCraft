@@ -13,6 +13,7 @@
 
 pub mod ai;
 pub mod anatomy;
+pub mod anchors;
 mod batch;
 pub mod clip;
 pub mod clipfile;

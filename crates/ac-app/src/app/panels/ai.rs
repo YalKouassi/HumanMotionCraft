@@ -283,6 +283,13 @@ impl App {
         match &gap {
             Some(g) => {
                 let text = format!("Gap {}–{}: {} frames (max {max})", g.from, g.to, g.frames);
+                let text = match g.anchors {
+                    Some(n) => format!(
+                        "{text}, split by {n} anchor pose{} from the library",
+                        if n == 1 { "" } else { "s" }
+                    ),
+                    None => text,
+                };
                 let filled = if g.filled { ", filled by the model" } else { "" };
                 ui.label(
                     egui::RichText::new(format!("{text}{filled}")).color(if g.refused.is_some() {

@@ -77,17 +77,34 @@ pub const AI_FILL: &[ParamSpec] = &[
     ParamSpec::new(
         "notes",
         Kind::TextList,
-        "impossible poses the fill made and bent back to the possible limit, or left (empty: none)",
+        "impossible poses the fill made and bent back to the possible limit, or left, and library animations left out of the anchor poses (empty: none)",
     )
+    .required(),
+    ANCHORS,
+    ParamSpec::new(
+        "anchor_segment",
+        Kind::Text,
+        "the library segment the anchors came from: {id, from, to, speed, match_deg} (its frames matched to the two keys, library frames per animation frame, and the mean angle between its end poses and the keys); null: the model took the gap in one",
+    )
+    .json()
     .required(),
     DIAGNOSTICS,
 ];
+
+/// The anchor poses a gap over the model's limit was split with (`crate::anchors`).
+const ANCHORS: ParamSpec = ParamSpec::new(
+    "anchors",
+    Kind::Text,
+    "a gap over the model's limit: the anchor poses placed inside it, [{frame, id, source_frame}] (the library animation and its frame the pose is); empty: the model took the gap in one",
+)
+.json()
+.required();
 
 /// Why a fill might look wrong, measured (`crate::filldiag`).
 const DIAGNOSTICS: ParamSpec = ParamSpec::new(
     "diagnostics",
     Kind::Text,
-    "measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding|path|pop|spin|bent, from, to, text}] what is past a line, notes: what could not be measured}",
+    "measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys and at each anchor pose between them (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding|path|pop|spin|bent, from, to, text}] what is past a line, notes: what could not be measured}",
 )
 .json()
 .required();
@@ -222,7 +239,7 @@ pub const AI_GAPS: &[ParamSpec] = &[
     ParamSpec::new(
         "gaps",
         Kind::Text,
-        "every gap between your keys: [{from, to, frames, filled, refused}] (refused: why the model can't fill it, null: it can)",
+        "every gap between your keys: [{from, to, frames, filled, refused, anchors}] (refused: why the model can't fill it, null: it can; anchors: over the model's limit, how many anchor poses from the library split it, null: none needed)",
     )
     .json()
     .required(),
@@ -252,6 +269,13 @@ pub const AI_FILL_ALL: &[ParamSpec] = &[
     )
     .required(),
     ParamSpec::new(
+        "anchors",
+        Kind::Text,
+        "the anchor poses placed in gaps over the model's limit: [{from, to, frame, id, source_frame}] (empty: none needed)",
+    )
+    .json()
+    .required(),
+    ParamSpec::new(
         "diagnostics",
         Kind::Text,
         "one per gap filled, in order, as ai.fill's: [{from, to, sliding, sliding_max_cm, path, seams, bent, flags, notes}]",
@@ -271,6 +295,12 @@ pub const AI_TOGGLE: &[ParamSpec] = &[
         Kind::TextList,
         "ai: impossible poses the fill made and bent back, or left",
     ),
+    ParamSpec::new(
+        "anchors",
+        Kind::Text,
+        "ai: the anchor poses placed in a gap over the model's limit, as ai.fill's (empty: none)",
+    )
+    .json(),
     ParamSpec::new(
         "diagnostics",
         Kind::Text,

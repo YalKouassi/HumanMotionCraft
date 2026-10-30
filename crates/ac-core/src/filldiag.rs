@@ -8,7 +8,7 @@
 //! |---|---|---|
 //! | `sliding` | per contact span ([`crate::contact`]), how far a planted foot slid (cm) | [`SLIDE_CM`] |
 //! | `path` | the root's largest distance (m) from the keys' own path: the clip's interpolation with the span's AI keys taken out | [`PATH_M`] |
-//! | `seams` | at each of the two keys: the largest change of any joint's speed (m/s, `clip.metrics`'s `keys`) and of any bone's spin (rad/s, [`metrics::spin_change`]) across the key | [`POP_SPEED`], [`SPIN_RAD_S`] |
+//! | `seams` | at each of the two keys, and at each anchor pose of a long fill ([`crate::anchors`]): the largest change of any joint's speed (m/s, `clip.metrics`'s `keys`) and of any bone's spin (rad/s, [`metrics::spin_change`]) across the key | [`POP_SPEED`], [`SPIN_RAD_S`] |
 //! | `bent` | the joints `keep_possible` bent back inside the possible limits, and how far past they were (degrees) | [`BENT_DEG`] |
 //!
 //! `flags` lists what went past a line, each with its frames and the reason in words (the
@@ -85,6 +85,10 @@ pub fn diagnose(doc: &Document, f: &Filled) -> Diagnostics {
         notes: Vec::new(),
     };
     let last = (doc.clip.length_with(&doc.links) - 1).max(0);
+    // the keys two fills meet at: yours, and each anchor pose between them
+    let mut seam_frames = vec![a];
+    seam_frames.extend(f.anchors.iter().map(|x| x.frame));
+    seam_frames.push(b);
     match metrics::measure(doc, Some(a), Some(b), false) {
         Ok(m) => {
             d.sliding = m.sliding;
@@ -93,7 +97,7 @@ pub fn diagnose(doc: &Document, f: &Filled) -> Diagnostics {
                     "no foot is planted on frames {a}–{b}: nothing to measure for foot slide"
                 ));
             }
-            for k in [a, b] {
+            for &k in &seam_frames {
                 d.seams.push(Seam {
                     frame: k,
                     pop: m.keys.iter().find(|p| p.frame == k).cloned(),
@@ -104,7 +108,7 @@ pub fn diagnose(doc: &Document, f: &Filled) -> Diagnostics {
         Err(e) => {
             d.notes
                 .push(format!("foot slide and the seams' speed were not measured: {e}"));
-            for k in [a, b] {
+            for &k in &seam_frames {
                 d.seams.push(Seam {
                     frame: k,
                     pop: None,
@@ -113,7 +117,7 @@ pub fn diagnose(doc: &Document, f: &Filled) -> Diagnostics {
             }
         }
     }
-    match spins(doc, a, b, last) {
+    match spins(doc, &seam_frames, last) {
         Ok(sp) => {
             for (s, v) in d.seams.iter_mut().zip(sp) {
                 s.spin = v;
@@ -150,10 +154,10 @@ pub fn diagnose(doc: &Document, f: &Filled) -> Diagnostics {
     d
 }
 
-/// The spin change at keys `a` and `b` (`None` for a key with no frame on one side).
-fn spins(doc: &Document, a: i64, b: i64, last: i64) -> R<Vec<Option<(f64, String)>>> {
-    let mut out = Vec::with_capacity(2);
-    for k in [a, b] {
+/// The spin change at each of `keys` (`None` for a key with no frame on one side).
+fn spins(doc: &Document, keys: &[i64], last: i64) -> R<Vec<Option<(f64, String)>>> {
+    let mut out = Vec::with_capacity(keys.len());
+    for &k in keys {
         if k <= 0 || k >= last {
             out.push(None);
             continue;

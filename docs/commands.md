@@ -68,6 +68,7 @@ Inputs:
 |---|---|---|---|---|
 | `from` | integer |  | 0 to 10000000 | your key before the gap (default: around the playhead) |
 | `to` | integer |  | 0 to 10000000 | your key after the gap |
+| `anchors` | one of auto \| none |  |  | a gap over the model's limit: "auto" (default) places anchor poses from the library inside it and fills each span between them; "none" refuses it |
 
 Outputs:
 
@@ -77,8 +78,10 @@ Outputs:
 | `to` | integer | yes |  | your key after the gap |
 | `frames` | integer | yes |  | frames filled |
 | `model` | text | yes |  | the model label |
-| `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left (empty: none) |
-| `diagnostics` | JSON | yes |  | measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding\|path\|pop\|spin\|bent, from, to, text}] what is past a line, notes: what could not be measured} |
+| `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left, and library animations left out of the anchor poses (empty: none) |
+| `anchors` | JSON | yes |  | a gap over the model's limit: the anchor poses placed inside it, [{frame, id, source_frame}] (the library animation and its frame the pose is); empty: the model took the gap in one |
+| `anchor_segment` | JSON | yes |  | the library segment the anchors came from: {id, from, to, speed, match_deg} (its frames matched to the two keys, library frames per animation frame, and the mean angle between its end poses and the keys); null: the model took the gap in one |
+| `diagnostics` | JSON | yes |  | measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys and at each anchor pose between them (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding\|path\|pop\|spin\|bent, from, to, text}] what is past a line, notes: what could not be measured} |
 
 ### `ai.fill_all`: AI fill all gaps
 
@@ -98,6 +101,7 @@ Outputs:
 | `skipped` | JSON | yes |  | the gaps left: [{from, to, reason}] |
 | `model` | text | yes |  | the model label |
 | `notes` | list of text | yes |  | impossible poses the fills made and bent back to the possible limit, or left (each starts with its gap, from–to; empty: none) |
+| `anchors` | JSON | yes |  | the anchor poses placed in gaps over the model's limit: [{from, to, frame, id, source_frame}] (empty: none needed) |
 | `diagnostics` | JSON | yes |  | one per gap filled, in order, as ai.fill's: [{from, to, sliding, sliding_max_cm, path, seams, bent, flags, notes}] |
 
 ### `ai.gaps`: AI gaps
@@ -110,7 +114,7 @@ Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `gaps` | JSON | yes |  | every gap between your keys: [{from, to, frames, filled, refused}] (refused: why the model can't fill it, null: it can) |
+| `gaps` | JSON | yes |  | every gap between your keys: [{from, to, frames, filled, refused, anchors}] (refused: why the model can't fill it, null: it can; anchors: over the model's limit, how many anchor poses from the library split it, null: none needed) |
 | `at` | JSON | yes |  | the gap the playhead is in (null: none) |
 | `max_gap` | integer | yes |  | most frames the model fills in one gap (null: no model loaded) |
 
@@ -214,6 +218,7 @@ Outputs:
 | `cleared` | integer |  |  | plain: AI keys removed |
 | `model` | text |  |  | ai: the model label |
 | `notes` | list of text |  |  | ai: impossible poses the fill made and bent back, or left |
+| `anchors` | JSON |  |  | ai: the anchor poses placed in a gap over the model's limit, as ai.fill's (empty: none) |
 | `diagnostics` | JSON |  |  | ai: why the fill might look wrong, measured, as ai.fill's |
 
 ## anim
