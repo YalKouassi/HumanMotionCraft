@@ -41,6 +41,13 @@ They are reported by gap bin (:data:`BINS`), for every context the app can give
 key A held still), by motion type and style, on a hard slice (a foot plants or lifts inside the
 gap, or the path turns), and for part layers: each part group's complement given, the error on the
 free bones alone. One composite number (:func:`score`) picks training's best checkpoint.
+
+**Scenarios** (126500, ``scenarios``): fixed slices of the clean windows, read from the recording's
+own motion, not its take name (:func:`scenarios`): ``start`` and ``stop`` (the hips going from still
+to moving, or back), ``crouch``, ``flight`` (both feet off the floor inside the gap) and ``turn_step``
+(a turn with a foot planting or lifting), each with its own measures (:func:`scene_measure`) beside
+plain interpolation's, its window count, and ``too_small`` under :data:`MIN_WINDOWS`. Carrying has no
+slice of its own: the rig has no load model, so it is the ``carry`` row of ``by_type``.
 """
 
 from __future__ import annotations
@@ -56,7 +63,7 @@ import numpy as np
 import torch
 
 from . import MODELS, REPO, context, review
-from .kinematics import EXTREMITIES, POINTS, Body, foot_speed, geodesic
+from .kinematics import EXTREMITIES, FOOT_POINTS, POINTS, Body, foot_speed, geodesic
 from .model import BONES, CONTEXT, PART_GROUPS, given_features, smooth_path, unfeatures
 from .quality import FPS, THRESHOLDS
 
@@ -77,6 +84,16 @@ TRAJECTORY_SMOOTH = 9
 TURN_DEG = 45.0
 #: ...when the root moves at least this fast at both ends (m/s)
 TURN_SPEED = 0.5
+#: scenarios: the hips are still under this speed (m/s), and going over the second
+STILL_MS = 0.2
+MOVING_MS = 0.7
+#: a crouch: hips between these shares of their standing height (lower is lying down or sitting)
+CROUCH_SHARE = (0.4, 0.75)
+#: a flight: this many frames in a row with both feet off the floor, inside the gap
+FLIGHT_FRAMES = 2
+#: a slice with fewer windows than this says so: its numbers aren't to be trusted
+MIN_WINDOWS = 30
+SCENARIOS = ("start", "stop", "crouch", "flight", "turn_step")
 
 
 def bin_name(lo: int, hi: int) -> str:
@@ -247,6 +264,64 @@ def hard(truth: Pose, body: Body, a: int, b: int) -> dict:
     return {"plant_change": plant, "turn": turn, "either": plant | turn}
 
 
+def hip_speed(pose: Pose):
+    """(N, T - 1) the root's speed across the floor between frames (m/s)."""
+    return (pose.root[:, 1:, :2] - pose.root[:, :-1, :2]).norm(dim=-1) * FPS
+
+
+def airborne(truth: Pose, body: Body):
+    """(N, T) bool: every foot point is off the floor."""
+    return body.foot_heights(truth.points).min(-1).values > THRESHOLDS["contact_m"]
+
+
+def scenarios(truth: Pose, body: Body, a: int, b: int) -> dict:
+    """(N,) bool per scenario, from the recording's own motion."""
+    v = hip_speed(truth)
+    start = (v[:, a] < STILL_MS) & (v[:, b - 1] > MOVING_MS)
+    stop = (v[:, a] > MOVING_MS) & (v[:, b - 1] < STILL_MS)
+    gap = slice(a + 1, b)
+    share = truth.points[:, gap, 0, 2].mean(1) / body.hip_height
+    in_air = airborne(truth, body)[:, gap]
+    crouch = (share > CROUCH_SHARE[0]) & (share < CROUCH_SHARE[1]) & (~in_air).all(1)
+    air = in_air.int()
+    run_len = torch.zeros_like(air)
+    run_len[:, 0] = air[:, 0]
+    for t in range(1, air.shape[1]):
+        run_len[:, t] = (run_len[:, t - 1] + 1) * air[:, t]
+    h = hard(truth, body, a, b)
+    return {"start": start, "stop": stop, "crouch": crouch, "flight": run_len.max(1).values >= FLIGHT_FRAMES,
+            "turn_step": h["turn"] & h["plant_change"]}
+
+
+def scene_measure(pose: Pose, truth: Pose, body: Body, a: int, b: int) -> dict:
+    """The scenarios' own measures of a fill against the recording: name -> (value (N,), weight (N,)).
+
+    ``hip_speed_ms``: how far the hips' speed is from the recording's, from key to key.
+    ``flight_root_m``: how far the root is on the frames the recording is in the air (the flight's shape).
+    ``landing_m``: how far the root is on the first frame down after them, when that is in the gap.
+    ``foot_place_m``: how far across the floor a foot is from where the recording plants it."""
+    gap = slice(a + 1, b)
+    N = pose.points.shape[0]
+    one = torch.ones(N, device=pose.points.device)
+    out = {"hip_speed_ms": ((hip_speed(pose) - hip_speed(truth))[:, a:b].abs().mean(1), one)}
+    root = (pose.root - truth.root).norm(dim=-1)  # (N, T)
+    air = airborne(truth, body)
+    n_air = air[:, gap].sum(1).float()
+    out["flight_root_m"] = ((root[:, gap] * air[:, gap]).sum(1) / n_air.clamp(min=1), n_air)
+    landed = air[:, a + 1 : b - 1] & ~air[:, a + 2 : b]  # in the air on a frame, down on the next, both in the gap
+    if landed.shape[1]:
+        first = landed.int().argmax(1) + a + 2
+        out["landing_m"] = (root[torch.arange(N, device=root.device), first], landed.any(1).float())
+    else:  # a gap of one frame has no frame to land on after one in the air
+        out["landing_m"] = (one * 0, one * 0)
+    planted = body.planted(truth.points)[:, gap]  # (N, g, 2)
+    err = (pose.points - truth.points)[:, gap][..., list(FOOT_POINTS), :2].norm(dim=-1)
+    foot = (err[..., 0:2] + err[..., 2:4]) / 2
+    n_pl = planted.sum((1, 2)).float()
+    out["foot_place_m"] = ((foot * planted).sum((1, 2)) / n_pl.clamp(min=1), n_pl)
+    return out
+
+
 # ---- aggregation --------------------------------------------------------------------------------
 
 class Acc:
@@ -326,6 +401,7 @@ def run(model, sets, body: Body, device, windows: int = 512, inputs=context.MODE
     total = Row()
     by_input = {m: {"all": Row(), "bins": {bin_name(*b): Row() for b in BINS}} for m in inputs}
     by_type, by_style, by_hard = defaultdict(Row), defaultdict(Row), defaultdict(Row)
+    by_scene = {k: Row() for k in SCENARIOS}
     by_part = {p: Row() for p in PART_GROUPS} if parts else {}
     traj = {"blend": Row(), **({"given": Row()} if getattr(model, "path", False) else {})} if trajectory else {}
     a = CONTEXT - 1
@@ -371,6 +447,12 @@ def run(model, sets, body: Body, device, windows: int = 512, inputs=context.MODE
                     for kind, rows in hard(tp, body, a, b).items():
                         if rows.any():
                             by_hard[kind].add(mm, mi, mt, rows)
+                    scenes = scenarios(tp, body, a, b)
+                    if any(rows.any() for rows in scenes.values()):
+                        sm, si = {**mm, **scene_measure(pp, tp, body, a, b)}, {**mi, **scene_measure(ip, tp, body, a, b)}
+                        for kind, rows in scenes.items():
+                            if rows.any():
+                                by_scene[kind].add(sm, si, mt, rows)
                 for part, grp in by_part.items():
                     gm = torch.ones(q.shape[0], len(BONES), device=device)
                     gm[:, list(PART_GROUPS[part])] = 0  # every bone given but the part's
@@ -408,6 +490,7 @@ def run(model, sets, body: Body, device, windows: int = 512, inputs=context.MODE
         out["by_type"] = {k: by_type[k].result() for k in sorted(by_type)}
         out["by_style"] = {k: by_style[k].result() for k in sorted(by_style)}
         out["hard"] = {k: by_hard[k].result() for k in sorted(by_hard)}
+        out["scenarios"] = {k: {**r.result(), "too_small": r.windows < MIN_WINDOWS} for k, r in by_scene.items()}
     if parts:
         out["parts"] = {k: r.result() for k, r in by_part.items()}
     if traj:
@@ -518,6 +601,18 @@ def report(ev: dict) -> str:
         lines.append(row(f"hard {k}", r))
     for k, r in ev.get("parts", {}).items():
         lines.append(row(f"part {k}", r))
+    if "scenarios" in ev:
+        lines.append(f"{'scenarios':14}{'windows':>9}{'hip speed m/s':>18}{'flight mm':>18}{'landing mm':>18}{'foot place mm':>18}")
+
+        def scene_row(name, r):
+            m, i = r.get("model", {}), r.get("interp", {})
+            cell = lambda k, s=1.0: f"{m.get(k, float('nan')) * s:7.3g} / {i.get(k, float('nan')) * s:<7.3g}"  # noqa: E731
+            small = "  too few windows to trust" if r["too_small"] else ""
+            return (f"{name:14}{r['windows']:>9}{cell('hip_speed_ms'):>18}{cell('flight_root_m', 1000):>18}"
+                    f"{cell('landing_m', 1000):>18}{cell('foot_place_m', 1000):>18}{small}")
+
+        for k, r in ev["scenarios"].items():
+            lines.append(scene_row(f"  {k}", r))
     for k, r in ev.get("trajectory", {}).items():
         lines.append(row(f"path {k}", r))
     if "posed" in ev:

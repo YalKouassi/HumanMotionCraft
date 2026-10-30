@@ -9,7 +9,7 @@ clips. Nothing here runs at app time.
 | `ac_train.datasets` | the dataset registry (source, licence, joint map), readers (BVH, `.b3d`, glb) and the retarget to `training/data/rig/<set>.npz` |
 | `ac_train.b3d` | pure-Python `.b3d` (`SubjectOnDisk`) reader and HTTP-Range fetcher for AddBiomechanics 1.0 |
 | `ac_train.train` | trains the network on the retargeted sets into `training/data/models/<tag>/` |
-| `ac_train.evaluate` | the evaluation suite: gap bins, pose, feet, continuity, impossible joints, realistic contexts, part layers; writes it into the card, and contact sheets |
+| `ac_train.evaluate` | the evaluation suite: gap bins, pose, feet, continuity, impossible joints, realistic contexts, part layers, scenarios (starts, stops, crouches, flights, turns while stepping); writes it into the card, and contact sheets |
 | `ac_train.split` | which subjects validation holds out (whole subjects, stable however the sets change) |
 | `ac_train.context` | the context before key A as the app gives it: a spline through sparse keys (the app's interpolation, batched), or held still |
 | `ac_train.kinematics`, `ac_train.losses` | body points, feet, contacts and joint angles in torch; training's loss terms |

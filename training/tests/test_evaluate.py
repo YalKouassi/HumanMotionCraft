@@ -16,11 +16,20 @@ from ac_train.model import BONES, features  # noqa: E402
 A, B, T = 1, 4, 5
 
 
-def window(skel, dx=(0.0,) * T, dz=(0.0,) * T):
+def window(skel, dx=(0.0,) * T, dz=(0.0,) * T, dy=None):
     lift = skel.hip_height - skel.heads[0][2]
-    local = torch.eye(3).expand(1, T, len(BONES), 3, 3)
-    pos = torch.tensor([[[x, 0.0, lift + z] for x, z in zip(dx, dz)]], dtype=torch.float32)
+    dy = dy or (0.0,) * len(dx)
+    local = torch.eye(3).expand(1, len(dx), len(BONES), 3, 3)
+    pos = torch.tensor([[[x, y, lift + z] for x, y, z in zip(dx, dy, dz)]], dtype=torch.float32)
     return features(local, pos, skel.hip_height)
+
+
+def poses(skel, body, **kw):
+    return evaluate.Pose(window(skel, **kw), body)
+
+
+def scenes(skel, body, a=A, b=B, **kw):
+    return {k: bool(v[0]) for k, v in evaluate.scenarios(poses(skel, body, **kw), body, a, b).items()}
 
 
 def metrics(pred, truth, body):
@@ -109,3 +118,83 @@ def test_grounded_poses_stand_on_the_floor():
     f, _, _, _, _, _ = prepare(q, r, 1, body, "cpu")
     low = body.foot_heights(evaluate.Pose(f, body).points[:, evaluate.CONTEXT - 1]).min(-1).values
     assert low.abs().max() < 1e-3
+
+
+def test_a_start_and_a_stop_are_the_hips_leaving_and_reaching_still():
+    skel = rig.Skeleton.load()
+    body = Body(skel)
+    # from key A the hips hold still for a frame (0 m/s), then go 5 cm a frame (1.5 m/s) into key B
+    going = scenes(skel, body, dx=(0.0, 0.0, 0.0, 0.05, 0.1))
+    assert going["start"] and not going["stop"]
+    stopping = scenes(skel, body, dx=(0.0, 0.0, 0.05, 0.1, 0.1))
+    assert stopping["stop"] and not stopping["start"]
+    # at 3 cm a frame (0.9 m/s) throughout it neither starts nor stops; standing doesn't either
+    steady = scenes(skel, body, dx=(0.0, 0.03, 0.06, 0.09, 0.12))
+    assert not steady["start"] and not steady["stop"]
+    still = scenes(skel, body)
+    assert not still["start"] and not still["stop"]
+
+
+def test_hip_speed_is_how_far_from_the_recording():
+    skel = rig.Skeleton.load()
+    body = Body(skel)
+    truth = poses(skel, body, dx=(0.0, 0.0, 0.0, 0.05, 0.1))  # 0, 1.5, 1.5 m/s from key to key
+    fill = poses(skel, body, dx=(0.0, 0.0, 0.0, 0.0, 0.1))  # 0, 0, 3 m/s
+    m = evaluate.scene_measure(fill, truth, body, A, B)
+    # off by 0, 1.5 and 1.5: 1 m/s on average
+    assert float(m["hip_speed_ms"][0][0]) == pytest.approx(1.0, abs=1e-3)
+
+
+def test_a_crouch_is_low_hips_with_the_feet_down():
+    skel = rig.Skeleton.load()
+    body = Body(skel)
+    low = 0.4 * skel.hip_height  # the whole body 40% down: hips at 0.6 of standing, in the 0.4 to 0.75
+    assert scenes(skel, body, dz=(-low,) * T)["crouch"]
+    assert not scenes(skel, body)["crouch"]  # standing
+    # 70% down: hips at 0.3 of standing, under the 0.4 of a crouch: lying or sitting
+    assert not scenes(skel, body, dz=(-0.7 * skel.hip_height,) * T)["crouch"]
+
+
+def test_a_flight_is_scored_on_its_shape_and_its_landing():
+    skel = rig.Skeleton.load()
+    body = Body(skel)
+    # 6 frames, keys at 1 and 5: in the air on frames 2 and 3, down again on frame 4
+    a, b = 1, 5
+    n = (0.0,) * 6
+    up = (0.0, 0.0, 0.2, 0.2, 0.0, 0.0)
+    assert scenes(skel, body, a=a, b=b, dx=n, dz=up)["flight"]
+    # one frame in the air is a stride, not a flight
+    assert not scenes(skel, body, a=a, b=b, dx=n, dz=(0.0, 0.0, 0.2, 0.0, 0.0, 0.0))["flight"]
+    truth = poses(skel, body, dx=n, dz=up)
+    fill = poses(skel, body, dx=n, dz=(0.0, 0.0, 0.2, 0.1, 0.05, 0.0))
+    m = evaluate.scene_measure(fill, truth, body, a, b)
+    # root off by 0 and 0.1 on the two frames in the air: 5 cm; 5 cm off on the frame it lands
+    assert float(m["flight_root_m"][0][0]) == pytest.approx(0.05, abs=1e-5)
+    assert float(m["flight_root_m"][1][0]) == 2
+    assert float(m["landing_m"][0][0]) == pytest.approx(0.05, abs=1e-5)
+    assert float(m["landing_m"][1][0]) == 1
+    # no flight: nothing to weigh
+    rest = poses(skel, body, dx=n, dz=n)
+    m = evaluate.scene_measure(rest, rest, body, a, b)
+    assert float(m["flight_root_m"][1][0]) == 0 and float(m["landing_m"][1][0]) == 0
+    # a gap of one frame (keys at 1 and 3) has no landing to weigh, and no flight of two frames
+    assert not scenes(skel, body, a=1, b=3, dx=n, dz=up)["flight"]
+    m = evaluate.scene_measure(fill, truth, body, 1, 3)
+    assert float(m["landing_m"][1][0]) == 0
+
+
+def test_a_turn_while_stepping_and_where_the_feet_land():
+    skel = rig.Skeleton.load()
+    body = Body(skel)
+    # along X at 3 cm a frame (0.9 m/s), then along Y into key B: a 90 degree turn at over 0.5 m/s;
+    # the feet stop being planted on frame 2 (they start to move), so a plant changes
+    turning = dict(dx=(0.0, 0.0, 0.03, 0.06, 0.06), dy=(0.0, 0.0, 0.0, 0.0, 0.03), dz=(0.0,) * T)
+    assert scenes(skel, body, **turning)["turn_step"]
+    # straight on: no turn
+    straight = dict(dx=(0.0, 0.0, 0.03, 0.06, 0.09), dz=(0.0,) * T)
+    assert not scenes(skel, body, **straight)["turn_step"]
+    # the recording stands on frames 2 and 3; the fill's feet are 0.1 m across the floor on both
+    truth = poses(skel, body)
+    fill = poses(skel, body, dx=(0.0, 0.0, 0.1, 0.1, 0.0))
+    m = evaluate.scene_measure(fill, truth, body, A, B)
+    assert float(m["foot_place_m"][0][0]) == pytest.approx(0.1, abs=1e-5)
