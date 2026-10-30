@@ -151,8 +151,11 @@
             "edit.undo",
             "editor.state",
             "feet.lock",
+            "feet.phases",
             "feet.plant",
+            "feet.roll",
             "frame.set",
+            "hips.transfer",
             "key.channel",
             "key.copy",
             "key.delete",
@@ -2741,6 +2744,40 @@
           "if": {
             "properties": {
               "command": {
+                "const": "feet.phases"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Foot phases"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "motion": {
+                    "type": "string",
+                    "enum": [
+                      "shown",
+                      "keys"
+                    ],
+                    "description": "what plays (the physics pass when it is on; default) or the keys alone"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "feet.plant"
               }
             },
@@ -2795,6 +2832,31 @@
           "if": {
             "properties": {
               "command": {
+                "const": "feet.roll"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Roll feet; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "frame.set"
               }
             },
@@ -2820,6 +2882,31 @@
                 "required": [
                   "frame"
                 ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "hips.transfer"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Shift weight over the feet; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
                 "additionalProperties": false
               }
             }
@@ -6237,8 +6324,11 @@
             "edit.undo",
             "editor.state",
             "feet.lock",
+            "feet.phases",
             "feet.plant",
+            "feet.roll",
             "frame.set",
+            "hips.transfer",
             "key.channel",
             "key.copy",
             "key.delete",

@@ -1,0 +1,26 @@
+{
+  "$schema": "./schema.json",
+  "name": "bug-feet-lock-pop",
+  "feature": "feet.lock",
+  "description": "Lock feet used to hold the ankle at the contact's mean place in all three directions, so a heel that rose was forced down into the floor and the leg stretched, and the knee popped on release (Walk 15: 2.17 to 7.73 m/s). It now holds the ball of the foot across the floor only. Standing keys at 0 and 30, the second 0.1 hip heights along +X (8.7 cm, 0.087 m/s, under the 0.5 m/s contact limit): both feet are in contact on all 31 frames and each slides 8.7 cm. Locking changes all 31 frames, then plants the 28 between the keys as well (`frames` counts both: 59), and the slide goes to about 0, each foot held at its mean place. The keys stay flat on the floor, so no joint changes speed by over 1 m/s.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "pose.set_root", "params": { "root": [0.1, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "clip.metrics",
+      "params": { "motion": "keys" },
+      "expect": { "sliding_max_cm": 8.698, "pops": 0 }
+    },
+    { "command": "feet.lock", "params": {}, "expect": { "frames": 59 } },
+    {
+      "command": "clip.metrics",
+      "params": { "motion": "keys" },
+      "expect": { "sliding_max_cm": 0, "pops": 0 }
+    }
+  ],
+  "expect": { "tolerance": 0.05 },
+  "errors": []
+}

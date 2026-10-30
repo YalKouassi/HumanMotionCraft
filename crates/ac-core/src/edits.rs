@@ -35,6 +35,55 @@ pub trait Filler {
     }
 }
 
+/// Frames either side of a foot's contact over which a lock eases in and out.
+pub const LOCK_FADE: usize = 4;
+
+/// How far `feet.lock` moves a foot on each frame, across the floor only (a heel may rise as the foot
+/// rolls). `balls`: where the ball of the foot is, which stays put as the foot rolls over it. Through
+/// a contact (a run of `flags`), to the
+/// run's mean place; on the [`LOCK_FADE`] frames either side, that move fades out. A run of one frame
+/// is not a contact.
+fn lock_moves(balls: &[Vec3], flags: &[bool]) -> Vec<Vec3> {
+    let n = balls.len().min(flags.len());
+    let mut held = vec![false; n];
+    let mut by = vec![[0.0; 3]; n];
+    let mut ends: Vec<(usize, usize)> = Vec::new();
+    let mut f = 0;
+    while f < n {
+        let start = f;
+        while f < n && flags[f] {
+            f += 1;
+        }
+        if f - start >= 2 {
+            let sum = balls[start..f].iter().fold([0.0; 3], |s, a| quat::add3(s, *a));
+            let at = quat::scale3(sum, 1.0 / (f - start) as f64);
+            for i in start..f {
+                held[i] = true;
+                by[i] = [at[0] - balls[i][0], at[1] - balls[i][1], 0.0];
+            }
+            ends.push((start, f - 1));
+        }
+        f = f.max(start + 1);
+    }
+    let reach = LOCK_FADE + 1;
+    let smooth = |d: usize| {
+        let u = 1.0 - d as f64 / reach as f64;
+        u * u * (3.0 - 2.0 * u)
+    };
+    let mut fades = vec![[0.0; 3]; n];
+    for (a, b) in ends {
+        for d in 1..reach {
+            if let Some(i) = a.checked_sub(d).filter(|&i| !held[i]) {
+                fades[i] = quat::add3(fades[i], quat::scale3(by[a], smooth(d)));
+            }
+            if let Some(i) = Some(b + d).filter(|&i| i < n && !held[i]) {
+                fades[i] = quat::add3(fades[i], quat::scale3(by[b], smooth(d)));
+            }
+        }
+    }
+    by.iter().zip(&fades).map(|(a, b)| quat::add3(*a, *b)).collect()
+}
+
 fn keys_mut(clip: &mut Clip) -> R<&mut Vec<Key>> {
     let e = clip.edit;
     clip.layers
@@ -626,50 +675,70 @@ impl Document {
         Ok(())
     }
 
-    /// Pin each planted foot to one spot for its whole contact; returns frames changed.
+    /// As [`Document::write_solved`], where the root moved too.
+    pub(crate) fn write_moved(
+        &mut self,
+        changed: &BTreeSet<usize>,
+        rots: &[Vec<Quat>],
+        roots: &[Vec3],
+        tag: &str,
+    ) -> R<()> {
+        self.write_solved(changed, 0, rots, roots, tag)?;
+        for k in keys_mut(&mut self.clip)?.iter_mut() {
+            let n = k.frame.max(0) as usize;
+            if changed.contains(&n)
+                && let Some(o) = roots.get(n)
+            {
+                k.root = *o;
+            }
+        }
+        Ok(())
+    }
+
+    /// Pin each planted foot to one spot for its whole contact, easing in and out of it over
+    /// [`LOCK_FADE`] frames either side; returns frames changed.
     pub fn lock_feet(&mut self) -> R<usize> {
         if self.clip.base().keys.is_empty() {
             return Ok(0);
         }
         let sk = self.skeleton.clone();
-        let c = self.contacts(0.04, 0.5)?;
         let frames: Vec<f64> = (0..self.clip.length()).map(|f| f as f64).collect();
         let (mut rots, roots) = self.clip.sample_with(&frames, &self.links)?;
+        // landing and release ease, as the frames either side do
+        let body = crate::physics::Body::new(&sk)?;
+        let [left, right] =
+            crate::contact::clip_phases(&body, &sk, &rots, &roots, self.clip.fps, &self.clip.surfaces)?;
+        let flag = |v: Vec<crate::contact::Phase>| {
+            v.into_iter()
+                .map(|p| p == crate::contact::Phase::Planted)
+                .collect::<Vec<bool>>()
+        };
+        let c = [("L", flag(left)), ("R", flag(right))];
         let mut changed = BTreeSet::new();
         for (s, flags) in &c {
             let fi = sk.bone(&format!("foot.{s}")).ok_or("no foot")?;
-            let mut f = 0;
-            while f < flags.len() {
-                if !flags.get(f).copied().unwrap_or(false) {
-                    f += 1;
+            let ti = sk.bone(&format!("toe3-1.{s}")).ok_or("no toe")?;
+            let (mut ankles, mut balls) = (Vec::with_capacity(flags.len()), Vec::with_capacity(flags.len()));
+            for (r, o) in rots.iter().zip(&roots).take(flags.len()) {
+                let (_, p) = sk.fk(r, *o).map_err(|e| e.to_string())?;
+                ankles.push(*p.get(fi).ok_or("joint")?);
+                balls.push(*p.get(ti).ok_or("joint")?);
+            }
+            let leg = format!("leg.{s}");
+            for (i, by) in lock_moves(&balls, flags).into_iter().enumerate() {
+                let (Some(r), Some(o), Some(a)) = (rots.get(i), roots.get(i), ankles.get(i)) else {
+                    continue;
+                };
+                if by.iter().all(|x| x.abs() < 1e-6) {
                     continue;
                 }
-                let mut g = f;
-                while flags.get(g).copied().unwrap_or(false) {
-                    g += 1;
+                let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
+                let solved = ik::two_bone(&sk, r, *o, &leg, quat::add3(*a, by), pole, None)
+                    .map_err(|e| e.to_string())?;
+                if let Some(slot) = rots.get_mut(i) {
+                    *slot = solved;
                 }
-                let mut sum = [0.0; 3];
-                for i in f..g {
-                    let (Some(r), Some(o)) = (rots.get(i), roots.get(i)) else {
-                        continue;
-                    };
-                    let (_, p) = sk.fk(r, *o).map_err(|e| e.to_string())?;
-                    sum = quat::add3(sum, *p.get(fi).ok_or("joint")?);
-                }
-                let at = quat::scale3(sum, 1.0 / (g - f) as f64);
-                for i in f..g {
-                    let (Some(r), Some(o)) = (rots.get(i), roots.get(i)) else {
-                        continue;
-                    };
-                    let leg = format!("leg.{s}");
-                    let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
-                    let solved = ik::two_bone(&sk, r, *o, &leg, at, pole, None).map_err(|e| e.to_string())?;
-                    if let Some(slot) = rots.get_mut(i) {
-                        *slot = solved;
-                    }
-                    changed.insert(i);
-                }
-                f = g;
+                changed.insert(i);
             }
         }
         self.write_solved(&changed, 0, &rots, &roots, "foot-lock")?;

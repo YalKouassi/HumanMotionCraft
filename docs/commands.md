@@ -525,6 +525,7 @@ Outputs:
 | `sliding_max_cm` | number | yes |  | the worst slide |
 | `penetration` | JSON | yes |  | {frames, spans: [[a, b]], max_cm, worst_frame, joint}: below the ground |
 | `balance` | JSON | yes |  | {frames, spans, max_cm, worst_frame, moving_frames}: still frames with the centre of mass outside the feet |
+| `capture` | JSON | yes |  | {frames, spans, max_cm, worst_frame}: a moving body's capture point outside the feet it has or is about to have |
 | `limits` | JSON | yes |  | [{bone, frames, spans, max_deg, worst_frame}] past their joint limits, worst first (null: no limits loaded) |
 | `keys` | JSON | yes |  | [{frame, dv, joint}]: at each key, the largest velocity change (m/s) and its joint |
 | `pops` | integer | yes |  | keys whose velocity change is over 1 m/s |
@@ -1173,6 +1174,23 @@ Outputs:
 |---|---|---|---|---|
 | `frames` | integer | yes |  | frames changed |
 
+### `feet.phases`: Foot phases
+
+not undoable, icon `graph`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `motion` | one of shown \| keys |  |  | what plays (the physics pass when it is on; default) or the keys alone |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `L` | list of text | yes |  | the left foot on each frame: swing, landing, planted or release |
+| `R` | list of text | yes |  | the right foot, the same |
+
 ### `feet.plant`: Plant foot
 
 undoable, icon `foot`.
@@ -1193,6 +1211,19 @@ Outputs:
 | `frames` | integer | yes |  | frames changed (planted or freed) |
 | `notes` | list of text | yes |  | what stays as it was |
 
+### `feet.roll`: Roll feet
+
+undoable, icon `foot`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frames` | integer | yes |  | frames changed |
+| `short` | integer | yes |  | frames a leg still can't reach at the most a foot rolls |
+
 ## frame
 
 ### `frame.set`: Go to frame
@@ -1210,6 +1241,21 @@ Outputs:
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `frame` | number | yes |  | the playhead |
+
+## hips
+
+### `hips.transfer`: Shift weight over the feet
+
+undoable, icon `foot`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frames` | integer | yes |  | frames changed |
+| `left_cm` | number | yes |  | the worst gap left, to the side of the feet |
 
 ## key
 

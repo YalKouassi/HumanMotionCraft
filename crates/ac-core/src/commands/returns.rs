@@ -45,6 +45,26 @@ pub const PARTS_LOCK: &[ParamSpec] =
 
 pub const FEET_LOCK: &[ParamSpec] = &[ParamSpec::new("frames", Kind::Integer, "frames changed").required()];
 
+pub const FEET_ROLL: &[ParamSpec] = &[
+    ParamSpec::new("frames", Kind::Integer, "frames changed").required(),
+    ParamSpec::new(
+        "short",
+        Kind::Integer,
+        "frames a leg still can't reach at the most a foot rolls",
+    )
+    .required(),
+];
+
+pub const HIPS_TRANSFER: &[ParamSpec] = &[
+    ParamSpec::new("frames", Kind::Integer, "frames changed").required(),
+    ParamSpec::new(
+        "left_cm",
+        Kind::Number,
+        "the worst gap left, to the side of the feet",
+    )
+    .required(),
+];
+
 pub const AI_KEEP: &[ParamSpec] = &[ParamSpec::new("kept", Kind::Integer, "AI keys made yours").required()];
 
 pub const AI_CLEAR: &[ParamSpec] = &[ParamSpec::new("cleared", Kind::Integer, "AI keys removed").required()];

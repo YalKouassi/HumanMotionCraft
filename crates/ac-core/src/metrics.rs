@@ -2,16 +2,15 @@
 //! an agent can act on. Every rule is simple enough to check by hand:
 //!
 //! - **Foot sliding.** A foot point (a toe joint's head or the heel, as in [`crate::physics`]) is
-//!   *planted* on a frame when it is within [`physics::NEAR`] of the ground and moved slower than
+//!   *planted* on a frame when its foot is `Planted` ([`crate::contact`]) and it is within [`physics::NEAR`] of the ground and moved slower than
 //!   [`physics::PLANT_SPEED`] across it since the frame before (the physics pass's own rule). A
 //!   contact span is a run of frames on which a foot has a planted point; its slide is the
 //!   longest distance any of its points travelled across the ground while planted on consecutive
 //!   frames, in centimetres. A planted foot should not move: anything over [`SLIDE_CM`] shows.
 //! - **Floor penetration.** On each frame, the lowest joint head or heel point below the ground
 //!   under it (by more than [`PENETRATION_SLACK`]): frames, depth (cm) and the joint.
-//! - **Balance.** On a frame where the body is on the ground and nearly still (its centre of mass
-//!   moves slower than [`physics::STILL_SPEED`]; a walk is balanced by its motion), the centre of
-//!   mass over the floor should lie inside the support (the hull of the foot points on the
+//! - **Balance.** On a frame where the body is on the ground and stands ([`physics::standing`]; a
+//!   walk is balanced by its motion, even on the spot), the centre of mass over the floor should lie inside the support (the hull of the foot points on the
 //!   ground). Frames outside, and how far (cm). Moving frames outside are counted apart.
 //! - **Joint limits.** Each bone's local rotation vector against `assets/rig/limits.json`: bones
 //!   past their range by more than [`LIMIT_SLACK_DEG`], on which frames and by how much (degrees).
@@ -26,6 +25,7 @@ use serde_json::{Value, json};
 use crate::document::{Document, Pose};
 use crate::physics::{self, Body};
 use crate::quat::{self, Quat, Vec3};
+use crate::weight;
 
 type R<T> = Result<T, String>;
 
@@ -109,6 +109,8 @@ pub struct Metrics {
     pub sliding: Vec<Slide>,
     pub penetration: Spans,
     pub balance: Spans,
+    /// Frames a moving body's capture point is outside the feet it has or is about to have.
+    pub capture: Spans,
     /// Frames out of balance while moving (not counted as problems).
     pub moving_outside: usize,
     /// Per bone past its limits; `None`: no limits loaded.
@@ -187,22 +189,43 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
         sliding: sliding(doc, &frames, lo, a, b, fps),
         penetration: Spans::default(),
         balance: Spans::default(),
+        capture: Spans::default(),
         moving_outside: 0,
         limits: None,
         keys: Vec::new(),
         notes: Vec::new(),
     };
+    // the physics pass's own test of a body standing
+    let feet: Vec<Vec<Vec3>> = frames
+        .iter()
+        .map(|fr| fr.feet.iter().map(|(_, p)| *p).collect())
+        .collect();
+    let coms: Vec<Vec3> = frames.iter().map(|fr| fr.com).collect();
+    let stands = physics::standing(&feet, &coms, fps);
+    let samples: Vec<weight::Sample> = frames
+        .iter()
+        .map(|fr| weight::Sample {
+            feet: fr.feet.clone(),
+            com: fr.com,
+            rests: body.rests(&fr.pos, &doc.clip.surfaces),
+        })
+        .collect();
+    let gaps = weight::gaps(&samples, fps, &doc.clip.surfaces);
     for f in a..=b {
+        if let Some(Some(g)) = gaps.get((f - lo) as usize) {
+            m.capture.add(f, g.outside * 100.0, "");
+        }
+
         let (Some(fr), Some(pose)) = (at(f), poses.get((f - lo) as usize)) else {
             continue;
         };
         penetration(doc, fr, f, &mut m.penetration);
-        let before = if f > 0 { at(f - 1) } else { None };
-        let speed = before.map_or(0.0, |p| (fr.com[0] - p.com[0]).hypot(fr.com[1] - p.com[1]) * fps);
         if let Some(bal) = physics::balance(sk, &body, &pose.rotations, pose.root, &doc.clip.surfaces)?
             && !bal.inside
         {
-            if speed < physics::STILL_SPEED {
+            if stands.get((f - lo) as usize).copied().unwrap_or(false)
+                && !body.rests(&fr.pos, &doc.clip.surfaces)
+            {
                 let (d, fix) = outside(&bal.support, bal.com);
                 if m.balance.add(f, d * 100.0, "") {
                     m.balance.fix = Some(fix);
@@ -226,12 +249,56 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
     Ok(m)
 }
 
+/// Each foot's phase on every frame of what plays (`shown`) or of the keys.
+pub fn foot_phases(doc: &Document, shown: bool) -> R<[Vec<crate::contact::Phase>; 2]> {
+    let n = doc.clip.length_with(&doc.links).max(0);
+    if n > MAX_FRAMES {
+        return Err(format!("{n} frames is more than {MAX_FRAMES} at once"));
+    }
+    let fr: Vec<f64> = (0..n).map(|f| f as f64).collect();
+    let poses: Vec<Pose> = if shown {
+        doc.shown_poses(&fr)?
+    } else {
+        let (r, o) = doc.clip.sample_with(&fr, &doc.links)?;
+        r.into_iter()
+            .zip(o)
+            .map(|(rotations, root)| Pose { rotations, root })
+            .collect()
+    };
+    let sk = &doc.skeleton;
+    let body = Body::new(sk)?;
+    let mut feet = Vec::with_capacity(poses.len());
+    for p in &poses {
+        let (world, pos) = sk.fk(&p.rotations, p.root).map_err(|e| e.to_string())?;
+        let pts = body.points(&world, &pos);
+        feet.push(
+            pts.into_iter()
+                .enumerate()
+                .map(|(k, q)| (body.foot_of(k), q))
+                .collect(),
+        );
+    }
+    Ok(crate::contact::phases(
+        &feet,
+        doc.clip.fps,
+        &doc.clip.surfaces,
+        0.0,
+    ))
+}
+
 fn sliding(doc: &Document, frames: &[Frame], lo: i64, a: i64, b: i64, fps: f64) -> Vec<Slide> {
     let mut out = Vec::new();
+    let tagged: Vec<Vec<(usize, Vec3)>> = frames.iter().map(|fr| fr.feet.clone()).collect();
+    let phases = crate::contact::phases(&tagged, fps, &doc.clip.surfaces, 0.0);
     for (foot, name) in [(0usize, "L"), (1, "R")] {
         // per frame: which of this foot's points are planted
         let planted = |f: i64| -> Vec<(usize, Vec3)> {
-            let Some(fr) = frames.get((f - lo) as usize) else {
+            let (Some(fr), Some(true)) = (
+                frames.get((f - lo) as usize),
+                phases[foot]
+                    .get((f - lo) as usize)
+                    .map(|p| *p == crate::contact::Phase::Planted),
+            ) else {
                 return Vec::new();
             };
             let prev = if f > 0 {
@@ -483,6 +550,7 @@ impl Metrics {
             "sliding_max_cm": r4(self.sliding.iter().map(|s| s.slide_cm).fold(0.0, f64::max)),
             "penetration": pen,
             "balance": bal,
+            "capture": self.capture.json("cm"),
             "limits": limits,
             "keys": self.keys.iter().map(|p| json!({ "frame": p.frame, "dv": r4(p.dv), "joint": p.joint })).collect::<Vec<_>>(),
             "pops": self.keys.iter().filter(|p| p.dv > POP_SPEED).count(),

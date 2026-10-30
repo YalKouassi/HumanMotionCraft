@@ -55,6 +55,99 @@ fn inset(h: &[[f64; 2]], q: [f64; 2]) -> f64 {
         .fold(f64::INFINITY, f64::min)
 }
 
+/// A slow lean past the toes: balance starts part way, and the hips ease into it rather than
+/// jump. The keyed hips don't move at all.
+#[test]
+fn balance_fades_in_rather_than_jumping() {
+    let sk = common::skeleton();
+    let lim = limits(&sk);
+    let rest = standing(&sk);
+    let frames = 90;
+    let rots: Vec<Vec<Quat>> = (0..frames)
+        .map(|f| {
+            let u = (f as f64 / 60.0).min(1.0);
+            let mut r = rest.rotations.clone();
+            for (b, t) in [
+                ("spine05", 0.4),
+                ("spine04", 0.34),
+                ("spine03", 0.3),
+                ("spine02", 0.3),
+                ("upperarm01.L", -1.4),
+                ("upperarm01.R", -1.4),
+            ] {
+                r[sk.bone(b).unwrap()] = about_x(t * u);
+            }
+            r
+        })
+        .collect();
+    let roots = vec![rest.root; frames];
+    let r = physics::solve(&sk, &rots, &roots, 30.0, &[], Some(&lim)).unwrap();
+    assert!(r.balanced.len() > 5, "balanced {:?}", r.balanced);
+    let first = r.balanced[0];
+    assert!(first > 0, "the lean starts in balance");
+    let h = sk.hip_height;
+    let at = |f: usize| sk.fk(&r.rotations[f], r.roots[f]).unwrap().1;
+    let foot = sk.bone("foot.L").unwrap();
+    let rest_foot = sk.fk(&rest.rotations, rest.root).unwrap().1[foot];
+    for f in 0..frames {
+        let p = at(f)[foot];
+        let d = (0..3).map(|k| (p[k] - rest_foot[k]).powi(2)).sum::<f64>().sqrt();
+        assert!(d < 1e-3, "frame {f}: the foot moved {d} m");
+        if f > 0 {
+            let (a, b) = (r.roots[f - 1], r.roots[f]);
+            let step = (a[0] - b[0]).hypot(a[1] - b[1]) * h;
+            assert!(step < 0.01, "frame {f}: the hips jumped {step} m");
+        }
+    }
+}
+
+/// A body lying on its back, its feet lifted well off the floor: its feet don't hold it up, so it is
+/// on the ground, not in flight, and the pass leaves it as keyed.
+#[test]
+fn a_lying_body_is_left_alone() {
+    let sk = common::skeleton();
+    let lim = limits(&sk);
+    let rest = standing(&sk);
+    let mut rots = rest.rotations.clone();
+    rots[0] = about_x(std::f64::consts::FRAC_PI_2);
+    // the hips 10 cm up, as root offsets in hip heights from the rest root
+    let root = [0.0, 0.0, 0.1 / sk.hip_height - sk.heads[0][2] / sk.hip_height];
+    let frames = 30;
+    let r = physics::solve(
+        &sk,
+        &vec![rots.clone(); frames],
+        &vec![root; frames],
+        30.0,
+        &[],
+        Some(&lim),
+    )
+    .unwrap();
+    assert!(r.flights.is_empty(), "flights {:?}", r.flights);
+    assert!(r.balanced.is_empty(), "balanced {:?}", r.balanced);
+    assert!(r.slid_frames.is_empty(), "slid {:?}", r.slid_frames);
+    assert!(r.rotations.iter().all(|x| *x == rots));
+    // lifted out of the floor if a heel is below it, but not moved across it
+    assert!(r.roots.iter().all(|o| o[0] == root[0] && o[1] == root[1]));
+}
+
+/// A walk on the spot has its centre of mass nearly still, but its feet step: it doesn't stand.
+#[test]
+fn a_body_that_steps_does_not_stand() {
+    let still = vec![vec![[0.1, 0.0, 0.0]]; 8];
+    let coms = vec![[0.0; 3]; 8];
+    assert_eq!(physics::standing(&still, &coms, 30.0), vec![true; 8]);
+    // the foot moves 2 cm a frame (0.6 m/s) on frames 3 to 5: the pause either side is too short
+    let y = [0.0, 0.0, 0.0, 0.02, 0.04, 0.06, 0.06, 0.06];
+    let stepping: Vec<Vec<Vec3>> = y.iter().map(|y| vec![[0.1, *y, 0.0]]).collect();
+    assert_eq!(physics::standing(&stepping, &coms, 30.0), vec![false; 8]);
+    // a clip shorter than MIN_STAND can still stand
+    let n = physics::MIN_STAND - 1;
+    assert_eq!(
+        physics::standing(&vec![vec![[0.1, 0.0, 0.0]]; n], &vec![[0.0; 3]; n], 30.0),
+        vec![true; n]
+    );
+}
+
 #[test]
 fn a_still_lean_is_balanced_with_feet_held() {
     let sk = common::skeleton();

@@ -6,19 +6,30 @@
 //! 2. **Contact**: a foot point is planted when it is within [`NEAR`] of the ground and moves
 //!    (as keyed) slower than [`PLANT_SPEED`] across it; a swinging foot that skims the floor is not.
 //!    A frame is on the ground when any foot point is within [`NEAR`] (planted or not).
-//! 3. **Fulcrum**: a foot point on the ground does not slide. It is pinned where it touched down
-//!    until it lifts; the body moves across the floor so that the pinned points stay (by the mean
-//!    of their slips, when several pull different ways). The body travels only by stepping.
-//! 4. **Balance**: on a frame on the ground where the body is nearly still (its keyed centre of
-//!    mass moves slower than [`STILL_SPEED`]; a walk or a run is balanced by its motion, not
-//!    statically), the centre of mass (over the floor) lies inside the support: the convex hull of the foot points on the ground. If it is outside, the hips move
+//! 3. **Fulcrum**: a foot point on the ground, on a foot in contact ([`crate::contact`]), does not
+//!    slide. It is pinned where it touched down until it lifts; the body moves across the floor so
+//!    that the pinned points stay (by the mean of their slips, when several pull different ways, at
+//!    most [`MAX_FULCRUM_STEP`] more a frame). The body travels only by stepping.
+//! 4. **Balance**: on a frame on the ground where the body stands ([`standing`]: its keyed centre
+//!    of mass and both feet are nearly still; a walk or a run is balanced by its motion, not
+//!    statically, even one that walks on the spot), the centre of mass (over the floor) lies inside
+//!    the support: the convex hull of the foot points on the ground. If it is outside, the hips move
 //!    across (the feet held, the legs bending, the rest of the pose kept) until it is
-//!    [`BALANCE_MARGIN`] inside the nearest edge.
+//!    [`BALANCE_MARGIN`] inside the nearest edge. The move fades out over [`BALANCE_FADE`] frames
+//!    either side, so the body doesn't jump.
+//!
+//!    A body resting on more than its feet ([`Body::rests`]: it sits, kneels, crawls or lies) is on
+//!    the ground, whatever its feet do, and neither the fulcrum rule nor balance touches it.
 //! 5. **Flight**: a run of at least [`MIN_FLIGHT`] frames off the ground, between a take-off frame
 //!    `a` and a landing frame `b` at most [`MAX_AIR`] seconds apart, follows gravity: the hips
 //!    travel at a constant speed across the floor, and their height is the one parabola that leaves
 //!    `a` and reaches `b` in that time: `z(t) = z_a + (z_b - z_a) t / T + g t (T - t) / 2`.
 //!    The take-off and landing frames are kept exactly; so is every pose in the air.
+//!
+//!    After a landing faster than [`MIN_ABSORB_SPEED`], the hips carry the arriving speed `v` down
+//!    into a compression and recover, the feet held: `dip(t) = v t exp(-t / ABSORB_TAU)`, faded out
+//!    by [`ABSORB_TIME`] or the next take-off. Keys whose hips already dip [`KEYED_DIP`] after
+//!    landing compress on their own and aren't doubled.
 //!
 //! Foot points are the heads of the toe joints and a heel under each ankle. The mass model is
 //! de Leva's (1996) segment table. Deterministic, f64.
@@ -43,6 +54,37 @@ pub const MAX_FRAMES: usize = 100_000;
 pub const PLANT_SPEED: f64 = 0.5;
 /// A body whose centre of mass moves slower than this (m/s) must stand in static balance.
 pub const STILL_SPEED: f64 = 0.2;
+/// A body stands for at least this many frames running; a shorter pause is part of a step.
+pub const MIN_STAND: usize = 5;
+/// The most the fulcrum rule moves the body in a frame beyond what it already moved (m): a point
+/// joining or leaving the mean of the slips eases in rather than jumps.
+pub const MAX_FULCRUM_STEP: f64 = 0.02;
+/// Frames either side of a balanced frame over which its move fades out.
+pub const BALANCE_FADE: usize = 6;
+/// A trunk, hand, elbow or knee joint this close to the ground (m) means the body rests on more than
+/// its feet.
+pub const RESTING: f64 = 0.15;
+/// Joints (by name prefix) that rest on the ground when a body sits, kneels, crawls or lies.
+const RESTING_JOINTS: &[&str] = &[
+    "root",
+    "spine",
+    "neck",
+    "head",
+    "lowerleg01",
+    "lowerarm01",
+    "wrist",
+];
+/// How long (s) a landing's compression lasts at most.
+pub const ABSORB_TIME: f64 = 0.4;
+/// The compression's time constant (s): the hips are lowest this long after landing, by the arriving
+/// speed times this over e.
+pub const ABSORB_TAU: f64 = 0.06;
+/// A landing slower than this (m/s) doesn't compress: a run's stride, not a jump.
+pub const MIN_ABSORB_SPEED: f64 = 1.5;
+/// The most arriving speed (m/s) a compression absorbs.
+pub const MAX_ABSORB_SPEED: f64 = 5.0;
+/// Keys whose hips already dip this far (m) after a landing compress on their own.
+pub const KEYED_DIP: f64 = 0.03;
 /// How far inside the support's edge (m) balance puts the centre of mass.
 pub const BALANCE_MARGIN: f64 = 0.01;
 /// How far behind the ankle (m, along the foot) the heel point is.
@@ -81,7 +123,7 @@ pub struct Report {
     pub lifted: usize,
     /// Frames the fulcrum rule moved (a planted foot had slid more than 0.1 mm).
     pub slid: usize,
-    /// Frames that were still and out of balance (and were balanced).
+    /// Frames where the body stood out of balance (and were balanced).
     pub balanced: Vec<usize>,
     /// The frames counted in `lifted`, in order.
     pub lifted_frames: Vec<usize>,
@@ -109,6 +151,7 @@ struct Foot {
 pub struct Body {
     feet: Vec<Foot>,
     segments: Vec<(f64, usize, usize, f64)>,
+    resting: Vec<usize>,
 }
 
 impl Body {
@@ -147,7 +190,23 @@ impl Body {
                 ))
             })
             .collect::<R<Vec<_>>>()?;
-        Ok(Body { feet, segments })
+        let resting = (0..sk.len())
+            .filter(|&i| RESTING_JOINTS.iter().any(|p| sk.names[i].starts_with(p)))
+            .collect();
+        Ok(Body {
+            feet,
+            segments,
+            resting,
+        })
+    }
+
+    /// Whether the body rests on the ground on more than its feet (it sits, kneels, crawls or lies).
+    /// The feet then don't hold it up, so the fulcrum and balance rules don't apply.
+    pub fn rests(&self, pos: &[Vec3], surfaces: &[Surface]) -> bool {
+        self.resting
+            .iter()
+            .filter_map(|&j| pos.get(j))
+            .any(|p| p[2] - ground(surfaces, p[0], p[1]) < RESTING)
     }
 
     /// Foot points (toe heads, then the heel, per foot) from a posed rig.
@@ -158,6 +217,15 @@ impl Body {
             out.push(quat::add3(pos[f.ankle], quat::mat3_vec(&world[f.ankle], f.heel)));
         }
         out
+    }
+
+    /// One foot's heel point from a posed rig.
+    pub fn heel(&self, foot: usize, world: &[Mat3], pos: &[Vec3]) -> Option<Vec3> {
+        let f = self.feet.get(foot)?;
+        Some(quat::add3(
+            *pos.get(f.ankle)?,
+            quat::mat3_vec(world.get(f.ankle)?, f.heel),
+        ))
     }
 
     /// The centre of mass (metres, rig world) of a posed rig.
@@ -350,7 +418,7 @@ fn nearest_on_segment(a: [f64; 2], b: [f64; 2], q: [f64; 2]) -> [f64; 2] {
 }
 
 /// Nearest point of the hull's outline to `q`.
-fn nearest(hull: &[[f64; 2]], q: [f64; 2]) -> [f64; 2] {
+pub(crate) fn nearest(hull: &[[f64; 2]], q: [f64; 2]) -> [f64; 2] {
     match hull.len() {
         0 => q,
         1 => hull[0],
@@ -383,6 +451,140 @@ fn balance_target(hull: &[[f64; 2]], com: [f64; 2]) -> [f64; 2] {
     [n[0] + d[0] * s, n[1] + d[1] * s]
 }
 
+/// Which frames a body stands on: the centre of mass moves slower than [`STILL_SPEED`] and no foot
+/// point (on the ground or not) moves faster than [`PLANT_SPEED`] across the floor, for at least
+/// [`MIN_STAND`] frames running (or the whole clip, when it is shorter). A body that steps does not
+/// stand, wherever its centre of mass is. `feet`: each frame's foot points.
+pub fn standing(feet: &[Vec<Vec3>], coms: &[Vec3], fps: f64) -> Vec<bool> {
+    let n = coms.len().min(feet.len());
+    let speed = |a: Vec3, b: Vec3| (a[0] - b[0]).hypot(a[1] - b[1]) * fps;
+    let near = |f: usize| {
+        if f > 0 {
+            f - 1
+        } else {
+            (f + 1).min(n.saturating_sub(1))
+        }
+    };
+    let mut out: Vec<bool> = (0..n)
+        .map(|f| {
+            speed(coms[f], coms[near(f)]) < STILL_SPEED
+                && feet[f]
+                    .iter()
+                    .zip(&feet[near(f)])
+                    .all(|(a, b)| speed(*a, *b) < PLANT_SPEED)
+        })
+        .collect();
+    let least = MIN_STAND.min(n);
+    let mut f = 0;
+    while f < n {
+        let start = f;
+        while f < n && out[f] {
+            f += 1;
+        }
+        if f - start < least {
+            out[start..f].iter_mut().for_each(|x| *x = false);
+        }
+        f = f.max(start + 1);
+    }
+    out
+}
+
+/// The joints that keep the feet on the ground where they are.
+fn feet_goals(sk: &Skeleton, body: &Body, world: &[Mat3], pos: &[Vec3], surfaces: &[Surface]) -> Vec<Goal> {
+    let mut held: Vec<usize> = body
+        .points(world, pos)
+        .iter()
+        .enumerate()
+        .filter(|(_, p)| p[2] - ground(surfaces, p[0], p[1]) < NEAR)
+        .map(|(k, _)| body.foot_of(k))
+        .collect();
+    held.dedup();
+    let mut goals = Vec::new();
+    for f in held {
+        goals.extend(body.holds(sk, f).into_iter().map(|j| Goal {
+            bone: j,
+            target: pos[j],
+        }));
+    }
+    goals
+}
+
+/// Move the hips by `by` (metres, across the floor), the feet held.
+pub(crate) fn shift_hips(
+    sk: &Skeleton,
+    body: &Body,
+    pose: (&mut Vec<Quat>, &mut Vec3),
+    by: [f64; 2],
+    surfaces: &[Surface],
+    limits: Option<&Limits>,
+) -> R<()> {
+    let (rots, root) = pose;
+    let widened = limits.map(|l| l.widened(rots));
+    let (world, pos) = sk.fk(rots, *root).map_err(|e| e.to_string())?;
+    let mut goals = feet_goals(sk, body, &world, &pos, surfaces);
+    goals.push(Goal {
+        bone: 0,
+        target: [pos[0][0] + by[0], pos[0][1] + by[1], pos[0][2]],
+    });
+    let s = fullbody::solve(sk, (rots, *root), &goals, widened.as_ref())?;
+    *rots = s.rotations;
+    *root = s.root;
+    Ok(())
+}
+
+/// Lower the hips by `dip` (metres), the feet held.
+fn lower_hips(
+    sk: &Skeleton,
+    body: &Body,
+    pose: (&mut Vec<Quat>, &mut Vec3),
+    dip: f64,
+    surfaces: &[Surface],
+    limits: Option<&Limits>,
+) -> R<()> {
+    let (rots, root) = pose;
+    let widened = limits.map(|l| l.widened(rots));
+    let (world, pos) = sk.fk(rots, *root).map_err(|e| e.to_string())?;
+    let mut goals = feet_goals(sk, body, &world, &pos, surfaces);
+    goals.push(Goal {
+        bone: 0,
+        target: [pos[0][0], pos[0][1], pos[0][2] - dip],
+    });
+    let s = fullbody::solve(sk, (rots, *root), &goals, widened.as_ref())?;
+    *rots = s.rotations;
+    *root = s.root;
+    Ok(())
+}
+
+/// How far (metres) frame `f`, itself not balanced, moves for the balanced frames near it: between
+/// two close ones it goes from one's move to the other's; otherwise each fades out alone.
+pub(crate) fn faded(balanced: &[usize], moved: &[[f64; 2]], f: usize) -> [f64; 2] {
+    let smooth = |u: f64| u * u * (3.0 - 2.0 * u);
+    let reach = BALANCE_FADE + 1;
+    let at = balanced.partition_point(|&b| b < f);
+    let before = at.checked_sub(1).and_then(|i| balanced.get(i)).copied();
+    let after = balanced.get(at).copied();
+    let of = |b: usize| moved.get(b).copied().unwrap_or([0.0; 2]);
+    match (before, after) {
+        (Some(a), Some(b)) if b - a <= 2 * reach => {
+            let u = smooth((f - a) as f64 / (b - a) as f64);
+            let (x, y) = (of(a), of(b));
+            [x[0] + (y[0] - x[0]) * u, x[1] + (y[1] - x[1]) * u]
+        }
+        _ => {
+            let mut by = [0.0; 2];
+            if let Some(a) = before.filter(|&a| f - a < reach) {
+                let w = smooth(1.0 - (f - a) as f64 / reach as f64);
+                by = [by[0] + of(a)[0] * w, by[1] + of(a)[1] * w];
+            }
+            if let Some(b) = after.filter(|&b| b - f < reach) {
+                let w = smooth(1.0 - (b - f) as f64 / reach as f64);
+                by = [by[0] + of(b)[0] * w, by[1] + of(b)[1] * w];
+            }
+            by
+        }
+    }
+}
+
 /// Move the hips (feet held) until the centre of mass is over the support.
 fn rebalance(
     sk: &Skeleton,
@@ -395,21 +597,7 @@ fn rebalance(
     let widened = limits.map(|l| l.widened(rots));
     let (world, pos) = sk.fk(rots, *root).map_err(|e| e.to_string())?;
     // the feet on the ground stay exactly where they are
-    let pts = body.points(&world, &pos);
-    let mut held: Vec<usize> = pts
-        .iter()
-        .enumerate()
-        .filter(|(_, p)| p[2] - ground(surfaces, p[0], p[1]) < NEAR)
-        .map(|(k, _)| body.foot_of(k))
-        .collect();
-    held.dedup();
-    let mut feet_goals: Vec<Goal> = Vec::new();
-    for f in held {
-        feet_goals.extend(body.holds(sk, f).into_iter().map(|j| Goal {
-            bone: j,
-            target: pos[j],
-        }));
-    }
+    let held = feet_goals(sk, body, &world, &pos, surfaces);
     for _ in 0..BALANCE_ROUNDS {
         let Some(b) = balance(sk, body, rots, *root, surfaces)? else {
             return Ok(());
@@ -420,7 +608,7 @@ fn rebalance(
             return Ok(());
         }
         let p = sk.fk(rots, *root).map_err(|e| e.to_string())?.1;
-        let mut goals = feet_goals.clone();
+        let mut goals = held.clone();
         goals.push(Goal {
             bone: 0,
             target: [p[0][0] + d[0], p[0][1] + d[1], p[0][2]],
@@ -457,10 +645,12 @@ pub fn solve(
     // foot points and centre of mass per frame, as keyed
     let mut pts: Vec<Vec<Vec3>> = Vec::with_capacity(n);
     let mut coms: Vec<Vec3> = Vec::with_capacity(n);
+    let mut rests: Vec<bool> = Vec::with_capacity(n);
     for (r, o) in rots.iter().zip(roots) {
         let (w, p) = sk.fk(r, *o).map_err(|e| e.to_string())?;
         pts.push(body.points(&w, &p));
         coms.push(body.com(&p));
+        rests.push(body.rests(&p, surfaces));
     }
     // speed across the floor (m/s) of a keyed point: backward difference (forward on frame 0)
     let speed = |a: Vec3, b: Vec3| (a[0] - b[0]).hypot(a[1] - b[1]) * fps;
@@ -474,9 +664,7 @@ pub fn solve(
                 .collect()
         })
         .collect();
-    let still: Vec<bool> = (0..n)
-        .map(|f| speed(coms[f], coms[near(f)]) < STILL_SPEED)
-        .collect();
+    let stands = standing(&pts, &coms, fps);
     // 1. support
     let mut lifted_frames = Vec::new();
     for (f, (o, ps)) in out.iter_mut().zip(pts.iter_mut()).enumerate() {
@@ -494,15 +682,28 @@ pub fn solve(
     let mut on = vec![false; n];
     let mut anchors: Vec<Option<[f64; 2]>> = vec![None; pts.first().map_or(0, Vec::len)];
     let mut off = [0.0f64; 2];
+    // what the body really moved: `off`, eased so a change of which points hold doesn't jump
+    let mut eased = [0.0f64; 2];
     let mut slid_frames = Vec::new();
+    let tagged: Vec<Vec<(usize, Vec3)>> = pts
+        .iter()
+        .map(|ps| {
+            ps.iter()
+                .enumerate()
+                .map(|(k, p)| (body.foot_of(k), *p))
+                .collect()
+        })
+        .collect();
+    let phases = crate::contact::phases(&tagged, fps, surfaces, 0.0);
     for f in 0..n {
         let mut sum = [0.0; 2];
         let mut count = 0.0;
         for (k, p) in pts[f].iter().enumerate() {
             let (x, y) = (p[0] + off[0], p[1] + off[1]);
             let low = p[2] - ground(surfaces, x, y) < NEAR;
-            on[f] |= low;
-            if low && point_speed[f][k] < PLANT_SPEED {
+            on[f] |= low || rests[f];
+            let down = phases[body.foot_of(k)][f].down();
+            if low && down && !rests[f] && point_speed[f][k] < PLANT_SPEED {
                 let a = *anchors[k].get_or_insert([x, y]);
                 sum[0] += a[0] - p[0];
                 sum[1] += a[1] - p[1];
@@ -518,20 +719,33 @@ pub fn solve(
             }
             off = next;
         }
-        out[f][0] += off[0] / h;
-        out[f][1] += off[1] / h;
+        eased[0] += (off[0] - eased[0]).clamp(-MAX_FULCRUM_STEP, MAX_FULCRUM_STEP);
+        eased[1] += (off[1] - eased[1]).clamp(-MAX_FULCRUM_STEP, MAX_FULCRUM_STEP);
+        out[f][0] += eased[0] / h;
+        out[f][1] += eased[1] / h;
     }
-    // 4. balance, on the ground and still
+    // 4. balance, on the ground and standing; each move fades out either side
     let mut balanced = Vec::new();
-    for f in (0..n).filter(|&f| on[f] && still[f]) {
+    let mut moved = vec![[0.0f64; 2]; n];
+    for f in (0..n).filter(|&f| on[f] && stands[f] && !rests[f]) {
         if let Some(b) = balance(sk, &body, &out_rots[f], out[f], surfaces)?
             && !b.inside
         {
+            let was = out[f];
             rebalance(sk, &body, &mut out_rots[f], &mut out[f], surfaces, limits)?;
+            moved[f] = [(out[f][0] - was[0]) * h, (out[f][1] - was[1]) * h];
             balanced.push(f);
         }
     }
-    // 5. flights
+    for f in (0..n).filter(|&f| on[f] && !rests[f]) {
+        if balanced.binary_search(&f).is_err() {
+            let by = faded(&balanced, &moved, f);
+            if by[0].hypot(by[1]) > 1e-5 {
+                shift_hips(sk, &body, (&mut out_rots[f], &mut out[f]), by, surfaces, limits)?;
+            }
+        }
+    }
+    // 5. flights, and the landing each one ends in
     let mut flights = Vec::new();
     let mut k = 0;
     while k < n {
@@ -560,6 +774,28 @@ pub fn solve(
             o[2] = oa[2] + (ob[2] - oa[2]) * s + 0.5 * G * t * (total - t) / h;
         }
         flights.push((a, b));
+    }
+    for (i, &(_, b)) in flights.iter().enumerate() {
+        let until = flights.get(i + 1).map_or(n, |next| next.0 + 1);
+        let arriving = (out[b - 1][2] - out[b][2]) * h * fps;
+        let last = (b + (ABSORB_TIME * fps).round() as usize).min(until);
+        let keyed_dip = roots[b..last.max(b)]
+            .iter()
+            .fold(0.0_f64, |d, o| d.max((roots[b][2] - o[2]) * h));
+        if arriving < MIN_ABSORB_SPEED || keyed_dip >= KEYED_DIP || last <= b + 1 {
+            continue;
+        }
+        let v = arriving.min(MAX_ABSORB_SPEED);
+        for f in (b + 1)..last {
+            if rests[f] {
+                continue;
+            }
+            let t = (f - b) as f64 / fps;
+            let u = (f - b) as f64 / (last - b) as f64;
+            let window = (1.0 - u * u).powi(2);
+            let dip = v * t * (-t / ABSORB_TAU).exp() * window;
+            lower_hips(sk, &body, (&mut out_rots[f], &mut out[f]), dip, surfaces, limits)?;
+        }
     }
     Ok(Report {
         rotations: out_rots,

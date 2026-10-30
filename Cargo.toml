@@ -25,7 +25,7 @@ craft-quit = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47
 craft-settings = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47d36e6d25747ab5665c4f174b03df5b7" }
 craft-ui = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47d36e6d25747ab5665c4f174b03df5b7", features = ["serde", "native-windows"] }
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde_json = { version = "1", features = ["float_roundtrip"] }
 thiserror = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", default-features = false, features = ["env-filter", "fmt", "std", "ansi"] }

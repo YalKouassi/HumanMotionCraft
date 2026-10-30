@@ -1,0 +1,155 @@
+{
+  "$schema": "./schema.json",
+  "name": "feet-roll",
+  "feature": "feet.roll",
+  "description": "A stiff stride: standing keys at 0 and 60 with the hips going from 18.9 cm behind the ankles to 18.9 cm ahead of them (+-0.2 hip heights), at 0.19 m/s, so both feet count as planted throughout. `feet.lock` holds the feet, but the straight legs can't reach them at either end: the slide is 0.68 cm as the legs fall short. `feet.roll` changes all 61 frames and leaves no leg short (`short` 0); the slide falls to 0.09 cm. At frame 30 the hips are over the feet and the foot is flat, the ball of the foot at its rest height, 4.2 cm. At frame 60 the hips are 4.9 cm past the ball, which is 14 cm ahead of the ankle, so the heel rises about the ball, which stays put within 2 mm: height 4.3 cm. At frame 0 the hips are 13.9 cm behind the heel (5 cm behind the ankle), so the toes rise about the heel: the ball, 19 cm from the heel, rises 4.2 cm to 8.4 cm, a turn of 13 degrees. Nothing goes below the floor and no joint pops.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0.2,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 60
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          -0.2,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "feet.lock",
+      "params": {}
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "motion": "keys"
+      },
+      "expect": {
+        "sliding_max_cm": 0.6845,
+        "pops": 0,
+        "penetration": {
+          "max_cm": 0
+        }
+      }
+    },
+    {
+      "command": "feet.roll",
+      "params": {},
+      "expect": {
+        "frames": 61,
+        "short": 0
+      }
+    },
+    {
+      "command": "clip.metrics",
+      "params": {
+        "motion": "keys"
+      },
+      "expect": {
+        "sliding_max_cm": 0.0874,
+        "pops": 0,
+        "penetration": {
+          "max_cm": 0
+        }
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 60
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 60,
+        "bones": [
+          "toe3-1.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.04335
+          }
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 30,
+        "bones": [
+          "toe3-1.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.04182
+          }
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 0,
+        "bones": [
+          "toe3-1.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.08356
+          }
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 0.002
+  },
+  "errors": [
+    {
+      "command": "feet.roll",
+      "params": {
+        "frames": 5
+      }
+    }
+  ]
+}

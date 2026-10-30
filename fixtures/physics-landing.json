@@ -1,0 +1,256 @@
+{
+  "$schema": "./schema.json",
+  "name": "physics-landing",
+  "feature": "physics",
+  "description": "A stiff jump with the physics pass on: flat keys at 0, 10, 30 and 50, and hips 0.3549 hip heights higher at 20, so the body leaves at frame 10 and lands at frame 30. The flight's parabola arrives at the root height 0.8724 from 0.9760 on frame 29: 0.1036 m in a frame, 3.11 m/s down. Before, the hips stopped dead on the landing frame, a change of 3.11 m/s. Now on frame 31 (t = 1/30 s, 12 frames of window, so its fade is (1 - 1/144)^2 = 0.986) the dip is 3.108 x 0.0333 x exp(-0.0333 / 0.06) x 0.986 = 0.0586, so the hips are at 0.8138, moving at 1.76 m/s: the change at landing falls from 3.11 to 1.35 m/s. On frame 32 they reach their lowest, 0.808; by frame 45 they are back at 0.8724. The left ankle stays at height 0.0734 throughout. Then the keys compress on their own (a key at 35, 3.9 cm lower, feet on the floor): the pass adds nothing, and frame 31 is the keyed 0.8724 - 0.0392 / 5 = 0.8646.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": true
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 20
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1.3
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 30
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 50
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 29,
+        "bones": [
+          "root",
+          "foot.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.976
+          },
+          {
+            "height": 0.177
+          }
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 30,
+        "bones": [
+          "root",
+          "foot.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.8724
+          },
+          {
+            "height": 0.0734
+          }
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 31,
+        "bones": [
+          "root",
+          "foot.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.8138
+          },
+          {
+            "height": 0.0734
+          }
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 32,
+        "bones": [
+          "root",
+          "foot.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.808
+          },
+          {
+            "height": 0.0734
+          }
+        ]
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 45,
+        "bones": [
+          "root",
+          "foot.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.8724
+          },
+          {
+            "height": 0.0734
+          }
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 35
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.9
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "foot.L",
+        "by": [
+          0,
+          0,
+          0.0392
+        ]
+      }
+    },
+    {
+      "command": "pose.drag",
+      "params": {
+        "bone": "foot.R",
+        "by": [
+          0,
+          0,
+          0.0392
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "pose.query",
+      "params": {
+        "frame": 31,
+        "bones": [
+          "root",
+          "foot.L"
+        ]
+      },
+      "expect": {
+        "bones": [
+          {
+            "height": 0.8646
+          },
+          {
+            "height": 0.0733
+          }
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 0.002
+  },
+  "errors": []
+}
