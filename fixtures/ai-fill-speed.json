@@ -1,0 +1,143 @@
+{
+  "$schema": "./schema.json",
+  "name": "ai-fill-speed",
+  "feature": "ai.fill",
+  "description": "One 30-frame AI fill, the case roadmap item 125000 times with `ac fixtures --timings`: keys at frames 0 and 31 one hip height apart leave 31 - 0 - 1 = 30 frames between them, which one unstyled fill (ai_force 1, style any: one pass of the network) makes 30 AI keys, band 1..30. The same gap filled with the walk style runs the network twice (the styled and the unstyled pass, blended) and keeps the 30 keys, labelled \"parts walk\". Physics is off: this checks the keys, and the time of each ai.fill step.",
+  "script": [
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "ai_force": 1,
+        "style": "any"
+      },
+      "expect": {
+        "style": "any",
+        "ai_force": 1,
+        "style_force": 1
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          0.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 31
+      }
+    },
+    {
+      "command": "pose.set_root",
+      "params": {
+        "root": [
+          0,
+          0,
+          1.9450101
+        ]
+      }
+    },
+    {
+      "command": "key.set",
+      "params": {
+        "interp": "linear"
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 10
+      }
+    },
+    {
+      "command": "ai.fill",
+      "params": {},
+      "expect": {
+        "from": 0,
+        "to": 31,
+        "frames": 30,
+        "model": "parts"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "bands": [
+          {
+            "from": 1,
+            "to": 30,
+            "model": "parts"
+          }
+        ]
+      }
+    },
+    {
+      "command": "ai.settings",
+      "params": {
+        "style": "walk"
+      },
+      "expect": {
+        "style": "walk"
+      }
+    },
+    {
+      "command": "ai.fill",
+      "params": {
+        "from": 0,
+        "to": 31
+      },
+      "expect": {
+        "from": 0,
+        "to": 31,
+        "frames": 30,
+        "model": "parts walk"
+      }
+    },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": {
+        "bands": [
+          {
+            "from": 1,
+            "to": 30,
+            "model": "parts walk"
+          }
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "ai.fill",
+      "params": {
+        "from": 0,
+        "to": 60
+      }
+    }
+  ],
+  "views": [
+    "front"
+  ]
+}
