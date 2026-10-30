@@ -2,7 +2,10 @@
 
 HumanMotionCraft is a standalone, pure-Rust humanoid keyframe animation application with a native `wgpu` + `egui` UI. It combines a 104-bone humanoid rig, two-bone and full-body IK, timeline layers and motion-matching travel, a physics-assisted solver, and a pure-Rust learned in-betweener—all built on a deterministic, command-first core that can be driven from the desktop UI, headless CLI (`ac`), or an MCP agent (`ac mcp`).
 
-
+<p align="center">
+  <img src="docs/media/ai-fill.gif" width="650" alt="A forward jump. First the five manually created frames are shown one at a time: standing, the crouch before the jump, in the air, the landing crouch and standing again. Then the AI autofilled animation plays, moving the mannequin through those frames as one continuous jump">
+  <br><em>AI fill: set the keys, and the built-in model moves the body between them.</em>
+</p>
 
 ---
 
