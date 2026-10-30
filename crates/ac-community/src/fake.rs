@@ -8,13 +8,13 @@
 //!
 //! | id | title | author | tags | licence | fps | frames | rating | ratings | downloads | published |
 //! |---|---|---|---|---|---|---|---|---|---|---|
-//! | c1 | Happy hop | Ana | jump, happy | CC0-1.0 | 30 | 30 | 4.5 | 2 | 10 | 10-01 |
+//! | c1 | Happy hop | Official | jump, happy | CC0-1.0 | 30 | 30 | 4.5 | 2 | 10 | 10-01 |
 //! | c2 | Slow walk | Ben | walk | CC-BY-4.0 ("Ben's mocap") | 30 | 90 | 4.5 | 8 | 3 | 10-05 |
 //! | c3 | Wave | Cat | gesture, wave | CC0-1.0 | 24 | 48 | 3.0 | 1 | 25 | 10-03 |
 //! | c4 | My spin | you | spin | CC0-1.0 | 30 | 60 | 0 | 0 | 1 | 10-04 |
 //! | c5 | Broken file | Dee | test | CC0-1.0 | 30 | 30 | 2.0 | 1 | 0 | 10-02 |
 //!
-//! c5's file doesn't match its hash. The account has also shared "Bad pose" (c6), which failed.
+//! c1 is the Official account's (its badge). c5's file doesn't match its hash. The account has also shared "Bad pose" (c6), which failed.
 //! The captcha token `pass` passes; any other fails.
 
 use std::cell::RefCell;
@@ -77,6 +77,7 @@ fn clip(
             title: title.into(),
             description: description.into(),
             author: author.into(),
+            official: author == "Official",
             tags: tags.iter().map(|t| t.to_string()).collect(),
             licence: licence.into(),
             credit: credit.into(),
@@ -121,7 +122,7 @@ fn seed() -> State {
                 "c1",
                 "Happy hop",
                 "A small jump for joy",
-                "Ana",
+                "Official",
                 &["jump", "happy"],
                 "CC0-1.0",
                 "",

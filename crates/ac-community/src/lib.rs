@@ -41,6 +41,22 @@ type P = Map<String, Value>;
 type Out = Result<Value, String>;
 
 pub const LICENCES: &[&str] = &["CC0-1.0", "CC-BY-4.0"];
+
+/// A preview strip's frames and cell size (points; drawn at twice the size), as the library's
+/// popover plays them: the app's shares and `ac strips` both draw them so.
+pub const PREVIEW_FRAMES: usize = 12;
+pub const PREVIEW_CELL: (u32, u32) = (120, 160);
+
+/// What a clip's licence lets people do, in words. `CMU-MOCAP` is the Official account's clips
+/// from the CMU Graphics Lab Motion Capture Database; nobody else can share under it.
+pub fn licence_words(licence: &str) -> &str {
+    match licence {
+        "CC0-1.0" => "CC0: any use, no credit needed",
+        "CC-BY-4.0" => "CC BY 4.0: any use, with credit",
+        "CMU-MOCAP" => "CMU mocap: any use, with acknowledgement",
+        other => other,
+    }
+}
 pub const MAX_TITLE: usize = 80;
 pub const MAX_DESCRIPTION: usize = 2000;
 pub const MAX_CREDIT: usize = 200;
@@ -388,6 +404,7 @@ fn listing_json(l: &Listing, installed: &str) -> Value {
     };
     json!({
         "id": l.id, "title": l.title, "description": l.description, "author": l.author,
+        "official": l.official,
         "tags": l.tags, "licence": l.licence, "credit": l.credit, "fps": l.fps, "frames": l.frames,
         "seconds": seconds, "rating": l.rating, "ratings": l.ratings, "downloads": l.downloads,
         "published": l.published, "preview": l.preview, "installed": installed,

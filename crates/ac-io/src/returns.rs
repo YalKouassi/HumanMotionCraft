@@ -49,12 +49,12 @@ pub const LIBRARY_SYNC: &[ParamSpec] = &[
     ParamSpec::new(
         "animations",
         K::Text,
-        "{added, updated, retired: [id], kept: [{id, why}]}: new built-ins copied in, unchanged copies replaced by a fixed one, ones no longer shipped moved to <library>/.retired, and ones you changed left as they are",
+        "{added, updated, retired: [id], moved: [id], kept: [{id, why}]}: new built-ins copied in, unchanged copies replaced by a fixed one, ones no longer shipped moved to <library>/.retired (or, when they moved to the community, kept in place as community installs), and ones you changed left as they are",
     )
     .json()
     .required(),
     ParamSpec::new("poses", K::Text, "the same for poses").json().required(),
-    ParamSpec::new("changed", K::Integer, "items added, updated or retired").required(),
+    ParamSpec::new("changed", K::Integer, "items added, updated, retired or moved").required(),
 ];
 
 pub const CLIP_NEW: &[ParamSpec] =

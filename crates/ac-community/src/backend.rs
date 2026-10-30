@@ -41,6 +41,8 @@ pub struct Listing {
     pub title: String,
     pub description: String,
     pub author: String,
+    /// Shared by the Official account: the clips that used to come with the app.
+    pub official: bool,
     pub tags: Vec<String>,
     pub licence: String,
     pub credit: String,

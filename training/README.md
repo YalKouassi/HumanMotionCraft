@@ -320,7 +320,11 @@ always use the bundled one.
 ### 6. Library clips
 
 The committed clips come from CMU, 100STYLE and the generated `kimodo` set (85 clips chosen from
-96 cut, by contact sheet). Clips from a non-commercial set you added are baked into the gitignored
+96 cut, by contact sheet). Since roadmap 151000 only a starter set ships (the Locomotion travel uses
+and one or two of each type); the rest are the community's Official collection
+(`assets/library/moved.json` lists them). A bake that writes to `../assets/library` puts moved
+clips back: delete the ones `moved.json` names before committing, or publish new ones with
+`services/community/scripts/official.ts`. Clips from a non-commercial set you added are baked into the gitignored
 `training/data/library/` instead and installed into your own app library (`myset` is your set):
 
 ```bash

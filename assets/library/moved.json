@@ -1,0 +1,1187 @@
+{
+ "animations": {
+  "Action/Acrobatics 3": {
+   "clip": "9931ef26-9438-41ef-8e0b-ae8a53bb7bba",
+   "title": "Acrobatics 3",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Action/Jump 14": {
+   "clip": "d28e5f64-f90b-4d66-aad0-6b1b372297a2",
+   "title": "Jump 14",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Jump 15": {
+   "clip": "d98f6298-6237-46cb-9d30-fa9f09537e96",
+   "title": "Jump 15",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Jump 16": {
+   "clip": "a521774f-a934-4cef-9564-b98538e823e9",
+   "title": "Jump 16",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Jump 5": {
+   "clip": "e74bab63-81c8-4c4d-8924-ae36e0b04a30",
+   "title": "Jump 5",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Action/Jump 6": {
+   "clip": "e0acecbb-05a7-47bd-9024-2748d9bdd273",
+   "title": "Jump 6",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Action/Jump 7": {
+   "clip": "85b3afae-f150-4550-a3de-ba8f156f55ad",
+   "title": "Jump 7",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Action/Jump 8": {
+   "clip": "7e277ecb-b6cc-4386-99a8-6ca5c58f26fd",
+   "title": "Jump 8",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Action/Jump transitions 5": {
+   "clip": "ede2b015-30ef-4c31-ba41-146803bc8a5c",
+   "title": "Jump transitions 5",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Jump transitions 6": {
+   "clip": "4e1eb207-22bb-41c5-92d2-772bcfbc3763",
+   "title": "Jump transitions 6",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Jump transitions 7": {
+   "clip": "25780839-ee25-4815-869d-ec6510d8a2fb",
+   "title": "Jump transitions 7",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Jump transitions 8": {
+   "clip": "a8f8f159-5ee7-4b3b-bbf2-d295ea9694bb",
+   "title": "Jump transitions 8",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Transitions 5": {
+   "clip": "0e45f069-3743-41b4-95b7-4028049d8b11",
+   "title": "Transitions 5",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Transitions 6": {
+   "clip": "8d1eb448-3b2d-4937-86b5-81d66f4a3a4c",
+   "title": "Transitions 6",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Transitions 7": {
+   "clip": "f3e5590d-e867-4bef-a73e-1d4740a8563a",
+   "title": "Transitions 7",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Action/Transitions 8": {
+   "clip": "4d814220-6de5-4ae2-91d2-8028ba57cdfb",
+   "title": "Transitions 8",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Dance/Dance 10": {
+   "clip": "0651adae-453a-4f8b-947b-6ff5219dcbea",
+   "title": "Dance 10",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Dance/Dance 9": {
+   "clip": "8f1ca68f-2933-4763-951d-27bc3f0f60fa",
+   "title": "Dance 9",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Gesture 10": {
+   "clip": "a8d8a48f-e959-46ed-a735-65a1832adcc2",
+   "title": "Gesture 10",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Gesture 11": {
+   "clip": "d8c2789b-247a-46d1-8dc9-e37f593b23f3",
+   "title": "Gesture 11",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Gesture 4": {
+   "clip": "88ba397c-dad0-4d2a-8e9a-d8a0fc303a10",
+   "title": "Gesture 4",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Gestures/Gesture 5": {
+   "clip": "ee9936af-1d0f-4794-a463-2fc2ee968706",
+   "title": "Gesture 5",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Gestures/Gesture 6": {
+   "clip": "fbef8b4d-adcb-475c-9ef9-cd018a6b29ea",
+   "title": "Gesture 6",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Gestures/Gesture 7": {
+   "clip": "b7fa8183-83b4-47a9-96c6-dc7035538c1a",
+   "title": "Gesture 7",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Gestures/Gesture 8": {
+   "clip": "7146d033-ff9a-4b9c-85fe-8c0134926084",
+   "title": "Gesture 8",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Gesture 9": {
+   "clip": "f3f7e2a7-5436-4b2c-b53e-381d45acc7a9",
+   "title": "Gesture 9",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Talk 2": {
+   "clip": "7518e19d-eef1-4373-8662-9d8f74f516d5",
+   "title": "Talk 2",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Talk 3": {
+   "clip": "95475c97-a712-4e16-b4a1-19800bf02d3b",
+   "title": "Talk 3",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Talk 4": {
+   "clip": "d662c729-72c0-48e3-8ebb-40421fae0f6d",
+   "title": "Talk 4",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Talk 5": {
+   "clip": "6572a59b-e4ac-4a04-8496-fe1ffd58663d",
+   "title": "Talk 5",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Whiteboard 3": {
+   "clip": "b234759e-2718-441a-8cf6-91729fc9b321",
+   "title": "Whiteboard 3",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Whiteboard 4": {
+   "clip": "f5e03834-9063-47b1-9f3b-b5dcfa1a9b20",
+   "title": "Whiteboard 4",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Gestures/Whiteboard 5": {
+   "clip": "249f04fb-b7b3-4ab0-80e8-bd82ce2246bc",
+   "title": "Whiteboard 5",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Interaction/Carry 10": {
+   "clip": "02c081b0-e439-471f-9eaa-b39fb8ca8f51",
+   "title": "Carry 10",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Interaction/Carry 11": {
+   "clip": "7a074e0e-36b3-4905-bb4b-b26d2747ff16",
+   "title": "Carry 11",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Interaction/Carry 12": {
+   "clip": "0912b586-0c12-402f-8935-5432588672bb",
+   "title": "Carry 12",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Interaction/Carry 5": {
+   "clip": "81d2aa58-b1ba-4f62-b3fa-204f1eda42e2",
+   "title": "Carry 5",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Interaction/Carry 6": {
+   "clip": "513f7dfc-c0dc-44a1-bb0b-6966074082c3",
+   "title": "Carry 6",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Interaction/Carry 7": {
+   "clip": "c855721f-f336-4897-be6c-c531a1baa544",
+   "title": "Carry 7",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Interaction/Carry 8": {
+   "clip": "c44fcca8-8fc1-4b98-acd1-33f02816f5e7",
+   "title": "Carry 8",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Interaction/Carry 9": {
+   "clip": "8b87d056-7f73-42f8-a27f-2da4ef1d5f18",
+   "title": "Carry 9",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Interaction/Open door 6": {
+   "clip": "29f61595-faa5-4427-ae92-f855a2c435b0",
+   "title": "Open door 6",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Interaction/Open door 7": {
+   "clip": "484e38c6-f9d1-4ce3-8f47-9dd7093ec6b5",
+   "title": "Open door 7",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Martial arts/Fight 1": {
+   "clip": "ad38f5b2-6180-4a1e-85a8-ea00090c34ab",
+   "title": "Fight 1",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Martial arts/Fight 10": {
+   "clip": "4f9d7e5d-3425-4adc-b0db-e30611bbcbbc",
+   "title": "Fight 10",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Martial arts/Fight 2": {
+   "clip": "48489e2c-bb0e-4496-8062-0694917b8a72",
+   "title": "Fight 2",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Martial arts/Fight 8": {
+   "clip": "973ed0fd-7a72-41bb-8633-48fa282caf3e",
+   "title": "Fight 8",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Martial arts/Fight 9": {
+   "clip": "9cf345bc-6669-450a-9b98-6961b1f0c689",
+   "title": "Fight 9",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sitting/Armchair 5": {
+   "clip": "10f2bede-7ce6-44f0-8df7-de777b22a95d",
+   "title": "Armchair 5",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sitting/Armchair 6": {
+   "clip": "3d506feb-d2b7-46f2-9ef5-32d35447bf58",
+   "title": "Armchair 6",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sitting/Armchair 7": {
+   "clip": "9b7c0a40-4774-45ff-819a-3d185bc60887",
+   "title": "Armchair 7",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sitting/Desk 5": {
+   "clip": "345a4964-9ed8-4b81-bb2c-44683e8d3e4b",
+   "title": "Desk 5",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sitting/Desk 6": {
+   "clip": "f1ca75cd-88c6-4d0f-abef-9da66e55db63",
+   "title": "Desk 6",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sitting/Desk 7": {
+   "clip": "c79f8e34-1fa8-430c-90a6-5d501954ec82",
+   "title": "Desk 7",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sitting/Sit 7": {
+   "clip": "a7608913-0098-416f-b2ec-91e1d9e37b0a",
+   "title": "Sit 7",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sitting/Sit 8": {
+   "clip": "137448db-7589-4b77-92ca-561067d2789d",
+   "title": "Sit 8",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sitting/Sit down and stand up 6": {
+   "clip": "7528627b-5a2a-4b1f-8093-582927c067e2",
+   "title": "Sit down and stand up 6",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sitting/Sit down and stand up 7": {
+   "clip": "ca4437a6-1a3a-46fb-bd71-e6cde25c12cf",
+   "title": "Sit down and stand up 7",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sports and fitness/Ball sports 1": {
+   "clip": "7c9c9ecb-ef8e-46f0-a557-8e2a49da01fd",
+   "title": "Ball sports 1",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sports and fitness/Ball sports 2": {
+   "clip": "b69e1aef-5857-44e6-bb5a-3c0a951038fa",
+   "title": "Ball sports 2",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sports and fitness/Ball sports 3": {
+   "clip": "ae17c550-85ab-4ba5-a8fd-3856a1357199",
+   "title": "Ball sports 3",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sports and fitness/Ball sports 4": {
+   "clip": "b15cc8ea-2050-414d-9362-85829a629795",
+   "title": "Ball sports 4",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sports and fitness/Stretch 1": {
+   "clip": "c3963109-0677-43f5-9841-7c598527795f",
+   "title": "Stretch 1",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sports and fitness/Stretch 2": {
+   "clip": "820b6691-c83b-4025-be5a-27f3a79d5317",
+   "title": "Stretch 2",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sports and fitness/Stretch 3": {
+   "clip": "58181689-8046-4764-bd29-eeca9a4328e8",
+   "title": "Stretch 3",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sports and fitness/Stretch 4": {
+   "clip": "510e2054-cffe-4287-a363-6f18d644a1fb",
+   "title": "Stretch 4",
+   "author": "Official",
+   "licence": "CMU-MOCAP",
+   "credit": "mocap.cs.cmu.edu; the database was created with funding from NSF EIA-0196217"
+  },
+  "Sports and fitness/Stretch 5": {
+   "clip": "ee0c5dae-b676-4e76-a3b6-6b5d68678ab5",
+   "title": "Stretch 5",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sports and fitness/Stretch 6": {
+   "clip": "3d0343ac-3c7a-4a1b-aaa7-fdd7c9ba290f",
+   "title": "Stretch 6",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sports and fitness/Stretch 7": {
+   "clip": "b6fb5a5f-cac3-4333-8da3-dbd984c162d0",
+   "title": "Stretch 7",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Sports and fitness/Stretch 8": {
+   "clip": "7152c0e3-0461-446a-a125-426c678c0abc",
+   "title": "Stretch 8",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Standing/Stand 10": {
+   "clip": "2a9d1883-94b2-4c5c-99be-fb76b91a576e",
+   "title": "Stand 10",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Standing/Stand 11": {
+   "clip": "2c910d1d-b367-48a0-b4ea-af91c2c617b4",
+   "title": "Stand 11",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Standing/Stand 12": {
+   "clip": "7d84529b-db8c-4d6d-9b6d-222d4111a546",
+   "title": "Stand 12",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Standing/Stand 13": {
+   "clip": "93dfcca4-9051-4bd0-9633-a7d614465359",
+   "title": "Stand 13",
+   "author": "Official",
+   "licence": "CC0-1.0",
+   "credit": "Generated with NVIDIA Kimodo"
+  },
+  "Standing/Stand 9": {
+   "clip": "5f1a7d8b-abff-4744-810b-e98e09bbdd8c",
+   "title": "Stand 9",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Aeroplane": {
+   "clip": "ae140492-605b-4220-8e82-28ddd411710f",
+   "title": "Aeroplane walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Arms above head": {
+   "clip": "0d816086-e0f2-4744-8019-654e05cfe94f",
+   "title": "Arms above head walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Arms behind back": {
+   "clip": "a15556df-f52d-4cfc-b602-bf4dd6331b17",
+   "title": "Arms behind back walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Arms by side": {
+   "clip": "6d388cca-16eb-4a4d-bc5d-857bf1644943",
+   "title": "Arms by side walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Arms folded": {
+   "clip": "ce71155a-dcda-4902-88e9-b3aeaa5420c4",
+   "title": "Arms folded walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Balancing (arms out)": {
+   "clip": "81c489a7-b837-44a7-a4e4-2fcd6144c11a",
+   "title": "Balancing (arms out) walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Ballet arms": {
+   "clip": "f8d2d9b1-a693-44dd-9397-ab19366ccbd9",
+   "title": "Ballet arms walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Beat chest": {
+   "clip": "b5f0f5f2-f8b2-462c-8bc4-9146827e1235",
+   "title": "Beat chest walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Bent forward": {
+   "clip": "3e4e3fef-b7bb-40f5-8536-ba8677778534",
+   "title": "Bent forward walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Bent forward, arms back": {
+   "clip": "7d54f590-e51e-401f-b26c-4361eab7ad75",
+   "title": "Bent forward, arms back walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Bent knees": {
+   "clip": "59e4a0b0-5d5c-4f71-bd2d-89832ae0182b",
+   "title": "Bent knees walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Big steps": {
+   "clip": "e371db26-dd2b-4aa1-b7a7-990c9a10b651",
+   "title": "Big steps walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Cat paws": {
+   "clip": "3c58790e-a60e-4cc8-ab9e-209280228ea7",
+   "title": "Cat paws walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Catwalk": {
+   "clip": "2a99de75-2f2b-4ab0-a929-3a9430b36ed3",
+   "title": "Catwalk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Chicken": {
+   "clip": "57cb24b2-31c8-4a62-b50c-a601923540bd",
+   "title": "Chicken walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Crouched on toes": {
+   "clip": "f334a30b-40ca-4b4d-ab13-9c03221a8b49",
+   "title": "Crouched on toes walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Crowd avoidance": {
+   "clip": "7c0c35e4-ffb8-44c4-b4a3-94657af7a9e5",
+   "title": "Crowd avoidance walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Depressed": {
+   "clip": "5c32cc7b-77da-42b5-93d0-630d757bc981",
+   "title": "Depressed walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Dinosaur": {
+   "clip": "c8177a69-e6b3-4763-a4d7-2def63a41b8d",
+   "title": "Dinosaur walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Disco hand roll": {
+   "clip": "b46c4cb9-f1ef-4fc5-9c6c-e3d0c35458f7",
+   "title": "Disco hand roll walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Drag left leg": {
+   "clip": "ac228c2e-3afd-4be6-8aa0-20cc0866f81d",
+   "title": "Drag left leg walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Drag right leg": {
+   "clip": "e6100e64-4abb-41cb-9558-54ae66b3522d",
+   "title": "Drag right leg walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Drunk": {
+   "clip": "d5b8c3ef-58cb-4172-a6ca-cfd15cc072bc",
+   "title": "Drunk walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Elderly": {
+   "clip": "7e5642cc-193e-4d0f-827f-664af238cdbc",
+   "title": "Elderly walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Feeling in the dark": {
+   "clip": "0f3afc6c-937d-4057-b4f6-7a65930805a3",
+   "title": "Feeling in the dark walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Flapping": {
+   "clip": "3bfd81e2-87f3-466f-a152-ee34b5dc3581",
+   "title": "Flapping walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Flick legs": {
+   "clip": "5c62477a-1238-4726-834f-301310b88227",
+   "title": "Flick legs walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Hand on hip, arm out": {
+   "clip": "040a099d-d262-4b52-a302-9520c13aca03",
+   "title": "Hand on hip, arm out walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Hands between legs": {
+   "clip": "b879f00a-996a-437e-b40a-0a7f538e4ed5",
+   "title": "Hands between legs walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Hands clasped, head bowed": {
+   "clip": "875be0ae-41b7-455c-af98-77e0259f5f3a",
+   "title": "Hands clasped, head bowed walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Hands in pockets": {
+   "clip": "5c616919-6c3c-4728-ab45-3c4a5cc9307c",
+   "title": "Hands in pockets walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Hands on hips": {
+   "clip": "9b61f05a-b4fd-4bed-bd57-00fbc17d7317",
+   "title": "Hands on hips walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Happy": {
+   "clip": "007012ac-f5b6-4ae0-b87a-cb1c17266f05",
+   "title": "Happy walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Heel-to-toe (tightrope)": {
+   "clip": "ab5525da-ad1f-4a9d-810f-22ba59c0c18a",
+   "title": "Heel-to-toe (tightrope) walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/High kicks": {
+   "clip": "0dce2642-9f20-4e80-8964-3dbb10373ed7",
+   "title": "High kicks walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/High knees": {
+   "clip": "6b9ca763-1240-4f8e-a6f8-a1f34078096b",
+   "title": "High knees walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/High knees, arms back": {
+   "clip": "44389e04-267b-48be-a71c-04cbdc05afe6",
+   "title": "High knees, arms back walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Karate chop": {
+   "clip": "64bc402b-a9ab-4a58-b220-f7567d12b5ff",
+   "title": "Karate chop walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Kick": {
+   "clip": "0d5d6fc8-dd56-4cdc-bb95-f8b63b98390f",
+   "title": "Kick walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Lean back": {
+   "clip": "7db84ace-b1ff-40f6-a790-7502ee24c570",
+   "title": "Lean back walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Lean left": {
+   "clip": "3bbf10f3-3a78-483b-943e-e76cfa32389e",
+   "title": "Lean left walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Lean right": {
+   "clip": "ae16c1c5-bb14-4eb1-8f7e-8540438f7d69",
+   "title": "Lean right walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Left hop": {
+   "clip": "65e45e5a-10f6-454e-bb24-c2065b8d534b",
+   "title": "Left hop walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Legs apart": {
+   "clip": "0b1985d1-9717-42ac-bd77-674ecd9eddd1",
+   "title": "Legs apart walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Limp left": {
+   "clip": "54fc4417-aead-4f87-8b67-458210d1d71b",
+   "title": "Limp left walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Limp right": {
+   "clip": "1991229d-8857-469f-b77c-357d0b32e589",
+   "title": "Limp right walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Look up": {
+   "clip": "2d5ca30b-588c-4a07-86ea-f213cd6e1a3f",
+   "title": "Look up walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Lunge": {
+   "clip": "2ec5bc57-f1bd-4921-b052-9187aed2baec",
+   "title": "Lunge walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/March": {
+   "clip": "6aaca623-7516-4a1e-81f7-a05f36008663",
+   "title": "March walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Morris dance skip": {
+   "clip": "ec406722-e58e-478b-93b6-b22e2f3e78e6",
+   "title": "Morris dance skip walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Muscle man": {
+   "clip": "4b91adcf-a9ae-48ac-87c9-035104273068",
+   "title": "Muscle man walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/On heels": {
+   "clip": "d40095a9-d475-43d9-9a7d-407e3cad13ac",
+   "title": "On heels walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/On phone left": {
+   "clip": "17966ca3-a871-459d-8c0d-83515cbc5599",
+   "title": "On phone left walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/On phone right": {
+   "clip": "752eae52-159b-4f92-b4cf-504af11a48d3",
+   "title": "On phone right walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/On toes bent forward": {
+   "clip": "63f7cc34-0326-4c63-9b3b-02595a6d2bbb",
+   "title": "On toes bent forward walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Pendulum hands": {
+   "clip": "77c1292a-9d4e-4e13-a483-45dcc9406063",
+   "title": "Pendulum hands walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Proud": {
+   "clip": "53179a98-562d-42ac-b863-2f1eeb3d2648",
+   "title": "Proud walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Punch": {
+   "clip": "0740c307-a25e-4cc5-8bb2-8faf7d137b0a",
+   "title": "Punch walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Raised left arm": {
+   "clip": "dfd6a558-cf11-44a4-9357-2aad1d29993b",
+   "title": "Raised left arm walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Raised right arm": {
+   "clip": "96f92c0d-008f-47c3-a933-cd0a3dbb66ae",
+   "title": "Raised right arm walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Rifle walk": {
+   "clip": "c1f3f4da-8def-4aa3-842e-e07258b436a5",
+   "title": "Rifle walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Right arm forward": {
+   "clip": "20efbd1b-09db-426b-83f9-23a865bdfb88",
+   "title": "Right arm forward walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Right hop": {
+   "clip": "4a159bf6-b4a0-4791-a19f-26add296b236",
+   "title": "Right hop walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Robot": {
+   "clip": "4b2303da-ad44-4f2f-a160-0bf58c2a3fbf",
+   "title": "Robot walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Shielded left": {
+   "clip": "fa77859b-4d8d-4bb8-9117-67a116772d54",
+   "title": "Shielded left walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Shielded right": {
+   "clip": "b1319a7f-f6f7-4105-bf4b-23cee4088b35",
+   "title": "Shielded right walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Shuffle": {
+   "clip": "2a7e486d-d114-4550-b0e7-0683f59ec928",
+   "title": "Shuffle walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Skip": {
+   "clip": "6602345b-6cb8-47da-9210-105980b66060",
+   "title": "Skip walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Small quick steps": {
+   "clip": "e91d5fa2-7b9d-405a-bac7-cff61f41599c",
+   "title": "Small quick steps walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Spinning walk (anticlockwise)": {
+   "clip": "887e5691-48f6-438b-92a2-e4018218b3a3",
+   "title": "Spinning walk (anticlockwise)",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Spinning walk (clockwise)": {
+   "clip": "f0c0a91e-fdcb-44fd-bfa2-426f3f88541d",
+   "title": "Spinning walk (clockwise)",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Spring off left foot": {
+   "clip": "4c80b758-bfe2-44e7-a07b-e9ccfd1279e6",
+   "title": "Spring off left foot walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Spring off right foot": {
+   "clip": "585aba2b-ad84-49e3-916b-efeb4d8c03d2",
+   "title": "Spring off right foot walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Star shape (arms and legs wide)": {
+   "clip": "0899b26f-8b78-46a7-ab71-e0ef520d2204",
+   "title": "Star shape (arms and legs wide) walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Start stop": {
+   "clip": "6af79238-5968-4446-98b8-7e7eea724c1d",
+   "title": "Start stop walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Step-together": {
+   "clip": "44e20d03-f03d-4d6e-af67-c8ca7b66375e",
+   "title": "Step-together walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Stiff": {
+   "clip": "037cee85-bc27-42d0-9c1a-0b04afd8cc1e",
+   "title": "Stiff walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Swagger": {
+   "clip": "ef8a86fd-546e-4fe9-a9dc-241954a9dccc",
+   "title": "Swagger walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Sweep": {
+   "clip": "4d15f927-6d56-49bb-b8e8-f1843fb5c1f9",
+   "title": "Sweep walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Swimming": {
+   "clip": "5e0d9693-c5f6-4bd9-8045-d7210b5b639c",
+   "title": "Swimming walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Swing arms round": {
+   "clip": "6c0a4b0e-7969-46c3-bfa2-98d73976d63b",
+   "title": "Swing arms round walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Swing shoulders": {
+   "clip": "3cee07e4-2fbc-47fc-857a-ce82b1b1a51d",
+   "title": "Swing shoulders walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Tiptoe": {
+   "clip": "7a44abe6-4c83-481b-b50d-4d42cb7bd829",
+   "title": "Tiptoe walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Toes in": {
+   "clip": "1f974019-3a9a-4391-9005-9321a7e47f62",
+   "title": "Toes in walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Toes out": {
+   "clip": "1d2611fd-a42d-4b7f-92a2-833124599767",
+   "title": "Toes out walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Two foot jump": {
+   "clip": "06894741-05da-41d3-a4bd-6b8a135a05d2",
+   "title": "Two foot jump walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Waddle": {
+   "clip": "c9a1bf1e-8281-4031-9d49-ca500396fc9e",
+   "title": "Waddle walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Walking stick left": {
+   "clip": "14b4de35-175a-4e91-9aba-7d57c2d12eb6",
+   "title": "Walking stick left",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Walking stick right": {
+   "clip": "1c6254a4-e722-47f4-96d2-436ba4e012a4",
+   "title": "Walking stick right",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Waving": {
+   "clip": "6bede6dc-fa0f-4b8f-be76-c641a3b7e048",
+   "title": "Waving walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Whirl arms": {
+   "clip": "9b0930e8-bba7-4e84-80c5-5827cd1891af",
+   "title": "Whirl arms walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Wide legs": {
+   "clip": "59a0e38d-47fe-4fe2-9bbe-c96866fa0736",
+   "title": "Wide legs walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Wiggle hips": {
+   "clip": "f3aec35e-b0d1-44fe-bf80-f2cbf79b252e",
+   "title": "Wiggle hips walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  },
+  "Walk styles/Wild arms": {
+   "clip": "11e248e9-8bbd-48ab-b73a-b4330538494e",
+   "title": "Wild arms walk",
+   "author": "Official",
+   "licence": "CC-BY-4.0",
+   "credit": "100STYLE (Ian Mason, Sebastian Starke, Taku Komura); retargeted and cut into clips"
+  }
+ }
+}

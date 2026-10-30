@@ -6,7 +6,7 @@
 use egui::vec2;
 
 use super::super::App;
-use super::tab::{Act, BIG, author, installs, playing, stars};
+use super::tab::{self, Act, BIG, author, installs, playing, stars};
 use crate::app::library::Tab;
 use crate::app::ui_ids::Tag;
 
@@ -219,7 +219,7 @@ impl App {
                                     .strips
                                     .get(&id, c["preview"].as_str().unwrap_or_default());
                                 let pic = playing(ui, strip, vec2(w, h), seconds);
-                                ui.add(egui::Label::new(egui::RichText::new(title).strong()).truncate());
+                                tab::title(ui, c);
                                 ui.add(
                                     egui::Label::new(
                                         egui::RichText::new(format!("by {} · {seconds:.1} s", author(c)))

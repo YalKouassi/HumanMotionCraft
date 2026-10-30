@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "community",
   "feature": "community.browse",
-  "description": "The community library on the fixtures' fake server (crates/ac-community/src/fake.rs has its table: c1 Happy hop 4.5 from 2 ratings, 10 downloads, 10-01; c2 Slow walk 4.5 from 8, 3, 10-05; c3 Wave 3.0 from 1, 25, 10-03; c4 My spin, yours, 0 from 0, 1, 10-04; c5 Broken file 2.0 from 1, 0, 10-02). Top: by rating, then number of ratings, then newest, so c2 (4.5, 8) beats c1 (4.5, 2), then c3, c5, c4. New: c2, c4, c3, c5, c1. Downloads: c3 25, c1 10, c2 3, c4 1, c5 0. Every search word must be in the title, description or tags: 'hello wave' finds only c3 (title Wave, description 'A friendly hello'); its 48 frames at 24 fps are 2 s. Page 1 of 2 by top is c3 and c5. Installing c3 puts it in Community as 'Wave 2', because the built-in Gestures/Wave has the name; installing it again changes nothing, and browsing then says where it is and counts 26 downloads. Rating c1 5 stars makes (4.5 x 2 + 5) / 3 = 4.67 from 3; rating it 3 instead makes (9 + 3) / 3 = 4.0, still 3 ratings. The captcha token 'pass' verifies the account, which can then report and share: tags 'Jump', 'jump' and 'small hop!' clean to jump, small, hop. My uploads lists newest first: the share (10-07, checking), Bad pose (10-06, failed, with the reason) and My spin (10-04, published); after removing the share it reads removed. Refused: a limit of 0, an unknown clip, c5 (its file doesn't match its hash), 6 stars, rating or reporting your own clip, a failing captcha token, sharing a built-in, an 81-character title, a missing licence or a pose, and removing someone else's clip.",
+  "description": "The community library on the fixtures' fake server (crates/ac-community/src/fake.rs has its table: c1 Happy hop (the Official account's, so official) 4.5 from 2 ratings, 10 downloads, 10-01; c2 Slow walk 4.5 from 8, 3, 10-05; c3 Wave 3.0 from 1, 25, 10-03; c4 My spin, yours, 0 from 0, 1, 10-04; c5 Broken file 2.0 from 1, 0, 10-02). Top: by rating, then number of ratings, then newest, so c2 (4.5, 8) beats c1 (4.5, 2), then c3, c5, c4. New: c2, c4, c3, c5, c1. Downloads: c3 25, c1 10, c2 3, c4 1, c5 0. Every search word must be in the title, description or tags: 'hello wave' finds only c3 (title Wave, description 'A friendly hello'); its 48 frames at 24 fps are 2 s. Page 1 of 2 by top is c3 and c5. Installing c3 puts it in Community as 'Wave 2', because the built-in Gestures/Wave has the name; installing it again changes nothing, and browsing then says where it is and counts 26 downloads. Rating c1 5 stars makes (4.5 x 2 + 5) / 3 = 4.67 from 3; rating it 3 instead makes (9 + 3) / 3 = 4.0, still 3 ratings. The captcha token 'pass' verifies the account, which can then report and share: tags 'Jump', 'jump' and 'small hop!' clean to jump, small, hop. My uploads lists newest first: the share (10-07, checking), Bad pose (10-06, failed, with the reason) and My spin (10-04, published); after removing the share it reads removed. Refused: a limit of 0, an unknown clip, c5 (its file doesn't match its hash), 6 stars, rating or reporting your own clip, a failing captcha token, sharing a built-in, an 81-character title, a missing licence or a pose, and removing someone else's clip.",
   "script": [
     {
       "command": "community.account",
@@ -30,8 +30,13 @@
       "params": { "search": "hello WAVE" },
       "expect": {
         "count": 1,
-        "clips": [{ "id": "c3", "title": "Wave", "author": "Cat", "seconds": 2.0, "installed": "" }]
+        "clips": [{ "id": "c3", "title": "Wave", "author": "Cat", "official": false, "seconds": 2.0, "installed": "" }]
       }
+    },
+    {
+      "command": "community.browse",
+      "params": { "tags": ["happy"] },
+      "expect": { "count": 1, "clips": [{ "id": "c1", "author": "Official", "official": true }] }
     },
     {
       "command": "community.browse",

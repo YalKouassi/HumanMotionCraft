@@ -830,7 +830,7 @@ Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `clips` | JSON | yes |  | {id, title, description, author, tags, licence, credit, fps, frames, seconds, rating, ratings, downloads, published, preview, installed} |
+| `clips` | JSON | yes |  | {id, title, description, author, tags, licence, credit, fps, frames, seconds, rating, ratings, downloads, published, preview, installed, official} |
 | `count` | integer | yes |  | how many on this page |
 
 ### `community.fetch`: Fetch community clip
@@ -849,7 +849,7 @@ Outputs:
 |---|---|---|---|---|
 | `id` | text | yes |  | the clip |
 | `path` | text | yes |  | the unpacked clip file, to play (not in the library) |
-| `clip` | JSON | yes |  | {id, title, description, author, tags, licence, credit, fps, frames, seconds, rating, ratings, downloads, published, preview, installed} |
+| `clip` | JSON | yes |  | {id, title, description, author, tags, licence, credit, fps, frames, seconds, rating, ratings, downloads, published, preview, installed, official} |
 
 ### `community.install`: Install community clip
 
@@ -1805,9 +1805,9 @@ Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `animations` | JSON | yes |  | {added, updated, retired: [id], kept: [{id, why}]}: new built-ins copied in, unchanged copies replaced by a fixed one, ones no longer shipped moved to <library>/.retired, and ones you changed left as they are |
+| `animations` | JSON | yes |  | {added, updated, retired: [id], moved: [id], kept: [{id, why}]}: new built-ins copied in, unchanged copies replaced by a fixed one, ones no longer shipped moved to <library>/.retired (or, when they moved to the community, kept in place as community installs), and ones you changed left as they are |
 | `poses` | JSON | yes |  | the same for poses |
-| `changed` | integer | yes |  | items added, updated or retired |
+| `changed` | integer | yes |  | items added, updated, retired or moved |
 
 ## marker
 

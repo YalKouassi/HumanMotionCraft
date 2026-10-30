@@ -136,6 +136,33 @@ pub(super) fn author(c: &Value) -> &str {
         .unwrap_or("someone")
 }
 
+/// Clip `c`'s title, cut to fit, after an "Official" badge when the Official account shared it
+/// (the clips that used to come with the app).
+pub(super) fn title(ui: &mut egui::Ui, c: &Value) {
+    ui.horizontal(|ui| {
+        ui.spacing_mut().item_spacing.x = 4.0;
+        if c["official"].as_bool() == Some(true) {
+            let (fill, ink) = (
+                ui.visuals().selection.bg_fill,
+                ui.visuals().selection.stroke.color,
+            );
+            egui::Frame::new()
+                .fill(fill)
+                .corner_radius(3.0)
+                .inner_margin(egui::Margin::symmetric(4, 0))
+                .show(ui, |ui| {
+                    ui.label(egui::RichText::new("Official").small().color(ink));
+                })
+                .response
+                .on_hover_text("From the app's own collection");
+        }
+        ui.add(
+            egui::Label::new(egui::RichText::new(c["title"].as_str().unwrap_or_default()).strong())
+                .truncate(),
+        );
+    });
+}
+
 /// What was clicked in a clip's details: (what, its value).
 pub(super) type Act = Option<(&'static str, Value)>;
 
@@ -285,9 +312,7 @@ impl App {
                             let seconds = c["seconds"].as_f64().unwrap_or(1.0);
                             let pic = playing(ui, strip, vec2(ROW_CELL.0, ROW_CELL.1), seconds);
                             let text = ui.vertical(|ui| {
-                                let title =
-                                    egui::RichText::new(c["title"].as_str().unwrap_or_default()).strong();
-                                ui.add(egui::Label::new(title).truncate());
+                                title(ui, c);
                                 ui.label(
                                     egui::RichText::new(format!("by {} · {seconds:.1} s", author(c)))
                                         .small()
@@ -397,7 +422,6 @@ impl App {
         let mut act: Act = None;
         let seconds = c["seconds"].as_f64().unwrap_or(1.0);
         ui.horizontal(|ui| {
-            ui.label(egui::RichText::new(c["title"].as_str().unwrap_or_default()).strong());
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if ui
                     .small_button("×")
@@ -407,6 +431,9 @@ impl App {
                 {
                     act = Some(("close", Value::Null));
                 }
+                ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                    title(ui, c)
+                });
             });
         });
         ui.label(egui::RichText::new(format!("by {}", author(c))).small().weak());
@@ -436,10 +463,11 @@ impl App {
         ui.label(egui::RichText::new(facts.join(" · ")).small());
         let licence = c["licence"].as_str().unwrap_or_default();
         let credit = c["credit"].as_str().unwrap_or_default();
+        let words = ac_community::licence_words(licence);
         let lic = if credit.is_empty() {
-            licence.to_string()
+            words.to_string()
         } else {
-            format!("{licence}, credit: {credit}")
+            format!("{words}; credit: {credit}")
         };
         ui.label(egui::RichText::new(lic).small().weak());
         ui.label(

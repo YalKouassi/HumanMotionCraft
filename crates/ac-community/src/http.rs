@@ -22,7 +22,7 @@ const MAX_FILE: u64 = 12 * 1024 * 1024;
 
 const COLUMNS: &str = "id,title,description,tags,licence,credit,fps,frames,rating_avg,rating_count,\
                        download_count,published_at,preview_key,file_key,sha256,\
-                       author:profiles!clips_author_id_fkey(display_name)";
+                       author:profiles!clips_author_id_fkey(display_name,official)";
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(default)]
@@ -338,6 +338,11 @@ impl Http {
                 .and_then(Value::as_str)
                 .unwrap_or_default()
                 .to_string(),
+            official: row
+                .get("author")
+                .and_then(|a| a.get("official"))
+                .and_then(Value::as_bool)
+                .unwrap_or(false),
             tags: row
                 .get("tags")
                 .and_then(Value::as_array)

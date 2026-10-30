@@ -1,6 +1,10 @@
 # Built-ins slimmed: most of the collection moves to the community
 
-- **Status:** not started (the owner chose this, 2026-10-30; acceptance proposed)
+- **Status:** built, waiting for the owner's look (the owner chose this, 2026-10-30). The owner
+  chose to keep all of Locomotion, since travel matches over every Locomotion clip (13 MB alone):
+  the starter set is the 42 Locomotion clips and 13 others, 55 in all, 17 MB, so the 10 MB line
+  below became about 17 MB. 169 clips are published under the Official account
+  (`services/community/official/ids.txt`, `assets/library/moved.json`).
 - **Requires:** 149000, 150000
 - **Source:** owner's choice of option B, 2026-10-30 ("Option B i guess. without C")
 

@@ -154,6 +154,12 @@ fn texture(ctx: &egui::Context, id: &str, png: &[u8]) -> Strip {
 #[cfg(test)]
 mod tests {
     #[test]
+    fn shares_and_ac_strips_draw_the_popovers_strip() {
+        assert_eq!(super::FRAMES, ac_community::PREVIEW_FRAMES);
+        assert_eq!(super::CELL, ac_community::PREVIEW_CELL);
+    }
+
+    #[test]
     fn a_popover_strip_has_its_cells() {
         // 12 cells of 240 × 320 (drawn at twice the size) and 11 gaps of 2
         assert_eq!(super::cells(12 * 240 + 11 * 2, 320), 12);

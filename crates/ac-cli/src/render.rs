@@ -160,6 +160,39 @@ pub fn unbase64(text: &str) -> Result<Vec<u8>, String> {
     Ok(out)
 }
 
+/// Clip `text`'s preview strip, as the app's library popover draws it (and sends with a share):
+/// [`ac_community::PREVIEW_FRAMES`] frames spread over the clip, each cell framed on its own body,
+/// at twice [`ac_community::PREVIEW_CELL`] for sharp high-DPI pictures, packed small to send.
+pub fn clip_strip(
+    pictures: &mut Pictures,
+    sk: &ac_core::rig::Skeleton,
+    text: &str,
+    lib: &ac_io::library::Library,
+) -> Result<Vec<u8>, String> {
+    let clip = ac_core::clipfile::load_clip(text)?;
+    let links = ac_io::commands::load_links(lib, &clip)?;
+    let last = (clip.length_with(&links) - 1).max(0) as f64;
+    let n = ac_community::PREVIEW_FRAMES.max(2);
+    let frames: Vec<f64> = (0..n)
+        .map(|i| (last * i as f64 / (n - 1) as f64).round())
+        .collect();
+    let (r, o) = clip.sample_with(&frames, &links)?;
+    let posed = r
+        .iter()
+        .zip(o)
+        .map(|(r, o)| sk.fk(r, o).map_err(|e| e.to_string()))
+        .collect::<Result<Vec<_>, String>>()?;
+    let (w, h) = ac_community::PREVIEW_CELL;
+    let png = pictures.off.sheet(
+        "three-quarter",
+        (w * 2, h * 2, posed.len() as u32),
+        &posed,
+        &sk.heads,
+        false,
+    )?;
+    offscreen::png_small(&png)
+}
+
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]

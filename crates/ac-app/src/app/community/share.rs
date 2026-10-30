@@ -176,6 +176,7 @@ impl App {
     /// The popover's strip of `id`, written beside the library for `community.share` to send.
     fn community_share_preview(&mut self, id: &str) -> Result<String, String> {
         let png = self.thumb_png("animations", id, true, FRAMES, CELL, "preview")?;
+        let png = ac_render::offscreen::png_small(&png)?;
         let root = self.session.document.library.clone().ok_or("no library")?;
         let dir = root.join(ac_community::record::CACHE);
         std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;

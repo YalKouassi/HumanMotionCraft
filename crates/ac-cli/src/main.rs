@@ -269,6 +269,34 @@ fn real_main() -> Result<ExitCode, String> {
             }
             Ok(ExitCode::SUCCESS)
         }
+        Some("strips") => {
+            // maintainers: preview strips for the Official collection (services/community)
+            let usage = "strips <library dir> <ids file> --out <dir>";
+            let (root, list) = (args.next().ok_or(usage)?, args.next().ok_or(usage)?);
+            let mut out = None;
+            while let Some(a) = args.next() {
+                match a {
+                    "--out" => out = Some(PathBuf::from(args.next().ok_or("--out needs a value")?)),
+                    other => return Err(format!("strips: unknown argument {other:?}")),
+                }
+            }
+            let out = out.ok_or(usage)?;
+            let rig = std::fs::read_to_string(f.assets.join("rig/default_rig.json")).map_err(|e| format!("the rig: {e}"))?;
+            let sk = ac_core::rig::Skeleton::from_json(&rig).map_err(|e| e.to_string())?;
+            let lib = ac_io::library::Library::new(std::path::Path::new(root), ac_io::library::Kind::Animations);
+            let mut pics = ac_cli::render::Pictures::new(&f.assets, &sk.names)?;
+            let ids = std::fs::read_to_string(list).map_err(|e| format!("{list}: {e}"))?;
+            for id in ids.lines().map(str::trim).filter(|l| !l.is_empty()) {
+                let png = ac_cli::render::clip_strip(&mut pics, &sk, &lib.read(id)?, &lib)?;
+                let path = out.join(format!("{id}.png"));
+                if let Some(dir) = path.parent() {
+                    std::fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+                }
+                std::fs::write(&path, png).map_err(|e| format!("{}: {e}", path.display()))?;
+                println!("{}", path.display());
+            }
+            Ok(ExitCode::SUCCESS)
+        }
         Some("video") => {
             let (mut script, mut from, mut to, mut fps, mut view, mut wh, mut out, mut fixed) = (None, None, None, None, "side", (960, 540), None, false);
             while let Some(a) = args.next() {
@@ -379,7 +407,7 @@ fn real_main() -> Result<ExitCode, String> {
             let ok = ac_cli::fixtures_cmd::run(&f.assets, &rest)?;
             Ok(if ok { ExitCode::SUCCESS } else { ExitCode::from(1) })
         }
-        _ => Err("usage: ac commands [<id> | --md] | new-command <area.verb> | run <command> [<json>] | script <file> | fixtures [--only <name>] [--shots <dir>] [--print] [--bless] [--golden-check] [--bless-visual] [--timings] [--watch] [--schema] [dir] | render ... --out <png> | video ... --out <mp4> | samples [--only <name>] [--bless] | mcp [--live <port> [--timeout <s>]]".into()),
+        _ => Err("usage: ac commands [<id> | --md] | new-command <area.verb> | run <command> [<json>] | script <file> | fixtures [--only <name>] [--shots <dir>] [--print] [--bless] [--golden-check] [--bless-visual] [--timings] [--watch] [--schema] [dir] | render ... --out <png> | strips <library dir> <ids file> --out <dir> | video ... --out <mp4> | samples [--only <name>] [--bless] | mcp [--live <port> [--timeout <s>]]".into()),
     }
 }
 

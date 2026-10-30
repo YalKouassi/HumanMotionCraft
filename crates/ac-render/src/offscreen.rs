@@ -314,6 +314,29 @@ pub fn png(w: u32, h: u32, rgba: &[u8]) -> Result<Vec<u8>, String> {
     Ok(out)
 }
 
+/// A PNG made as small as plain PNG goes (opaque RGB, the best deflate, each row's best filter):
+/// slower to write, for pictures sent over the network (community previews, about half the size).
+pub fn png_small(png_bytes: &[u8]) -> Result<Vec<u8>, String> {
+    let (w, h, rgba) = unpng(png_bytes)?;
+    let rgb: Vec<u8> = rgba
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .flat_map(|p| [p[0], p[1], p[2]])
+        .collect();
+    let mut out = Vec::new();
+    {
+        let mut enc = png::Encoder::new(&mut out, w, h);
+        enc.set_color(png::ColorType::Rgb);
+        enc.set_depth(png::BitDepth::Eight);
+        enc.set_compression(png::Compression::Best);
+        enc.set_adaptive_filter(png::AdaptiveFilterType::Adaptive);
+        let mut wr = enc.write_header().map_err(|e| e.to_string())?;
+        wr.write_image_data(&rgb).map_err(|e| e.to_string())?;
+    }
+    Ok(out)
+}
+
 /// Standard base64 (for MCP image content).
 pub fn base64(data: &[u8]) -> String {
     const T: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

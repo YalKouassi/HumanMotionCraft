@@ -5,7 +5,9 @@
 //! a hash of its file as installed. A sync then:
 //! - copies in a shipped item the library was never given (new built-ins reach old libraries);
 //! - replaces one it was given and still holds unchanged when the shipped file changed (a fix);
-//! - moves one no longer shipped to `<library>/.retired/` (out of the library, not destroyed);
+//! - moves one no longer shipped to `<library>/.retired/` (out of the library, not destroyed),
+//!   unless it moved to the community (`moved.json` beside the shipped items says where): that one
+//!   stays where it is as a community install (its `origin` and `.community.json` say which clip);
 //! - leaves one the person changed (its file no longer matches) and one they deleted.
 //!
 //! A library from before the record treats its items with an `origin` as installed built-ins: the
@@ -16,6 +18,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{Value, json};
 
+use crate::community_record::{Install, ORIGIN, Record as CommunityRecord};
 use crate::library::Kind;
 
 type R<T> = Result<T, String>;
@@ -24,6 +27,9 @@ type R<T> = Result<T, String>;
 pub const RECORD: &str = ".builtins.json";
 /// Where built-ins the app no longer ships are moved to.
 pub const RETIRED: &str = ".retired";
+/// Beside the shipped items: the built-ins that moved to the community's Official collection,
+/// `{animations: {<id>: {clip, title, author, licence, credit}}}` (`services/community/scripts/official.ts`).
+pub const MOVED: &str = "moved.json";
 const KINDS: [Kind; 2] = [Kind::Animations, Kind::Poses];
 
 /// FNV-1a, 64 bits, as hex: tells a changed file from the one installed (not a security hash).
@@ -114,6 +120,37 @@ fn copy(bytes: &[u8], to: &Path) -> R<()> {
     craft_atomic::atomic_write(to, bytes).map_err(|e| format!("can't write {}: {e}", to.display()))
 }
 
+/// The shipped built-ins that moved to the community, by library id (none when `from` has no list).
+fn read_moved(from: &Path) -> R<BTreeMap<String, Install>> {
+    let path = from.join(MOVED);
+    let text = match std::fs::read_to_string(&path) {
+        Ok(t) => t,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(BTreeMap::new()),
+        Err(e) => return Err(format!("can't read {}: {e}", path.display())),
+    };
+    #[derive(serde::Deserialize, Default)]
+    #[serde(default)]
+    struct Moved {
+        animations: BTreeMap<String, Install>,
+    }
+    let m: Moved = serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(m.animations)
+}
+
+/// Keep a built-in that moved to the community as an install of its clip: its `origin` names the
+/// clip, and the community record keeps its credit.
+fn keep_moved(path: &Path, bytes: &[u8], id: &str, to: &Install, rec: &mut CommunityRecord) -> R<()> {
+    let mut v: Value = serde_json::from_slice(bytes).map_err(|e| format!("{}: {e}", path.display()))?;
+    let Some(o) = v.as_object_mut() else {
+        return Err(format!("{} is not a clip", path.display()));
+    };
+    o.insert("origin".into(), json!(format!("{ORIGIN}{}", to.clip)));
+    let text = serde_json::to_string_pretty(&v).map_err(|e| e.to_string())?;
+    copy(text.as_bytes(), path)?;
+    rec.installs.insert(id.to_string(), to.clone());
+    Ok(())
+}
+
 /// Move a retired built-in to `<library>/.retired/<kind>/<group>/`; its group folder goes when
 /// it was the last item (as `Library::delete` does).
 fn retire(lib: &Path, kind: Kind, id: &str, path: &Path) -> R<()> {
@@ -168,12 +205,14 @@ pub fn record_installed(from: &Path, lib: &Path) -> R<()> {
 }
 
 /// Bring the built-ins in `lib` in step with the shipped ones in `from` (module docs).
-/// `{animations: {added, updated, retired, kept: [{id, why}]}, poses: {...}, changed}`.
+/// `{animations: {added, updated, retired, moved, kept: [{id, why}]}, poses: {...}, changed}`.
 pub fn sync(from: &Path, lib: &Path) -> R<Value> {
     if !from.join(Kind::Animations.folder()).is_dir() {
         return Err(format!("{} is not a built-in library folder", from.display()));
     }
     let old = read_record(lib)?;
+    let moved_out = read_moved(from)?;
+    let mut community: Option<CommunityRecord> = None;
     let mut rec = Record::new();
     let mut out = json!({ "changed": 0 });
     let mut changed = 0;
@@ -182,6 +221,7 @@ pub fn sync(from: &Path, lib: &Path) -> R<Value> {
         let shipped = files(from, kind);
         let mine = files(lib, kind);
         let (mut added, mut updated, mut retired, mut kept) = (vec![], vec![], vec![], vec![]);
+        let mut moved = vec![];
         let mut ids = BTreeMap::new();
         for (id, src) in &shipped {
             let new = read(src)?;
@@ -235,16 +275,29 @@ pub fn sync(from: &Path, lib: &Path) -> R<Value> {
                 Some(g) => g.get(id).is_some_and(|h| *h == hash(&cur)),
                 None => has_origin(&cur),
             };
-            if installed {
+            let to_community = moved_out.get(id).filter(|_| kind == Kind::Animations);
+            if let (true, Some(to)) = (installed, to_community) {
+                let rec = match &mut community {
+                    Some(r) => r,
+                    None => community.insert(CommunityRecord::load(lib)?),
+                };
+                keep_moved(dst, &cur, id, to, rec)?;
+                moved.push(id.clone());
+            } else if installed {
                 retire(lib, kind, id, dst)?;
                 retired.push(id.clone());
             } else if given.is_some_and(|g| g.contains_key(id)) {
                 kept.push(json!({ "id": id, "why": "no longer shipped, changed in your library: kept" }));
             }
         }
-        changed += added.len() + updated.len() + retired.len();
-        out[kind.folder()] = json!({ "added": added, "updated": updated, "retired": retired, "kept": kept });
+        changed += added.len() + updated.len() + retired.len() + moved.len();
+        out[kind.folder()] = json!({
+            "added": added, "updated": updated, "retired": retired, "moved": moved, "kept": kept,
+        });
         rec.insert(kind.folder(), ids);
+    }
+    if let Some(c) = community {
+        c.save(lib)?;
     }
     write_record(lib, &rec)?;
     out["changed"] = json!(changed);
@@ -260,7 +313,8 @@ pub fn summary(r: &Value) -> Option<String> {
             .sum()
     };
     let (added, updated, retired, kept) = (count("added"), count("updated"), count("retired"), count("kept"));
-    if added + updated + retired == 0 {
+    let moved = count("moved");
+    if added + updated + retired + moved == 0 {
         return None;
     }
     let mut parts = Vec::new();
@@ -268,6 +322,7 @@ pub fn summary(r: &Value) -> Option<String> {
         (added, "new"),
         (updated, "fixed"),
         (retired, "retired (moved to .retired)"),
+        (moved, "now in the community (kept in your library)"),
     ] {
         if n > 0 {
             parts.push(format!("{n} {what}"));

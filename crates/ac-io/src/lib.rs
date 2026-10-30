@@ -10,6 +10,7 @@
 
 pub mod builtins;
 pub mod commands;
+pub mod community_record;
 pub mod data_folder;
 pub mod export;
 pub mod export_batch;

@@ -4,7 +4,7 @@
 use ac_core::command::{Kind as K, ParamSpec};
 
 const CLIP_FIELDS: &str = "{id, title, description, author, tags, licence, credit, fps, frames, \
-                           seconds, rating, ratings, downloads, published, preview, installed}";
+                           seconds, rating, ratings, downloads, published, preview, installed, official}";
 
 pub const BROWSE: &[ParamSpec] = &[
     ParamSpec::new("clips", K::Text, CLIP_FIELDS).json().required(),
