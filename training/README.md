@@ -359,7 +359,7 @@ and writes it all into the card. `--sheets` draws six fixed hard fills (the reco
 the interpolation) as contact sheets with physics off, under `data/models/<tag>/sheets-<checkpoint>/`,
 so two model versions can be compared side by side.
 
-How much training motion each slice has, without a model (CPU, about four minutes for the six sets):
+How much training motion each slice has, without a model (CPU, under two minutes for the six sets):
 
 ```bash
 uv run python -m ac_train.coverage --card parts-lowweights:best --card parts   # prints the table, writes data/coverage.json
