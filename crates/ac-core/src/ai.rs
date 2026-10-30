@@ -15,13 +15,14 @@ use crate::rig::Skeleton;
 type R<T> = Result<T, String>;
 
 /// A fill kept in the clip: its span, the model label, and what [`Document::keep_possible`] said
-/// (impossible poses the model made, bent back).
+/// (impossible poses the model made, bent back): in words (`notes`) and as data (`kept`).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Filled {
     pub from: i64,
     pub to: i64,
     pub model: String,
     pub notes: Vec<String>,
+    pub kept: crate::possible::Kept,
 }
 
 /// A fill worked out but not kept: `clip` is `base` with the span `from..to` filled.
@@ -277,12 +278,13 @@ impl crate::document::Document {
             self.plant_steps(a, b, &c, PLANT_GROUND)?;
         }
         self.plant_feet(a, b, PLANT_STILL, PLANT_GROUND)?;
-        let notes = self.keep_possible(a, b)?;
+        let kept = self.keep_possible_report(a, b)?;
         Ok(Filled {
             from: a,
             to: b,
             model: filler.label(),
-            notes,
+            notes: kept.notes.clone(),
+            kept,
         })
     }
 
@@ -317,6 +319,7 @@ impl crate::document::Document {
             to,
             model: label,
             notes,
+            kept: _,
         } = made?;
         let p = Arc::new(Preview {
             base,

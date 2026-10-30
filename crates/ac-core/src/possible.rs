@@ -220,11 +220,20 @@ impl Document {
     /// its limits (the keys there are the fill's own). Returns notes saying what was bent and
     /// anything still past; none when the fill was possible throughout.
     pub fn keep_possible(&mut self, a: i64, b: i64) -> R<Vec<String>> {
+        Ok(self.keep_possible_report(a, b)?.notes)
+    }
+
+    /// [`Document::keep_possible`], with the joints bent back as data as well as in words.
+    pub fn keep_possible_report(&mut self, a: i64, b: i64) -> R<Kept> {
         let Some(possible) = self.possible()? else {
-            return Ok(vec![
-                "the range tables are not loaded (assets/rig/ranges.json): the fill was not checked for impossible poses"
-                    .into(),
-            ]);
+            return Ok(Kept {
+                notes: vec![
+                    "the range tables are not loaded (assets/rig/ranges.json): the fill was not checked for impossible poses"
+                        .into(),
+                ],
+                checked: false,
+                bent: Vec::new(),
+            });
         };
         let additive = self
             .clip
@@ -232,14 +241,19 @@ impl Document {
             .get(self.clip.edit)
             .is_some_and(|l| l.mode == LayerMode::Additive);
         if b - a < 2 {
-            return Ok(Vec::new());
+            return Ok(Kept {
+                notes: Vec::new(),
+                checked: true,
+                bent: Vec::new(),
+            });
         }
         let sk = self.skeleton.clone();
         let frames: Vec<f64> = (a + 1..b).map(|f| f as f64).collect();
         let (mut rots, roots) = self.clip.sample_with(&frames, &self.links)?;
         let mut changed = std::collections::BTreeSet::new();
         let (mut bent, mut still) = (Vec::new(), Vec::new());
-        let mut worst: Vec<Breach> = Vec::new();
+        // per joint and component: the worst breach and every frame it was bent back on
+        let mut worst: Vec<Bent> = Vec::new();
         for (k, r) in rots.iter_mut().enumerate() {
             let f = a + 1 + k as i64;
             if additive {
@@ -257,9 +271,20 @@ impl Document {
                         .iter_mut()
                         .find(|w| w.joint == x.joint && w.component == x.component)
                     {
-                        Some(w) if w.past() >= x.past() => {}
-                        Some(w) => *w = x,
-                        None => worst.push(x),
+                        Some(w) => {
+                            if x.past() > w.past_deg {
+                                w.past_deg = x.past();
+                                w.worst_frame = f;
+                            }
+                            w.frames.push(f);
+                        }
+                        None => worst.push(Bent {
+                            joint: x.joint.clone(),
+                            component: x.component,
+                            past_deg: x.past(),
+                            worst_frame: f,
+                            frames: vec![f],
+                        }),
                     }
                 }
             }
@@ -270,11 +295,16 @@ impl Document {
         self.write_solved(&changed, a + 1, &rots, &roots, "possible")?;
         let mut notes = Vec::new();
         if !bent.is_empty() {
-            worst.sort_by(|x, y| y.past().total_cmp(&x.past()));
+            worst.sort_by(|x, y| {
+                y.past_deg
+                    .total_cmp(&x.past_deg)
+                    .then(x.joint.cmp(&y.joint))
+                    .then(x.component.cmp(y.component))
+            });
             let what: Vec<String> = worst
                 .iter()
                 .take(4)
-                .map(|w| format!("{} {} {:.0}° past", w.joint, w.component, w.past()))
+                .map(|w| format!("{} {} {:.0}° past", w.joint, w.component, w.past_deg))
                 .collect();
             notes.push(format!(
                 "the AI fill made impossible poses on frames {}; they were bent back to the possible limit ({})",
@@ -295,8 +325,47 @@ impl Document {
                 )
             });
         }
-        Ok(notes)
+        Ok(Kept {
+            notes,
+            checked: true,
+            bent: worst,
+        })
     }
+}
+
+/// One joint angle an AI fill made impossible and [`Document::keep_possible`] bent back: how far
+/// past its limit it went at worst, on which frame, and every frame it was bent on.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Bent {
+    /// `"ankle.R"`, or `"trunk"` for a joint with no side.
+    pub joint: String,
+    pub component: &'static str,
+    /// Degrees past the limit at worst.
+    pub past_deg: f64,
+    pub worst_frame: i64,
+    /// Frames it was bent back on, in order.
+    pub frames: Vec<i64>,
+}
+
+impl Bent {
+    pub fn json(&self) -> Value {
+        json!({
+            "joint": self.joint,
+            "component": self.component,
+            "past_deg": r2(self.past_deg),
+            "worst_frame": self.worst_frame,
+            "spans": runs(&self.frames),
+        })
+    }
+}
+
+/// What [`Document::keep_possible_report`] did: the notes in words, whether the fill was checked
+/// at all (the range tables may be missing), and each joint bent back, worst first.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Kept {
+    pub notes: Vec<String>,
+    pub checked: bool,
+    pub bent: Vec<Bent>,
 }
 
 /// Most passes [`Document::fix_impossible`] makes over the frames between keys (a key added
