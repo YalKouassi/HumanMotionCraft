@@ -45,6 +45,20 @@ HumanMotionCraft is a standalone, pure-Rust humanoid keyframe animation applicat
 cargo run --release -p ac-app
 ```
 
+### Build on Linux
+The build needs a C compiler (for `ring`, the TLS library, and the Wayland shim) and `git` (for
+the git dependencies); nothing else. Every windowing library (Wayland, X11, xkbcommon, EGL) is
+loaded at run time from the desktop you already have, so no `-dev` packages are needed.
+
+```bash
+sudo apt install build-essential git        # Debian, Ubuntu
+sudo dnf install gcc git                    # Fedora
+cargo build --release --locked -p ac-app -p ac-cli
+```
+
+CI compiles the workspace on `ubuntu-latest` (`.github/workflows/ci.yml`, the `linux` job).
+Releases are Windows only for now; a Linux release is a separate decision.
+
 Optional startup flags:
 ```text
 humanmotioncraft [--assets <dir>] [--library <dir>] [--open <id>] [--frame <n>]
