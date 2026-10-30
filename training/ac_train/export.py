@@ -1,6 +1,7 @@
 """Export a trained in-betweener for the app, and the goldens that pin the Rust port to it.
 
     python -m ac_train.export parts
+    python -m ac_train.export parts-lowweights --checkpoint best --as parts   # a training run shipped under the app's tag
 
 Writes, under the repo:
 - assets/models/<tag>/weights.bin   every tensor of the state dict, float32 little-endian, in order;
@@ -27,7 +28,7 @@ import torch
 
 from . import ASSETS, REPO, infer
 from .clip import Clip
-from .model import BONES, FEAT
+from .model import BONES, FEAT, PART_GROUPS
 from .rig import Skeleton
 
 GOLDEN_CLIP = "Locomotion/Walk"  # a CC0 built-in loop, so the golden carries no dataset's terms
@@ -58,13 +59,17 @@ def read_weights(folder: pathlib.Path) -> tuple[dict[str, np.ndarray], dict]:
     return tensors, meta["card"]
 
 
-def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None = None, checkpoint: str = "model") -> None:
+def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None = None, checkpoint: str = "model",
+           as_tag: str | None = None) -> None:
     """Write ``tag``'s weights to ``out`` (default ``assets/models/<tag>``) and its goldens to
     ``gold`` (default ``crates/ac-ai/tests/golden``) as ``<tag>-net.json`` and ``<tag>-fill.json``.
-    ``checkpoint``: ``model`` (training's last step) or ``best`` (its best evaluation score)."""
+    ``checkpoint``: ``model`` (training's last step) or ``best`` (its best evaluation score).
+    ``as_tag``: the tag the app sees (the card, the folder and the goldens' names) when a training
+    run (``parts-lowweights``) ships as the app's model (``parts``, as ``assets/models/MANIFEST.json`` records)."""
     net, card = infer.load(tag, checkpoint)
-    card = {**card, "checkpoint": checkpoint}
-    out = out or ASSETS / "models" / tag
+    shipped = as_tag or tag
+    card = {**card, "tag": shipped, "checkpoint": checkpoint}
+    out = out or ASSETS / "models" / shipped
     gold = gold or REPO / "crates" / "ac-ai" / "tests" / "golden"
     if not card.get("commercial"):
         inside = [p for p in (out, gold) if p.resolve().is_relative_to(REPO.resolve())]
@@ -96,7 +101,7 @@ def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None 
         y, contacts = net(known, interp, mask, ttg, torch.tensor([style]) if style is not None else None,
                           gmask if card.get("given") else None, with_contacts=True,
                           path=path if card.get("path") else None, pmask=pmask if card.get("path") else None)
-    (gold / f"{tag}-net.json").write_text(json.dumps({
+    (gold / f"{shipped}-net.json").write_text(json.dumps({
         "T": T, "style": style, "given": [3, 7] if card.get("given") else [],
         "known": known[0].tolist(), "interp": interp[0].tolist(), "mask": mask[0, :, 0].tolist(), "ttg": ttg[0, :, 0].tolist(),
         **({"path": path[0].tolist(), "pmask": pmask[0, :, 0].tolist()} if card.get("path") else {}),
@@ -105,17 +110,34 @@ def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None 
         **({"contacts": contacts[0].tolist()} if contacts is not None else {}),
     }), encoding="utf-8", newline="\n")
 
-    # 2. the pipeline: fills of a library walk between two of its frames (the last on the keys' path)
+    # 2. the pipeline: fills of a library walk (a 33-frame loop, so a long gap wraps through it)
     skel = Skeleton.load()
     clip = Clip.load(ASSETS / "library" / "animations" / (GOLDEN_CLIP + ".clip.json"))
     cases = []
     styles = card.get("styles", [])
     styled = "walk" if "walk" in styles else styles[1] if len(styles) > 1 else "any"
-    for a, b, style, sf, af, tr in [(20, 39, "any", 1.0, 1.0, 0.0), (5, 12, styled, 1.5, 0.8, 0.0), (8, 30, "any", 1.0, 1.0, 1.0)]:
-        r, o = infer.fill(clip, a, b, skel, tag, style=style, style_force=sf, ai_force=af, trajectory=tr, checkpoint=checkpoint)
-        cases.append({"a": a, "b": b, "style": style, "style_force": sf, "ai_force": af, "trajectory": tr,
-                      "rotations": np.round(r, 7).tolist(), "roots": np.round(o, 7).tolist()})
-    (gold / f"{tag}-fill.json").write_text(json.dumps({"clip": GOLDEN_CLIP, "cases": cases}), encoding="utf-8", newline="\n")
+    # a part layer driving the left arm: the model's other bones are given, as the app builds the
+    # list (crates/ac-core/src/ai.rs, AiFiller::fill)
+    arm_layer = [b for i, b in enumerate(BONES) if i not in PART_GROUPS["left_arm"]] if card.get("given") else []
+    for a, b, style, sf, af, tr, head, given in [
+        (20, 39, "any", 1.0, 1.0, 0.0, 0.0, []),  # the plain fill, the gap past the loop's end
+        (5, 12, styled, 1.5, 0.8, 0.0, 0.0, []),  # a style, pushed, the network's change scaled down
+        (8, 30, "any", 1.0, 1.0, 1.0, 0.0, []),  # the root put on the keys' own path
+        (10, 12, "any", 1.0, 1.0, 0.0, 0.0, []),  # a gap of 1: the shortest the model takes (127000)
+        (4, 50, "any", 1.0, 1.0, 0.0, 0.0, []),  # a gap of 45: the longest, more than one lap of the loop
+        (6, 22, "any", 1.0, 1.0, 0.0, 0.0, arm_layer),  # a part layer: every bone but the left arm given
+        (14, 36, "any", 1.0, 1.0, 0.5, 0.0, []),  # half way to the keys' path
+        (16, 40, "any", 1.0, 1.0, 0.0, 0.5, []),  # the neck and head half way back to the keys' spline
+        (20, 39, "any", 1.0, 0.0, 0.0, 0.0, []),  # ai_force 0: the plain interpolation, exactly
+        (0, 9, "any", 1.0, 1.0, 0.0, 0.0, []),  # a fill at the clip's start: the context repeats frame 0
+    ]:
+        if given and not card.get("given"):
+            continue  # a model without the given mask cannot fill around a part layer
+        r, o = infer.fill(clip, a, b, skel, tag, style=style, style_force=sf, ai_force=af, trajectory=tr, head=head,
+                          given=given or None, checkpoint=checkpoint)
+        cases.append({"a": a, "b": b, "style": style, "style_force": sf, "ai_force": af, "trajectory": tr, "head": head,
+                      "given": given, "rotations": np.round(r, 7).tolist(), "roots": np.round(o, 7).tolist()})
+    (gold / f"{shipped}-fill.json").write_text(json.dumps({"clip": GOLDEN_CLIP, "cases": cases}), encoding="utf-8", newline="\n")
     print(f"goldens written -> {gold}")
 
 
@@ -126,8 +148,10 @@ def main(argv=None):
     ap.add_argument("--golden", type=pathlib.Path, help="goldens folder (default crates/ac-ai/tests/golden)")
     ap.add_argument("--checkpoint", default="model", choices=("model", "best"),
                     help="model.pt (the last step) or best.pt (the best evaluation score; the card says which step)")
+    ap.add_argument("--as", dest="as_tag", metavar="TAG",
+                    help="ship under this tag (the card, assets/models/<TAG>, the goldens' names); default: the training tag")
     args = ap.parse_args(argv)
-    export(args.tag, args.out, args.golden, args.checkpoint)
+    export(args.tag, args.out, args.golden, args.checkpoint, args.as_tag)
 
 
 if __name__ == "__main__":

@@ -338,10 +338,13 @@ so two model versions can be compared side by side.
 ```bash
 uv run python -m ac_train.export parts                       # the last step (model.pt)
 uv run python -m ac_train.export parts --checkpoint best     # or the best evaluation's (best.pt)
+uv run python -m ac_train.export parts-lowweights --checkpoint best --as parts   # a training run shipped as the app's "parts"
 ```
 
 Writes `assets/models/parts/weights.{bin,json}` and the goldens
-`crates/ac-ai/tests/golden/parts-{net,fill}.json`, then check the Rust port against them:
+`crates/ac-ai/tests/golden/parts-{net,fill}.json` (one network pass, and ten fills of the CC0
+library walk: gaps of 1 to 45, a style, a part layer, `trajectory`, `head`, `ai_force` 0 and a
+fill at the clip's start), then check the Rust port against them:
 
 ```bash
 cd .. && cargo nextest run -p ac-ai
