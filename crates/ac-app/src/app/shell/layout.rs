@@ -1,6 +1,6 @@
 //! The panels around the viewport: library and inspector at the sides (either way round), the
 //! timeline below, and `craft_ui::docking` hosting the 3D viewport canvas alongside any dockable
-//! or pop-out tool panels (`Range`, `Picker`, `Joint`, `Layers`, `Physics`, `Scene`, `AI`,
+//! or pop-out tool panels (`Range`, `Picker`, `Joint`, `Layers`, `Physics`, `Review`, `Scene`, `AI`,
 //! `Text`, `Pins`). With `craft-ui`'s `native-windows` feature, any floating panel opens in its
 //! own native OS window so it can be dragged onto a separate monitor and docked back by dragging
 //! its title bar into the main window (or clicking its header button).
@@ -26,6 +26,7 @@ pub enum DockPanel {
     Joint,
     Layers,
     Physics,
+    Review,
     Scene,
     Ai,
     Text,
@@ -40,6 +41,7 @@ impl DockPanel {
         DockPanel::Joint,
         DockPanel::Layers,
         DockPanel::Physics,
+        DockPanel::Review,
         DockPanel::Scene,
         DockPanel::Ai,
         DockPanel::Text,
@@ -54,6 +56,7 @@ impl DockPanel {
             DockPanel::Joint => "joint",
             DockPanel::Layers => "layers",
             DockPanel::Physics => "physics",
+            DockPanel::Review => "review",
             DockPanel::Scene => "scene",
             DockPanel::Ai => "ai",
             DockPanel::Text => "text",
@@ -69,6 +72,7 @@ impl DockPanel {
             DockPanel::Joint => "Joint",
             DockPanel::Layers => "Layers",
             DockPanel::Physics => "Physics",
+            DockPanel::Review => "Review",
             DockPanel::Scene => "Scene boxes",
             DockPanel::Ai => "AI in-between",
             DockPanel::Text => "Motion from text",
@@ -98,6 +102,14 @@ impl DockPanel {
                     format!("Physics ({n} problems)")
                 } else {
                     "Physics".into()
+                }
+            }
+            DockPanel::Review => {
+                let n = app.panels.review.count();
+                if n > 0 {
+                    format!("Review ({n})")
+                } else {
+                    "Review".into()
                 }
             }
             DockPanel::Scene => {
@@ -138,6 +150,7 @@ pub fn default_dock_workspace() -> Workspace<DockPanel> {
                         DockPanel::Joint,
                         DockPanel::Layers,
                         DockPanel::Physics,
+                        DockPanel::Review,
                         DockPanel::Scene,
                         DockPanel::Ai,
                         DockPanel::Text,
@@ -222,6 +235,12 @@ impl DockContent<DockPanel> for DockAdapter<'_> {
                     .id_salt("dock-physics")
                     .auto_shrink([false, false])
                     .show(ui, |ui| self.app.physics_panel(ui));
+            }
+            DockPanel::Review => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-review")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.review_panel(ui));
             }
             DockPanel::Scene => {
                 egui::ScrollArea::vertical()

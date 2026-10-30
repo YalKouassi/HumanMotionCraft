@@ -451,6 +451,13 @@ impl App {
             return;
         }
         if let Some(result) = self.run_from_ui(id, params) {
+            if id == "clip.critique" {
+                // the review has its own panel; the status line only says how it went
+                let count = result["count"].as_u64().unwrap_or(0);
+                self.status = format!("{}: {count} found, see the Review panel", spec.label);
+                self.review_show(result);
+                return;
+            }
             // the answer goes in the status line (and so the message history)
             self.status = result_text(id, spec.label, &result);
         }

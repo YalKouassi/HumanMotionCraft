@@ -6,7 +6,7 @@ with and without Alt, wheel zoom, right-click pinning, the Reach and Move tools;
 keys Q W E R, the Rotate gizmo's rings in world and local axes with Ctrl snapping, onion skin,
 trails, the camera keys 1 3 7 5 0 F and follow, Shift+click and the picker; the timeline's
 key menu, keyboard navigation, copy / paste, retime, dope-sheet rows, markers, the play range,
-problem marks, curves and the foot-contact strip; context keys; op click by widget id), checks the agent protocol (request ids,
+problem marks, curves and the foot-contact strip; context keys; op click by widget id; the Review panel), checks the agent protocol (request ids,
 events since a cursor, an event subscription, the animation op), checks each result, and
 closes the app. Exit 1 when a check fails.
 
@@ -694,6 +694,61 @@ check('Footsteps walks with keys on each footfall', err is None and {0, 13, 27, 
 check('the Walk loop needs no model', not st['bands'], st['bands'])
 shot('live-footsteps')
 check('footsteps are one undo step', last_undo() == 'Footsteps')
+
+# the Review panel, on the clip of fixtures/clip-critique.json: both feet slide 12 cm on frames 0-30
+def widget(name):
+    return next((w for w in req({'op': 'layout'})['widgets'] if w['id'] == name), None)
+
+
+def press(name):
+    req({'op': 'click', 'widget': name})
+    settle()
+
+
+def slide_cm():
+    return sum(s['slide_cm'] for s in run('clip.metrics', {'motion': 'keys'})['sliding'])
+
+
+run('clip.new', {'name': 'Review'})
+run('physics.set', {'on': False})
+run('frame.set', {'frame': 0})
+run('pose.set_root', {'root': [0, 0, 0.9450101408607229]})
+run('key.set', {'interp': 'linear'})
+run('frame.set', {'frame': 10})
+run('pose.set_root', {'root': [0.13795785962212959, 0, 0.9450101408607229]})
+run('key.set', {'interp': 'linear'})
+run('frame.set', {'frame': 20})
+run('key.set', {'interp': 'linear'})
+run('frame.set', {'frame': 30})
+run('pose.set_root', {'root': [0.13795785962212959, 0, 0.8875276993515022]})
+run('key.set', {'interp': 'linear'})
+settle()
+press('panel.review.run')
+findings = run('clip.critique', {'limit': 50})['findings']
+slide = next((i for i, f in enumerate(findings) if f['kind'] == 'sliding' and f['batch']), None)
+check('the review shows the slide', slide is not None and widget(f'panel.review.finding.{slide}') is not None, slide)
+shot('review-problem')
+press(f'panel.review.goto.{slide}')
+a, b = findings[slide]['frames']
+at = run('editor.state')['frame']
+check('Go to problem moves the playhead into the span', a <= at <= b and at != 30, at)
+before, keys_before = slide_cm(), keys()
+press(f'panel.review.fix.{slide}')
+after = slide_cm()
+said = widget('panel.review.result')
+check('Fix lowers the number', after < before, f'{before} to {after}')
+check('Fix says what it did', said is not None and 'to' in said['label'], said)
+shot('review-fixed')
+undo_steps = run('edit.history')['steps']
+check('Fix is one undo step', undo_steps[-1]['label'] == 'Fix: sliding', undo_steps[-1])
+key('Z', ('ctrl',))
+settle()
+check('one Ctrl+Z restores the clip', slide_cm() == before and keys() == keys_before, f'{slide_cm()} {keys()}')
+run('clip.open', {'id': 'Standing/Idle'})
+settle()
+press('panel.review.run')
+check('a clean clip says nothing was found', widget('panel.review.clean') is not None)
+shot('review-clean')
 
 failed = [n for n, ok in checks if not ok]
 print(f'{len(checks)} checks, {len(failed)} failed')

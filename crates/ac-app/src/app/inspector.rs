@@ -1,5 +1,5 @@
 //! The right panel: a summary, then one collapsible section per panel (`panels/`): the selected
-//! joint, layers, physics report, scene boxes, the AI in-between, motion from text, and pins.
+//! joint, layers, physics report, the review, scene boxes, the AI in-between, motion from text, and pins.
 //! Any section (as well as `Range` and `Picker` from the viewport toolbar) can also be opened as
 //! its own dockable or pop-out native-window panel via `craft_ui::docking` (`shell/layout.rs`).
 
@@ -47,6 +47,15 @@ impl App {
         };
         self.inspector_section(ui, DockPanel::Physics, &physics, true, |app, ui| {
             app.physics_panel(ui)
+        });
+        let findings = self.panels.review.count();
+        let review = if findings > 0 {
+            format!("Review ({findings})")
+        } else {
+            "Review".into()
+        };
+        self.inspector_section(ui, DockPanel::Review, &review, true, |app, ui| {
+            app.review_panel(ui)
         });
         self.inspector_section(
             ui,

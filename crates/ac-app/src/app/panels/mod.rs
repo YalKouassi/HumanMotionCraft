@@ -8,6 +8,7 @@ pub mod joint;
 pub mod layers;
 pub mod physics;
 pub mod range;
+pub mod review;
 pub mod scene;
 pub mod text;
 pub mod text_install;
@@ -19,6 +20,7 @@ pub struct Panels {
     pub ai: ai::AiState,
     pub physics: physics::PhysicsState,
     pub range: range::RangeState,
+    pub review: review::ReviewState,
     pub scene: scene::SceneState,
     pub layers: layers::LayersState,
     pub text: text::TextState,
