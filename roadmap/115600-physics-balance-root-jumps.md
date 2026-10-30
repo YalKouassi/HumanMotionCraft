@@ -1,6 +1,6 @@
 # Physics: balance makes the body jump
 
-- **Status:** not started; the acceptance line needs the owner's agreement
+- **Status:** built, waiting for the owner (2026-10-30)
 - **Requires:** 115300
 - **Source:** 115100 (measured)
 
@@ -23,3 +23,23 @@ On every built-in, no physics root jump over 1 m/s above the keyed speed, except
 the item's result; `fixtures/physics-balance.json` still balances a standing pose; a new
 `fixtures/bug-physics-balance-jump.json` checks the Walk; the owner approves any visual golden that
 changes.
+
+## Result
+2026-10-30. `physics::standing`: the centre of mass and every foot point nearly still, for at least 5
+frames. `clip.metrics` uses the same test. A balance move fades out over 6 frames either side, with
+the feet held. The 11 unexplained jumps in `Locomotion/Run` were moves inside its balance runs: the
+support changing under a body that wasn't standing. They went with this fix.
+
+| Worst root jump above the keyed speed | Before | After |
+|---|---|---|
+| `Locomotion/Walk` | 3.42 m/s | 0.27 |
+| `Locomotion/Run` | 16.9 | 0.28 |
+| `Dance/Dance 8` | 5.11 | 0.38 |
+| `Locomotion/Side step 10` | 3.24 | 0.21 |
+| `Sitting/Sit down and stand up 5` | 6.84 | 1.34 |
+| `Locomotion/Side step 9` | 2.78 | 2.01 |
+
+The Walk's pops at keys went from 6 to 0. No visual golden changed, and `physics-balance` passes.
+
+Left over 1 m/s: `Side step 9` and `Sit down and stand up 5`. Neither is a balance edge any more;
+117400 takes them on.

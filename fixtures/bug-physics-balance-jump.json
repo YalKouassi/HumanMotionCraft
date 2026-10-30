@@ -1,0 +1,20 @@
+{
+  "$schema": "./schema.json",
+  "name": "bug-physics-balance-jump",
+  "feature": "physics.solve",
+  "description": "The built-in Walk walks on the spot, so its centre of mass moves slower than 0.2 m/s, and balance used to take it for standing: it rebalanced 15 frames with no blend, and the body jumped about 14 cm in a frame, which read as a 3.85 m/s pop at key 6. Its swinging foot moves faster than 0.5 m/s all the time, so it now doesn't stand: nothing is balanced, and there are no pops. The keyed loop has none either, its worst being 0.91 m/s.",
+  "script": [
+    { "command": "clip.open", "params": { "id": "Locomotion/Walk" } },
+    {
+      "command": "physics.solve",
+      "params": { "frame": 7 },
+      "expect": { "balanced": [], "flights": [] }
+    },
+    {
+      "command": "clip.metrics",
+      "params": { "motion": "shown" },
+      "expect": { "pops": 0 }
+    }
+  ],
+  "errors": []
+}

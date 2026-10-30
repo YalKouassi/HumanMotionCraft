@@ -9,9 +9,8 @@
 //!   frames, in centimetres. A planted foot should not move: anything over [`SLIDE_CM`] shows.
 //! - **Floor penetration.** On each frame, the lowest joint head or heel point below the ground
 //!   under it (by more than [`PENETRATION_SLACK`]): frames, depth (cm) and the joint.
-//! - **Balance.** On a frame where the body is on the ground and nearly still (its centre of mass
-//!   moves slower than [`physics::STILL_SPEED`]; a walk is balanced by its motion), the centre of
-//!   mass over the floor should lie inside the support (the hull of the foot points on the
+//! - **Balance.** On a frame where the body is on the ground and stands ([`physics::standing`]; a
+//!   walk is balanced by its motion, even on the spot), the centre of mass over the floor should lie inside the support (the hull of the foot points on the
 //!   ground). Frames outside, and how far (cm). Moving frames outside are counted apart.
 //! - **Joint limits.** Each bone's local rotation vector against `assets/rig/limits.json`: bones
 //!   past their range by more than [`LIMIT_SLACK_DEG`], on which frames and by how much (degrees).
@@ -192,17 +191,24 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
         keys: Vec::new(),
         notes: Vec::new(),
     };
+    // the physics pass's own test of a body standing
+    let feet: Vec<Vec<Vec3>> = frames
+        .iter()
+        .map(|fr| fr.feet.iter().map(|(_, p)| *p).collect())
+        .collect();
+    let coms: Vec<Vec3> = frames.iter().map(|fr| fr.com).collect();
+    let stands = physics::standing(&feet, &coms, fps);
     for f in a..=b {
         let (Some(fr), Some(pose)) = (at(f), poses.get((f - lo) as usize)) else {
             continue;
         };
         penetration(doc, fr, f, &mut m.penetration);
-        let before = if f > 0 { at(f - 1) } else { None };
-        let speed = before.map_or(0.0, |p| (fr.com[0] - p.com[0]).hypot(fr.com[1] - p.com[1]) * fps);
         if let Some(bal) = physics::balance(sk, &body, &pose.rotations, pose.root, &doc.clip.surfaces)?
             && !bal.inside
         {
-            if speed < physics::STILL_SPEED {
+            if stands.get((f - lo) as usize).copied().unwrap_or(false)
+                && !body.rests(&fr.pos, &doc.clip.surfaces)
+            {
                 let (d, fix) = outside(&bal.support, bal.com);
                 if m.balance.add(f, d * 100.0, "") {
                     m.balance.fix = Some(fix);

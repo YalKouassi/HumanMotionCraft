@@ -1,6 +1,6 @@
 # A regression suite for reproduced bugs
 
-- **Status:** not started; the acceptance line needs the owner's agreement
+- **Status:** built, waiting for the owner (2026-10-30)
 - **Requires:** none
 - **Source:** 115100
 
@@ -17,3 +17,8 @@ Two things, on the fixture and visual golden tests we already have, with no new 
 ## Acceptance
 `cargo nextest run -p ac-cli` runs the ratchet on all 55 clips, and it fails when `physics.rs` is
 deliberately broken; `docs/testing.md` has rows for both; `cargo xtask check` passes.
+
+## Result
+2026-10-30. `crates/ac-cli/tests/quality_ratchet.rs` against `tests/quality/builtins.json`, about 3
+seconds. It showed each change of 115600 and 115900, including one clip's slide getting worse. The
+first bug fixture is `fixtures/bug-physics-balance-jump.json`.
