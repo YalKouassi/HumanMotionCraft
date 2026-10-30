@@ -59,7 +59,19 @@ jobs:
       - uses: Swatinem/rust-cache@v2
 
       - name: build
+        env:
+          # The launcher refuses a portable exe without version info, so a missing resource
+          # compiler fails the release instead of shipping one (crates/ac-app/build.rs).
+          HUMANMOTIONCRAFT_REQUIRE_WINRES: "1"
         run: cargo build --release --locked -p ac-app -p ac-cli
+
+      - name: check the version info
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $v = (Get-Item target/release/humanmotioncraft.exe).VersionInfo.ProductVersion
+          if ($v -ne $env:VERSION) { throw "humanmotioncraft.exe's ProductVersion is '$v', not $env:VERSION" }
 
       - name: release folder
         shell: bash
