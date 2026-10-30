@@ -13,7 +13,7 @@ of it.** `AGENTS.md` holds the rules; `docs/testing.md` says what the tests are.
    must match its checked-in golden (`tests/fixtures/golden/`) within the golden's stated tolerance.
 4. **Implement** the command; the UI only calls it.
 5. **Gate**: crate tests while working; `cargo xtask check` before committing.
-6. **Render and look** at your own images first (`--screenshot`, MCP `render_preview` / `ui_screenshot`, contact sheets).
+6. **Render and look** at your own images first (`--screenshot`, MCP `render_preview` / `ui_screenshot`, contact sheets). For anything that moves, hand the owner MP4s (the `ac-review-video` skill).
 7. **Ask**, one feature at a time:
 
    > **Feature:** Two-bone IK drag (`pose.drag`)

@@ -16,3 +16,6 @@ __pycache__/
 /demo video
 # Community backend secrets
 /services/community/.env.local
+
+# Third-party apps cloned for reference
+/reference repos/

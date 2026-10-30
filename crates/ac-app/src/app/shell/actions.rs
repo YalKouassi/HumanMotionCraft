@@ -308,6 +308,9 @@ pub static ACTIONS: &[Action] = &[
     a("app.timeline", "Timeline panel", "View", &[]).check(),
     a("app.swap_sides", "Library on the right", "View", &[]).check(),
     a("app.maximise", "Maximise viewport", "View", &["Cmd+Space"]).check(),
+    a("app.simple_mode", "Simple mode", "View", &[])
+        .check()
+        .doc("beginner layout with essential controls; switch off for advanced panels"),
     a("app.reset_layout", "Reset layout", "View", &[]),
     a("app.zoom_in", "Zoom in", "View", &["Cmd+Plus", "Cmd+="])
         .repeat()
@@ -503,6 +506,7 @@ impl App {
             "app.timeline" => p.layout.show_timeline,
             "app.swap_sides" => p.layout.library_side == Side::Right,
             "app.maximise" => self.shell.maximised,
+            "app.simple_mode" => p.layout.ui_mode == crate::app::prefs::UiMode::Simple,
             "app.light" => p.general.theme == Theme::Light,
             "app.colours" => p.general.colours == Colours::Safe,
             "app.perf" => p.view.perf,
@@ -577,6 +581,14 @@ impl App {
                 });
             }
             "app.maximise" => self.shell.maximised = !self.shell.maximised,
+            "app.simple_mode" => {
+                let current = self.shell.prefs.get().layout.ui_mode;
+                let next = match current {
+                    crate::app::prefs::UiMode::Simple => crate::app::prefs::UiMode::Advanced,
+                    crate::app::prefs::UiMode::Advanced => crate::app::prefs::UiMode::Simple,
+                };
+                self.set_ui_mode(next, ctx);
+            }
             "app.reset_layout" => self.reset_layout(ctx),
             "app.zoom_in" | "app.zoom_out" => {
                 let up = id == "app.zoom_in";

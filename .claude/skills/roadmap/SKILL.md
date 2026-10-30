@@ -72,7 +72,8 @@ Decisions use `## Question` (open) or `## Decision` (made) in place of What.
 
 - **An item with no acceptance line can't be built.** Propose one in the file and wait for the
   owner to agree.
-- **Built, then confirmed.** When the work is built and its images are ready, set the status to
+- **Built, then confirmed.** When the work is built and its images (MP4s for anything that moves: the
+  `ac-review-video` skill) are ready, set the status to
   `built, waiting for the owner`. Rename to `DONE_` **only after the owner confirms**, and set the
   status to `done (YYYY-MM-DD)` with the result (numbers, screenshots) under `## Result`.
 - **Obsolete, not deleted.** An item that won't be built (overtaken, ended by a decision, split

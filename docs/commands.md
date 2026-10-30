@@ -174,6 +174,7 @@ Inputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
+| `preset` | text |  |  | a named preset: "preserve" \| "natural" \| "follow_style" |
 | `style` | text |  |  | a style the model knows ("any": none) |
 | `style_force` | number |  | 0 to 3 | style guidance: 0 none, 1 the style, more is stronger |
 | `ai_force` | number |  | 0 to 1.5 | how much of the network's change to keep (0: plain interpolation) |
@@ -404,6 +405,7 @@ Inputs:
 | `profile` | one of full \| game \| body |  |  | which joints to keep |
 | `bones` | list of text |  |  | exactly these joints instead of a profile |
 | `drop` | list of text |  |  | joints to leave out as well |
+| `root` | one of hips \| ground \| in_place |  |  | root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed) |
 
 Outputs:
 
@@ -428,6 +430,7 @@ Inputs:
 | `profile` | one of full \| game \| body |  |  | which joints to keep |
 | `bones` | list of text |  |  | exactly these joints instead of a profile |
 | `drop` | list of text |  |  | joints to leave out as well |
+| `root` | one of hips \| ground \| in_place |  |  | root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed) |
 
 Outputs:
 

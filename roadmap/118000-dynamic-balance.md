@@ -40,3 +40,10 @@ Proof in `target/shots/2026-10-30/weight/` (`before.png`, `after.png`).
   pops are measured at keys and the command adds keys.
 - **Not built:** the upper body's counterbalance. Hips moving carry it along; nothing turns the spine.
 - **Not in the physics pass:** it is a command, so nothing changes unless it's run.
+- **Video (2026-10-30):** `target/shots/2026-10-30/videos/118000-weight-quarter-speed.mp4`, the fixture from
+  the front at quarter speed; the widest point is at 4 s. The cameras differ slightly, because `--fixed`
+  frames each body.
+- **Finding from the video (2026-10-30):** only the planted foot is held. By `pose.query` at frame 30, the
+  planted `foot.L` doesn't move, but the lifted `foot.R` goes from (-0.177, -0.004, 0.223) to
+  (-0.301, -0.067, 0.167): about 15 cm, carried with the hips. The fixture's "feet stay where they are"
+  is only true of feet on the floor.

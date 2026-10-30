@@ -1,8 +1,8 @@
 # Export: a root bone on the floor
 
-- **Status:** not started; acceptance line proposed, waiting for the owner to agree
+- **Status:** built, waiting for the owner (2026-10-30)
 - **Requires:** 106000
-- **Source:** 144000 (one rig, retarget on export)
+- **Source:** 144000 (one rig, retarget on export); owner request 2026-10-30
 
 ## What
 Our top bone, `root`, is the pelvis: it sits at the hips (`assets/rig/default_rig.json`, every
@@ -20,8 +20,16 @@ Add an export option `root`:
 - `in_place`: as `ground`, with the path and turn removed (for engines that drive movement
   themselves).
 
-## Acceptance (proposed)
+## Acceptance
 A fixture exports a walk with each option; with `ground` the new bone stays at height 0 and its
 path matches the hips' horizontal path within 1 mm, and world poses equal the `hips` export's;
-with `in_place` the hips' horizontal path is 0. The engine check (122000) loads the `ground`
-export with root motion on.
+with `in_place` the hips' horizontal path is 0.
+
+## Result
+2026-10-30. Added `root` option (`hips` | `ground` | `in_place`) to `clip.export` and `clip.export_batch`.
+`ground` mode generates a top bone `ground` at Y=0 carrying horizontal path and heading yaw, with all joint
+world poses identical to the `hips` export. `in_place` mode locks ground at origin and removes horizontal
+displacement and yaw from the hips.
+The Export dialog now includes game engine presets (Unreal Engine, Unity, Godot, Blender, Custom) and
+an interactive visual diagram illustrating root bone placement relative to the floor.
+Verified with fixture `fixtures/export-root-bone.json` and unit tests in `crates/ac-io/tests/export.rs`.

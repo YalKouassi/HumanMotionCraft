@@ -15,10 +15,10 @@ serve(async (req) => {
   const db = admin();
 
   if (body.action === "pending") {
-    const { data, error } = await db.from("clips").select("id, file_key")
+    const { data, error } = await db.from("clips").select("id, file_key, sha256")
       .eq("status", "checking").order("created_at").limit(50);
     if (error) throw error;
-    return reply(200, { clips: data.map((c) => ({ id: c.id, url: Bucket.url(c.file_key) })) });
+    return reply(200, { clips: data.map((c) => ({ id: c.id, url: Bucket.url(c.file_key), sha256: c.sha256 })) });
   }
 
   if (body.action === "result") {

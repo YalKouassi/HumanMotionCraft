@@ -1,6 +1,6 @@
 # Landing compression
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 117400
 - **Source:** 115100
 

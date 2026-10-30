@@ -435,6 +435,38 @@ impl App {
         ctx: &egui::Context,
     ) {
         let mut st = self.session.document.ai_settings.clone();
+        let mut preset_chosen = None;
+        ui.horizontal(|ui| {
+            ui.label(egui::RichText::new("Preset:").weak());
+            if ui
+                .button("Preserve motion")
+                .tag("panel.ai.preset.preserve", "Preserve motion")
+                .clicked()
+            {
+                preset_chosen = Some("preserve");
+            }
+            if ui
+                .button("Natural")
+                .tag("panel.ai.preset.natural", "Natural")
+                .clicked()
+            {
+                preset_chosen = Some("natural");
+            }
+            if ui
+                .button("Follow style")
+                .tag("panel.ai.preset.follow_style", "Follow style")
+                .clicked()
+            {
+                preset_chosen = Some("follow_style");
+            }
+        });
+        if let Some(p) = preset_chosen {
+            self.run("ai.settings", json!({ "preset": p }));
+            if self.session.document.live_preview().is_some() {
+                self.ai_dirty = true;
+            }
+            return;
+        }
         let mut changed = false;
         if !info.styles.is_empty() {
             // the model's styles ("any" first): a hundred or more with 100STYLE, so the list scrolls

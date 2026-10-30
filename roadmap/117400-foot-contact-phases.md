@@ -36,3 +36,7 @@ works a landing, a release and a one-frame skim by hand.
   inside its limit of 2 m/s. Its slide limit is now a rise of at most 0.5 cm unless it stays under
   2 cm; on `Walk`, a foot it holds now counts as planted, reading 1.71 cm where it read 0 before.
 - Contact sheets not drawn: no pose of a walk or side step changed visibly enough to tell apart.
+- **Videos (2026-10-30):** `target/shots/2026-10-30/videos/117400-walk-12.mp4` and `117400-side-step-9.mp4`,
+  keys beside physics on, with today's code. They aren't before and after: the old code wasn't built. They
+  can show that physics on doesn't slide or jump on these clips, not that the phases made it better. That
+  rests on the fixture and the ratchet.

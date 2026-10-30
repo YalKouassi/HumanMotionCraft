@@ -1,0 +1,42 @@
+name: community-check
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: community-check
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+
+jobs:
+  check:
+    name: check community uploads
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      - name: build ac
+        run: cargo build --release -p ac-cli
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: check pending clips
+        env:
+          CHECKER_SECRET: ${{ secrets.CHECKER_SECRET }}
+        run: python tools/community_check.py

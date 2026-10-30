@@ -48,6 +48,7 @@ worked out by hand, and `errors` (bad input that must be refused without changin
 ## 6. Look, then ask
 - For anything visible, run the app with `--screenshot` (or MCP `render_preview` / `ui_screenshot`) and read the PNG
   yourself first. Proof shots go to `target/shots/<date>/<topic>/` in this checkout (gitignored).
+- For anything that moves, the owner gets MP4s, not stills: the `ac-review-video` skill.
 - Ask for confirmation in the format from `docs/llm-guidelines.md`. Mark the row `[~]` until the
   owner says yes.
 

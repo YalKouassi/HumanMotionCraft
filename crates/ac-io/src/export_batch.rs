@@ -35,6 +35,11 @@ pub static SPECS: &[CommandSpec] =
                 ),
                 ParamSpec::new("bones", K::TextList, "exactly these joints instead of a profile"),
                 ParamSpec::new("drop", K::TextList, "joints to leave out as well"),
+                ParamSpec::new(
+                    "root",
+                    K::Choice(&["hips", "ground", "in_place"]),
+                    "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)",
+                ),
             ])
             .writes()
             .outputs(crate::returns::CLIP_EXPORT_BATCH),
@@ -98,7 +103,7 @@ fn export_batch(doc: &mut Document, p: &P) -> Out {
         let mut q = P::new();
         q.insert("path".into(), json!(folder.join(name).to_string_lossy()));
         q.insert("ids".into(), json!([id]));
-        for k in ["profile", "bones", "drop"] {
+        for k in ["profile", "bones", "drop", "root"] {
             if let Some(v) = p.get(k) {
                 q.insert(k.into(), v.clone());
             }

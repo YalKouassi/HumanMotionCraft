@@ -15,6 +15,7 @@ use craft_menu::{
 };
 
 use super::super::App;
+use super::super::ui_ids::Tag;
 use super::actions::{self, ACTIONS, Show};
 
 /// The menus, in order.
@@ -222,6 +223,33 @@ impl App {
                 .clone()
                 .unwrap_or_else(|| self.session.document.clip.name.clone());
             ui.label(egui::RichText::new(name).strong());
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                let mode = self.shell.prefs.get().layout.ui_mode;
+                let is_simple = mode == super::super::prefs::UiMode::Simple;
+                let btn_text = if is_simple {
+                    "Mode: Simple"
+                } else {
+                    "Mode: Advanced"
+                };
+                let tooltip = if is_simple {
+                    "Simple mode (beginners): essential panels only. Click to switch to Advanced mode."
+                } else {
+                    "Advanced mode: all tool panels available. Click to switch to Simple mode."
+                };
+                if ui
+                    .button(egui::RichText::new(btn_text).small())
+                    .tag("window.menu.ui_mode", btn_text)
+                    .on_hover_text(tooltip)
+                    .clicked()
+                {
+                    let next = if is_simple {
+                        super::super::prefs::UiMode::Advanced
+                    } else {
+                        super::super::prefs::UiMode::Simple
+                    };
+                    self.set_ui_mode(next, ui.ctx());
+                }
+            });
         });
         let ctx = ui.ctx().clone();
         for c in chosen {

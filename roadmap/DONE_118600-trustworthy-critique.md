@@ -1,6 +1,6 @@
 # A review that can be trusted
 
-- **Status:** built, waiting for the owner (2026-10-30); the clean list below needs agreeing
+- **Status:** done (2026-10-30)
 - **Requires:** 116200
 - **Source:** 115100 (measured)
 
@@ -38,7 +38,7 @@ has judged the remaining findings by eye.
 - **Fixes:** each runs on a copy first (20 at most), and is dropped, with a note in the message, if it
   doesn't lessen its own finding or worsens another kind. 14 are offered across the built-ins; the
   test runs each for real.
-- **Clean list, proposed:** `Locomotion/Walk` and the recorded `Locomotion/Walk 12` to `17`.
+- **Clean list, agreed by the owner:** `Locomotion/Walk` and the recorded `Locomotion/Walk 12` to `17`.
 - **`Locomotion/Walk`:** its medium was a false alarm. A foot on the floor slid back at about 0.9 m/s
   under a body going nowhere, so no foot counted as planted and the gap was measured against the
   wrong foot. A body that does this for three quarters of a second now has no gap (`weight.rs`;

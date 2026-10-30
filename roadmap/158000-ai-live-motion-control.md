@@ -16,6 +16,10 @@ the upstream repo). A new generation starts when playback nears the transition p
 changes enough. The model has no controller input, so all of this is application code we write. The
 demo doesn't export motion, so recording and clipping are ours too.
 
+
+
+see D:/CreativeFusion/AnimationCraft/reference repos
+
 ### The trap: we can't use the demo's walk targets
 The model only moves towards target poses, and those decide what the walk looks like. The demo's
 come from `assets/smart_primitives/soma/locomotion_bs1_linear.smart_primitive.json` and

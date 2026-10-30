@@ -585,6 +585,12 @@
               "params": {
                 "type": "object",
                 "properties": {
+                  "preset": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a named preset: \"preserve\" | \"natural\" | \"follow_style\""
+                  },
                   "style": {
                     "type": "string",
                     "minLength": 1,
@@ -1105,6 +1111,15 @@
                     },
                     "maxItems": 1048576,
                     "description": "joints to leave out as well"
+                  },
+                  "root": {
+                    "type": "string",
+                    "enum": [
+                      "hips",
+                      "ground",
+                      "in_place"
+                    ],
+                    "description": "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)"
                   }
                 },
                 "required": [
@@ -1178,6 +1193,15 @@
                     },
                     "maxItems": 1048576,
                     "description": "joints to leave out as well"
+                  },
+                  "root": {
+                    "type": "string",
+                    "enum": [
+                      "hips",
+                      "ground",
+                      "in_place"
+                    ],
+                    "description": "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)"
                   }
                 },
                 "required": [

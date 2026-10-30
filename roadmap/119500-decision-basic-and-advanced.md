@@ -1,18 +1,20 @@
 # Decision: a simpler interface for beginners
 
-- **Status:** owner's decision first
+- **Status:** built, waiting for the owner (2026-10-30)
 - **Requires:** none
-- **Source:** 115100
+- **Source:** 115100; owner decision 2026-10-30
 
-## Question
-The review proposes Basic mode (timeline, viewport, posing, playback, keys, simple interpolation) and
-Advanced mode (layers, AI controls, physics, range, rig controls). Nothing like it exists now; panels
-dock and can be hidden (`crates/ac-app/src/app/shell/layout.rs`).
-
-Recommendation: a default dock layout for beginners plus a "show all panels" preset, not a mode. A
-mode splits the menus and the help, and hidden features look missing. Decide after 119200, because
-the guided path may remove most of the need.
+## Decision
+Simple and Advanced UI modes. Simple mode provides a beginner-focused layout with essential
+controls and clean viewport workspace, hiding advanced tool panels (Layers, Physics, Review,
+Scene boxes, AI, Text motion, Pins, Range). Advanced mode makes all tool panels available.
+All commands remain accessible in menus and the command palette so nothing is unreachable.
 
 ## Acceptance
-To be agreed with the owner. Whichever is chosen, `every_command_is_in_a_menu_and_the_palette` keeps
-passing, so nothing becomes unreachable.
+Whichever is chosen, `every_command_is_in_a_menu_and_the_palette` keeps passing, so nothing
+becomes unreachable.
+
+## Result
+2026-10-30. Added `UiMode` (`Simple` | `Advanced`) persisted in `layout.ui_mode`. Action `app.simple_mode`
+in View menu and header bar toggle (`Mode: Simple` / `Mode: Advanced`) switches modes instantly.
+`every_command_is_in_a_menu_and_the_palette` passes.

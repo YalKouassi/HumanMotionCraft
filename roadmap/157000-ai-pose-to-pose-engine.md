@@ -38,6 +38,10 @@ training clips. It doesn't replace the text engine, and `ai.fill` keeps using ou
   the check skipped. Stop and ask the owner if the wording differs from the table or TensorRT's terms
   stop the install from fetching it.
 
+
+
+see D:/CreativeFusion/AnimationCraft/reference repos
+
 ### The engine
 - **Names:** other products' names stay out of code, as with `tools/textmotion`: `tools/posefill/`,
   crate `ac-posefill`, commands `posefill.install`, `posefill.helper`, `posefill.fill`. Only the

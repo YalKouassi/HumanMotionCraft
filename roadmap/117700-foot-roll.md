@@ -39,3 +39,6 @@ physics pass, so it never runs unasked. `fixtures/feet-roll.json` works a stiff 
 - `write_solved` overwrites an existing key's rotations, as `feet.lock` does: running the command on
   hand-made keys changes them (undoable).
 - The heel point (`HEEL_BACK`, 5 cm) is far enough to pivot on: a 13 degree roll on the stride.
+- **Video (2026-10-30):** `target/shots/2026-10-30/videos/117700-foot-roll-feet-close-quarter-speed.mp4`,
+  the stride's feet from the side at quarter speed. The toes rising at the start show clearly. The middle
+  matches, as it should. The heel rise at the end is hard to see at this size. It is the stride only: it says nothing about a real walk or AI output.

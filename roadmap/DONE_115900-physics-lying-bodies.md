@@ -1,6 +1,6 @@
 # Physics: lying bodies sit up
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 115300
 - **Source:** 102000's known issue; 115100 (measured)
 

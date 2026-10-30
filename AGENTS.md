@@ -162,7 +162,8 @@ Never run two cargo commands at once. Builds go to the checkout's own `target/`.
 For UI work, look at the result: run the app with `--screenshot PATH` (or the MCP `render_preview`
 / `ui_screenshot` tools) and read the PNG. Review and proof images go under
 `target/shots/<date>/<topic>/` in this checkout: gitignored, so they stay on your machine (and
-`cargo clean` removes them). Never write them outside the repo.
+`cargo clean` removes them). Never write them outside the repo. For anything that moves, the owner
+reviews MP4s in the same folder, not stills: see the `ac-review-video` skill.
 
 ## Roadmap
 Every piece of work is a file in `roadmap/`, named `roadmap/<number>-<slug>.md` (six digits, spaced by 1000,

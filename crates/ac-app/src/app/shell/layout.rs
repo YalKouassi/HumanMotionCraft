@@ -589,4 +589,31 @@ impl App {
         ctx.request_repaint();
         self.status = "layout reset".into();
     }
+
+    /// Switch between Simple mode (beginner essentials) and Advanced mode (full tool panels).
+    pub(in crate::app) fn set_ui_mode(&mut self, mode: super::super::prefs::UiMode, ctx: &egui::Context) {
+        self.shell.prefs.update(|p| p.layout.ui_mode = mode);
+        match mode {
+            super::super::prefs::UiMode::Simple => {
+                for &p in &[
+                    DockPanel::Layers,
+                    DockPanel::Physics,
+                    DockPanel::Review,
+                    DockPanel::Scene,
+                    DockPanel::Ai,
+                    DockPanel::Text,
+                    DockPanel::Pins,
+                    DockPanel::Range,
+                ] {
+                    let _ = self.shell.dock.set_visible(p, false, None, dock_permissions);
+                }
+                self.status = "switched to simple mode".into();
+            }
+            super::super::prefs::UiMode::Advanced => {
+                self.status = "switched to advanced mode".into();
+            }
+        }
+        self.sync_dock_flags();
+        ctx.request_repaint();
+    }
 }

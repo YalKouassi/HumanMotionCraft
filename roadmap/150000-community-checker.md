@@ -1,6 +1,6 @@
 # Community checker: publish or refuse shared clips
 
-- **Status:** not started (acceptance agreed by the owner, 2026-10-30)
+- **Status:** built, waiting for the owner (2026-10-30)
 - **Requires:** none
 - **Source:** owner request, 2026-10-30 (no manual approval; `CHECKER_SECRET` is set on GitHub;
   no instant wake-up, so the schedule alone)
@@ -20,3 +20,9 @@ Shared clips stay `checking` until something runs the app's own checks on them. 
 - A clip with an impossible pose, and a file that isn't a clip, go `failed` with the reason, and
   their files are deleted.
 - A run with nothing pending exits in under a minute after the build cache.
+
+## Result
+2026-10-30. Workflow `.github/workflows/community-check.yml` and engine runner `tools/community_check.py`
+added. Checks pending clips via the `/functions/v1/checker` endpoint with `CHECKER_SECRET`, validates
+downloaded file integrity against sha256, verifies loading through `ac run clip.open`, and evaluates
+joint limits through `ac run clip.possible` before marking `published` or `failed`.

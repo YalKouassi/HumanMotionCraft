@@ -25,6 +25,7 @@ const ALLOWED: &[&str] = &[
     "NOTICE",
     "README.md",
     "ROADMAP.md",
+    "reference repos",
     "assets",
     "book.toml",
     "crates",

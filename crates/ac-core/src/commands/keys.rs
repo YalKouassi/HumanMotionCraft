@@ -225,6 +225,11 @@ pub static SPECS: &[CommandSpec] = &[
         .outputs(returns::AI_FILL),
     CommandSpec::new("ai.settings", "AI fill settings", ai_settings)
         .inputs(&[
+            ParamSpec::new(
+                "preset",
+                Kind::Text,
+                "a named preset: \"preserve\" | \"natural\" | \"follow_style\"",
+            ),
             ParamSpec::new("style", Kind::Text, "a style the model knows (\"any\": none)"),
             ParamSpec::new(
                 "style_force",
@@ -625,6 +630,33 @@ fn ai_discard(doc: &mut Document, _: &P) -> Out {
 /// Set any of the fill settings; returns them all.
 fn ai_settings(doc: &mut Document, p: &P) -> Out {
     let mut s = doc.ai_settings.clone();
+    if let Some(preset) = cmd::text(p, "preset") {
+        match preset.to_ascii_lowercase().replace([' ', '_', '-'], "").as_str() {
+            "preserve" | "preservemotion" | "preservemymotion" => {
+                s.ai_force = 0.5;
+                s.style_force = 0.0;
+                s.trajectory = 0.8;
+                s.head = 0.8;
+            }
+            "natural" | "naturalmotion" | "naturalmovement" => {
+                s.ai_force = 1.0;
+                s.style_force = 1.0;
+                s.trajectory = 0.0;
+                s.head = 0.0;
+            }
+            "followstyle" | "style" => {
+                s.ai_force = 1.0;
+                s.style_force = 1.5;
+                s.trajectory = 0.2;
+                s.head = 0.0;
+            }
+            _ => {
+                return Err(format!(
+                    "unknown preset {preset:?}; one of \"preserve\", \"natural\", \"follow_style\""
+                ));
+            }
+        }
+    }
     if let Some(st) = cmd::text(p, "style") {
         let known = doc
             .ai

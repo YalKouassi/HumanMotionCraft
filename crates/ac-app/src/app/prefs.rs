@@ -321,6 +321,14 @@ pub enum Side {
     Right,
 }
 
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Debug, Default)]
+#[serde(rename_all = "lowercase")]
+pub enum UiMode {
+    Simple,
+    #[default]
+    Advanced,
+}
+
 /// Panel sizes and placement (points).
 #[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(default)]
@@ -337,6 +345,8 @@ pub struct Layout {
     /// Serialized `craft_ui::docking::Workspace<DockPanel>` arrangement (empty: default).
     #[serde(default)]
     pub dock_json: String,
+    #[serde(default)]
+    pub ui_mode: UiMode,
 }
 
 impl Default for Layout {
@@ -350,6 +360,7 @@ impl Default for Layout {
             show_inspector: true,
             show_timeline: true,
             dock_json: String::new(),
+            ui_mode: UiMode::default(),
         }
     }
 }

@@ -19,6 +19,28 @@ const PROFILES: &[(&str, &str, &str)] = &[
     ("bones", "Bone list", "exactly the joints you list"),
 ];
 
+const ENGINE_PRESETS: &[(&str, &str, &str, &str)] = &[
+    ("custom", "Custom", "full", "hips"),
+    ("unreal", "Unreal Engine", "game", "ground"),
+    ("unity", "Unity", "game", "ground"),
+    ("godot", "Godot", "game", "hips"),
+    ("blender", "Blender", "full", "hips"),
+];
+
+const ROOT_OPTIONS: &[(&str, &str, &str)] = &[
+    ("hips", "Hips", "Rig pelvis is top bone; no extra ground bone"),
+    (
+        "ground",
+        "Ground (Root motion)",
+        "New top bone on floor under hips; carries horizontal path and facing yaw",
+    ),
+    (
+        "in_place",
+        "In Place",
+        "New top bone on floor; horizontal movement and yaw removed from hips",
+    ),
+];
+
 pub struct Export {
     /// The open animation as it is now (unsaved changes included).
     open: bool,
@@ -27,6 +49,7 @@ pub struct Export {
     filter: String,
     profile: String,
     bones: String,
+    root: String,
     /// One .glb holding every animation (else a file each).
     one_file: bool,
     folder: String,
@@ -50,6 +73,7 @@ impl App {
             filter: String::new(),
             profile: st.export_profile.clone().unwrap_or_else(|| "full".into()),
             bones: st.export_bones.clone(),
+            root: "hips".into(),
             one_file: true,
             folder: st
                 .export_dir
@@ -146,6 +170,21 @@ impl App {
                     }
                 });
                 ui.separator();
+                ui.label(egui::RichText::new("Target Engine Preset").strong());
+                ui.horizontal(|ui| {
+                    for (id, label, prof, rt) in ENGINE_PRESETS {
+                        let selected = ex.profile == *prof && ex.root == *rt;
+                        if ui
+                            .selectable_label(selected, *label)
+                            .tag(format!("dialog.export.preset.{id}"), *label)
+                            .clicked()
+                        {
+                            ex.profile = (*prof).to_string();
+                            ex.root = (*rt).to_string();
+                        }
+                    }
+                });
+                ui.separator();
                 ui.label(egui::RichText::new("Joints").strong());
                 ui.horizontal(|ui| {
                     for (key, label, tip) in PROFILES {
@@ -162,6 +201,16 @@ impl App {
                     )
                     .tag("dialog.export.bones", "Bone list");
                 }
+                ui.separator();
+                ui.label(egui::RichText::new("Root Motion Bone").strong());
+                ui.horizontal(|ui| {
+                    for (key, label, tip) in ROOT_OPTIONS {
+                        ui.selectable_value(&mut ex.root, (*key).to_string(), *label)
+                            .on_hover_text(*tip)
+                            .tag(format!("dialog.export.root.{key}"), *label);
+                    }
+                });
+                draw_root_visual(ui, &ex.root);
                 ui.separator();
                 let count = ex.picked.len() + usize::from(ex.open);
                 if count > 1 {
@@ -243,6 +292,7 @@ impl App {
         } else {
             joints["profile"] = json!(ex.profile);
         }
+        joints["root"] = json!(ex.root);
         let doc = &self.session.document;
         let ids: Vec<String> = ex.picked.iter().cloned().collect();
         // the open animation goes in by id when the library has it as it is
@@ -332,6 +382,120 @@ fn merge(into: &mut Value, from: &Value) {
     if let (Some(a), Some(b)) = (into.as_object_mut(), from.as_object()) {
         for (k, v) in b {
             a.insert(k.clone(), v.clone());
+        }
+    }
+}
+
+fn draw_root_visual(ui: &mut egui::Ui, root_mode: &str) {
+    let desired_size = egui::vec2(ui.available_width(), 48.0);
+    let (rect, _) = ui.allocate_exact_size(desired_size, egui::Sense::hover());
+    let painter = ui.painter_at(rect);
+
+    painter.rect_filled(rect, 4.0, egui::Color32::from_black_alpha(35));
+
+    let floor_y = rect.max.y - 12.0;
+    let center_x = rect.min.x + 36.0;
+    let pelvis_y = rect.min.y + 12.0;
+
+    // Floor line
+    painter.line_segment(
+        [
+            egui::pos2(rect.min.x + 12.0, floor_y),
+            egui::pos2(rect.max.x - 12.0, floor_y),
+        ],
+        egui::Stroke::new(1.0, egui::Color32::from_gray(100)),
+    );
+    painter.text(
+        egui::pos2(rect.max.x - 16.0, floor_y - 2.0),
+        egui::Align2::RIGHT_BOTTOM,
+        "floor (Y=0)",
+        egui::FontId::proportional(10.0),
+        egui::Color32::from_gray(130),
+    );
+
+    match root_mode {
+        "ground" => {
+            // Ground bone on floor
+            painter.circle_filled(
+                egui::pos2(center_x, floor_y),
+                4.5,
+                egui::Color32::from_rgb(80, 200, 120),
+            );
+            // Connector up to pelvis
+            painter.line_segment(
+                [egui::pos2(center_x, floor_y), egui::pos2(center_x, pelvis_y)],
+                egui::Stroke::new(1.0, egui::Color32::from_rgb(80, 200, 120)),
+            );
+            // Pelvis
+            painter.circle_filled(
+                egui::pos2(center_x, pelvis_y),
+                3.5,
+                egui::Color32::from_rgb(180, 180, 180),
+            );
+            painter.text(
+                egui::pos2(center_x + 16.0, pelvis_y),
+                egui::Align2::LEFT_CENTER,
+                "root (pelvis relative to ground)",
+                egui::FontId::proportional(11.0),
+                egui::Color32::from_gray(200),
+            );
+            painter.text(
+                egui::pos2(center_x + 16.0, floor_y),
+                egui::Align2::LEFT_CENTER,
+                "ground (floor root bone carries horizontal path & yaw)",
+                egui::FontId::proportional(11.0),
+                egui::Color32::from_rgb(100, 220, 140),
+            );
+        }
+        "in_place" => {
+            // Ground bone fixed at origin
+            painter.circle_filled(
+                egui::pos2(center_x, floor_y),
+                4.5,
+                egui::Color32::from_rgb(90, 170, 250),
+            );
+            painter.line_segment(
+                [egui::pos2(center_x, floor_y), egui::pos2(center_x, pelvis_y)],
+                egui::Stroke::new(1.0, egui::Color32::from_rgb(90, 170, 250)),
+            );
+            painter.circle_filled(
+                egui::pos2(center_x, pelvis_y),
+                3.5,
+                egui::Color32::from_rgb(180, 180, 180),
+            );
+            painter.text(
+                egui::pos2(center_x + 16.0, pelvis_y),
+                egui::Align2::LEFT_CENTER,
+                "root (pelvis in-place; forward motion removed)",
+                egui::FontId::proportional(11.0),
+                egui::Color32::from_gray(200),
+            );
+            painter.text(
+                egui::pos2(center_x + 16.0, floor_y),
+                egui::Align2::LEFT_CENTER,
+                "ground (origin [0, 0, 0] for game movement)",
+                egui::FontId::proportional(11.0),
+                egui::Color32::from_rgb(110, 190, 255),
+            );
+        }
+        _ => {
+            // Hips mode (pelvis only)
+            painter.circle_filled(
+                egui::pos2(center_x, pelvis_y),
+                4.5,
+                egui::Color32::from_rgb(240, 180, 70),
+            );
+            painter.line_segment(
+                [egui::pos2(center_x, floor_y), egui::pos2(center_x, pelvis_y)],
+                egui::Stroke::new(1.0, egui::Color32::from_gray(70)),
+            );
+            painter.text(
+                egui::pos2(center_x + 16.0, pelvis_y),
+                egui::Align2::LEFT_CENTER,
+                "root (pelvis is top bone, no ground bone; standard mocap)",
+                egui::FontId::proportional(11.0),
+                egui::Color32::from_rgb(250, 190, 80),
+            );
         }
     }
 }

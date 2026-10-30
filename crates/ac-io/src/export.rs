@@ -310,7 +310,17 @@ pub fn export(
     items: &[Item],
     keep: &[usize],
     limits: Option<&ac_core::fullbody::Limits>,
+    root: &str,
 ) -> R<(Vec<u8>, Value)> {
+    let has_ground = match root {
+        "hips" => false,
+        "ground" | "in_place" => true,
+        _ => {
+            return Err(format!(
+                "unknown root mode {root:?}; one of hips, ground, in_place"
+            ));
+        }
+    };
     let (mut gltf, mut bin) = read_glb(mannequin)?;
     let nj = sk.len();
     let names: Vec<String> = gltf["nodes"]
@@ -375,12 +385,25 @@ pub fn export(
     let mesh_node = gltf["nodes"][nj].clone();
     let mut nodes = Vec::new();
     let mut rest_t = Vec::new();
+    if has_ground {
+        nodes.push(json!({
+            "name": "ground",
+            "translation": [0.0, 0.0, 0.0],
+            "rotation": [0.0, 0.0, 0.0, 1.0],
+            "children": [1],
+        }));
+        rest_t.push([0.0, 0.0, 0.0]);
+    }
+    let node_offset = usize::from(has_ground);
     for n in 0..keep.len() {
         let l = local_of(&bind, n)?;
         let q = quat::from_mat3(&rot3(&l));
         let mut node =
             json!({ "name": sk.names[keep[n]], "translation": [l[0][3], l[1][3], l[2][3]], "rotation": q });
-        let children: Vec<usize> = (0..keep.len()).filter(|&c| new_parent[c] == Some(n)).collect();
+        let children: Vec<usize> = (0..keep.len())
+            .filter(|&c| new_parent[c] == Some(n))
+            .map(|c| c + node_offset)
+            .collect();
         if !children.is_empty() {
             node["children"] = json!(children);
         }
@@ -394,15 +417,27 @@ pub fn export(
     gltf["nodes"][mesh_at]["skin"] = json!(0);
 
     // skin: the kept rows of the inverse bind matrices; dropped joints' weights to their owners
-    let kept_ibm: Vec<f64> = keep
-        .iter()
-        .flat_map(|&j| ibm[j * 16..j * 16 + 16].to_vec())
-        .collect();
+    let kept_ibm: Vec<f64> = if has_ground {
+        let mut all_ibm = Vec::with_capacity(16 + keep.len() * 16);
+        all_ibm.extend([
+            1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+        ]);
+        all_ibm.extend(keep.iter().flat_map(|&j| ibm[j * 16..j * 16 + 16].to_vec()));
+        all_ibm
+    } else {
+        keep.iter()
+            .flat_map(|&j| ibm[j * 16..j * 16 + 16].to_vec())
+            .collect()
+    };
+    let total_joints = if has_ground { keep.len() + 1 } else { keep.len() };
     let ibm_new = append(&mut gltf, &mut bin, &kept_ibm, "MAT4", false)?;
-    gltf["skins"][0]["joints"] = json!((0..keep.len()).collect::<Vec<_>>());
+    gltf["skins"][0]["joints"] = json!((0..total_joints).collect::<Vec<_>>());
     gltf["skins"][0]["skeleton"] = json!(0);
     gltf["skins"][0]["inverseBindMatrices"] = json!(ibm_new);
-    let remap: Vec<f64> = (0..nj).map(|j| new_of[&kept_ancestor(j)] as f64).collect();
+    let remap_offset = usize::from(has_ground);
+    let remap: Vec<f64> = (0..nj)
+        .map(|j| (new_of[&kept_ancestor(j)] + remap_offset) as f64)
+        .collect();
     let prims = gltf["meshes"][0]["primitives"]
         .as_array()
         .cloned()
@@ -469,9 +504,45 @@ pub fn export(
             let r = ac_core::physics::solve(sk, &rots, &roots, it.clip.fps, &it.clip.surfaces, limits)?;
             (rots, roots) = (r.rotations, r.roots);
         }
+        if root == "in_place" {
+            for (r, o) in rots.iter_mut().zip(&mut roots) {
+                // remove horizontal displacement
+                o[0] = 0.0;
+                o[1] = 0.0;
+                // remove yaw turn from root rotation
+                let rot_m = quat::to_mat3(r[0]);
+                let heading_rad = rot_m[1][0].atan2(rot_m[0][0]);
+                let (s, c) = (-heading_rad).sin_cos();
+                let inv_yaw: Mat3 = [[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]];
+                let r_unturned = quat::mat3_mul(&inv_yaw, &rot_m);
+                r[0] = quat::from_mat3(&r_unturned);
+            }
+        }
         let mut world: Vec<Vec<M4>> = Vec::with_capacity(n);
+        let mut ground_m: Vec<M4> = Vec::with_capacity(n);
         for (r, o) in rots.iter().zip(&roots) {
             let (wr, wp) = sk.fk(r, *o).map_err(|e| e.to_string())?;
+            if has_ground {
+                let (gx, gy, yaw_val) = if root == "ground" {
+                    let h = wr[0][1][0].atan2(wr[0][0][0]);
+                    (wp[0][0], wp[0][1], h)
+                } else {
+                    (0.0, 0.0, 0.0)
+                };
+                let (s, c) = yaw_val.sin_cos();
+                let r_ground_rig: Mat3 = [[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]];
+                let mut gm = I4;
+                let rg = quat::mat3_mul(&quat::mat3_mul(&rot3(&C4), &r_ground_rig), &rot3(&C4T));
+                for r_idx in 0..3 {
+                    for c_idx in 0..3 {
+                        gm[r_idx][c_idx] = rg[r_idx][c_idx];
+                    }
+                }
+                gm[0][3] = gx;
+                gm[1][3] = 0.0; // Y is height in glTF: always 0.0
+                gm[2][3] = -gy;
+                ground_m.push(gm);
+            }
             world.push(
                 (0..nj)
                     .map(|j| mul(&mul(&mul(&C4, &skin(&wr[j], wp[j], sk.heads[j])), &C4T), &bind[j]))
@@ -482,8 +553,42 @@ pub fn export(
         let times: Vec<f64> = (0..n).map(|f| f as f64 / fps).collect();
         let t_acc = append(&mut gltf, &mut bin, &times, "SCALAR", true)?;
         let (mut samplers, mut channels) = (Vec::new(), Vec::new());
+        if has_ground {
+            let mut qs: Vec<[f64; 4]> = ground_m.iter().map(|l| quat::from_mat3(&rot3(l))).collect();
+            for f in 1..qs.len() {
+                if (0..4).map(|i| qs[f][i] * qs[f - 1][i]).sum::<f64>() < 0.0 {
+                    qs[f] = qs[f].map(|x| -x);
+                }
+            }
+            let mut tracks = vec![("rotation", qs.concat(), "VEC4")];
+            let ts: Vec<[f64; 3]> = ground_m.iter().map(|l| [l[0][3], l[1][3], l[2][3]]).collect();
+            if ts
+                .iter()
+                .any(|t| (0..3).any(|i| (t[i] - rest_t[0][i]).abs() > 1e-6))
+            {
+                tracks.push(("translation", ts.concat(), "VEC3"));
+            }
+            for (path, values, kind) in tracks {
+                let out = append(&mut gltf, &mut bin, &values, kind, false)?;
+                samplers.push(json!({ "input": t_acc, "output": out, "interpolation": "LINEAR" }));
+                channels
+                    .push(json!({ "sampler": samplers.len() - 1, "target": { "node": 0, "path": path } }));
+            }
+        }
+
+        let inv_ground: Vec<M4> = if has_ground {
+            ground_m.iter().map(inverse).collect::<R<_>>()?
+        } else {
+            Vec::new()
+        };
+
         for k in 0..keep.len() {
-            let locals: Vec<M4> = world.iter().map(|w| local_of(w, k)).collect::<R<_>>()?;
+            let target_node = k + node_offset;
+            let locals: Vec<M4> = if has_ground && k == 0 {
+                (0..n).map(|f| mul(&inv_ground[f], &world[f][keep[0]])).collect()
+            } else {
+                world.iter().map(|w| local_of(w, k)).collect::<R<Vec<M4>>>()?
+            };
             let mut qs: Vec<[f64; 4]> = locals.iter().map(|l| quat::from_mat3(&rot3(l))).collect();
             for f in 1..qs.len() {
                 if (0..4).map(|i| qs[f][i] * qs[f - 1][i]).sum::<f64>() < 0.0 {
@@ -494,15 +599,16 @@ pub fn export(
             let ts: Vec<[f64; 3]> = locals.iter().map(|l| [l[0][3], l[1][3], l[2][3]]).collect();
             if ts
                 .iter()
-                .any(|t| (0..3).any(|i| (t[i] - rest_t[k][i]).abs() > 1e-6))
+                .any(|t| (0..3).any(|i| (t[i] - rest_t[target_node][i]).abs() > 1e-6))
             {
                 tracks.push(("translation", ts.concat(), "VEC3"));
             }
             for (path, values, kind) in tracks {
                 let out = append(&mut gltf, &mut bin, &values, kind, false)?;
                 samplers.push(json!({ "input": t_acc, "output": out, "interpolation": "LINEAR" }));
-                channels
-                    .push(json!({ "sampler": samplers.len() - 1, "target": { "node": k, "path": path } }));
+                channels.push(
+                    json!({ "sampler": samplers.len() - 1, "target": { "node": target_node, "path": path } }),
+                );
             }
         }
         animations.push(json!({ "name": it.name, "samplers": samplers, "channels": channels }));
@@ -511,14 +617,19 @@ pub fn export(
     if !animations.is_empty() {
         gltf["animations"] = Value::Array(animations);
     }
-    let kept_names: Vec<&String> = keep.iter().map(|&j| &sk.names[j]).collect();
+    let mut kept_names: Vec<String> = if has_ground {
+        vec!["ground".to_string()]
+    } else {
+        Vec::new()
+    };
+    kept_names.extend(keep.iter().map(|&j| sk.names[j].clone()));
     gltf["scenes"][0]["extras"] = json!({ ac_core::product::ID: {
         "joints": kept_names,
         "dropped": sk.names.iter().enumerate().filter(|(j, _)| !new_of.contains_key(j)).map(|x| x.1).collect::<Vec<_>>(),
         "clips": items.iter().map(|i| &i.name).collect::<Vec<_>>(),
     }});
     let bytes = write_glb(&mut gltf, bin)?;
-    let summary = json!({ "bytes": bytes.len(), "joints": keep.len(), "animations": items.len(), "frames": frames_out });
+    let summary = json!({ "bytes": bytes.len(), "joints": total_joints, "animations": items.len(), "frames": frames_out });
     Ok((bytes, summary))
 }
 
@@ -551,6 +662,11 @@ pub static SPECS: &[CommandSpec] = &[CommandSpec::new("clip.export", "Export .gl
         ),
         ParamSpec::new("bones", K::TextList, "exactly these joints instead of a profile"),
         ParamSpec::new("drop", K::TextList, "joints to leave out as well"),
+        ParamSpec::new(
+            "root",
+            K::Choice(&["hips", "ground", "in_place"]),
+            "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)",
+        ),
     ])
     .writes()
     .outputs(crate::returns::CLIP_EXPORT)];
@@ -597,7 +713,15 @@ pub(crate) fn clip_export(doc: &mut Document, p: &Map<String, Value>) -> R<Value
             links: &doc.links,
         });
     }
-    let (bytes, mut summary) = export(&sk, &mannequin(&assets)?, &items, &keep, doc.limits.as_deref())?;
+    let root = cmd::text(p, "root").unwrap_or("hips");
+    let (bytes, mut summary) = export(
+        &sk,
+        &mannequin(&assets)?,
+        &items,
+        &keep,
+        doc.limits.as_deref(),
+        root,
+    )?;
     if let Some(dir) = path.parent().filter(|d| !d.as_os_str().is_empty()) {
         std::fs::create_dir_all(dir).map_err(|e| format!("can't create {}: {e}", dir.display()))?;
     }

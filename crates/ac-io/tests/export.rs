@@ -39,7 +39,7 @@ fn check(profile: &str, physics: bool) {
         clip: &clip,
         links: &ac_core::clip::NoLinks,
     }];
-    let (bytes, summary) = export(&sk, &mannequin, &items, &keep, None).unwrap();
+    let (bytes, summary) = export(&sk, &mannequin, &items, &keep, None, "hips").unwrap();
     assert_eq!(summary["joints"], keep.len());
 
     let (doc, buffers, _) = gltf::import_slice(&bytes).unwrap();
@@ -131,4 +131,91 @@ fn physics_export_moves_as_the_pass() {
 #[test]
 fn game_profile_keeps_its_joints_moving_as_the_rig() {
     check("game", false);
+}
+
+#[test]
+fn ground_root_bone_stays_at_height_0_and_matches_hips_path() {
+    let sk =
+        Skeleton::from_json(&std::fs::read_to_string(repo().join("assets/rig/default_rig.json")).unwrap())
+            .unwrap();
+    let mut clip = load_clip(
+        &std::fs::read_to_string(repo().join("assets/library/animations/Locomotion/Walk.clip.json")).unwrap(),
+    )
+    .unwrap();
+    clip.physics = false;
+    let mannequin = std::fs::read(repo().join("assets/rig/mannequin.glb")).unwrap();
+    let keep = keep_list(&sk, "game", &[], &[]).unwrap();
+    let items = [Item {
+        name: "walk".into(),
+        clip: &clip,
+        links: &ac_core::clip::NoLinks,
+    }];
+    let (bytes, summary) = export(&sk, &mannequin, &items, &keep, None, "ground").unwrap();
+    assert_eq!(summary["joints"], keep.len() + 1);
+
+    let (doc, buffers, _) = gltf::import_slice(&bytes).unwrap();
+    let nodes: Vec<gltf::Node> = doc.nodes().collect();
+    assert_eq!(nodes[0].name(), Some("ground"));
+    let anim = doc.animations().next().unwrap();
+
+    let mut t_ground: Vec<DVec3> = vec![DVec3::ZERO; clip.length() as usize];
+    for ch in anim.channels() {
+        if ch.target().node().index() == 0 {
+            let rd = ch.reader(|b| buffers.get(b.index()).map(|d| &d.0[..]));
+            if let Some(gltf::animation::util::ReadOutputs::Translations(v)) = rd.read_outputs() {
+                t_ground = v.map(|c| DVec3::from(c.map(f64::from))).collect();
+            }
+        }
+    }
+
+    for (f, &tg) in t_ground.iter().enumerate() {
+        // Ground bone stays at height 0 (Y in glTF is up)
+        assert!(tg.y.abs() < 1e-5, "frame {f}: ground height is {}", tg.y);
+        let (rots, roots) = clip.sample(&[f as f64]).unwrap();
+        let (_wr, wp) = sk.fk(&rots[0], roots[0]).unwrap();
+        // Path matches hips horizontal path (X and -Y in rig space map to X and Z in glTF) within 1 mm (0.001 m)
+        let diff_x = (tg.x - wp[0][0]).abs();
+        let diff_z = (tg.z - (-wp[0][1])).abs();
+        assert!(diff_x < 0.001, "frame {f}: diff_x {diff_x}");
+        assert!(diff_z < 0.001, "frame {f}: diff_z {diff_z}");
+    }
+}
+
+#[test]
+fn in_place_export_has_zero_horizontal_path() {
+    let sk =
+        Skeleton::from_json(&std::fs::read_to_string(repo().join("assets/rig/default_rig.json")).unwrap())
+            .unwrap();
+    let clip = load_clip(
+        &std::fs::read_to_string(repo().join("assets/library/animations/Locomotion/Walk.clip.json")).unwrap(),
+    )
+    .unwrap();
+    let mannequin = std::fs::read(repo().join("assets/rig/mannequin.glb")).unwrap();
+    let keep = keep_list(&sk, "game", &[], &[]).unwrap();
+    let items = [Item {
+        name: "walk".into(),
+        clip: &clip,
+        links: &ac_core::clip::NoLinks,
+    }];
+    let (bytes, summary) = export(&sk, &mannequin, &items, &keep, None, "in_place").unwrap();
+    assert_eq!(summary["joints"], keep.len() + 1);
+
+    let (doc, buffers, _) = gltf::import_slice(&bytes).unwrap();
+    let anim = doc.animations().next().unwrap();
+    let mut t_hips: Vec<DVec3> = vec![DVec3::ZERO; clip.length() as usize];
+    for ch in anim.channels() {
+        // Node 1 is root (hips)
+        if ch.target().node().index() == 1 {
+            let rd = ch.reader(|b| buffers.get(b.index()).map(|d| &d.0[..]));
+            if let Some(gltf::animation::util::ReadOutputs::Translations(v)) = rd.read_outputs() {
+                t_hips = v.map(|c| DVec3::from(c.map(f64::from))).collect();
+            }
+        }
+    }
+    let rest_x = t_hips[0].x;
+    let rest_z = t_hips[0].z;
+    for (f, &th) in t_hips.iter().enumerate() {
+        assert!((th.x - rest_x).abs() < 1e-4, "frame {f}: hips horizontal X moved");
+        assert!((th.z - rest_z).abs() < 1e-4, "frame {f}: hips horizontal Z moved");
+    }
 }

@@ -1,0 +1,68 @@
+{
+  "$schema": "./schema.json",
+  "name": "export-root-bone",
+  "feature": "clip.export",
+  "description": "Exporting with root: ground or in_place adds a top root bone on the ground plane (total joints: game profile 68 + 1 ground bone = 69). With root: hips, standard 68 joints are exported without the extra bone.",
+  "script": [
+    {
+      "command": "clip.export",
+      "params": {
+        "path": "{tmp}/walk-hips.glb",
+        "ids": [
+          "Locomotion/Walk"
+        ],
+        "profile": "game",
+        "root": "hips"
+      },
+      "expect": {
+        "joints": 68,
+        "animations": 1
+      }
+    },
+    {
+      "command": "clip.export",
+      "params": {
+        "path": "{tmp}/walk-ground.glb",
+        "ids": [
+          "Locomotion/Walk"
+        ],
+        "profile": "game",
+        "root": "ground"
+      },
+      "expect": {
+        "joints": 69,
+        "animations": 1
+      }
+    },
+    {
+      "command": "clip.export",
+      "params": {
+        "path": "{tmp}/walk-inplace.glb",
+        "ids": [
+          "Locomotion/Walk"
+        ],
+        "profile": "game",
+        "root": "in_place"
+      },
+      "expect": {
+        "joints": 69,
+        "animations": 1
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "clip.export",
+      "params": {
+        "path": "{tmp}/walk-bad.glb",
+        "ids": [
+          "Locomotion/Walk"
+        ],
+        "root": "invalid_root_mode"
+      }
+    }
+  ]
+}
