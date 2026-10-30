@@ -151,6 +151,7 @@
             "edit.undo",
             "editor.state",
             "feet.lock",
+            "feet.phases",
             "feet.plant",
             "frame.set",
             "key.channel",
@@ -2731,6 +2732,40 @@
               "params": {
                 "type": "object",
                 "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "feet.phases"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Foot phases"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "motion": {
+                    "type": "string",
+                    "enum": [
+                      "shown",
+                      "keys"
+                    ],
+                    "description": "what plays (the physics pass when it is on; default) or the keys alone"
+                  }
+                },
                 "required": [],
                 "additionalProperties": false
               }
@@ -6237,6 +6272,7 @@
             "edit.undo",
             "editor.state",
             "feet.lock",
+            "feet.phases",
             "feet.plant",
             "frame.set",
             "key.channel",

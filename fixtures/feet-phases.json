@@ -1,0 +1,48 @@
+{
+  "$schema": "./schema.json",
+  "name": "feet-phases",
+  "feature": "feet.phases",
+  "description": "A foot's phases, keyed with no travel so every speed is 0. Linear keys, physics off: 30 cm up on frame 0 (root offset z 0.9450101 + 0.3 / 0.8698308 = 1.2899), standing on frames 6 and 20 (the lowest toe 2 cm up), 30 cm up on frame 26. The feet move 5 cm a frame on the way, so the lowest point is at 7 cm on frame 5 (past the 5 cm a foot comes down at) and 2 cm on frame 6: it lands on 6. Leaving, it is at 7 cm on 21 (still under the 8 cm a foot leaves at) and 12 cm on 22, so the last frame down is 21. Landing is 6 and 7, release is 20 and 21, planted is 8 to 19. Then the skim: a key 30 cm up on frame 0 and on frame 10, and standing only on frame 5, all linear. It is below 5 cm on frame 5 alone: under the 3 frames a contact lasts, so both feet swing throughout.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.2899] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 6 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 26 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.2899] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "feet.phases",
+      "params": { "motion": "keys" },
+      "expect": {
+        "L": ["swing", "swing", "swing", "swing", "swing", "swing", "landing", "landing", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "release", "release", "swing", "swing", "swing", "swing", "swing"],
+        "R": ["swing", "swing", "swing", "swing", "swing", "swing", "landing", "landing", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "planted", "release", "release", "swing", "swing", "swing", "swing", "swing"]
+      }
+    },
+    { "command": "clip.new", "params": { "name": "Skim" } },
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.2899] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 5 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.2899] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "feet.phases",
+      "params": { "motion": "keys" },
+      "expect": {
+        "L": ["swing", "swing", "swing", "swing", "swing", "swing", "swing", "swing", "swing", "swing", "swing"],
+        "R": ["swing", "swing", "swing", "swing", "swing", "swing", "swing", "swing", "swing", "swing", "swing"]
+      }
+    }
+  ],
+  "errors": [
+    { "command": "feet.phases", "params": { "motion": "both" } }
+  ]
+}

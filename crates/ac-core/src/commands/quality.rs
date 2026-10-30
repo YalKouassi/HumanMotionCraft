@@ -114,6 +114,14 @@ pub static SPECS: &[CommandSpec] = &[
         .icon("graph")
         .inputs(&[FROM, TO, MOTION])
         .outputs(METRICS_OUT),
+    CommandSpec::new("feet.phases", "Foot phases", feet_phases)
+        .icon("graph")
+        .inputs(&[MOTION])
+        .outputs(&[
+            ParamSpec::new("L", Kind::TextList, "the left foot on each frame: swing, landing, planted or release")
+                .required(),
+            ParamSpec::new("R", Kind::TextList, "the right foot, the same").required(),
+        ]),
     CommandSpec::new("clip.critique", "Review animation", clip_critique)
         .icon("review")
         .inputs(&[
@@ -300,6 +308,13 @@ fn measured(doc: &Document, p: &P) -> Result<metrics::Metrics, String> {
 
 fn clip_metrics(doc: &mut Document, p: &P) -> Out {
     Ok(measured(doc, p)?.json())
+}
+
+fn feet_phases(doc: &mut Document, p: &P) -> Out {
+    let shown = cmd::text(p, "motion") != Some("keys");
+    let [left, right] = metrics::foot_phases(doc, shown)?;
+    let names = |v: Vec<crate::contact::Phase>| v.into_iter().map(|x| x.name()).collect::<Vec<_>>();
+    Ok(serde_json::json!({ "L": names(left), "R": names(right) }))
 }
 
 fn clip_critique(doc: &mut Document, p: &P) -> Out {

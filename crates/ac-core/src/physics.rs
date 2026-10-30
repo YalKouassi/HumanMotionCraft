@@ -6,9 +6,10 @@
 //! 2. **Contact**: a foot point is planted when it is within [`NEAR`] of the ground and moves
 //!    (as keyed) slower than [`PLANT_SPEED`] across it; a swinging foot that skims the floor is not.
 //!    A frame is on the ground when any foot point is within [`NEAR`] (planted or not).
-//! 3. **Fulcrum**: a foot point on the ground does not slide. It is pinned where it touched down
-//!    until it lifts; the body moves across the floor so that the pinned points stay (by the mean
-//!    of their slips, when several pull different ways). The body travels only by stepping.
+//! 3. **Fulcrum**: a foot point on the ground, on a foot in contact ([`crate::contact`]), does not
+//!    slide. It is pinned where it touched down until it lifts; the body moves across the floor so
+//!    that the pinned points stay (by the mean of their slips, when several pull different ways, at
+//!    most [`MAX_FULCRUM_STEP`] more a frame). The body travels only by stepping.
 //! 4. **Balance**: on a frame on the ground where the body stands ([`standing`]: its keyed centre
 //!    of mass and both feet are nearly still; a walk or a run is balanced by its motion, not
 //!    statically, even one that walks on the spot), the centre of mass (over the floor) lies inside
@@ -50,6 +51,9 @@ pub const PLANT_SPEED: f64 = 0.5;
 pub const STILL_SPEED: f64 = 0.2;
 /// A body stands for at least this many frames running; a shorter pause is part of a step.
 pub const MIN_STAND: usize = 5;
+/// The most the fulcrum rule moves the body in a frame beyond what it already moved (m): a point
+/// joining or leaving the mean of the slips eases in rather than jumps.
+pub const MAX_FULCRUM_STEP: f64 = 0.02;
 /// Frames either side of a balanced frame over which its move fades out.
 pub const BALANCE_FADE: usize = 6;
 /// A trunk, hand, elbow or knee joint this close to the ground (m) means the body rests on more than
@@ -630,7 +634,19 @@ pub fn solve(
     let mut on = vec![false; n];
     let mut anchors: Vec<Option<[f64; 2]>> = vec![None; pts.first().map_or(0, Vec::len)];
     let mut off = [0.0f64; 2];
+    // what the body really moved: `off`, eased so a change of which points hold doesn't jump
+    let mut eased = [0.0f64; 2];
     let mut slid_frames = Vec::new();
+    let tagged: Vec<Vec<(usize, Vec3)>> = pts
+        .iter()
+        .map(|ps| {
+            ps.iter()
+                .enumerate()
+                .map(|(k, p)| (body.foot_of(k), *p))
+                .collect()
+        })
+        .collect();
+    let phases = crate::contact::phases(&tagged, fps, surfaces, 0.0);
     for f in 0..n {
         let mut sum = [0.0; 2];
         let mut count = 0.0;
@@ -638,7 +654,8 @@ pub fn solve(
             let (x, y) = (p[0] + off[0], p[1] + off[1]);
             let low = p[2] - ground(surfaces, x, y) < NEAR;
             on[f] |= low || rests[f];
-            if low && !rests[f] && point_speed[f][k] < PLANT_SPEED {
+            let down = phases[body.foot_of(k)][f].down();
+            if low && down && !rests[f] && point_speed[f][k] < PLANT_SPEED {
                 let a = *anchors[k].get_or_insert([x, y]);
                 sum[0] += a[0] - p[0];
                 sum[1] += a[1] - p[1];
@@ -654,8 +671,10 @@ pub fn solve(
             }
             off = next;
         }
-        out[f][0] += off[0] / h;
-        out[f][1] += off[1] / h;
+        eased[0] += (off[0] - eased[0]).clamp(-MAX_FULCRUM_STEP, MAX_FULCRUM_STEP);
+        eased[1] += (off[1] - eased[1]).clamp(-MAX_FULCRUM_STEP, MAX_FULCRUM_STEP);
+        out[f][0] += eased[0] / h;
+        out[f][1] += eased[1] / h;
     }
     // 4. balance, on the ground and standing; each move fades out either side
     let mut balanced = Vec::new();

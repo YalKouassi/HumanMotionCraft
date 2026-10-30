@@ -18,6 +18,7 @@ pub mod clip;
 pub mod clipfile;
 pub mod command;
 pub mod commands;
+pub mod contact;
 pub mod critique;
 pub mod diff;
 pub mod document;

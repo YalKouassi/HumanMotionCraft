@@ -18,8 +18,8 @@ pub const MAX_CHECKS: usize = 200;
 
 /// The last part of a query's id: these read the document and change nothing.
 pub const QUERY_VERBS: &[&str] = &[
-    "state", "get", "world", "info", "list", "sample", "curves", "contacts", "overlay", "solve", "metrics",
-    "critique", "range", "query", "history",
+    "state", "get", "world", "info", "list", "sample", "curves", "contacts", "phases", "overlay", "solve",
+    "metrics", "critique", "range", "query", "history",
 ];
 
 /// A command `expect` may run: not undoable, and named as a query.

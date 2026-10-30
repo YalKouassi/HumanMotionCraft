@@ -682,9 +682,35 @@ impl Document {
             return Ok(0);
         }
         let sk = self.skeleton.clone();
-        let c = self.contacts(0.04, 0.5)?;
         let frames: Vec<f64> = (0..self.clip.length()).map(|f| f as f64).collect();
         let (mut rots, roots) = self.clip.sample_with(&frames, &self.links)?;
+        // a clip may be keyed above the floor: its lowest foot point counts as the ground. Landing and
+        // release ease, as the frames either side do
+        let body = crate::physics::Body::new(&sk)?;
+        let mut feet = Vec::with_capacity(rots.len());
+        for (r, o) in rots.iter().zip(&roots) {
+            let (w, p) = sk.fk(r, *o).map_err(|e| e.to_string())?;
+            let pts = body.points(&w, &p);
+            feet.push(
+                pts.into_iter()
+                    .enumerate()
+                    .map(|(k, q)| (body.foot_of(k), q))
+                    .collect::<Vec<_>>(),
+            );
+        }
+        let lowest = feet
+            .iter()
+            .flatten()
+            .map(|(_, p)| p[2] - crate::physics::ground(&self.clip.surfaces, p[0], p[1]))
+            .fold(f64::INFINITY, f64::min);
+        let [left, right] =
+            crate::contact::phases(&feet, self.clip.fps, &self.clip.surfaces, lowest.max(0.0));
+        let flag = |v: Vec<crate::contact::Phase>| {
+            v.into_iter()
+                .map(|p| p == crate::contact::Phase::Planted)
+                .collect::<Vec<bool>>()
+        };
+        let c = [("L", flag(left)), ("R", flag(right))];
         let mut changed = BTreeSet::new();
         for (s, flags) in &c {
             let fi = sk.bone(&format!("foot.{s}")).ok_or("no foot")?;

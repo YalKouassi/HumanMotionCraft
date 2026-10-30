@@ -21,8 +21,8 @@ pub struct Watch {
 /// Commands that only read: an agent asks these all the time, so they are not published.
 fn is_query(id: &str) -> bool {
     const VERBS: &[&str] = &[
-        "state", "get", "world", "info", "list", "sample", "curves", "contacts", "overlay", "solve",
-        "metrics", "critique", "query", "history",
+        "state", "get", "world", "info", "list", "sample", "curves", "contacts", "phases", "overlay",
+        "solve", "metrics", "critique", "query", "history",
     ];
     id.rsplit('.').next().is_some_and(|v| VERBS.contains(&v))
 }

@@ -2,7 +2,7 @@
 //! an agent can act on. Every rule is simple enough to check by hand:
 //!
 //! - **Foot sliding.** A foot point (a toe joint's head or the heel, as in [`crate::physics`]) is
-//!   *planted* on a frame when it is within [`physics::NEAR`] of the ground and moved slower than
+//!   *planted* on a frame when its foot is `Planted` ([`crate::contact`]) and it is within [`physics::NEAR`] of the ground and moved slower than
 //!   [`physics::PLANT_SPEED`] across it since the frame before (the physics pass's own rule). A
 //!   contact span is a run of frames on which a foot has a planted point; its slide is the
 //!   longest distance any of its points travelled across the ground while planted on consecutive
@@ -232,12 +232,56 @@ pub fn measure(doc: &Document, from: Option<i64>, to: Option<i64>, shown: bool) 
     Ok(m)
 }
 
+/// Each foot's phase on every frame of what plays (`shown`) or of the keys.
+pub fn foot_phases(doc: &Document, shown: bool) -> R<[Vec<crate::contact::Phase>; 2]> {
+    let n = doc.clip.length_with(&doc.links).max(0);
+    if n > MAX_FRAMES {
+        return Err(format!("{n} frames is more than {MAX_FRAMES} at once"));
+    }
+    let fr: Vec<f64> = (0..n).map(|f| f as f64).collect();
+    let poses: Vec<Pose> = if shown {
+        doc.shown_poses(&fr)?
+    } else {
+        let (r, o) = doc.clip.sample_with(&fr, &doc.links)?;
+        r.into_iter()
+            .zip(o)
+            .map(|(rotations, root)| Pose { rotations, root })
+            .collect()
+    };
+    let sk = &doc.skeleton;
+    let body = Body::new(sk)?;
+    let mut feet = Vec::with_capacity(poses.len());
+    for p in &poses {
+        let (world, pos) = sk.fk(&p.rotations, p.root).map_err(|e| e.to_string())?;
+        let pts = body.points(&world, &pos);
+        feet.push(
+            pts.into_iter()
+                .enumerate()
+                .map(|(k, q)| (body.foot_of(k), q))
+                .collect(),
+        );
+    }
+    Ok(crate::contact::phases(
+        &feet,
+        doc.clip.fps,
+        &doc.clip.surfaces,
+        0.0,
+    ))
+}
+
 fn sliding(doc: &Document, frames: &[Frame], lo: i64, a: i64, b: i64, fps: f64) -> Vec<Slide> {
     let mut out = Vec::new();
+    let tagged: Vec<Vec<(usize, Vec3)>> = frames.iter().map(|fr| fr.feet.clone()).collect();
+    let phases = crate::contact::phases(&tagged, fps, &doc.clip.surfaces, 0.0);
     for (foot, name) in [(0usize, "L"), (1, "R")] {
         // per frame: which of this foot's points are planted
         let planted = |f: i64| -> Vec<(usize, Vec3)> {
-            let Some(fr) = frames.get((f - lo) as usize) else {
+            let (Some(fr), Some(true)) = (
+                frames.get((f - lo) as usize),
+                phases[foot]
+                    .get((f - lo) as usize)
+                    .map(|p| *p == crate::contact::Phase::Planted),
+            ) else {
                 return Vec::new();
             };
             let prev = if f > 0 {

@@ -1173,6 +1173,23 @@ Outputs:
 |---|---|---|---|---|
 | `frames` | integer | yes |  | frames changed |
 
+### `feet.phases`: Foot phases
+
+not undoable, icon `graph`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `motion` | one of shown \| keys |  |  | what plays (the physics pass when it is on; default) or the keys alone |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `L` | list of text | yes |  | the left foot on each frame: swing, landing, planted or release |
+| `R` | list of text | yes |  | the right foot, the same |
+
 ### `feet.plant`: Plant foot
 
 undoable, icon `foot`.

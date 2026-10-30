@@ -1,14 +1,14 @@
 {
   "Action/Jump": {
     "shown": {
-      "slide_cm": 2.72,
+      "slide_cm": 2.5,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 15,
       "worst_dv": 14.63
     },
     "keys": {
-      "slide_cm": 4.34,
+      "slide_cm": 3.48,
       "penetration_cm": 1.12,
       "balance_frames": 0,
       "pops": 15,
@@ -16,7 +16,7 @@
     },
     "root_jump_ms": 0.35,
     "after_lock": {
-      "slide_cm": 1.62,
+      "slide_cm": 0.95,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 27,
@@ -25,14 +25,14 @@
   },
   "Action/Jump 13": {
     "shown": {
-      "slide_cm": 3.44,
+      "slide_cm": 1.95,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 34,
       "worst_dv": 5.38
     },
     "keys": {
-      "slide_cm": 8.25,
+      "slide_cm": 6.05,
       "penetration_cm": 0.15,
       "balance_frames": 0,
       "pops": 33,
@@ -40,10 +40,10 @@
     },
     "root_jump_ms": 0.47,
     "after_lock": {
-      "slide_cm": 4.85,
+      "slide_cm": 3.14,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 61,
+      "pops": 59,
       "worst_dv": 5.4
     }
   },
@@ -56,7 +56,7 @@
       "worst_dv": 5.68
     },
     "keys": {
-      "slide_cm": 42.14,
+      "slide_cm": 41.46,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 43,
@@ -64,7 +64,7 @@
     },
     "root_jump_ms": 0.38,
     "after_lock": {
-      "slide_cm": 15.39,
+      "slide_cm": 14.76,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 83,
@@ -169,14 +169,14 @@
   },
   "Interaction/Open door 5": {
     "shown": {
-      "slide_cm": 6.98,
+      "slide_cm": 6.07,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 1,
       "worst_dv": 1.13
     },
     "keys": {
-      "slide_cm": 9.96,
+      "slide_cm": 7.59,
       "penetration_cm": 0.25,
       "balance_frames": 0,
       "pops": 1,
@@ -184,23 +184,23 @@
     },
     "root_jump_ms": 0.24,
     "after_lock": {
-      "slide_cm": 8.25,
+      "slide_cm": 7.42,
       "penetration_cm": 0.16,
       "balance_frames": 0,
-      "pops": 15,
-      "worst_dv": 2.1
+      "pops": 13,
+      "worst_dv": 1.79
     }
   },
   "Locomotion/Crouch walk 10": {
     "shown": {
-      "slide_cm": 5.18,
+      "slide_cm": 3.63,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 3,
       "worst_dv": 1.16
     },
     "keys": {
-      "slide_cm": 10.32,
+      "slide_cm": 9.89,
       "penetration_cm": 0.38,
       "balance_frames": 0,
       "pops": 3,
@@ -208,23 +208,23 @@
     },
     "root_jump_ms": 0.29,
     "after_lock": {
-      "slide_cm": 3.81,
+      "slide_cm": 3.74,
       "penetration_cm": 0.39,
       "balance_frames": 0,
       "pops": 15,
-      "worst_dv": 1.71
+      "worst_dv": 1.79
     }
   },
   "Locomotion/Crouch walk 5": {
     "shown": {
-      "slide_cm": 3.69,
+      "slide_cm": 3.08,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
       "worst_dv": 0.95
     },
     "keys": {
-      "slide_cm": 5.34,
+      "slide_cm": 5.32,
       "penetration_cm": 1.28,
       "balance_frames": 0,
       "pops": 0,
@@ -232,23 +232,23 @@
     },
     "root_jump_ms": 0.3,
     "after_lock": {
-      "slide_cm": 4.09,
+      "slide_cm": 2.48,
       "penetration_cm": 1.28,
       "balance_frames": 0,
-      "pops": 7,
-      "worst_dv": 1.16
+      "pops": 4,
+      "worst_dv": 1.13
     }
   },
   "Locomotion/Crouch walk 6": {
     "shown": {
-      "slide_cm": 5.1,
+      "slide_cm": 3.3,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 1,
       "worst_dv": 1.07
     },
     "keys": {
-      "slide_cm": 5.84,
+      "slide_cm": 3.36,
       "penetration_cm": 1.13,
       "balance_frames": 0,
       "pops": 0,
@@ -256,23 +256,23 @@
     },
     "root_jump_ms": 0.32,
     "after_lock": {
-      "slide_cm": 3.36,
+      "slide_cm": 2.04,
       "penetration_cm": 1.13,
       "balance_frames": 0,
-      "pops": 9,
-      "worst_dv": 1.15
+      "pops": 3,
+      "worst_dv": 1.09
     }
   },
   "Locomotion/Crouch walk 7": {
     "shown": {
-      "slide_cm": 4.84,
+      "slide_cm": 3.38,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
       "worst_dv": 0.95
     },
     "keys": {
-      "slide_cm": 5.3,
+      "slide_cm": 2.98,
       "penetration_cm": 1.34,
       "balance_frames": 0,
       "pops": 0,
@@ -280,23 +280,23 @@
     },
     "root_jump_ms": 0.35,
     "after_lock": {
-      "slide_cm": 3.91,
+      "slide_cm": 1.86,
       "penetration_cm": 1.34,
       "balance_frames": 0,
-      "pops": 8,
+      "pops": 3,
       "worst_dv": 1.23
     }
   },
   "Locomotion/Crouch walk 8": {
     "shown": {
-      "slide_cm": 3.65,
+      "slide_cm": 3.11,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 6,
       "worst_dv": 1.6
     },
     "keys": {
-      "slide_cm": 7.24,
+      "slide_cm": 5.67,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 6,
@@ -304,23 +304,23 @@
     },
     "root_jump_ms": 0.33,
     "after_lock": {
-      "slide_cm": 4.79,
+      "slide_cm": 2.38,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 14,
-      "worst_dv": 1.85
+      "worst_dv": 1.9
     }
   },
   "Locomotion/Crouch walk 9": {
     "shown": {
-      "slide_cm": 9.52,
+      "slide_cm": 7.27,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 2,
       "worst_dv": 1.26
     },
     "keys": {
-      "slide_cm": 12.75,
+      "slide_cm": 10.63,
       "penetration_cm": 0.38,
       "balance_frames": 0,
       "pops": 2,
@@ -328,11 +328,11 @@
     },
     "root_jump_ms": 0.22,
     "after_lock": {
-      "slide_cm": 4.28,
+      "slide_cm": 3.22,
       "penetration_cm": 0.38,
       "balance_frames": 0,
-      "pops": 15,
-      "worst_dv": 1.85
+      "pops": 17,
+      "worst_dv": 2.06
     }
   },
   "Locomotion/Run": {
@@ -361,14 +361,14 @@
   },
   "Locomotion/Run 10": {
     "shown": {
-      "slide_cm": 4.56,
+      "slide_cm": 2.81,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 11,
       "worst_dv": 1.48
     },
     "keys": {
-      "slide_cm": 7.83,
+      "slide_cm": 5.17,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 10,
@@ -376,23 +376,23 @@
     },
     "root_jump_ms": 0.45,
     "after_lock": {
-      "slide_cm": 2.8,
+      "slide_cm": 2.57,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 32,
-      "worst_dv": 2.06
+      "pops": 30,
+      "worst_dv": 2.25
     }
   },
   "Locomotion/Run 11": {
     "shown": {
-      "slide_cm": 2.13,
+      "slide_cm": 1.09,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 25,
       "worst_dv": 2.28
     },
     "keys": {
-      "slide_cm": 7.19,
+      "slide_cm": 3.58,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 26,
@@ -400,23 +400,23 @@
     },
     "root_jump_ms": 0.37,
     "after_lock": {
-      "slide_cm": 5.99,
+      "slide_cm": 2.01,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 45,
+      "pops": 44,
       "worst_dv": 3.05
     }
   },
   "Locomotion/Run 12": {
     "shown": {
-      "slide_cm": 1.96,
+      "slide_cm": 1.43,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 19,
       "worst_dv": 2.19
     },
     "keys": {
-      "slide_cm": 8.34,
+      "slide_cm": 5.86,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 18,
@@ -424,23 +424,23 @@
     },
     "root_jump_ms": 0.38,
     "after_lock": {
-      "slide_cm": 5.63,
+      "slide_cm": 3.29,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 33,
-      "worst_dv": 2.55
+      "pops": 32,
+      "worst_dv": 2.56
     }
   },
   "Locomotion/Run 13": {
     "shown": {
-      "slide_cm": 1.95,
+      "slide_cm": 1.92,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 24,
       "worst_dv": 2.32
     },
     "keys": {
-      "slide_cm": 6.16,
+      "slide_cm": 5.18,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 23,
@@ -448,23 +448,23 @@
     },
     "root_jump_ms": 0.4,
     "after_lock": {
-      "slide_cm": 4.81,
+      "slide_cm": 2.27,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 41,
+      "pops": 42,
       "worst_dv": 2.77
     }
   },
   "Locomotion/Run 9": {
     "shown": {
-      "slide_cm": 2.15,
+      "slide_cm": 0.97,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 14,
       "worst_dv": 2.05
     },
     "keys": {
-      "slide_cm": 7.95,
+      "slide_cm": 5.43,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 13,
@@ -472,23 +472,23 @@
     },
     "root_jump_ms": 0.43,
     "after_lock": {
-      "slide_cm": 2.73,
+      "slide_cm": 2.76,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 27,
-      "worst_dv": 2.61
+      "worst_dv": 2.63
     }
   },
   "Locomotion/Side step 10": {
     "shown": {
-      "slide_cm": 4.99,
+      "slide_cm": 3.24,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
       "worst_dv": 0.92
     },
     "keys": {
-      "slide_cm": 7.39,
+      "slide_cm": 6.24,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
@@ -496,23 +496,23 @@
     },
     "root_jump_ms": 0.21,
     "after_lock": {
-      "slide_cm": 2.85,
+      "slide_cm": 1.83,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 7,
-      "worst_dv": 1.47
+      "pops": 4,
+      "worst_dv": 1.94
     }
   },
   "Locomotion/Side step 11": {
     "shown": {
-      "slide_cm": 4.67,
+      "slide_cm": 2.89,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 1,
       "worst_dv": 1.02
     },
     "keys": {
-      "slide_cm": 6.8,
+      "slide_cm": 5.43,
       "penetration_cm": 0.0,
       "balance_frames": 1,
       "pops": 0,
@@ -520,11 +520,11 @@
     },
     "root_jump_ms": 0.14,
     "after_lock": {
-      "slide_cm": 5.21,
+      "slide_cm": 1.72,
       "penetration_cm": 0.0,
       "balance_frames": 1,
-      "pops": 5,
-      "worst_dv": 1.32
+      "pops": 4,
+      "worst_dv": 1.18
     }
   },
   "Locomotion/Side step 12": {
@@ -536,7 +536,7 @@
       "worst_dv": 1.29
     },
     "keys": {
-      "slide_cm": 12.36,
+      "slide_cm": 9.85,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 7,
@@ -547,8 +547,8 @@
       "slide_cm": 7.82,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 19,
-      "worst_dv": 1.75
+      "pops": 18,
+      "worst_dv": 1.73
     }
   },
   "Locomotion/Side step 13": {
@@ -568,11 +568,11 @@
     },
     "root_jump_ms": 0.18,
     "after_lock": {
-      "slide_cm": 7.3,
+      "slide_cm": 7.96,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
-      "worst_dv": 0.71
+      "worst_dv": 0.7
     }
   },
   "Locomotion/Side step 14": {
@@ -601,14 +601,14 @@
   },
   "Locomotion/Side step 9": {
     "shown": {
-      "slide_cm": 4.84,
+      "slide_cm": 3.46,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 1,
       "worst_dv": 3.0
     },
     "keys": {
-      "slide_cm": 5.59,
+      "slide_cm": 4.27,
       "penetration_cm": 0.0,
       "balance_frames": 4,
       "pops": 0,
@@ -616,23 +616,23 @@
     },
     "root_jump_ms": 2.01,
     "after_lock": {
-      "slide_cm": 3.06,
+      "slide_cm": 1.55,
       "penetration_cm": 0.0,
       "balance_frames": 4,
-      "pops": 7,
-      "worst_dv": 1.47
+      "pops": 2,
+      "worst_dv": 1.1
     }
   },
   "Locomotion/Small steps 3": {
     "shown": {
-      "slide_cm": 6.25,
+      "slide_cm": 4.79,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 2,
       "worst_dv": 1.18
     },
     "keys": {
-      "slide_cm": 7.59,
+      "slide_cm": 6.2,
       "penetration_cm": 0.47,
       "balance_frames": 0,
       "pops": 2,
@@ -640,23 +640,23 @@
     },
     "root_jump_ms": 0.13,
     "after_lock": {
-      "slide_cm": 4.97,
+      "slide_cm": 2.42,
       "penetration_cm": 0.47,
       "balance_frames": 0,
-      "pops": 18,
-      "worst_dv": 1.87
+      "pops": 14,
+      "worst_dv": 1.86
     }
   },
   "Locomotion/Small steps 4": {
     "shown": {
-      "slide_cm": 4.48,
+      "slide_cm": 3.31,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 5,
       "worst_dv": 1.52
     },
     "keys": {
-      "slide_cm": 12.51,
+      "slide_cm": 8.85,
       "penetration_cm": 0.51,
       "balance_frames": 0,
       "pops": 5,
@@ -664,23 +664,23 @@
     },
     "root_jump_ms": 0.35,
     "after_lock": {
-      "slide_cm": 4.66,
+      "slide_cm": 3.48,
       "penetration_cm": 0.4,
       "balance_frames": 0,
-      "pops": 19,
-      "worst_dv": 1.92
+      "pops": 17,
+      "worst_dv": 2.1
     }
   },
   "Locomotion/Small steps 5": {
     "shown": {
-      "slide_cm": 5.53,
+      "slide_cm": 3.41,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 1,
       "worst_dv": 1.25
     },
     "keys": {
-      "slide_cm": 10.79,
+      "slide_cm": 8.73,
       "penetration_cm": 0.58,
       "balance_frames": 0,
       "pops": 2,
@@ -688,23 +688,23 @@
     },
     "root_jump_ms": 0.25,
     "after_lock": {
-      "slide_cm": 3.73,
+      "slide_cm": 2.31,
       "penetration_cm": 0.51,
       "balance_frames": 0,
-      "pops": 9,
-      "worst_dv": 1.63
+      "pops": 8,
+      "worst_dv": 1.85
     }
   },
   "Locomotion/Sprint 5": {
     "shown": {
-      "slide_cm": 5.05,
+      "slide_cm": 4.59,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 39,
       "worst_dv": 3.73
     },
     "keys": {
-      "slide_cm": 8.07,
+      "slide_cm": 6.99,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 39,
@@ -712,23 +712,23 @@
     },
     "root_jump_ms": 0.44,
     "after_lock": {
-      "slide_cm": 3.57,
+      "slide_cm": 2.63,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 77,
-      "worst_dv": 3.85
+      "pops": 75,
+      "worst_dv": 4.09
     }
   },
   "Locomotion/Sprint 6": {
     "shown": {
-      "slide_cm": 2.28,
+      "slide_cm": 2.26,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 35,
       "worst_dv": 3.38
     },
     "keys": {
-      "slide_cm": 6.81,
+      "slide_cm": 6.07,
       "penetration_cm": 0.23,
       "balance_frames": 0,
       "pops": 36,
@@ -736,23 +736,23 @@
     },
     "root_jump_ms": 0.49,
     "after_lock": {
-      "slide_cm": 4.66,
+      "slide_cm": 2.76,
       "penetration_cm": 0.41,
       "balance_frames": 0,
-      "pops": 68,
+      "pops": 67,
       "worst_dv": 4.26
     }
   },
   "Locomotion/Sprint 7": {
     "shown": {
-      "slide_cm": 1.99,
+      "slide_cm": 0.62,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 44,
       "worst_dv": 4.29
     },
     "keys": {
-      "slide_cm": 6.8,
+      "slide_cm": 3.49,
       "penetration_cm": 0.29,
       "balance_frames": 0,
       "pops": 44,
@@ -760,7 +760,7 @@
     },
     "root_jump_ms": 0.44,
     "after_lock": {
-      "slide_cm": 5.59,
+      "slide_cm": 2.35,
       "penetration_cm": 0.81,
       "balance_frames": 0,
       "pops": 79,
@@ -769,14 +769,14 @@
   },
   "Locomotion/Stop 5": {
     "shown": {
-      "slide_cm": 1.59,
+      "slide_cm": 1.12,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 31,
       "worst_dv": 3.02
     },
     "keys": {
-      "slide_cm": 6.3,
+      "slide_cm": 3.95,
       "penetration_cm": 1.19,
       "balance_frames": 0,
       "pops": 29,
@@ -784,23 +784,23 @@
     },
     "root_jump_ms": 0.46,
     "after_lock": {
-      "slide_cm": 4.34,
+      "slide_cm": 1.93,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 59,
-      "worst_dv": 3.45
+      "pops": 62,
+      "worst_dv": 3.48
     }
   },
   "Locomotion/Stop 6": {
     "shown": {
-      "slide_cm": 1.62,
+      "slide_cm": 1.28,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 26,
       "worst_dv": 3.1
     },
     "keys": {
-      "slide_cm": 5.75,
+      "slide_cm": 2.99,
       "penetration_cm": 0.22,
       "balance_frames": 0,
       "pops": 26,
@@ -808,11 +808,11 @@
     },
     "root_jump_ms": 0.41,
     "after_lock": {
-      "slide_cm": 5.14,
+      "slide_cm": 2.83,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 48,
-      "worst_dv": 3.5
+      "worst_dv": 4.28
     }
   },
   "Locomotion/Stop 7": {
@@ -824,7 +824,7 @@
       "worst_dv": 2.45
     },
     "keys": {
-      "slide_cm": 5.86,
+      "slide_cm": 2.1,
       "penetration_cm": 0.53,
       "balance_frames": 0,
       "pops": 22,
@@ -832,23 +832,23 @@
     },
     "root_jump_ms": 0.41,
     "after_lock": {
-      "slide_cm": 3.96,
+      "slide_cm": 2.52,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 39,
-      "worst_dv": 2.76
+      "pops": 36,
+      "worst_dv": 2.79
     }
   },
   "Locomotion/Stop 8": {
     "shown": {
-      "slide_cm": 4.16,
+      "slide_cm": 3.1,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 12,
       "worst_dv": 2.1
     },
     "keys": {
-      "slide_cm": 9.92,
+      "slide_cm": 7.06,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 13,
@@ -856,23 +856,23 @@
     },
     "root_jump_ms": 0.29,
     "after_lock": {
-      "slide_cm": 4.07,
+      "slide_cm": 3.74,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 30,
-      "worst_dv": 2.26
+      "pops": 27,
+      "worst_dv": 2.28
     }
   },
   "Locomotion/Turn in place 5": {
     "shown": {
-      "slide_cm": 11.58,
+      "slide_cm": 11.32,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
       "worst_dv": 0.83
     },
     "keys": {
-      "slide_cm": 13.76,
+      "slide_cm": 13.11,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
@@ -883,13 +883,13 @@
       "slide_cm": 9.84,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 1,
-      "worst_dv": 1.02
+      "pops": 3,
+      "worst_dv": 1.5
     }
   },
   "Locomotion/Turn in place 6": {
     "shown": {
-      "slide_cm": 9.93,
+      "slide_cm": 9.55,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 1,
@@ -904,11 +904,11 @@
     },
     "root_jump_ms": 0.17,
     "after_lock": {
-      "slide_cm": 10.03,
+      "slide_cm": 9.58,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 3,
-      "worst_dv": 1.15
+      "worst_dv": 1.84
     }
   },
   "Locomotion/Turn in place 7": {
@@ -932,19 +932,19 @@
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 2,
-      "worst_dv": 1.13
+      "worst_dv": 1.16
     }
   },
   "Locomotion/Turn in place 8": {
     "shown": {
-      "slide_cm": 5.76,
+      "slide_cm": 5.15,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
       "worst_dv": 0.63
     },
     "keys": {
-      "slide_cm": 5.61,
+      "slide_cm": 5.51,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
@@ -952,7 +952,7 @@
     },
     "root_jump_ms": 0.13,
     "after_lock": {
-      "slide_cm": 3.58,
+      "slide_cm": 3.89,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
@@ -961,14 +961,14 @@
   },
   "Locomotion/Walk": {
     "shown": {
-      "slide_cm": 0.55,
+      "slide_cm": 0.0,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
       "worst_dv": 0.88
     },
     "keys": {
-      "slide_cm": 2.54,
+      "slide_cm": 0.0,
       "penetration_cm": 0.75,
       "balance_frames": 0,
       "pops": 0,
@@ -976,7 +976,7 @@
     },
     "root_jump_ms": 0.27,
     "after_lock": {
-      "slide_cm": 1.64,
+      "slide_cm": 1.71,
       "penetration_cm": 0.7,
       "balance_frames": 0,
       "pops": 2,
@@ -985,14 +985,14 @@
   },
   "Locomotion/Walk 12": {
     "shown": {
-      "slide_cm": 3.7,
+      "slide_cm": 3.03,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 1,
       "worst_dv": 1.05
     },
     "keys": {
-      "slide_cm": 6.69,
+      "slide_cm": 4.9,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 1,
@@ -1000,23 +1000,23 @@
     },
     "root_jump_ms": 0.23,
     "after_lock": {
-      "slide_cm": 3.97,
+      "slide_cm": 2.36,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 13,
-      "worst_dv": 1.36
+      "pops": 12,
+      "worst_dv": 1.29
     }
   },
   "Locomotion/Walk 13": {
     "shown": {
-      "slide_cm": 4.07,
+      "slide_cm": 3.31,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
       "worst_dv": 0.94
     },
     "keys": {
-      "slide_cm": 6.01,
+      "slide_cm": 5.54,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
@@ -1024,23 +1024,23 @@
     },
     "root_jump_ms": 0.23,
     "after_lock": {
-      "slide_cm": 4.68,
+      "slide_cm": 2.62,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 10,
-      "worst_dv": 1.53
+      "pops": 7,
+      "worst_dv": 1.57
     }
   },
   "Locomotion/Walk 14": {
     "shown": {
-      "slide_cm": 4.64,
+      "slide_cm": 2.42,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 19,
       "worst_dv": 1.77
     },
     "keys": {
-      "slide_cm": 9.72,
+      "slide_cm": 6.67,
       "penetration_cm": 1.06,
       "balance_frames": 0,
       "pops": 20,
@@ -1048,23 +1048,23 @@
     },
     "root_jump_ms": 0.18,
     "after_lock": {
-      "slide_cm": 3.94,
+      "slide_cm": 3.1,
       "penetration_cm": 0.68,
       "balance_frames": 0,
-      "pops": 45,
-      "worst_dv": 3.04
+      "pops": 44,
+      "worst_dv": 3.27
     }
   },
   "Locomotion/Walk 15": {
     "shown": {
-      "slide_cm": 3.03,
+      "slide_cm": 1.97,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 25,
       "worst_dv": 2.17
     },
     "keys": {
-      "slide_cm": 10.26,
+      "slide_cm": 7.58,
       "penetration_cm": 0.38,
       "balance_frames": 0,
       "pops": 26,
@@ -1072,23 +1072,23 @@
     },
     "root_jump_ms": 0.31,
     "after_lock": {
-      "slide_cm": 5.13,
+      "slide_cm": 2.47,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 41,
-      "worst_dv": 2.94
+      "pops": 40,
+      "worst_dv": 3.23
     }
   },
   "Locomotion/Walk 16": {
     "shown": {
-      "slide_cm": 4.89,
+      "slide_cm": 3.23,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 7,
       "worst_dv": 1.31
     },
     "keys": {
-      "slide_cm": 7.44,
+      "slide_cm": 5.52,
       "penetration_cm": 0.13,
       "balance_frames": 0,
       "pops": 6,
@@ -1096,23 +1096,23 @@
     },
     "root_jump_ms": 0.46,
     "after_lock": {
-      "slide_cm": 2.63,
+      "slide_cm": 1.75,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 21,
-      "worst_dv": 1.93
+      "pops": 17,
+      "worst_dv": 1.77
     }
   },
   "Locomotion/Walk 17": {
     "shown": {
-      "slide_cm": 3.96,
+      "slide_cm": 1.79,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 12,
       "worst_dv": 1.6
     },
     "keys": {
-      "slide_cm": 6.35,
+      "slide_cm": 4.17,
       "penetration_cm": 0.25,
       "balance_frames": 0,
       "pops": 12,
@@ -1120,23 +1120,23 @@
     },
     "root_jump_ms": 0.29,
     "after_lock": {
-      "slide_cm": 5.38,
+      "slide_cm": 2.27,
       "penetration_cm": 0.25,
       "balance_frames": 0,
       "pops": 26,
-      "worst_dv": 2.38
+      "worst_dv": 2.43
     }
   },
   "Locomotion/Walk in a circle 5": {
     "shown": {
-      "slide_cm": 3.82,
+      "slide_cm": 1.32,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 25,
       "worst_dv": 2.58
     },
     "keys": {
-      "slide_cm": 11.81,
+      "slide_cm": 8.35,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 26,
@@ -1144,23 +1144,23 @@
     },
     "root_jump_ms": 0.48,
     "after_lock": {
-      "slide_cm": 4.6,
+      "slide_cm": 2.67,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 56,
-      "worst_dv": 3.36
+      "pops": 55,
+      "worst_dv": 3.61
     }
   },
   "Locomotion/Walk in a circle 6": {
     "shown": {
-      "slide_cm": 3.64,
+      "slide_cm": 1.57,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 21,
       "worst_dv": 2.66
     },
     "keys": {
-      "slide_cm": 11.7,
+      "slide_cm": 8.6,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 22,
@@ -1168,23 +1168,23 @@
     },
     "root_jump_ms": 0.3,
     "after_lock": {
-      "slide_cm": 5.73,
+      "slide_cm": 3.08,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 41,
-      "worst_dv": 3.32
+      "pops": 42,
+      "worst_dv": 3.6
     }
   },
   "Locomotion/Walk in a circle 7": {
     "shown": {
-      "slide_cm": 4.04,
+      "slide_cm": 1.97,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 20,
       "worst_dv": 2.36
     },
     "keys": {
-      "slide_cm": 10.99,
+      "slide_cm": 6.87,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 21,
@@ -1192,16 +1192,16 @@
     },
     "root_jump_ms": 0.44,
     "after_lock": {
-      "slide_cm": 5.62,
+      "slide_cm": 2.15,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 38,
-      "worst_dv": 2.97
+      "pops": 39,
+      "worst_dv": 2.98
     }
   },
   "Martial arts/Fight 7": {
     "shown": {
-      "slide_cm": 20.44,
+      "slide_cm": 19.57,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 18,
@@ -1216,7 +1216,7 @@
     },
     "root_jump_ms": 0.53,
     "after_lock": {
-      "slide_cm": 20.25,
+      "slide_cm": 19.95,
       "penetration_cm": 0.88,
       "balance_frames": 0,
       "pops": 31,
@@ -1229,7 +1229,7 @@
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 2,
-      "worst_dv": 1.27
+      "worst_dv": 1.09
     },
     "keys": {
       "slide_cm": 16.52,
@@ -1238,13 +1238,13 @@
       "pops": 0,
       "worst_dv": 0.93
     },
-    "root_jump_ms": 0.5,
+    "root_jump_ms": 0.35,
     "after_lock": {
-      "slide_cm": 8.79,
+      "slide_cm": 4.86,
       "penetration_cm": 1.02,
       "balance_frames": 1,
       "pops": 1,
-      "worst_dv": 1.26
+      "worst_dv": 1.2
     }
   },
   "Sitting/Sit down and stand up 5": {
@@ -1297,14 +1297,14 @@
   },
   "Walk styles/Zombie": {
     "shown": {
-      "slide_cm": 6.0,
+      "slide_cm": 4.1,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
       "worst_dv": 0.66
     },
     "keys": {
-      "slide_cm": 6.1,
+      "slide_cm": 4.8,
       "penetration_cm": 0.0,
       "balance_frames": 0,
       "pops": 0,
@@ -1312,11 +1312,11 @@
     },
     "root_jump_ms": 0.38,
     "after_lock": {
-      "slide_cm": 4.68,
+      "slide_cm": 1.84,
       "penetration_cm": 0.0,
       "balance_frames": 0,
-      "pops": 4,
-      "worst_dv": 1.29
+      "pops": 0,
+      "worst_dv": 0.89
     }
   }
 }
