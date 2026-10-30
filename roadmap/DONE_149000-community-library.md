@@ -1,7 +1,6 @@
 # Community library: browse, install, rate, share, report
 
-- **Status:** built, waiting for 150000 and the owner (2026-10-30: acceptance agreed by the owner; screenshots in
-  `target/shots/2026-10-30/community/`)
+- **Status:** done (2026-10-30)
 - **Added** (owner, 2026-10-30): a pop-out button beside the tab opens the community in a
   resizable window of its own, with a gallery of large playing cards (size slider) or the rows,
   and the selected clip's details at the side.
@@ -79,6 +78,7 @@ the library.
 - The owner shares one clip from the app, ticks the captcha, and sees it go live (needs 150000 to
   publish it).
 
-## Still open
-2026-10-30. Not marked done: the owner's share test needs 150000, which isn't built, and
-`target/shots/2026-10-30/community/` has no offline message screenshot and no video of rows playing.
+## Result
+2026-10-30. Confirmed by the owner, with two acceptance lines not met: the owner's share test needs
+150000, which isn't built, so a shared clip stays `checking`; and `target/shots/2026-10-30/community/`
+has no offline message screenshot and no video of rows playing.
