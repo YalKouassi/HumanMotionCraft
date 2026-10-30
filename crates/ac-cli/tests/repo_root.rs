@@ -26,6 +26,7 @@ const ALLOWED: &[&str] = &[
     "README.md",
     "ROADMAP.md",
     "assets",
+    "book.toml",
     "crates",
     "docs",
     "fixtures",
