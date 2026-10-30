@@ -57,7 +57,7 @@ pub mod travel;
 pub mod weight;
 
 pub use command::{CommandSpec, Form, Kind, ParamSpec};
-pub use document::{Document, Pose};
+pub use document::{Document, Pose, ProjectFile};
 pub use error::CoreError;
 pub use rig::Skeleton;
 pub use session::Session;

@@ -69,6 +69,7 @@ fn editor_state(doc: &mut Document, _: &P) -> Out {
         "name": doc.clip.name,
         "group": doc.clip.group,
         "id": doc.clip_id,
+        "project": doc.project.as_ref().map(|p| p.path.to_string_lossy().replace('\\', "/")),
         "unsaved": doc.unsaved(),
         "keys": keys,
         "layers": layers,

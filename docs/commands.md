@@ -1157,7 +1157,8 @@ Outputs:
 | `name` | text | yes |  | its name |
 | `group` | text | yes |  | its group |
 | `id` | text | yes |  | its library id (null: not saved) |
-| `unsaved` | bool | yes |  | changes the library lacks |
+| `project` | text | yes |  | the project file it is (null: a library animation) |
+| `unsaved` | bool | yes |  | changes the library (or the project file) lacks |
 | `keys` | JSON | yes |  | [{frame, interp, source, model, part?, rows?}] of the edited layer |
 | `layers` | JSON | yes |  | [{name, keys, muted, weight, link}] |
 | `edit_layer` | integer | yes |  | the layer keys go on |

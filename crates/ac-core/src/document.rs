@@ -25,6 +25,17 @@ impl Pose {
     }
 }
 
+/// A project file the document came from or was last saved to (`ac-io`'s `project.*` commands
+/// keep it): its path and what the file holds, so [`Document::unsaved`] compares a project
+/// document with its file, not with the library. The format itself is `ac-io`'s business.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ProjectFile {
+    pub path: std::path::PathBuf,
+    pub clip: Clip,
+    pub links: BTreeMap<String, Clip>,
+    pub ai_settings: crate::ai::FillSettings,
+}
+
 /// A copied pose: the pose and the bones it covers (`None`: all).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Clipboard {
@@ -79,6 +90,8 @@ pub struct Document {
     /// clip has unsaved changes when it differs from its entry. The files are outside the undo
     /// history, so the session carries this across undo, redo and refused commands.
     pub saved: BTreeMap<String, Arc<Clip>>,
+    /// The project file this document is (`None`: a library animation, or never saved).
+    pub project: Option<Arc<ProjectFile>>,
 }
 
 /// Height (m) of the lowest joint above the floor when standing: the toe joints sit inside the foot.
@@ -130,6 +143,7 @@ impl Document {
             clip_id: None,
             links: BTreeMap::new(),
             saved: BTreeMap::new(),
+            project: None,
         }
     }
 
@@ -140,9 +154,12 @@ impl Document {
         }
     }
 
-    /// The open clip has changes the library doesn't hold. Never saved: any keys or layers
-    /// count as work to keep.
+    /// The open clip has changes the library doesn't hold (a project document: changes its file
+    /// doesn't hold). Never saved: any keys or layers count as work to keep.
     pub fn unsaved(&self) -> bool {
+        if let Some(p) = &self.project {
+            return self.clip != p.clip || self.links != p.links || self.ai_settings != p.ai_settings;
+        }
         match &self.clip_id {
             Some(id) => self.saved.get(id).is_none_or(|c| **c != self.clip),
             None => self.clip.layers.len() > 1 || self.clip.layers.iter().any(|l| !l.keys.is_empty()),

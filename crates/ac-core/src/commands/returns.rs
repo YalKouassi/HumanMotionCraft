@@ -168,7 +168,18 @@ pub const EDITOR_STATE: &[ParamSpec] = &[
     ParamSpec::new("name", Kind::Text, "its name").required(),
     ParamSpec::new("group", Kind::Text, "its group").required(),
     ParamSpec::new("id", Kind::Text, "its library id (null: not saved)").required(),
-    ParamSpec::new("unsaved", Kind::Bool, "changes the library lacks").required(),
+    ParamSpec::new(
+        "project",
+        Kind::Text,
+        "the project file it is (null: a library animation)",
+    )
+    .required(),
+    ParamSpec::new(
+        "unsaved",
+        Kind::Bool,
+        "changes the library (or the project file) lacks",
+    )
+    .required(),
     ParamSpec::new(
         "keys",
         Kind::Text,
