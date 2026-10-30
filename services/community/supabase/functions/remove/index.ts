@@ -1,12 +1,13 @@
 // POST {"id"} from the clip's author: deletes its files and marks it removed. Ratings and reports
 // stay with the row, so a removed clip can't come back with a clean slate.
 
-import { admin, caller, Refusal, reply, retire, serve } from "../_shared/common.ts";
+import { admin, caller, log, Refusal, reply, retire, serve } from "../_shared/common.ts";
 
 serve(async (req) => {
   if (req.method !== "POST") throw new Refusal(405, "use POST");
   const db = admin();
-  const user = await caller(db, req, false);
+  const who = await caller(db, req);
+  const user = who.user;
   const { id } = await req.json().catch(() => ({}));
   if (typeof id !== "string") throw new Refusal(400, "id is required");
 
@@ -15,5 +16,6 @@ serve(async (req) => {
   if (clip.status === "removed") return reply(200, { id, status: "removed" });
 
   await retire(db, id, "removed", null);
+  await log(db, who, "remove", id);
   return reply(200, { id, status: "removed" });
 });

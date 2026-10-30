@@ -1,0 +1,46 @@
+<!doctype html>
+<!--
+  The captcha page. The app opens it in the browser as
+  verify.html?port=<local port>&state=<random>, and once the captcha passes the page sends the
+  browser back to http://127.0.0.1:<port>/verified?state=…&token=…, where the app is listening.
+  The app then sends the token to the `verify` function. Served from the public bucket; the site
+  key is filled in when it's uploaded (`__SITE_KEY__`).
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Community check</title>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <style>
+    body { font: 16px system-ui, sans-serif; display: grid; place-items: center; min-height: 90vh;
+           margin: 0; background: #1e1f22; color: #e6e6e6; }
+    main { text-align: center; max-width: 28rem; padding: 1rem; }
+    p { color: #b0b0b0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>One quick check</h1>
+    <p id="say">Tick the box to share and report clips. You only do this once.</p>
+    <div class="cf-turnstile" data-sitekey="__SITE_KEY__" data-callback="passed"
+         data-theme="dark"></div>
+  </main>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const port = q.get("port") || "";
+    const state = q.get("state") || "";
+    if (!/^\d{2,5}$/.test(port) || !/^[A-Za-z0-9_-]{16,128}$/.test(state)) {
+      document.getElementById("say").textContent =
+        "Open this page from the app's Share or Report button.";
+    }
+    function passed(token) {
+      document.getElementById("say").textContent = "Done. You can go back to the app.";
+      const back = new URL(`http://127.0.0.1:${port}/verified`);
+      back.searchParams.set("state", state);
+      back.searchParams.set("token", token);
+      location.href = back;
+    }
+  </script>
+</body>
+</html>

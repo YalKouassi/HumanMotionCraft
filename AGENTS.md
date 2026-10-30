@@ -39,6 +39,7 @@ this file is the single source of agent rules.
 | `crates/ac-textmotion` | motion from text: `text.install`, `text.helper`, `text.generate`, `text.fill`, through the optional helper process that `tools/textmotion/` installs; `Engine` is the seam (a fake in the tests) | depends on `ac-core` only; registered through `SessionBuilder::commands`; without the install `text.generate` and `text.fill` refuse and say how to install it |
 | `training/` | Python: dataset retargeting, training, weight export and library clip cutting (`training/README.md`); data under `training/data/` is gitignored | the only Python in the repo besides `tools/drive_ui.py` and `tools/textmotion/`; never a runtime dependency |
 | `tools/textmotion/` | Python: the optional text-to-motion install (`setup_textmotion.py`), the app's helper process (`helper.py`, with `engine.py`, JSON lines on stdin/stdout) and training-clip generation (`generate.py`) | installed outside the repo; the app runs without it |
+| `services/community/` | the community library's server: Supabase migrations and Edge Functions (SQL, TypeScript), clip files on Cloudflare R2 (`services/community/README.md`); secrets in its gitignored `.env.local` | never part of the app's build; the app reaches it over HTTPS only |
 | `vendor/craft-libs` (optional, gitignored; not in a clone) | a local read-only copy of [craft-libs](https://github.com/storytold/craft-libs) for reading its source | depend on craft-libs by pinned git `rev`, never by path |
 
 Layering: `ac-core` → (`ac-ai`, `ac-io`) → (`ac-cli`, `ac-app`); `ac-render` stands on its own
@@ -132,7 +133,7 @@ time and no unseeded randomness in them. Maths is `f64` in the core (the GPU get
 - **Assets.** No vendor icons, images or fonts. Icons are drawn in code or come from craft-libs.
 - **craft-libs first.** Settings, atomic saves, keymaps, menus, quit handling, UI widgets, docking,
   i18n: use the `craft-*` crate when one covers it, and keep app policy in the app.
-- **Rust only at runtime.** Python lives in `training/` (and `tools/drive_ui.py`). The one exception is optional: motion from text runs in a Python helper process installed by `tools/textmotion/setup_textmotion.py`, which the app starts only when asked and never needs (owner's decision, 2026-10-28).
+- **Rust only at runtime.** Python lives in `training/` (and `tools/drive_ui.py`). The one exception is optional: motion from text runs in a Python helper process installed by `tools/textmotion/setup_textmotion.py`, which the app starts only when asked and never needs (owner's decision, 2026-10-28). The community library's server (`services/community/`) is SQL and TypeScript running on Supabase, not in the app (owner's decision, 2026-10-30).
 - **Units:** metres and radians internally; Z up, the rig faces -Y; glTF export maps to Y up.
 - Never weaken a gate, add an allow-list entry or delete a fixture or golden to get past a check;
   fix the design. Changing a rule is the owner's decision.

@@ -44,16 +44,60 @@ export function serve(handle: (req: Request) => Promise<Response>) {
   });
 }
 
-/// The signed-in caller. Anonymous accounts (which can rate) are refused when `named` is set.
-export async function caller(db: SupabaseClient, req: Request, named: boolean): Promise<User> {
+/// Who is calling: their account (anonymous ones included) and the address they call from.
+export type Caller = { user: User; ip: string | null };
+
+export async function caller(db: SupabaseClient, req: Request): Promise<Caller> {
   const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
   if (!token) throw new Refusal(401, "sign in first");
   const { data, error } = await db.auth.getUser(token);
   if (error || !data.user) throw new Refusal(401, "sign in first");
-  if (named && data.user.is_anonymous) {
-    throw new Refusal(403, "sharing needs an account with an email address");
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || null;
+  return { user: data.user, ip };
+}
+
+/// Refuses a blocked account or address, and (with `verified`) one that hasn't passed the captcha.
+export async function guard(db: SupabaseClient, who: Caller, verified: boolean): Promise<void> {
+  const match = who.ip
+    ? `user_id.eq.${who.user.id},ip.eq."${who.ip}"`
+    : `user_id.eq.${who.user.id}`;
+  const { data: blocks, error } = await db.from("blocks").select("expires_at").or(match);
+  if (error) throw error;
+  if (blocks.some((b) => !b.expires_at || new Date(b.expires_at) > new Date())) {
+    throw new Refusal(403, "this account can't share or report");
   }
-  return data.user;
+  if (!verified) return;
+  const { data } = await db.from("profiles").select("verified_at").eq("id", who.user.id).single();
+  if (!data?.verified_at) throw new Refusal(403, "captcha needed");
+}
+
+/// How many times the account, and the address, did `action` in the last day.
+export async function today(
+  db: SupabaseClient,
+  who: Caller,
+  action: string,
+): Promise<{ account: number; address: number }> {
+  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const count = async (column: string, value: string | null) => {
+    if (!value) return 0;
+    const { count, error } = await db.from("activity").select("id", { count: "exact", head: true })
+      .eq(column, value).eq("action", action).gte("at", since);
+    if (error) throw error;
+    return count ?? 0;
+  };
+  return { account: await count("user_id", who.user.id), address: await count("ip", who.ip) };
+}
+
+/// Records what the caller did, for limits and for maintainers chasing spam.
+export async function log(
+  db: SupabaseClient,
+  who: Caller,
+  action: "verify" | "upload" | "report" | "remove",
+  clipId: string | null,
+): Promise<void> {
+  const { error } = await db.from("activity")
+    .insert({ user_id: who.user.id, ip: who.ip, action, clip_id: clipId });
+  if (error) console.error("logging", action, error);
 }
 
 /// The public bucket the clips and previews live in.

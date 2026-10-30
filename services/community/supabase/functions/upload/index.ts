@@ -2,16 +2,30 @@
 //   meta     JSON {title, description?, tags?, licence, credit?, display_name?}
 //   clip     the clip file, gzipped
 //   preview  optional looping preview, WebP
-// Light checks here (size, gzip, the clip's shape); the checker runs the app's own checks before
-// the clip is published. Replies {id, status: "checking"}.
+// The caller needs an account that has passed the captcha (`verify`) and isn't blocked. Light
+// checks here (size, gzip, the clip's shape); the checker runs the app's own checks before the
+// clip is published. Replies {id, status: "checking"}.
 
-import { admin, Bucket, caller, env, Refusal, reply, serve, sha256 } from "../_shared/common.ts";
+import {
+  admin,
+  Bucket,
+  caller,
+  env,
+  guard,
+  log,
+  Refusal,
+  reply,
+  serve,
+  sha256,
+  today,
+} from "../_shared/common.ts";
 
 const MAX_BODY = 12 * 1024 * 1024;
 const MAX_CLIP = 10 * 1024 * 1024;
 const MAX_UNZIPPED = 100 * 1024 * 1024;
 const MAX_PREVIEW = 1024 * 1024;
-const UPLOADS_PER_DAY = 20;
+const PER_ACCOUNT = 20;
+const PER_ADDRESS = 30;
 const LICENCES = ["CC0-1.0", "CC-BY-4.0"];
 
 serve(async (req) => {
@@ -21,14 +35,13 @@ serve(async (req) => {
   if (length > MAX_BODY) throw new Refusal(413, "the upload is too big (12 MB at most)");
 
   const db = admin();
-  const user = await caller(db, req, true);
-
-  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-  const { count } = await db.from("clips").select("id", { count: "exact", head: true })
-    .eq("author_id", user.id).gte("created_at", since);
-  if ((count ?? 0) >= UPLOADS_PER_DAY) {
-    throw new Refusal(429, `you can share ${UPLOADS_PER_DAY} clips a day; try again tomorrow`);
+  const who = await caller(db, req);
+  await guard(db, who, true);
+  const done = await today(db, who, "upload");
+  if (done.account >= PER_ACCOUNT || done.address >= PER_ADDRESS) {
+    throw new Refusal(429, "that's as many clips as can be shared in a day; try again tomorrow");
   }
+  const user = who.user;
 
   const form = await req.formData();
   const meta = readMeta(form.get("meta"));
@@ -81,6 +94,7 @@ serve(async (req) => {
     throw e;
   }
 
+  await log(db, who, "upload", id);
   await wakeChecker();
   return reply(201, { id, status: "checking" });
 });
