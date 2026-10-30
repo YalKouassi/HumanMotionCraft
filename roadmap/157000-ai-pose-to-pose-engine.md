@@ -72,7 +72,9 @@ Build this once the owner has judged the fill by eye. A generated set in the `RE
 - Quality on our rig: the model card warns that unusual target poses lower it.
 - Speed: published timings are TensorRT on an RTX 4090, with no figures for ONNX Runtime on CPU.
 - Whether the model depends on anything in `assets/motions/` at load, such as a default pose. If it
-  does, stop and ask the owner.
+  does, stop and ask the owner. Found 2026-10-30: the ONNX models are in the repo at
+  `motionbricks/assets/onnx/` with their own `LICENSE.md`, and the upstream Smart Primitive documents
+  point at the sample clips, so we don't use those either (158000).
 
 Packaging (124000) must ship `tools/posefill` and the rig modules, as it must for `tools/textmotion`.
 
