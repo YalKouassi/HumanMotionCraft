@@ -495,13 +495,46 @@ Inputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `path` | text | yes |  | a file path |
+| `path` | text | yes |  | an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig) |
+| `joints` | JSON |  |  | an .fbx: landmark -> joint name, correcting the guess ({"l_knee": "LeftLeg"}); the landmarks are hips, spine, neck, head and per side shoulder, elbow, wrist, hip, knee, ankle, toe |
 
 Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `length` | integer | yes |  | frames |
+| `fps` | number |  |  | an .fbx: the file's frame rate |
+| `frames` | integer |  |  | an .fbx: frames read (setup frames dropped) |
+| `joints` | JSON |  |  | an .fbx: {landmark: the file's joint that stood for it} |
+| `given` | list of text |  |  | an .fbx: the landmarks the joints parameter set |
+| `unused` | list of text |  |  | an .fbx: the file's joints with no landmark (fingers, face, props, ends) |
+| `at_rest` | list of text |  |  | an .fbx: rig bone families left at rest ("finger: 30 of 30 at rest") |
+| `scale` | number |  |  | an .fbx: the factor that made the source's legs the rig's |
+| `floor` | number |  |  | an .fbx: how far the floor was moved to z = 0 (metres; 0: left as it was) |
+| `hips` | JSON |  |  | an .fbx: {mid, left, right}: how far the rig's hip joints land from the source's on the worst frame (metres) |
+| `notes` | list of text |  |  | an .fbx: what was guessed, dropped or left at rest |
+| `source` | JSON |  |  | an .fbx: {version, up_axis, front_axis, unit_scale, fps_from, take, joints, frames, dropped} |
+
+### `clip.import_batch`: Import a folder of FBX
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `import`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | text | yes |  | a folder of .fbx files (subfolders too) |
+| `to` | text | yes |  | the folder the .clip.json files go in (made if missing) |
+| `joints` | JSON |  |  | landmark -> joint name, correcting the guess for every file ({"l_knee": "LeftLeg"}) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `folder` | text | yes |  | the folder the clips went in |
+| `files` | JSON | yes |  | [{file, path, frames, fps, notes}] written |
+| `failed` | JSON | yes |  | [{file, error}] not imported |
+| `cut` | text |  |  | set when more files were found than one batch takes |
 
 ### `clip.loop`: Loop
 

@@ -116,6 +116,7 @@
             "clip.fix_impossible",
             "clip.group",
             "clip.import",
+            "clip.import_batch",
             "clip.loop",
             "clip.metrics",
             "clip.move",
@@ -1326,11 +1327,58 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 4096,
-                    "description": "a file path"
+                    "description": "an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig)"
+                  },
+                  "joints": {
+                    "description": "an .fbx: landmark -> joint name, correcting the guess ({\"l_knee\": \"LeftLeg\"}); the landmarks are hips, spine, neck, head and per side shoulder, elbow, wrist, hip, knee, ankle, toe"
                   }
                 },
                 "required": [
                   "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.import_batch"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Import a folder of FBX; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a folder of .fbx files (subfolders too)"
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the folder the .clip.json files go in (made if missing)"
+                  },
+                  "joints": {
+                    "description": "landmark -> joint name, correcting the guess for every file ({\"l_knee\": \"LeftLeg\"})"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
                 ],
                 "additionalProperties": false
               }
@@ -6424,6 +6472,7 @@
             "clip.fix_impossible",
             "clip.group",
             "clip.import",
+            "clip.import_batch",
             "clip.loop",
             "clip.metrics",
             "clip.move",

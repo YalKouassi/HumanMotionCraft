@@ -10,6 +10,8 @@ publish.workspace = true
 [dependencies]
 ac-core.workspace = true
 craft-atomic.workspace = true
+# zlib arrays of binary FBX (pure Rust; already in the lock through png)
+miniz_oxide = "0.8"
 serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true

@@ -15,6 +15,7 @@ pub mod community_record;
 pub mod data_folder;
 pub mod export;
 pub mod export_batch;
+pub mod fbx;
 pub mod find;
 pub mod import;
 pub mod layer_tools;
@@ -38,6 +39,7 @@ pub const ALL: &[&[ac_core::CommandSpec]] = &[
     export::SPECS,
     // files, recovery and reloading for the window (batch A2)
     export_batch::SPECS,
+    fbx::commands::SPECS,
     recovery::SPECS,
     reload::SPECS,
     project::SPECS,

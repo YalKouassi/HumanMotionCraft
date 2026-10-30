@@ -75,7 +75,35 @@ pub const CLIP_DELETE: &[ParamSpec] = &[ParamSpec::new(
     "the open animation was this one and is closed",
 )];
 
-pub const CLIP_IMPORT: &[ParamSpec] = &[ParamSpec::new("length", K::Integer, "frames").required()];
+pub const CLIP_IMPORT: &[ParamSpec] = &[
+    ParamSpec::new("length", K::Integer, "frames").required(),
+    ParamSpec::new("fps", K::Number, "an .fbx: the file's frame rate"),
+    ParamSpec::new("frames", K::Integer, "an .fbx: frames read (setup frames dropped)"),
+    ParamSpec::new("joints", K::Text, "an .fbx: {landmark: the file's joint that stood for it}").json(),
+    ParamSpec::new("given", K::TextList, "an .fbx: the landmarks the joints parameter set"),
+    ParamSpec::new("unused", K::TextList, "an .fbx: the file's joints with no landmark (fingers, face, props, ends)"),
+    ParamSpec::new("at_rest", K::TextList, "an .fbx: rig bone families left at rest (\"finger: 30 of 30 at rest\")"),
+    ParamSpec::new("scale", K::Number, "an .fbx: the factor that made the source's legs the rig's"),
+    ParamSpec::new("floor", K::Number, "an .fbx: how far the floor was moved to z = 0 (metres; 0: left as it was)"),
+    ParamSpec::new("hips", K::Text, "an .fbx: {mid, left, right}: how far the rig's hip joints land from the source's on the worst frame (metres)").json(),
+    ParamSpec::new("notes", K::TextList, "an .fbx: what was guessed, dropped or left at rest"),
+    ParamSpec::new("source", K::Text, "an .fbx: {version, up_axis, front_axis, unit_scale, fps_from, take, joints, frames, dropped}").json(),
+];
+
+pub const CLIP_IMPORT_BATCH: &[ParamSpec] = &[
+    ParamSpec::new("folder", K::Text, "the folder the clips went in").required(),
+    ParamSpec::new("files", K::Text, "[{file, path, frames, fps, notes}] written")
+        .json()
+        .required(),
+    ParamSpec::new("failed", K::Text, "[{file, error}] not imported")
+        .json()
+        .required(),
+    ParamSpec::new(
+        "cut",
+        K::Text,
+        "set when more files were found than one batch takes",
+    ),
+];
 
 pub const CLIP_WRITE: &[ParamSpec] = &[ParamSpec::new("path", K::Text, "the file written").required()];
 

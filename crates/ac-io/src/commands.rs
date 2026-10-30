@@ -110,7 +110,15 @@ pub static SPECS: &[CommandSpec] = &[
     CommandSpec::new("clip.import", "Import animation file", clip_import)
         .icon("import")
         .undoable()
-        .inputs(&[PATH.required()])
+        .inputs(&[
+            ParamSpec::new("path", K::Text, "an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig)").required(),
+            ParamSpec::new(
+                "joints",
+                K::Text,
+                "an .fbx: landmark -> joint name, correcting the guess ({\"l_knee\": \"LeftLeg\"}); the landmarks are hips, spine, neck, head and per side shoulder, elbow, wrist, hip, knee, ankle, toe",
+            )
+            .json(),
+        ])
         .outputs(crate::returns::CLIP_IMPORT),
     CommandSpec::new("clip.write", "Write animation file", clip_write)
         .icon("export")
@@ -508,6 +516,14 @@ fn clip_delete(doc: &mut Document, p: &P) -> Out {
 
 fn clip_import(doc: &mut Document, p: &P) -> Out {
     let path = cmd::text(p, "path").unwrap_or_default();
+    if path.to_lowercase().ends_with(".fbx") {
+        let joints = crate::fbx::commands::joints_param(p)?;
+        let imported = crate::fbx::import_file(Path::new(path), &doc.skeleton, &joints)?;
+        open(doc, imported.clip, None)?;
+        let mut out = imported.report;
+        out.insert("length".into(), json!(doc.clip.length()));
+        return Ok(Value::Object(out));
+    }
     let text = std::fs::read_to_string(path).map_err(|e| format!("can't read {path}: {e}"))?;
     let clip = clipfile::load_clip(&text).map_err(|e| format!("{path}: {e}"))?;
     open(doc, clip, None)?;
