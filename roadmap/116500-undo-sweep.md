@@ -1,6 +1,6 @@
 # Undo and redo, for every command
 
-- **Status:** not started; the acceptance line needs the owner's agreement
+- **Status:** built, waiting for the owner (2026-10-30)
 - **Requires:** 115300
 - **Source:** 115100
 
@@ -14,3 +14,10 @@ regression test.
 ## Acceptance
 The new test runs every fixture's undoable steps, including `edit.batch` and gestures; any step it
 leaves out is listed with the reason; `cargo xtask check` passes.
+
+## Result
+2026-10-30. `crates/ac-cli/tests/undo_sweep.rs`. No bug found: undo works from whole-document
+snapshots, and every undoable step restored the document, and redo brought it back. It fails if a new
+undoable command is neither swept nor listed. Left out, with reasons in the test: `clip.group` (it
+moves a library file) and `layer.plan` (the same plan again). Steps inside a gesture aren't undone one
+by one. `Document`'s comparison leaves out settings such as the AI sliders, so they aren't checked.

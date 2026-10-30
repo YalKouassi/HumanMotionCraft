@@ -129,7 +129,7 @@ fn snapshot(s: &mut Session) -> Value {
 
 /// In any text of `v`, `{tmp}` becomes the fixture's scratch folder and `{assets}` the assets
 /// folder (for file paths).
-fn with_tmp(v: &Value, tmp: &Path, assets: &Path) -> Value {
+pub fn with_tmp(v: &Value, tmp: &Path, assets: &Path) -> Value {
     let slash = |p: &Path| p.to_string_lossy().replace('\\', "/");
     match v {
         Value::String(s) => Value::String(
