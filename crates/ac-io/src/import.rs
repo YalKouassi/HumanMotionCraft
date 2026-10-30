@@ -408,5 +408,14 @@ pub(crate) fn library_install(doc: &mut Document, p: &P) -> Out {
             }
         }
     }
+    // what was given is recorded, so a later `library.sync` knows the person's changes from it
+    crate::builtins::record_installed(&from, &to)?;
     Ok(json!({ "copied": copied }))
+}
+
+/// Bring the installed built-ins in step with the shipped ones (`crate::builtins`).
+pub(crate) fn library_sync(doc: &mut Document, p: &P) -> Out {
+    let to = crate::commands::root(doc)?.to_path_buf();
+    let from = PathBuf::from(cmd::text(p, "from").unwrap_or_default());
+    crate::builtins::sync(&from, &to)
 }

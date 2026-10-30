@@ -38,6 +38,8 @@ pub struct Built {
     pub notes: Vec<String>,
     /// How many items were copied when the built-in library was installed into an empty one.
     pub installed: Option<u64>,
+    /// What updating an existing library's built-ins changed (`builtins::summary`), if anything.
+    pub synced: Option<String>,
 }
 
 impl SessionBuilder {
@@ -111,6 +113,7 @@ impl SessionBuilder {
         }
         let mut notes = Vec::new();
         let mut installed = None;
+        let mut synced = None;
         match load_ranges(&self.assets, &doc.skeleton) {
             Ok(r) => doc.ranges = Some(Arc::new(r)),
             Err(e) => {
@@ -143,11 +146,18 @@ impl SessionBuilder {
             Ok(())
         };
         if let Some(lib) = &self.library {
+            let from = self.assets.join("library");
+            let from = json!({ "from": from.to_string_lossy() });
             if self.install && !lib.join("animations").is_dir() {
-                let from = self.assets.join("library");
-                match session.run("library.install", &json!({ "from": from.to_string_lossy() })) {
+                match session.run("library.install", &from) {
                     Ok(v) => installed = Some(v["copied"].as_u64().unwrap_or_default()),
                     Err(e) => soft(format!("couldn't install the built-in library: {e}"))?,
+                }
+            } else if self.install {
+                // built-ins fixed, added or dropped since the library was installed
+                match session.run("library.sync", &from) {
+                    Ok(v) => synced = crate::builtins::summary(&v),
+                    Err(e) => soft(format!("couldn't update the built-in library: {e}"))?,
                 }
             }
             if let Err(e) = crate::commands::load_parts(&mut session.document) {
@@ -158,6 +168,7 @@ impl SessionBuilder {
             session,
             notes,
             installed,
+            synced,
         })
     }
 }

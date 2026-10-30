@@ -26,6 +26,18 @@ pub const LIBRARY_LIST: &[ParamSpec] = &[
 
 pub const LIBRARY_INSTALL: &[ParamSpec] = &[ParamSpec::new("copied", K::Integer, "files copied").required()];
 
+pub const LIBRARY_SYNC: &[ParamSpec] = &[
+    ParamSpec::new(
+        "animations",
+        K::Text,
+        "{added, updated, retired: [id], kept: [{id, why}]}: new built-ins copied in, unchanged copies replaced by a fixed one, ones no longer shipped moved to <library>/.retired, and ones you changed left as they are",
+    )
+    .json()
+    .required(),
+    ParamSpec::new("poses", K::Text, "the same for poses").json().required(),
+    ParamSpec::new("changed", K::Integer, "items added, updated or retired").required(),
+];
+
 pub const CLIP_NEW: &[ParamSpec] =
     &[ParamSpec::new("id", K::Text, "its library id (null: no library)").required()];
 

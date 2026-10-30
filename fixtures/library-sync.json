@@ -1,0 +1,30 @@
+{
+  "$schema": "./schema.json",
+  "name": "library-sync",
+  "feature": "library.sync",
+  "description": "Installed built-ins follow the shipped ones. The fixture's library is a fresh install of {assets}/library, so a sync finds every built-in byte-for-byte the shipped one: nothing added, updated or retired, nothing kept (changed 0). After saving an animation of the person's own (Mine/Fixture, no origin) a sync still changes nothing and leaves it alone: only built-ins are ever replaced or retired. The cases where something changes (a fixed built-in replaced, a new one added, a dropped one moved to .retired, an edited or deleted one left as it is, a library from before the record) are in crates/ac-io/tests/builtins.rs, which builds its own shipped folders. A folder that is not a built-in library is refused.",
+  "script": [
+    {
+      "command": "library.sync",
+      "params": { "from": "{assets}/library" },
+      "expect": {
+        "changed": 0,
+        "animations": { "added": [], "updated": [], "retired": [], "kept": [] },
+        "poses": { "added": [], "updated": [], "retired": [], "kept": [] }
+      }
+    },
+    { "command": "clip.new", "params": { "name": "Fixture", "group": "Mine" } },
+    { "command": "clip.save", "expect": { "id": "Mine/Fixture" } },
+    {
+      "command": "library.sync",
+      "params": { "from": "{assets}/library" },
+      "expect": { "changed": 0, "animations": { "retired": [], "kept": [] } }
+    },
+    { "command": "clip.open", "params": { "id": "Mine/Fixture" } }
+  ],
+  "errors": [
+    { "command": "library.sync", "params": { "from": "{assets}/no-such-library" } },
+    { "command": "library.sync", "params": {} }
+  ],
+  "views": []
+}

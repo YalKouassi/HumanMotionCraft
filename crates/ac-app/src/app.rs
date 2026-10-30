@@ -153,6 +153,13 @@ impl App {
         // preferences first: the library folder is one
         let automated = args.screenshot.is_some() || args.control.is_some();
         let (prefs, prefs_notes) = prefs::open(prefs::location(args.prefs.as_deref(), automated));
+        // the app's own library, left under a former name's folder, moves to this name's once
+        let default_library = args.library.is_none() && prefs.get().general.library_dir.is_none();
+        let moved = if default_library && !automated {
+            ac_io::data_folder::move_former_data()
+        } else {
+            None
+        };
         let library = args
             .library
             .clone()
@@ -175,12 +182,21 @@ impl App {
             .commands(ac_textmotion::SPECS)
             .build()?;
         let mut session = built.session;
-        let mut status = match built.installed {
-            Some(n) => format!("installed the built-in library ({n} items)"),
-            None => String::new(),
+        let mut status = match (built.installed, built.synced) {
+            (Some(n), _) => format!("installed the built-in library ({n} items)"),
+            (None, Some(s)) => s,
+            (None, None) => String::new(),
         };
         if !built.notes.is_empty() {
             status = built.notes.join("; ");
+        }
+        if let Some(m) = moved {
+            let note = m.unwrap_or_else(|e| e);
+            status = if status.is_empty() {
+                note
+            } else {
+                format!("{note}; {status}")
+            };
         }
         if own_model {
             let note = format!("AI fill uses your own model from {}", own.display());

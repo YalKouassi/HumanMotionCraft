@@ -172,6 +172,7 @@
             "library.install",
             "library.list",
             "library.samples",
+            "library.sync",
             "marker.add",
             "marker.delete",
             "marker.move",
@@ -3741,6 +3742,40 @@
           "if": {
             "properties": {
               "command": {
+                "const": "library.sync"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Update built-ins; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the built-in library folder"
+                  }
+                },
+                "required": [
+                  "from"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "marker.add"
               }
             },
@@ -5659,6 +5694,7 @@
             "library.install",
             "library.list",
             "library.samples",
+            "library.sync",
             "marker.add",
             "marker.delete",
             "marker.move",

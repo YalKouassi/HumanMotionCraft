@@ -1562,6 +1562,24 @@ Outputs:
 | `kept` | list of text | yes |  | samples already there, kept |
 | `group` | text | yes |  | their group |
 
+### `library.sync`: Update built-ins
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `restore`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | text | yes |  | the built-in library folder |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `animations` | JSON | yes |  | {added, updated, retired: [id], kept: [{id, why}]}: new built-ins copied in, unchanged copies replaced by a fixed one, ones no longer shipped moved to <library>/.retired, and ones you changed left as they are |
+| `poses` | JSON | yes |  | the same for poses |
+| `changed` | integer | yes |  | items added, updated or retired |
+
 ## marker
 
 ### `marker.add`: Add marker

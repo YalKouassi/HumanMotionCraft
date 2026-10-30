@@ -42,6 +42,11 @@ pub static SPECS: &[CommandSpec] = &[
     ])
     .writes()
     .outputs(crate::returns::LIBRARY_INSTALL),
+    CommandSpec::new("library.sync", "Update built-ins", crate::import::library_sync)
+        .icon("restore")
+        .inputs(&[ParamSpec::new("from", K::Text, "the built-in library folder").required()])
+        .writes()
+        .outputs(crate::returns::LIBRARY_SYNC),
     CommandSpec::new("clip.new", "New animation", clip_new)
         .icon("new")
         .shortcut("Ctrl+N")

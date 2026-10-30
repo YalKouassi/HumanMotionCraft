@@ -8,7 +8,9 @@
     clippy::unreachable
 )]
 
+pub mod builtins;
 pub mod commands;
+pub mod data_folder;
 pub mod export;
 pub mod export_batch;
 pub mod import;
