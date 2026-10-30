@@ -115,7 +115,7 @@ def publish(names: list[str], out_root: pathlib.Path, rig: pathlib.Path = RIG,
     (out / "NOTES.md").write_text("\n".join(notes) + "\n", encoding="utf-8", newline="\n")
     paths = " ".join(f'"{out / f["file"]}"' for f in files)
     print(f"\nmanifest -> {manifest} (commit it)\nfiles -> {out}\n\nto upload (a person decides):\n"
-          f'  gh release create {tag} {paths} --title "{tag}" --notes-file "{out / "NOTES.md"}"')
+          f'  gh release create {tag} {paths} --title "{tag}" --notes-file "{out / "NOTES.md"}" --prerelease')
     return record
 
 

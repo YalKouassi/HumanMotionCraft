@@ -20,6 +20,7 @@ const ALLOWED: &[&str] = &[
     "CLAUDE.md",
     "Cargo.lock",
     "Cargo.toml",
+    "craft-app.json",
     "LICENSE",
     "NOTICE",
     "README.md",

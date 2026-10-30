@@ -33,6 +33,7 @@ this file is the single source of agent rules.
 | `crates/ac-review` | the training-data review app `ac-review` (dev only, never shipped): plays each take of `training/data/rig/*.npz` with the scan's flags (`ac_train.quality`), and keeps the keep/cut/reject decisions, tags and notes in `training/review/decisions.json`; headless `ac-review run review.list|take|decide|clear|summary` for agents | writes only the decisions file and its own unpack cache (`training/data/rig/.review-cache/`) |
 | `xtask/` | repo tasks: `cargo xtask check` (the whole pre-commit gate), `names`, `assets`, `docs` | dev only; never a dependency |
 | `.github/workflows/ci.yml` | CI: the same gate on Windows | |
+| `.github/workflows/release.yml` | the release: a `v<version>` tag builds the Windows portable zip (the app, `ac.exe`, `assets/`), checks it against Craft Unofficial Launcher's contract (`craft-app.json`) and publishes it as the latest release; a manual run only builds and checks | releases are the owner's call; data releases are prereleases |
 | `assets/` | the baked rig, limits, mannequin, built-in library, models (`MANIFEST.json`) | every file has a row in `ATTRIBUTION.md` |
 | `tests/fixtures/golden` | the earlier prototype's results on fixed inputs (parity) | checked in; the prototype is not public, so they can't be regenerated: never edit them or rewrite them from this repo's own output |
 | `fixtures/` | feature fixtures (JSON scripts of commands with hand-worked expectations) | never deleted to pass a check |

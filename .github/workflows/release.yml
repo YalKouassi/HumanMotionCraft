@@ -1,0 +1,108 @@
+# The app's release, in the form Craft Unofficial Launcher installs (craft-app.json at the repo
+# root; the contract is JOINING.md in github.com/YalKouassi/craft-bridge).
+#
+# Push a tag `v<version>` (the version in Cargo.toml) to publish. Run it by hand
+# (workflow_dispatch) to build and check the release folder without publishing: the folder is
+# uploaded as a workflow artifact instead.
+#
+# The release attaches:
+#   humanmotioncraft-<version>-windows-x64-portable.zip  (one folder: the app, `ac.exe`, assets/,
+#                                                        the licence files)
+#   craft-app.json, its icon (assets/icon/), SHA256SUMS.txt
+# It is created as a draft, uploaded, then published as the latest release, so an interrupted run
+# never leaves a half-uploaded public one. Data releases (training/ac_train/publish.py) are
+# prereleases and never take "latest" from it.
+
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+  # The craft-bridge commit whose bridge.py checks the release (pinned, not main).
+  BRIDGE_REF: 9732a88b3530e34ff3e3d9960061c2f14dc39037
+
+jobs:
+  windows:
+    name: build, check and publish (Windows x64)
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: version
+        id: version
+        shell: bash
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"$/\1/p' Cargo.toml | head -n 1)
+          if [ -z "$version" ]; then echo "no version in Cargo.toml" >&2; exit 1; fi
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            tag="$GITHUB_REF_NAME"
+            if [ "${tag#v}" != "$version" ]; then
+              echo "tag $tag does not match Cargo.toml's version $version" >&2; exit 1
+            fi
+          else
+            tag="v$version"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: build
+        run: cargo build --release --locked -p ac-app -p ac-cli
+
+      - name: release folder
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          id=$(jq -r .id craft-app.json)
+          stem="$id-$VERSION-windows-x64-portable"
+          mkdir -p "dist" "target/package/$stem"
+          cp "target/release/$id.exe" target/release/ac.exe "target/package/$stem/"
+          cp -r assets "target/package/$stem/assets"
+          cp LICENSE NOTICE ATTRIBUTION.md README.md "target/package/$stem/"
+          # Python's zipfile writes `/` separators (Compress-Archive may write `\`, which the
+          # launcher refuses; Git Bash's tar can't write zips).
+          (cd target/package && python -I -m zipfile -c "../../dist/$stem.zip" "$stem")
+          cp craft-app.json "assets/icon/$id-256.png" dist/
+
+      - name: check against the launcher's contract
+        shell: bash
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          curl -fsSL -o target/bridge.py "https://raw.githubusercontent.com/YalKouassi/craft-bridge/$BRIDGE_REF/bridge.py"
+          python -I target/bridge.py --sums dist
+          python -I target/bridge.py --check dist --repo "$GITHUB_REPOSITORY" --tag "$TAG"
+
+      - name: keep the folder (manual run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ steps.version.outputs.tag }}
+          path: dist/
+
+      - name: publish
+        if: github.ref_type == 'tag'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --draft --verify-tag \
+            --title "$(jq -r .name craft-app.json) $TAG" --generate-notes
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest

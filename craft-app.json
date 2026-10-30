@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "id": "humanmotioncraft",
+  "name": "HumanMotionCraft",
+  "tagline": "Keyframe animation for a posable human rig",
+  "repo": "YalKouassi/HumanMotionCraft",
+  "publisher": "HumanMotionCraft contributors",
+  "upstream": null,
+  "bundle_id": "io.github.yalkouassi.humanmotioncraft",
+  "apple_team": null,
+  "website": "https://github.com/YalKouassi/HumanMotionCraft",
+  "color": "#e8743b",
+  "icon": "humanmotioncraft-256.png"
+}

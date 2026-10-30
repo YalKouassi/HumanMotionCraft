@@ -8,7 +8,9 @@ The name is set once, in `crates/ac-core/src/product.rs`:
 | `ID` / `product_id!()` | `humanmotioncraft` | MCP `serverInfo.name`, file formats (`<ID>.clip`, `.pose`, `.rig`), the glTF `scenes[0].extras` key, temp folder names |
 | `FORMER` | `("AnimationCraft", "animationcraft")` | names the product had before. Files with a former id still load and are saved under `ID`. A library in a former data folder is still found |
 
-Rust code never spells the name. The usage text in `ac-app` comes from `env!("CARGO_BIN_NAME")`.
+Rust code never spells the name. `craft-app.json` (the release descriptor the launcher reads,
+`.github/workflows/release.yml`) can't read the constant: it spells the name, the id (also the
+package names and the exe's name) and `io.github.yalkouassi.<id>` as the bundle id. The usage text in `ac-app` comes from `env!("CARGO_BIN_NAME")`.
 `tools/drive_ui.py` reads the binary name from `crates/ac-app/Cargo.toml`. Crate docs and Cargo
 descriptions say "the app", not the name.
 
@@ -24,7 +26,10 @@ descriptions say "the app", not the name.
 ## Renaming again
 1. In `product.rs`: set `product_name!()` and `product_id!()` to the new name, and push the old
    (name, id) pair onto the front of `FORMER`.
-2. Rename the `[[bin]]` in `crates/ac-app/Cargo.toml` and the server key in `.mcp.json`.
+2. Rename the `[[bin]]` in `crates/ac-app/Cargo.toml` and the server key in `.mcp.json`. In
+   `craft-app.json`, change `name`, `id` and `bundle_id`, and add the old values to `former_names`,
+   `former_ids` and `former_bundles`: the launcher pins them, and refuses a release that changes
+   one without listing the old value.
 3. Rewrite the `format` lines in `assets/rig/*.json` and `assets/models/MANIFEST.json`. Rewrite
    the samples with `ac samples --bless`. (The built-in library's clips and poses use the earlier
    prototype's `cf-animate.*` formats and have nothing to change.)

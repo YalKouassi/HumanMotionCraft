@@ -125,7 +125,8 @@ uv run python -m ac_train.publish                        # every built set (all 
 It checks each set is stamped, fits today's rig, was built from committed code and has a current
 scan, copies the files to `data/publish/<tag>/` with `NOTES.md` (licences and credits), writes
 `training/rig-data.json` (commit it) and prints the `gh release create` command. It uploads
-nothing itself.
+nothing itself. The command marks the release a prerelease: the app's own releases (`v*`) must stay
+the repo's latest, because the launcher installs from the latest release.
 
 ### 2. Download the datasets into `training/data/raw/`
 

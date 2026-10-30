@@ -49,7 +49,7 @@
     clippy::unreachable
 )]
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use serde_json::{Value, json};
@@ -78,8 +78,13 @@ fn flags() -> Result<Flags, String> {
         }
     }
     let cwd = std::env::current_dir().map_err(|e| e.to_string())?;
+    // Then beside the executable, as in an installed release (`ac.exe` next to `assets/`).
+    let exe_dir = std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(Path::to_path_buf));
     let assets = assets
         .or_else(|| ac_cli::find_assets(&cwd))
+        .or_else(|| exe_dir.and_then(|d| ac_cli::find_assets(&d)))
         .ok_or("no assets folder found (pass --assets <dir>)")?;
     let library_set = library.is_some();
     let library = library.unwrap_or_else(|| {
