@@ -1,7 +1,7 @@
 // POST multipart/form-data from the app's "Share to community":
 //   meta     JSON {title, description?, tags?, licence, credit?, display_name?}
 //   clip     the clip file, gzipped
-//   preview  optional looping preview, WebP
+//   preview  optional preview: a PNG strip of frames side by side, as the Library's thumbnails
 // The caller needs an account that has passed the captcha (`verify`) and isn't blocked. Light
 // checks here (size, gzip, the clip's shape); the checker runs the app's own checks before the
 // clip is published. Replies {id, status: "checking"}.
@@ -56,7 +56,7 @@ serve(async (req) => {
   if (previewFile instanceof File) {
     if (previewFile.size > MAX_PREVIEW) throw new Refusal(413, "the preview is too big (1 MB)");
     preview = new Uint8Array(await previewFile.arrayBuffer());
-    if (!isWebp(preview)) throw new Refusal(400, "the preview must be a WebP image");
+    if (!isPng(preview)) throw new Refusal(400, "the preview must be a PNG image");
   }
 
   if (meta.display_name) {
@@ -65,7 +65,7 @@ serve(async (req) => {
 
   const id = crypto.randomUUID();
   const fileKey = `clips/${id}.clip.json.gz`;
-  const previewKey = preview ? `previews/${id}.webp` : null;
+  const previewKey = preview ? `previews/${id}.png` : null;
   const { error } = await db.from("clips").insert({
     id,
     author_id: user.id,
@@ -87,7 +87,7 @@ serve(async (req) => {
   const bucket = new Bucket();
   try {
     await bucket.put(fileKey, gz, "application/gzip");
-    if (preview && previewKey) await bucket.put(previewKey, preview, "image/webp");
+    if (preview && previewKey) await bucket.put(previewKey, preview, "image/png");
   } catch (e) {
     await bucket.delete(fileKey).catch(() => {});
     await db.from("clips").delete().eq("id", id);
@@ -200,9 +200,9 @@ function readClip(bytes: Uint8Array): { version: number; fps: number; frames: nu
   return { version: c.version as number, fps: c.fps, frames: last + 1 };
 }
 
-function isWebp(b: Uint8Array): boolean {
-  const ascii = (from: number, to: number) => String.fromCharCode(...b.subarray(from, to));
-  return b.length > 12 && ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP";
+function isPng(b: Uint8Array): boolean {
+  const magic = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  return b.length > 8 && magic.every((m, i) => b[i] === m);
 }
 
 /// Starts the checker at once (a GitHub workflow); its schedule catches anything this misses.

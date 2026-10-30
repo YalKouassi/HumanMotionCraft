@@ -385,6 +385,11 @@ fn real_main() -> Result<ExitCode, String> {
 
 fn main() -> ExitCode {
     ac_io::setup::init_logging();
+    // the live community server (fixture runs put the fake in its place), with the account beside
+    // the app's own library
+    if let Some(dir) = ac_io::library::app_library_dir().parent() {
+        ac_community::http::connect(dir.to_path_buf());
+    }
     match real_main() {
         Ok(c) => c,
         Err(e) => {

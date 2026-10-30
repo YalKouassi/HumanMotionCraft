@@ -53,6 +53,7 @@ pub fn session(assets: &Path, library: &Path) -> Result<Session, String> {
         .ai(ac_ai::shared(assets))
         .commands(ac_media::SPECS)
         .commands(ac_textmotion::SPECS)
+        .commands(ac_community::SPECS)
         .strict()
         .build()?
         .session)
@@ -227,6 +228,8 @@ pub fn run_fixture(assets: &Path, fixture: &Value) -> Outcome {
     // fixtures give the same result everywhere: motion from text comes from the stand-in, never
     // from the optional helper (`ac_textmotion::stand_in`)
     ac_textmotion::stand_in::use_stand_in();
+    // and the community from its fake server, never the live one (`ac_community::fake`)
+    ac_community::fake::use_fake(&assets.join("rig").join("default_rig.json"));
     let lib = std::env::temp_dir().join(format!(
         "{}-fixture-{}-{}",
         ac_core::product::ID,

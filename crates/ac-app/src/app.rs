@@ -1,6 +1,7 @@
 //! The window: menu bar, library (left), inspector (right), timeline (bottom), 3D viewport.
 
 mod agent;
+mod community;
 mod curves;
 mod files;
 mod gizmo;
@@ -71,6 +72,8 @@ pub struct App {
     preview_path: Option<(usize, Vec<Vec3>)>,
     timeline: timeline::Timeline,
     lib_tab: library::Tab,
+    /// The library's Community tab.
+    community: community::State,
     lib_filter: String,
     thumbs: library::Thumbs,
     /// The library panel's filters, folds and preview.
@@ -182,8 +185,16 @@ impl App {
             .ai(model)
             .commands(ac_media::SPECS)
             .commands(ac_textmotion::SPECS)
+            .commands(ac_community::SPECS)
             .build()?;
         let mut session = built.session;
+        // the community: a screenshot run gets the fixtures' fake server (the same picture every
+        // time); otherwise the live one, with this computer's account beside the app's library
+        if args.screenshot.is_some() {
+            ac_community::fake::use_fake(&assets.join("rig").join("default_rig.json"));
+        } else if let Some(dir) = ac_io::library::app_library_dir().parent() {
+            ac_community::http::connect(dir.to_path_buf());
+        }
         let mut status = match (built.installed, built.synced) {
             (Some(n), _) => format!("installed the built-in library ({n} items)"),
             (None, Some(s)) => s,
@@ -276,6 +287,7 @@ impl App {
             preview_path: None,
             timeline: timeline::Timeline::default(),
             lib_tab: library::Tab::Animations,
+            community: community::State::default(),
             lib_filter: String::new(),
             thumbs: library::Thumbs::default(),
             lib_view: library::View::default(),
@@ -320,7 +332,8 @@ impl App {
                         library::Tab::Animations
                     }
                     "poses" => library::Tab::Poses,
-                    _ => return Err("animations, builtin or poses".into()),
+                    "community" => library::Tab::Community,
+                    _ => return Err("animations, builtin, poses or community".into()),
                 }
             }
             "source" => self.lib_view.filters.source = library::filter::parse_source(value)?,
@@ -339,6 +352,25 @@ impl App {
                 self.camera.distance = d;
             }
             "dialog" => self.open_dialog(value)?,
+            "community" => {
+                self.lib_tab = library::Tab::Community;
+                let st = &mut self.community;
+                st.show_mine = value == "mine";
+                st.selected = (!matches!(value, "mine" | "none")).then(|| value.to_string());
+                if st.show_mine {
+                    self.community_mine();
+                }
+            }
+            "share" => self.community_share_open(value),
+            "community_window" => self.community_float(on()?),
+            "community_view" => self.community.view = community::window::View::parse(value)?,
+            "community_card" => {
+                let w: f32 = value.parse().map_err(|e| format!("{value:?}: {e}"))?;
+                if !w.is_finite() {
+                    return Err(format!("{value:?}: a width in points"));
+                }
+                self.community.card = w.clamp(community::window::CARD_MIN, community::window::CARD_MAX);
+            }
             _ => return self.set_view_ui(name, value),
         }
         Ok(())
@@ -363,6 +395,10 @@ impl App {
     fn run(&mut self, id: &str, params: Value) -> Option<Value> {
         // motion from text that would wait for the model is made off the UI thread first
         if self.text_deferred(id, &params) {
+            return None;
+        }
+        // and so is anything from the community (it waits on the network)
+        if self.community_deferred(id, &params) {
             return None;
         }
         let before = self.shell.perf.before(&self.session);
@@ -463,9 +499,11 @@ impl eframe::App for App {
         // --screenshot: wait for a few settled frames, grab the window, write it, quit
         if let Some((path, state)) = &self.screenshot {
             self.frames_drawn += 1;
+            let busy = self.thumbs.busy || self.community.loading();
             match state.load(Ordering::SeqCst) {
-                // settled: a few frames drawn and the thumbnails on screen ready (or a long wait)
-                0 if self.frames_drawn > 5 && (!self.thumbs.busy || self.frames_drawn > 600) => {
+                // settled: a few frames drawn and the thumbnails and community strips on screen
+                // ready (or a long wait)
+                0 if self.frames_drawn > 5 && (!busy || self.frames_drawn > 600) => {
                     state.store(1, Ordering::SeqCst);
                     let (path, state) = (path.clone(), state.clone());
                     ctx.request_screenshot(move |img| {

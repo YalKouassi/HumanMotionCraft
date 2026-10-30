@@ -795,6 +795,189 @@ Outputs:
 |---|---|---|---|---|
 | `path` | text | yes |  | the file written |
 
+## community
+
+### `community.account`: Community account
+
+not undoable, icon `user`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `signed_in` | bool | yes |  | an account exists on this computer |
+| `verified` | bool | yes |  | it passed the captcha: may share and report |
+| `name` | text | yes |  | the name shown on its clips |
+| `captcha` | text | yes |  | the captcha page |
+
+### `community.browse`: Browse the community
+
+not undoable, icon `globe`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `search` | text |  |  | words that must all be in the title, description or tags |
+| `tags` | list of text |  |  | tags the clip must all have |
+| `sort` | one of top \| new \| downloads |  |  | top (best rated, the default), new, or most downloaded |
+| `page` | integer |  | 0 to 10000 | which page, from 0 |
+| `limit` | integer |  | 1 to 100 | clips a page (default 50) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `clips` | JSON | yes |  | {id, title, description, author, tags, licence, credit, fps, frames, seconds, rating, ratings, downloads, published, preview, installed} |
+| `count` | integer | yes |  | how many on this page |
+
+### `community.fetch`: Fetch community clip
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `download`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the community clip's id |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the clip |
+| `path` | text | yes |  | the unpacked clip file, to play (not in the library) |
+| `clip` | JSON | yes |  | {id, title, description, author, tags, licence, credit, fps, frames, seconds, rating, ratings, downloads, published, preview, installed} |
+
+### `community.install`: Install community clip
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `download`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the community clip's id |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the library id it was installed as (Community/<title>) |
+| `clip` | text | yes |  | the community clip |
+| `already` | bool | yes |  | it was installed before: nothing changed |
+| `notes` | list of text | yes |  | what didn't go to plan (empty: nothing) |
+
+### `community.mine`: My community uploads
+
+not undoable, icon `user`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `clips` | JSON | yes |  | [{id, title, status (checking, published, failed, hidden, removed), reason, created}], newest first |
+
+### `community.rate`: Rate community clip
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `star`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the community clip's id |
+| `stars` | integer | yes | 1 to 5 | 1 to 5 |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the clip |
+| `rating` | number | yes |  | its average now, to two decimals |
+| `ratings` | integer | yes |  | how many have rated it |
+
+### `community.remove`: Remove my community clip
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `trash`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the community clip's id |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the clip |
+| `status` | text | yes |  | removed |
+
+### `community.report`: Report community clip
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `flag`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the community clip's id |
+| `reason` | text |  |  | what's wrong with it (500 characters at most) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | the clip |
+| `reported` | bool | yes |  | true |
+
+### `community.share`: Share to community
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `upload`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `id` | text | yes |  | one of your animations in the library |
+| `title` | text |  |  | 80 characters at most (default: the animation's name) |
+| `description` | text |  |  | 2000 characters at most |
+| `tags` | list of text |  |  | 10 at most: letters, digits and hyphens, 24 each |
+| `licence` | one of CC0-1.0 \| CC-BY-4.0 | yes |  | CC0-1.0 (anyone, any use) or CC-BY-4.0 (with credit) |
+| `credit` | text |  |  | who or what to credit (200 characters at most) |
+| `name` | text |  |  | the name shown as the author (40 at most) |
+| `preview` | text |  |  | its frames side by side as one PNG strip (1 MB at most), as the Library draws thumbnails |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `clip` | text | yes |  | its community id |
+| `status` | text | yes |  | checking: it goes live once the checks pass |
+| `title` | text | yes |  | the title it was shared with |
+| `tags` | list of text | yes |  | the tags, cleaned |
+
+### `community.verify`: Pass the community captcha
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `check`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `token` | text | yes |  | the token the captcha page gave |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `verified` | bool | yes |  | true |
+
 ## edit
 
 ### `edit.batch`: Run commands

@@ -13,7 +13,7 @@
 //! hovered (`hover.rs`). Right-click menus, the keys and the small dialogs are in `menu.rs`.
 
 pub mod filter;
-mod hover;
+pub(in crate::app) mod hover;
 pub mod menu;
 pub mod preview;
 mod row;
@@ -33,6 +33,7 @@ use row::Drop;
 pub enum Tab {
     Animations,
     Poses,
+    Community,
 }
 
 /// The panel's own state: filters, the group to scroll to, the preview.
@@ -303,7 +304,18 @@ impl App {
             .tag("library.tab.animations", "Animations");
             ui.selectable_value(&mut self.lib_tab, Tab::Poses, format!("Poses {n_poses}"))
                 .tag("library.tab.poses", "Poses");
+            ui.selectable_value(&mut self.lib_tab, Tab::Community, "Community")
+                .on_hover_text("Animations other people shared: watch, install and rate them")
+                .tag("library.tab.community", "Community");
+            let floating = self.community.floating;
+            if crate::app::community::window::float_button(ui, floating).clicked() {
+                self.community_float(!floating);
+            }
         });
+        if self.lib_tab == Tab::Community {
+            self.community_tab(ui);
+            return;
+        }
         ui.add(
             egui::TextEdit::singleline(&mut self.lib_filter)
                 .hint_text("Search: every word must match")
@@ -584,7 +596,7 @@ impl App {
     /// A library item's picture as PNG, `frames` cells of `cell` points (an animation's frames
     /// spread over it): from `<library>/.thumbs/<sub>/` if newer than the item, else drawn (and
     /// kept there).
-    fn thumb_png(
+    pub(in crate::app) fn thumb_png(
         &mut self,
         kind: &str,
         id: &str,
@@ -614,10 +626,29 @@ impl App {
             return Ok(png);
         }
         let text = std::fs::read_to_string(&src).map_err(|e| e.to_string())?;
+        let png = self.strip_png(&text, anims, frames, cell, &lib)?;
+        if let Some(dir) = cached.parent() {
+            let _ = std::fs::create_dir_all(dir);
+            let _ = std::fs::write(&cached, &png);
+        }
+        Ok(png)
+    }
+
+    /// An animation's (or a pose's) picture as PNG from its file's text: `frames` cells of `cell`
+    /// points side by side, spread over the animation. Link layers find their clips in `lib` (a
+    /// missing one drives nothing).
+    pub(in crate::app) fn strip_png(
+        &mut self,
+        text: &str,
+        anims: bool,
+        frames: usize,
+        cell: (u32, u32),
+        lib: &ac_io::library::Library,
+    ) -> Result<Vec<u8>, String> {
         let sk = self.session.document.skeleton.clone();
         let poses: Vec<(Vec<ac_core::quat::Quat>, [f64; 3])> = if anims {
-            let clip = ac_core::clipfile::load_clip(&text)?;
-            let links = ac_io::commands::load_links(&lib, &clip)?;
+            let clip = ac_core::clipfile::load_clip(text)?;
+            let links = ac_io::commands::load_links(lib, &clip)?;
             let last = (clip.length_with(&links) - 1).max(0) as f64;
             let n = frames.max(2);
             let frames: Vec<f64> = (0..n)
@@ -626,7 +657,7 @@ impl App {
             let (r, o) = clip.sample_with(&frames, &links)?;
             r.into_iter().zip(o).collect()
         } else {
-            let p = ac_core::clipfile::load_pose(&text)?;
+            let p = ac_core::clipfile::load_pose(text)?;
             if p.bones != sk.names {
                 return Err("a pose for a different rig".into());
             }
@@ -639,17 +670,12 @@ impl App {
         self.ensure_offscreen()?;
         let off = self.offscreen.as_mut().ok_or("no renderer")?;
         let scale = 2; // drawn at twice the size for sharp high-DPI thumbnails
-        let png = off.sheet(
+        off.sheet(
             "three-quarter",
             (cell.0 * scale, cell.1 * scale, posed.len() as u32),
             &posed,
             &sk.heads,
             false,
-        )?;
-        if let Some(dir) = cached.parent() {
-            let _ = std::fs::create_dir_all(dir);
-            let _ = std::fs::write(&cached, &png);
-        }
-        Ok(png)
+        )
     }
 }

@@ -20,7 +20,7 @@ time it needs to; that account lives in the app's settings on that computer.
 |---|---|
 | `supabase/migrations/` | tables, grants, row-level security, triggers, `block_author` |
 | `supabase/functions/verify` | `POST {token}`: checks the captcha with Turnstile and verifies the account |
-| `supabase/functions/upload` | `POST` multipart (`meta` JSON, `clip` gzipped, optional `preview` WebP) from a verified account; light checks, files to R2, the clip `checking` |
+| `supabase/functions/upload` | `POST` multipart (`meta` JSON, `clip` gzipped, optional `preview` PNG strip) from a verified account; light checks, files to R2, the clip `checking` |
 | `supabase/functions/report` | `POST {id, reason?}` from a verified account |
 | `supabase/functions/remove` | the author removes their clip: files deleted, row marked `removed` |
 | `supabase/functions/checker` | the checker's door (header `x-checker-secret`): `pending` lists clips waiting, `result` publishes one or deletes its files and marks it `failed` |

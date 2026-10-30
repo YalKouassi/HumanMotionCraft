@@ -17,6 +17,7 @@ ac-core.workspace = true
 ac-io.workspace = true
 ac-media.workspace = true
 ac-textmotion.workspace = true
+ac-community.workspace = true
 ac-render.workspace = true
 serde_json = { workspace = true, features = ["preserve_order"] }
 tracing.workspace = true

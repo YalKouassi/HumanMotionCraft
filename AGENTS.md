@@ -38,6 +38,7 @@ this file is the single source of agent rules.
 | `tests/fixtures/golden` | the earlier prototype's results on fixed inputs (parity) | checked in; the prototype is not public, so they can't be regenerated: never edit them or rewrite them from this repo's own output |
 | `fixtures/` | feature fixtures (JSON scripts of commands with hand-worked expectations) | never deleted to pass a check |
 | `crates/ac-textmotion` | motion from text: `text.install`, `text.helper`, `text.generate`, `text.fill`, through the optional helper process that `tools/textmotion/` installs; `Engine` is the seam (a fake in the tests) | depends on `ac-core` only; registered through `SessionBuilder::commands`; without the install `text.generate` and `text.fill` refuse and say how to install it |
+| `crates/ac-community` | the community library: `community.browse`, `.fetch`, `.install`, `.rate`, `.report`, `.verify`, `.share`, `.mine`, `.remove`, `.account`, through the server in `services/community/`; `Backend` is the seam (`Http` the live server, `Fake` the fixtures') | depends on `ac-core` and `ac-io`; registered through `SessionBuilder::commands`; with no backend connected (tests) every command refuses; fixture runs and `--screenshot` use the fake, never the network |
 | `training/` | Python: dataset retargeting, training, weight export and library clip cutting (`training/README.md`); data under `training/data/` is gitignored | the only Python in the repo besides `tools/drive_ui.py` and `tools/textmotion/`; never a runtime dependency |
 | `tools/textmotion/` | Python: the optional text-to-motion install (`setup_textmotion.py`), the app's helper process (`helper.py`, with `engine.py`, JSON lines on stdin/stdout) and training-clip generation (`generate.py`) | installed outside the repo; the app runs without it |
 | `services/community/` | the community library's server: Supabase migrations and Edge Functions (SQL, TypeScript), clip files on Cloudflare R2 (`services/community/README.md`); secrets in its gitignored `.env.local` | never part of the app's build; the app reaches it over HTTPS only |
@@ -46,7 +47,7 @@ this file is the single source of agent rules.
 Layering: `ac-core` → (`ac-ai`, `ac-io`) → (`ac-cli`, `ac-app`); `ac-render` stands on its own
 (`wgpu`, no egui) and is used by `ac-media`, `ac-cli` and `ac-app`; `ac-media` stands on `ac-core`
 and `ac-render` and is used by `ac-cli` and `ac-app`; `ac-textmotion` stands on `ac-core` and is
-used by `ac-cli` and `ac-app`, which don't depend on each other. Only
+used by `ac-cli` and `ac-app`; `ac-community` stands on `ac-core` and `ac-io` and is used by `ac-cli` and `ac-app`, which don't depend on each other. Only
 `ac-app` and the separate dev app `ac-review` depend on egui, eframe or winit (the owner
 chose a separate review exe, 2026-10-28, so the shipped app has no training buttons). The solver,
 the UI panels and MCP live in `ac_core::physics`, `crates/ac-app/src/app/` and

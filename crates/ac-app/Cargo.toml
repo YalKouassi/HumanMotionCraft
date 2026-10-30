@@ -17,6 +17,7 @@ ac-core.workspace = true
 ac-io.workspace = true
 ac-media.workspace = true
 ac-textmotion.workspace = true
+ac-community.workspace = true
 ac-render.workspace = true
 craft-atomic.workspace = true
 eframe = { version = "0.37", default-features = false, features = ["wgpu", "default_fonts", "accesskit", "clipboard"] }

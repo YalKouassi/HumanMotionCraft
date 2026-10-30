@@ -100,7 +100,7 @@ impl App {
     }
 
     /// Open an animation, or apply a pose.
-    pub(super) fn lib_activate(&mut self, anims: bool, id: &str) {
+    pub(in crate::app) fn lib_activate(&mut self, anims: bool, id: &str) {
         if anims {
             if self.session.document.clip_id.as_deref() != Some(id) {
                 self.switch(Switch::Open(id.to_string()));
@@ -256,6 +256,16 @@ impl App {
             {
                 let id = id.clone();
                 choose(&mut act, ui, Box::new(move |a| a.lib_duplicate(&id)));
+            }
+            if anims
+                && ui
+                    .button("Share to community…")
+                    .on_hover_text("Let other people watch, install and rate it")
+                    .tag("library.item_menu.share", "Share to community…")
+                    .clicked()
+            {
+                let id = id.clone();
+                choose(&mut act, ui, Box::new(move |a| a.community_share_open(&id)));
             }
             ui.menu_button("Move to group", |ui| {
                 let here = id.split_once('/').map_or("", |x| x.0).to_string();

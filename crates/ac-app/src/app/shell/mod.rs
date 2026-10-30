@@ -137,6 +137,12 @@ impl App {
             ("tab", p.view.library_tab.as_str()),
             ("source", p.view.library_source.as_str()),
             ("sort", p.view.library_sort.as_str()),
+            (
+                "community_window",
+                if p.view.community_window { "on" } else { "off" },
+            ),
+            ("community_view", p.view.community_view.as_str()),
+            ("community_card", &p.view.community_card.to_string()),
         ] {
             if let Err(e) = self.set_ui(name, value) {
                 self.shell.messages.push(
@@ -250,6 +256,7 @@ impl App {
         let tab = match self.lib_tab {
             super::library::Tab::Animations => "animations",
             super::library::Tab::Poses => "poses",
+            super::library::Tab::Community => "community",
         };
         let c = &self.camera;
         let view = prefs::View {
@@ -260,6 +267,9 @@ impl App {
             library_tab: tab.into(),
             library_source: super::library::filter::source_name(self.lib_view.filters.source).into(),
             library_sort: self.lib_view.filters.order.name().into(),
+            community_window: self.community.floating,
+            community_view: self.community.view.name().into(),
+            community_card: self.community.card,
             camera: prefs::CameraPrefs {
                 yaw: c.yaw,
                 pitch: c.pitch,

@@ -15,6 +15,7 @@ ac-ai = { path = "crates/ac-ai" }
 ac-io = { path = "crates/ac-io" }
 ac-media = { path = "crates/ac-media" }
 ac-textmotion = { path = "crates/ac-textmotion" }
+ac-community = { path = "crates/ac-community" }
 ac-render = { path = "crates/ac-render" }
 ac-cli = { path = "crates/ac-cli" }
 craft-atomic = { git = "https://github.com/storytold/craft-libs", rev = "d40c2be47d36e6d25747ab5665c4f174b03df5b7" }

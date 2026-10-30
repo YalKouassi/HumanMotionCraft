@@ -162,6 +162,10 @@ pub struct View {
     pub library_source: String,
     /// The library's order: `name`, `recent`, `modified` or `length`.
     pub library_sort: String,
+    /// The community in its own window; its view (`gallery` or `list`) and card width.
+    pub community_window: bool,
+    pub community_view: String,
+    pub community_card: f32,
     pub camera: CameraPrefs,
     /// The performance HUD.
     pub perf: bool,
@@ -177,6 +181,9 @@ impl Default for View {
             library_tab: "animations".into(),
             library_source: "all".into(),
             library_sort: "name".into(),
+            community_window: false,
+            community_view: "gallery".into(),
+            community_card: 160.0,
             camera: CameraPrefs::default(),
             perf: false,
         }

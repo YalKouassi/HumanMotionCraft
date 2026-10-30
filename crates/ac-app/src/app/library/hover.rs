@@ -9,7 +9,7 @@ const FPS: f64 = 6.0;
 const GAP: f32 = 2.0;
 
 /// The part of a strip texture (`w` pixels wide, `n` cells) holding cell `i`, in UV.
-pub(super) fn cell_uv(w: f32, n: usize, i: usize) -> egui::Rect {
+pub(in crate::app) fn cell_uv(w: f32, n: usize, i: usize) -> egui::Rect {
     let n = n.max(1) as f32;
     let cell = ((w - GAP * (n - 1.0)) / n).max(1.0);
     let x0 = i as f32 * (cell + GAP) / w.max(1.0);

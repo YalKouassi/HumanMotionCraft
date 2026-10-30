@@ -1,0 +1,136 @@
+{
+  "$schema": "./schema.json",
+  "name": "community",
+  "feature": "community.browse",
+  "description": "The community library on the fixtures' fake server (crates/ac-community/src/fake.rs has its table: c1 Happy hop 4.5 from 2 ratings, 10 downloads, 10-01; c2 Slow walk 4.5 from 8, 3, 10-05; c3 Wave 3.0 from 1, 25, 10-03; c4 My spin, yours, 0 from 0, 1, 10-04; c5 Broken file 2.0 from 1, 0, 10-02). Top: by rating, then number of ratings, then newest, so c2 (4.5, 8) beats c1 (4.5, 2), then c3, c5, c4. New: c2, c4, c3, c5, c1. Downloads: c3 25, c1 10, c2 3, c4 1, c5 0. Every search word must be in the title, description or tags: 'hello wave' finds only c3 (title Wave, description 'A friendly hello'); its 48 frames at 24 fps are 2 s. Page 1 of 2 by top is c3 and c5. Installing c3 puts it in Community as 'Wave 2', because the built-in Gestures/Wave has the name; installing it again changes nothing, and browsing then says where it is and counts 26 downloads. Rating c1 5 stars makes (4.5 x 2 + 5) / 3 = 4.67 from 3; rating it 3 instead makes (9 + 3) / 3 = 4.0, still 3 ratings. The captcha token 'pass' verifies the account, which can then report and share: tags 'Jump', 'jump' and 'small hop!' clean to jump, small, hop. My uploads lists newest first: the share (10-07, checking), Bad pose (10-06, failed, with the reason) and My spin (10-04, published); after removing the share it reads removed. Refused: a limit of 0, an unknown clip, c5 (its file doesn't match its hash), 6 stars, rating or reporting your own clip, a failing captcha token, sharing a built-in, an 81-character title, a missing licence or a pose, and removing someone else's clip.",
+  "script": [
+    {
+      "command": "community.account",
+      "expect": { "signed_in": false, "verified": false, "name": "", "captcha": "fake://verify.html" }
+    },
+    {
+      "command": "community.browse",
+      "expect": {
+        "count": 5,
+        "clips": [{ "id": "c2" }, { "id": "c1" }, { "id": "c3" }, { "id": "c5" }, { "id": "c4" }]
+      }
+    },
+    {
+      "command": "community.browse",
+      "params": { "sort": "new" },
+      "expect": { "clips": [{ "id": "c2" }, { "id": "c4" }, { "id": "c3" }, { "id": "c5" }, { "id": "c1" }] }
+    },
+    {
+      "command": "community.browse",
+      "params": { "sort": "downloads" },
+      "expect": { "clips": [{ "id": "c3" }, { "id": "c1" }, { "id": "c2" }, { "id": "c4" }, { "id": "c5" }] }
+    },
+    {
+      "command": "community.browse",
+      "params": { "search": "hello WAVE" },
+      "expect": {
+        "count": 1,
+        "clips": [{ "id": "c3", "title": "Wave", "author": "Cat", "seconds": 2.0, "installed": "" }]
+      }
+    },
+    {
+      "command": "community.browse",
+      "params": { "tags": ["walk"] },
+      "expect": {
+        "count": 1,
+        "clips": [{ "id": "c2", "seconds": 3.0, "licence": "CC-BY-4.0", "credit": "Ben's mocap" }]
+      }
+    },
+    {
+      "command": "community.browse",
+      "params": { "page": 1, "limit": 2 },
+      "expect": { "count": 2, "clips": [{ "id": "c3" }, { "id": "c5" }] }
+    },
+    {
+      "command": "community.install",
+      "params": { "id": "c3" },
+      "expect": { "id": "Community/Wave 2", "clip": "c3", "already": false, "notes": [] }
+    },
+    {
+      "command": "community.install",
+      "params": { "id": "c3" },
+      "expect": { "id": "Community/Wave 2", "already": true }
+    },
+    {
+      "command": "community.browse",
+      "params": { "search": "wave" },
+      "expect": { "clips": [{ "id": "c3", "installed": "Community/Wave 2", "downloads": 26 }] }
+    },
+    {
+      "command": "community.fetch",
+      "params": { "id": "c2" },
+      "expect": { "id": "c2", "clip": { "title": "Slow walk", "frames": 90 } }
+    },
+    {
+      "command": "community.rate",
+      "params": { "id": "c1", "stars": 5 },
+      "expect": { "id": "c1", "rating": 4.67, "ratings": 3 }
+    },
+    {
+      "command": "community.rate",
+      "params": { "id": "c1", "stars": 3 },
+      "expect": { "rating": 4.0, "ratings": 3 }
+    },
+    { "command": "community.account", "expect": { "signed_in": true, "verified": false } },
+    { "command": "community.verify", "params": { "token": "pass" }, "expect": { "verified": true } },
+    {
+      "command": "community.report",
+      "params": { "id": "c2", "reason": "test" },
+      "expect": { "id": "c2", "reported": true }
+    },
+    { "command": "clip.new", "params": { "name": "Hop", "group": "Mine", "fps": 30 } },
+    { "command": "key.set", "params": {} },
+    { "command": "clip.save", "expect": { "id": "Mine/Hop" } },
+    {
+      "command": "community.share",
+      "params": {
+        "id": "Mine/Hop",
+        "tags": ["Jump", "jump", "small hop!"],
+        "licence": "CC0-1.0",
+        "name": "Tester"
+      },
+      "expect": { "clip": "s1", "status": "checking", "title": "Hop", "tags": ["jump", "small", "hop"] }
+    },
+    {
+      "command": "community.mine",
+      "expect": {
+        "clips": [
+          { "id": "s1", "status": "checking", "reason": "" },
+          { "id": "c6", "status": "failed", "reason": "frame 12: the left knee bends backwards" },
+          { "id": "c4", "status": "published" }
+        ]
+      }
+    },
+    { "command": "community.remove", "params": { "id": "s1" }, "expect": { "id": "s1", "status": "removed" } },
+    { "command": "community.mine", "expect": { "clips": [{ "id": "s1", "status": "removed" }, {}, {}] } },
+    { "command": "community.account", "expect": { "signed_in": true, "verified": true, "name": "Tester" } }
+  ],
+  "errors": [
+    { "command": "community.browse", "params": { "limit": 0 } },
+    { "command": "community.fetch", "params": { "id": "nope" } },
+    { "command": "community.install", "params": { "id": "c5" } },
+    { "command": "community.rate", "params": { "id": "c1", "stars": 6 } },
+    { "command": "community.rate", "params": { "id": "c4", "stars": 3 } },
+    { "command": "community.report", "params": { "id": "c4" } },
+    { "command": "community.verify", "params": { "token": "nope" } },
+    { "command": "community.share", "params": { "id": "Gestures/Wave", "licence": "CC0-1.0" } },
+    {
+      "command": "community.share",
+      "params": {
+        "id": "Mine/Hop",
+        "licence": "CC0-1.0",
+        "title": "123456789012345678901234567890123456789012345678901234567890123456789012345678901"
+      }
+    },
+    { "command": "community.share", "params": { "id": "Mine/Hop" } },
+    { "command": "community.share", "params": { "id": "Action/Crouch", "licence": "CC0-1.0" } },
+    { "command": "community.remove", "params": { "id": "c1" } },
+    { "command": "community.mine", "params": { "page": 1 } },
+    { "command": "community.account", "params": { "id": "c1" } }
+  ]
+}

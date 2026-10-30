@@ -394,6 +394,9 @@ impl App {
         // Background panel work runs every frame whether the Inspector or a dock panel is open.
         self.ai_poll();
         self.text_poll(ui.ctx());
+        self.community_poll(ui.ctx());
+        self.community_window(ui.ctx());
+        self.community_share_window(ui.ctx());
         self.physics_refresh();
         self.range_refresh();
         self.sync_dock_flags();
