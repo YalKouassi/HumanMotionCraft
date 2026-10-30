@@ -19,6 +19,8 @@ training clips. It doesn't replace the text engine, and `ai.fill` keeps using ou
 | SOMA model | NVIDIA Open Model Agreement | use it, downloaded at install |
 | Sample clips (`assets/motions/`) | NVIDIA Sample Data Evaluation License | never ship, train on, or use as poses for anything we keep |
 | BONES-SEED | Bones licence | never accept it or use it |
+| TensorRT packages | NVIDIA TensorRT Software License Agreement | not read in full; the install fetches them and the repo and release never carry them |
+| Warp | Apache 2.0 | use it, fetched at install |
 
 - **Sample clips:** the upstream demos pick their poses from these clips, and anything derived from
   them is held to the same evaluation-only limit. Poses must come only from the person's own keys,
@@ -31,9 +33,10 @@ training clips. It doesn't replace the text engine, and `ai.fill` keeps using ou
 - **Training on outputs:** the agreement doesn't mention it, so nothing forbids it. It has the same
   catch as the `kimodo` set: the model learned from Bones' RigPlay data, and this distils data that
   Bones keeps from generative training.
-- **First step of the build:** read the agreement and the sample licence line by line, and open the
-  Hugging Face card (`nvidia/MotionBricks`), which the check skipped. Stop and ask the owner if the
-  wording differs from the table.
+- **First step of the build:** read the agreement, the sample licence and the TensorRT licence that
+  ships with the package line by line, and open the Hugging Face card (`nvidia/MotionBricks`), which
+  the check skipped. Stop and ask the owner if the wording differs from the table or TensorRT's terms
+  stop the install from fetching it.
 
 ### The engine
 - **Names:** other products' names stay out of code, as with `tools/textmotion`: `tools/posefill/`,
@@ -43,9 +46,11 @@ training clips. It doesn't replace the text engine, and `ai.fill` keeps using ou
   `text.helper` do it, with an `Engine` seam and a fake in the tests. Code shared with
   `ac-textmotion` moves first, in its own behaviour-preserving commit. `AGENTS.md`'s exception to
   "Rust only at runtime" gains this helper.
-- **Runtime:** ONNX Runtime, not TensorRT, which needs an NVIDIA GPU and has a licence nobody has
-  read. Raw ONNX output needs upstream's frame trimming and endpoint correction ported to the
-  helper.
+- **Runtime:** TensorRT through upstream's Apache-licensed engine, so this needs an NVIDIA GPU (owner,
+  2026-10-30). That spares us porting the frame trimming and endpoint correction, and gives live
+  control (158000) the speed it needs from one runtime. There is no CPU or other-GPU fallback:
+  `posefill.install` checks for the GPU and refuses with the reason. The first launch builds a
+  TensorRT plan, which takes a few minutes, so the panel says so.
 - **Rig:** reuse the conversion between our rig and SOMA in `tools/textmotion/engine.py`.
 
 ### The fill
@@ -70,7 +75,7 @@ Build this once the owner has judged the fill by eye. A generated set in the `RE
 
 ### Not known yet
 - Quality on our rig: the model card warns that unusual target poses lower it.
-- Speed: published timings are TensorRT on an RTX 4090, with no figures for ONNX Runtime on CPU.
+- Speed on lower-end cards: published timings are for an RTX 4090 (2.5 ms for the plan alone).
 - Whether the model depends on anything in `assets/motions/` at load, such as a default pose. If it
   does, stop and ask the owner. Found 2026-10-30: the ONNX models are in the repo at
   `motionbricks/assets/onnx/` with their own `LICENSE.md`, and the upstream Smart Primitive documents
@@ -91,7 +96,8 @@ Packaging (124000) must ship `tools/posefill` and the rig modules, as it must fo
 - With the install, contact sheets show fills of about 1 s and 2 s between our keys, and a chained
   fill through a middle key, each meeting its keys on our rig. Save a fill to the library and reload
   it.
-- Seconds per call on CPU, and on GPU if used, are recorded under `## Result`.
+- On a machine without an NVIDIA GPU, `posefill.install` refuses and says why.
+- Seconds per call on the GPU, with the card named, are recorded under `## Result`.
 - `ATTRIBUTION.md` and `NOTICE` carry the credit, and `AGENTS.md` and `docs/commands.md` are updated.
   `cargo xtask check` passes.
 - The owner judges the motion by eye and approves the panel from screenshots, and only then does
