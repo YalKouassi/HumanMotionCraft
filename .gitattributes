@@ -1,4 +1,5 @@
 * text=auto eol=lf
 *.glb binary
+*.fbx binary
 *.onnx binary
 *.bin binary
