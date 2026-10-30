@@ -10,6 +10,8 @@ clips. Nothing here runs at app time.
 | `ac_train.b3d` | pure-Python `.b3d` (`SubjectOnDisk`) reader and HTTP-Range fetcher for AddBiomechanics 1.0 |
 | `ac_train.train` | trains the network on the retargeted sets into `training/data/models/<tag>/` |
 | `ac_train.evaluate` | the evaluation suite: gap bins, pose, feet, continuity, impossible joints, realistic contexts, part layers, scenarios (starts, stops, crouches, flights, turns while stepping); writes it into the card, and contact sheets |
+| `ac_train.flag` | after training: fills every window of every take with the model and puts the worst 1 % of the takes (by loss) into the review app's queue (`data/rig/flags.json`); a person decides, never the flag |
+| `ac_train.coverage` | how many training minutes each evaluation slice has (starts, stops, crouches, flights, turns, the motion types), by set and by what training uses, holds out or leaves out, beside each slice's windows from a card and the windows it can expect; writes `data/coverage.json` (roadmap 134750) |
 | `ac_train.split` | which subjects validation holds out (whole subjects, stable however the sets change) |
 | `ac_train.context` | the context before key A as the app gives it: a spline through sparse keys (the app's interpolation, batched), or held still |
 | `ac_train.kinematics`, `ac_train.losses` | body points, feet, contacts and joint angles in torch; training's loss terms |
@@ -240,6 +242,30 @@ What training would use, without training (`--dropped` lists the takes left out 
 uv run python -m ac_train.review
 ```
 
+### 3e. Flag the takes the model fails on
+
+After training (step 4), the model itself says which takes it fits worst:
+
+```bash
+uv run python -m ac_train.flag --tag parts-lowweights --checkpoint best    # writes data/rig/flags.json
+cargo run -p ac-review --release -- run review.list '{"show": "model", "limit": 20}'
+```
+
+Every window of every take (clean context, a gap of 15 frames, the take's own styles) is filled
+by the model and given training's loss (`ac_train/losses.py`, the card's weights); the worst 1 %
+of the takes by their mean window loss (at least one; `--by worst` ranks by the worst window,
+`--share` changes the share, `--stride n` keeps every n-th window for a quicker look) are written
+to `data/rig/flags.json` with their loss, their worst window's frame and a line saying why. The
+six sets' 2.9 million windows take about 2.5 minutes on an RTX 3080 Ti. Takes training leaves out
+(rejected by the scan or the review) are skipped: they are in the queue already.
+
+The review app reads the file beside the scans: **Model fails** in the filter (`show: "model"`)
+lists the flagged takes worst first, each take's panel says its rank, loss and why, with a link to
+the worst window, and `review.summary` reports the file (`flags`). No file is said, not silent;
+flags made before a set was rebuilt are stale: left out and said. Flagging decides nothing and
+never touches `training/review/decisions.json`: a high loss is often just hard motion (a flip, a
+drop jump), not bad data, so a person looks and then keeps, cuts or rejects as usual.
+
 ### 3d. Styles
 
 The model's styles are the labels in the training data, nothing else (`ac_train/labels.py`). A
@@ -332,6 +358,19 @@ possible joint limits. By gap bin (1–4, 5–10, 11–20, 21–30, 31–45), fo
 and writes it all into the card. `--sheets` draws six fixed hard fills (the recording, the model,
 the interpolation) as contact sheets with physics off, under `data/models/<tag>/sheets-<checkpoint>/`,
 so two model versions can be compared side by side.
+
+How much training motion each slice has, without a model (CPU, about four minutes for the six sets):
+
+```bash
+uv run python -m ac_train.coverage --card parts-lowweights:best --card parts   # prints the table, writes data/coverage.json
+```
+
+The slices are the evaluation's, read from the recordings with its thresholds (`ac_train/coverage.py`
+says how each one is counted frame by frame). The table gives each slice's minutes (what training
+uses, what validation holds out, what the scan or the review leaves out, by set), the card's windows
+and model / interpolation joint error (a later `--card` fills rows the first lacks), whether the
+windows are enough to trust (100), the windows the slice can expect at the default draw and the
+`--windows` it would need, and a ranking of the slices by the model's share of the interpolation's error.
 
 ### 5. Export to the app
 

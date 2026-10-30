@@ -13,6 +13,7 @@
 )]
 
 pub mod decisions;
+pub mod flags;
 pub mod npz;
 pub mod review;
 pub mod scan;

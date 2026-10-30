@@ -1,0 +1,19 @@
+{
+ "format": "ac-train.flags",
+ "version": 1,
+ "model": {"tag": "parts", "checkpoint": "best", "file": "data/models/parts/best.pt", "steps": 100, "best": {"step": 90, "score": 0.5}},
+ "gap": 15,
+ "stride": 1,
+ "share": 0.01,
+ "by": "loss",
+ "sets": {"tiny": {"takes": 2, "frames": 16, "crc32": 408843836, "evaluated": 1, "skipped": 1, "windows": 4}},
+ "takes": 1,
+ "windows": 4,
+ "median_loss": 0.41,
+ "elapsed_s": 0.2,
+ "flagged": [
+  {"id": "tiny/walk_a", "label": "a walk", "frames": 10, "windows": 4, "loss": 0.41, "worst": 0.9, "worst_at": 3,
+   "terms": {"pos": 0.2, "feat": 0.1}, "weighted": {"pos": 0.4, "feat": 0.1}, "rank": 1,
+   "why": "mean loss 0.410 over 4 windows of gap 15, 1.0x the median take; worst 0.900 at frame 3; mostly pos (0.400)"}
+ ]
+}

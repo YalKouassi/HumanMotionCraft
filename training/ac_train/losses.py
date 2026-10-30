@@ -88,3 +88,45 @@ def terms(pred, truth, gm, a: int, b: int, body: Body, contacts=None) -> dict[st
 
 def total(t: dict[str, torch.Tensor], weights: dict[str, float] = WEIGHTS) -> torch.Tensor:
     return sum(weights.get(k, 0.0) * v for k, v in t.items())
+
+
+def window_terms(pred, truth, a: int, b: int, body: Body, contacts=None) -> dict[str, torch.Tensor]:
+    """The same terms, one value a window (N,), with nothing given: what :func:`terms` averages
+    over a batch (``feat``, ``pos``, ``vel``, ``jerk``, ``rot``, ``possible``, ``contact``,
+    ``floor`` are plain means of these; ``skate`` is their mean weighted by planted frames).
+    ``ac_train.flag`` ranks takes by them."""
+    hip = body.hip_height
+    gap = slice(a + 1, b)
+    known = torch.ones(pred.shape[1], 1, device=pred.device)
+    known[gap] = 0
+    pred = pred * (1 - known) + truth * known
+    out = {"feat": (pred[:, gap] - truth[:, gap]).abs().mean((1, 2))}
+    Rp, Pp = unfeatures(pred, hip)
+    Wp = body.world(Rp)
+    pp = body.points(Rp, Pp, Wp)
+    Rt, Pt = unfeatures(truth, hip)
+    pt = body.points(Rt, Pt)
+    w = _point_weights(pred.device)
+    out["pos"] = ((pp[:, gap] - pt[:, gap]).norm(dim=-1) * w).mean((1, 2)) / hip
+    span = slice(a, b + 1)
+    vp, vt = pp[:, span].diff(dim=1), pt[:, span].diff(dim=1)
+    out["vel"] = ((vp - vt).norm(dim=-1) * w).mean((1, 2)) * FPS / hip
+    lo = max(a - 1, 0)
+    if b + 1 - lo >= 4:
+        jp, jt = pp[:, lo : b + 1].diff(n=3, dim=1), pt[:, lo : b + 1].diff(n=3, dim=1)
+        out["jerk"] = torch.relu(jp.norm(dim=-1) - jt.norm(dim=-1)).mean((1, 2)) * FPS**3 / hip
+    else:
+        out["jerk"] = pred.new_zeros(pred.shape[0])
+    out["rot"] = geodesic(Rp[:, gap], Rt[:, gap]).mean((1, 2))
+    _, over = body.impossible(Wp[:, gap], hinge=True)
+    out["possible"] = over.mean(1)
+    if contacts is not None:
+        planted = body.planted(pt)
+        bce = torch.nn.functional.binary_cross_entropy_with_logits(contacts[:, gap], planted[:, gap].float(), reduction="none")
+        out["contact"] = bce.mean((1, 2))
+        speed = foot_speed(pp)[:, gap]
+        pl = planted[:, gap].float()
+        out["skate"] = (speed * pl).sum((1, 2)) / pl.sum((1, 2)).clamp(min=1) / hip
+        low = body.foot_heights(pp[:, gap]).min(-1).values
+        out["floor"] = torch.relu(-low).mean(1) / hip
+    return out

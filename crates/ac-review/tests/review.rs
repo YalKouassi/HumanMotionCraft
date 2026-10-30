@@ -227,3 +227,116 @@ fn a_set_built_for_another_rig_is_left_out() {
     assert!(r.problems[0].contains("no build stamp"), "{:?}", r.problems);
     std::fs::remove_dir_all(&dir).ok();
 }
+
+/// 137000: the model's flags (`flags.json`) filter the queue and show on a take; a missing file
+/// is said, a stale one (the set rebuilt since) is left out and said; nothing is decided.
+#[test]
+fn the_models_flags_list_worst_first_and_stale_or_missing_ones_are_said() {
+    let dir = scratch("flags");
+    write_set(&dir);
+    let decisions = dir.join("decisions.json");
+    let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/data");
+    // no file: stated by review.summary and review.take, and `show: model` refuses with the same words
+    let mut r = Review::open(&dir, &decisions).unwrap();
+    assert!(r.problems.is_empty(), "{:?}", r.problems);
+    let s = r.run("review.summary", &p(json!({}))).unwrap();
+    assert_eq!(s["flags"]["present"], false);
+    assert!(
+        s["flags"]["note"]
+            .as_str()
+            .unwrap()
+            .contains("python -m ac_train.flag"),
+        "{s}"
+    );
+    let e = r.run("review.list", &p(json!({"show": "model"}))).unwrap_err();
+    assert!(e.contains("no model flags") && e.contains("ac_train.flag"), "{e}");
+    let t = r.run("review.take", &p(json!({"id": "tiny/walk_a"}))).unwrap();
+    assert!(
+        t["model"].is_null() && t["model_note"].as_str().unwrap().contains("no model flags"),
+        "{t}"
+    );
+    assert!(r.run("review.list", &p(json!({"show": "modle"}))).is_err());
+    // the fixture's digest is the tiny set's (ac_train.flag.digest agrees: tests/test_flag.py)
+    assert_eq!(
+        ac_review::flags::digest([("walk_a".to_string(), 10), ("jump_b".to_string(), 6)]),
+        408843836
+    );
+    std::fs::copy(fixtures.join("flags.json"), dir.join("flags.json")).unwrap();
+    let mut r = Review::open(&dir, &decisions).unwrap();
+    assert!(r.problems.is_empty(), "{:?}", r.problems);
+    assert_eq!(
+        (r.flags.present, r.flags.model.as_str(), r.flags.gap),
+        (true, "parts/best", 15)
+    );
+    assert!(
+        r.flags
+            .note
+            .starts_with("1 of 1 takes flagged by parts/best (gap 15, every window"),
+        "{}",
+        r.flags.note
+    );
+    let list = r.run("review.list", &p(json!({"show": "model"}))).unwrap();
+    assert_eq!(list["total"], 1);
+    let row = &list["takes"][0];
+    assert_eq!(row["id"], "tiny/walk_a");
+    assert_eq!(
+        row["model"],
+        json!({"rank": 1, "loss": 0.41, "worst": 0.9, "worst_at": 3, "windows": 4})
+    );
+    // the other filters still work, and say which takes the model flags
+    let all = r.run("review.list", &p(json!({"show": "all"}))).unwrap();
+    assert_eq!(all["total"], 2);
+    let by_id: Vec<(&str, bool)> = all["takes"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|t| (t["id"].as_str().unwrap(), t["model"].is_null()))
+        .collect();
+    assert_eq!(by_id, [("tiny/jump_b", true), ("tiny/walk_a", false)]);
+    let t = r.run("review.take", &p(json!({"id": "tiny/walk_a"}))).unwrap();
+    assert!(
+        t["model"]["why"].as_str().unwrap().starts_with("mean loss 0.410"),
+        "{t}"
+    );
+    assert_eq!(t["model"]["weighted"]["pos"], 0.4);
+    assert!(t.get("model_note").is_none());
+    let s = r.run("review.summary", &p(json!({}))).unwrap();
+    assert_eq!(
+        (s["flags"]["present"].clone(), s["flags"]["takes"].clone()),
+        (json!(true), json!(1))
+    );
+    // flagging decided nothing
+    assert!(r.decisions.takes.is_empty() && !decisions.exists());
+    // stale: made when walk_a was 11 frames; left out and said, the rest of the review as before
+    std::fs::copy(fixtures.join("flags-stale.json"), dir.join("flags.json")).unwrap();
+    let mut r = Review::open(&dir, &decisions).unwrap();
+    assert_eq!(r.problems.len(), 1, "{:?}", r.problems);
+    assert!(
+        r.problems[0].contains("tiny's model flags are stale") && r.problems[0].contains("1 left out"),
+        "{:?}",
+        r.problems
+    );
+    assert!(r.flags.present && r.flags.takes.is_empty());
+    assert_eq!(
+        r.run("review.list", &p(json!({"show": "model"}))).unwrap()["total"],
+        0
+    );
+    assert_eq!(r.run("review.list", &p(json!({}))).unwrap()["total"], 2);
+    // not a flags file, or one from a newer writer: an error, the review still opens
+    std::fs::write(
+        dir.join("flags.json"),
+        "{\"format\": \"x.review\", \"version\": 1}",
+    )
+    .unwrap();
+    let r = Review::open(&dir, &decisions).unwrap();
+    assert!(r.problems[0].contains("not a flags file"), "{:?}", r.problems);
+    assert!(!r.flags.present);
+    std::fs::write(
+        dir.join("flags.json"),
+        "{\"format\": \"ac-train.flags\", \"version\": 2}",
+    )
+    .unwrap();
+    let r = Review::open(&dir, &decisions).unwrap();
+    assert!(r.problems[0].contains("newer"), "{:?}", r.problems);
+    std::fs::remove_dir_all(&dir).ok();
+}
