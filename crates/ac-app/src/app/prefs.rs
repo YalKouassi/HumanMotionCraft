@@ -275,6 +275,8 @@ pub struct FilesPrefs {
     pub preview_format: Option<String>,
     pub welcome_seen: bool,
     pub tips_seen: bool,
+    /// The next-step window after a block-out was asked not to show again.
+    pub guide_off: bool,
     /// Per library folder ([`library_key`]): recent animations and the last one open.
     pub libraries: BTreeMap<String, LibraryPrefs>,
 }

@@ -187,6 +187,7 @@ impl App {
             });
         if go && self.run_block(&b) {
             open = false;
+            self.open_guide(&b.fill);
         }
         if open {
             self.files.block = Some(b);

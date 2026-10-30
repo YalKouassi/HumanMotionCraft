@@ -39,6 +39,8 @@ pub struct AppState {
     pub welcome_seen: bool,
     /// The tips tour was finished or dismissed.
     pub tips_seen: bool,
+    /// The next-step window after a block-out was asked not to show again.
+    pub guide_off: bool,
 }
 
 impl AppState {
@@ -109,6 +111,7 @@ impl FilesPrefs {
             preview_format: self.preview_format.clone(),
             welcome_seen: self.welcome_seen,
             tips_seen: self.tips_seen,
+            guide_off: self.guide_off,
         }
     }
 
@@ -121,6 +124,7 @@ impl FilesPrefs {
         self.preview_format = s.preview_format.clone();
         self.welcome_seen = s.welcome_seen;
         self.tips_seen = s.tips_seen;
+        self.guide_off = s.guide_off;
         self.libraries.insert(
             library_key(library),
             LibraryPrefs {

@@ -12,6 +12,7 @@ mod autosave;
 mod block;
 mod drop;
 mod export;
+mod guide;
 mod preview;
 mod state;
 mod watch;
@@ -32,6 +33,7 @@ pub struct Files {
     /// The recovery dialog's items (`recovery.list`), while it is on screen.
     pub recover: Option<Vec<Value>>,
     pub export: Option<export::Export>,
+    pub guide: Option<guide::Guide>,
     pub preview: Option<preview::Preview>,
     pub welcome: bool,
     /// The tips tour's page, while it is on screen.
@@ -215,6 +217,7 @@ impl App {
         self.export_window(ctx);
         self.preview_window(ctx);
         self.block_window(ctx);
+        self.guide_window(ctx);
         self.welcome_dialog(ctx);
         self.tips_window(ctx);
         self.library_dialogs(ctx);
@@ -234,6 +237,7 @@ impl App {
                 self.files.export = None;
                 self.files.preview = None;
                 self.files.block = None;
+                self.files.guide = None;
                 self.files.welcome = false;
                 self.files.tips = None;
                 self.files.recover = None;

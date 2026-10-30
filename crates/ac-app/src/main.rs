@@ -18,7 +18,7 @@
 //! `palette=<search>`, `theme=dark|light`, `scale=<0.5..3>`, `colours=standard|safe`,
 //! `units=frames|seconds|timecode`, `maximise=on|off`, `library|inspector|timeline=on|off`,
 //! `side=left|right`, `perf=on|off`; the inspector panels': `joint=<bone>`, `box=<n>`,
-//! `layer=<n>`, `travel=preview|off`, `prompt=<text>` (motion from text), `range_pair=<pair>`,
+//! `layer=<n>`, `travel=preview|off`, `prompt=<text>` (motion from text), `export_dir=<folder>` (where Export starts), `range_pair=<pair>`,
 //! `range_side=L|R|Both` (the Range panel); the Community tab's: `community=<clip id>|mine|none`
 //! (its popover, or your uploads), `share=<animation id>` (the Share to community window),
 //! `community_window=on|off` (the community in its own window), `community_view=gallery|list`,

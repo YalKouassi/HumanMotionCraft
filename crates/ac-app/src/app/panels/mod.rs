@@ -29,7 +29,7 @@ pub struct Panels {
 impl super::App {
     /// The panels' window state for `--ui` and the control port: `joint=<bone>` selects a joint,
     /// `box=<n>` picks a scene box, `layer=<n>` picks a layer, `prompt=<text>` fills in motion from
-    /// text's prompt.
+    /// text's prompt, `export_dir=<folder>` is where the Export dialog starts.
     pub(in crate::app) fn set_panel_ui(&mut self, name: &str, value: &str) -> Result<(), String> {
         let index = || value.parse::<usize>().map_err(|e| format!("{value:?}: {e}"));
         match name {
@@ -49,6 +49,7 @@ impl super::App {
                 self.panels.layers.pick(i);
             }
             "prompt" => self.panels.text.prompt = value.to_string(),
+            "export_dir" => self.files.state.export_dir = Some(value.to_string()),
             "range_pair" => {
                 if let Some(r) = self.session.document.ranges.as_deref() {
                     r.pair(value)?;
