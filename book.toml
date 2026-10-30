@@ -1,0 +1,12 @@
+[book]
+title = "HumanMotionCraft"
+authors = ["YalKouassi"]
+language = "en"
+src = "docs"
+
+[build]
+build-dir = "target/book"
+
+[output.html]
+git-repository-url = "https://github.com/YalKouassi/HumanMotionCraft"
+edit-url-template = "https://github.com/YalKouassi/HumanMotionCraft/edit/main/{path}"

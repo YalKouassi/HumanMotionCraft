@@ -1,0 +1,3 @@
+# Game-ready .glb
+
+WIP

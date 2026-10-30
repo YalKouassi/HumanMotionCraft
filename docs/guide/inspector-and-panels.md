@@ -1,0 +1,3 @@
+# Inspector and panels
+
+WIP
