@@ -1,6 +1,6 @@
 # A guided path to a first animation
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-30)
 - **Requires:** 118900
 - **Source:** 115100
 
