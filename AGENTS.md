@@ -23,9 +23,9 @@ this file is the single source of agent rules.
 
 | Folder | What | Rule |
 |---|---|---|
-| `crates/ac-core` | rig, quaternions, FK, IK, limits, clip/layer/curve model, the physics pass (`ac_core::physics`), **the command registry and session (undo)** | no UI, GPU, file dialogs or threads; wasm-safe |
+| `crates/ac-core` | rig, quaternions, FK, IK, limits, clip/layer/curve model, the physics pass (`ac_core::physics`), the retarget of landmark positions onto the rig (`ac_core::retarget`, a port of `training/ac_train/retarget.py` pinned by `crates/ac-core/tests/golden/retarget-walk.json`) and the joint-name guess it needs (`ac_core::jointmap`, shared with the export onto a character), **the command registry and session (undo)** | no UI, GPU, file dialogs or threads; wasm-safe |
 | `crates/ac-ai` | in-betweener: the network in plain Rust (weights from `training/`: `python -m ac_train.export`) and the fill pipeline | depends on `ac-core` only; goldens in `crates/ac-ai/tests/golden` |
-| `crates/ac-io` | GLB export, clip and pose files, the library, recovery, and the one session setup every front end uses (`ac_io::setup::SessionBuilder`) | depends on `ac-core` only |
+| `crates/ac-io` | GLB export, clip and pose files, the library, recovery, binary FBX import (`ac_io::fbx`: our own reader, `clip.import` of an `.fbx`, `clip.import_batch`; test files from `training/ac_train/fbxwrite.py`), and the one session setup every front end uses (`ac_io::setup::SessionBuilder`) | depends on `ac-core` only (plus `miniz_oxide` for FBX's zlib arrays); never reads or copies another product's FBX code |
 | `crates/ac-render` | `wgpu` renderer: skinned mesh, joints, grid, onion skin, gizmos, offscreen pictures; the one GIF/MP4 encoder (`ac_render::anim`: `GifWriter`, `Mp4Writer`) | no egui |
 | `crates/ac-media` | pictures and video of the animation as it plays: `clip.video` (MP4 through ffmpeg, or GIF), `clip.sheet` (contact sheet PNG); `Shots` renders headless, `Encoder` writes the file with `ac_render::anim` | depends on `ac-core` and `ac-render`; registered through `SessionBuilder::commands` by the CLI and the app |
 | `crates/ac-cli` | headless CLI `ac`: commands, scripts, fixtures, renders, video, scaffolding; MCP over stdio in `crates/ac-cli/src/mcp/` (generated from the command registry) | no command logic of its own |

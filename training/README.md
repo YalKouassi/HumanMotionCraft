@@ -18,6 +18,7 @@ clips. Nothing here runs at app time.
 | `ac_train.export` | writes `assets/models/<tag>/` (the weights the app loads) and the `ac-ai` goldens |
 | `ac_train.library` | cuts 3-second clips from the retargeted sets into a library folder |
 | `ac_train.infer` | the reference fill (PyTorch) that the goldens pin the Rust port to |
+| `ac_train.fbxwrite` | a small binary FBX writer: the test files of the app's FBX import (`fixtures/data/*.fbx`) and the retarget golden the Rust port is pinned to (`crates/ac-core/tests/golden/retarget-walk.json`); it never reads FBX (the app's reader is the one importer) |
 
 Everything under `training/data/` is gitignored: the downloads, the retargeted sets, the PyTorch
 checkpoints and the clips that may not be committed.
@@ -182,6 +183,24 @@ Loading takes about a minute, then each clip takes seconds (on an RTX 3080 Ti); 
 runs on the CPU unless the GPU has 24 GB. A clip already in `data/raw/kimodo` is skipped, so a run can be stopped and resumed, or
 extended with more seeds. `AC_TEXTMOTION_DIR` installs somewhere other than the default
 (`%LOCALAPPDATA%/<app>/textmotion`).
+
+### 2c. Your own FBX animations
+
+The app imports humanoid FBX (`clip.import`, roadmap 152000); there is no FBX reader in Python.
+Write a folder of clips with the batch command, then build a set from the folder:
+
+```bash
+cd .. && cargo run --release -p ac-cli -- --assets assets run clip.import_batch '{"from": "<fbx folder>", "to": "training/data/raw/myfbx"}'
+cd training && uv run python -m ac_train.datasets --clips data/raw/myfbx --name myfbx    # --commercial if they are yours to ship
+uv run python -m ac_train.quality myfbx
+```
+
+The clips are read as they are (already on the rig, their floor at z = 0); a take that walks on
+the spot (the feet step but the hips stay: a game loop) is left out and named, since it would teach
+the model that planted feet slide. Without `--commercial` the set is non-commercial (training reads
+it with `--noncommercial`). For a set you want in the registry, give its `Dataset` a `folder`.
+The test files of the import (`fixtures/data/*.fbx`) and the retarget golden come from
+`python -m ac_train.fbxwrite`.
 
 ### 3. Retarget onto the rig
 
