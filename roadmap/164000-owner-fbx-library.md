@@ -1,6 +1,6 @@
 # Port the owner's FBX animations into a private clip library
 
-- **Status:** built, bulk run next
+- **Status:** in progress: bulk run done, 6,433 clips; refused groups and the owner's delete pass left
 - **Requires:** 152000
 - **Source:** owner request (2026-10-31)
 
@@ -247,3 +247,6 @@ marks it finished only by its file. The port should record what the owner delete
 Tests: `crates/ac-io/tests/library.rs` (the index, threads, opening a folder, the layout note) and the tests
 in `crates/ac-app/src/app/library.rs` and `library/menu.rs` (6,000 rows, rows on screen, the cap, the next
 row, when it asks, the status line). All expected numbers are worked by hand in the tests' comments.
+
+## Bulk run (2026-10-31)
+All 6,489 sources have one outcome: 5,297 imported (6,433 clips, 4.9 GB, outside the repo), 116 duplicates, 1,076 refused. Largest refused groups: 321 no joint found for neck, 186 not humanoid by name with no bone map, 56 floor below z = 0, 14 `.meta` naming a head the file lacks, 12 feet swapped. `library.list` opens the folder; timing in the panel at this size isn't measured. The owner deletes bad clips as they go. The acceptance's agreement of every refused group is still to do.
