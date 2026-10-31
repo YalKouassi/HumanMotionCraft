@@ -98,6 +98,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
                     from: p,
                     to: q,
                     model: f.model.clone(),
+                    hash: f.hash.clone(),
                     notes: Vec::new(),
                     kept: f.kept.clone(),
                     anchors: Vec::new(),

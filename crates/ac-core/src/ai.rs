@@ -23,6 +23,8 @@ pub struct Filled {
     pub from: i64,
     pub to: i64,
     pub model: String,
+    /// The hash of the model's weights (`session.info`'s `model.hash`; empty: the filler has none).
+    pub hash: String,
     pub notes: Vec<String>,
     pub kept: crate::possible::Kept,
     /// The anchor poses placed inside a gap over the model's limit (`crate::anchors`; empty:
@@ -100,6 +102,58 @@ pub struct ModelInfo {
     /// Whether its training data allows commercial use.
     pub commercial: bool,
     pub warning: String,
+}
+
+/// A model as `ai.models` lists it: its card, where its files are, and whether it loads and fits
+/// this session (`refused`: why not). An add-on (roadmap 154000) names the base it was made on.
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct ModelCard {
+    pub tag: String,
+    /// What the card calls it (the tag when it has no name).
+    pub name: String,
+    /// FNV-1a of the weights (`session.info`'s `model.hash`); empty when the files can't be read.
+    pub hash: String,
+    pub bones: Vec<String>,
+    pub context: usize,
+    pub max_gap: usize,
+    pub context_after: usize,
+    pub multi_key: bool,
+    pub styles: Vec<String>,
+    pub given: bool,
+    pub commercial: bool,
+    pub warning: String,
+    /// The model this one adds on to (its card's `base` and `base_hash`); `None`: a base model.
+    pub base: Option<ModelBase>,
+    /// The folder its files are in.
+    pub path: String,
+    /// Where it was found: "installed" (the app's own models folder), "bundled" (the app's
+    /// assets) or "folder" (one `ai.models` was given).
+    pub source: String,
+    /// The one a fresh session loads.
+    pub default: bool,
+    /// Whether it loads and fits this session (`false`: `refused` says why).
+    pub loads: bool,
+    pub refused: Option<String>,
+}
+
+/// The base an add-on was made on: its tag and the hash of its weights at the time.
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct ModelBase {
+    pub tag: String,
+    pub hash: String,
+}
+
+/// Where models come from (the front end's `ac-ai`): the installed ones, the bundled ones and
+/// any folder a command added ([`crate::Document::model_folders`]). `ai.models` lists them and
+/// `ai.model` picks one; the core never reads weights itself.
+pub trait ModelSource: Send + Sync + std::fmt::Debug {
+    /// Every model found, in the order a tag is resolved (the first with a tag wins), each
+    /// checked against the rig `sk` and, for an add-on, against its base.
+    fn cards(&self, sk: &Skeleton, folders: &[std::path::PathBuf]) -> Vec<ModelCard>;
+
+    /// The model `tag` loaded, or why it can't be (not there, broken, or refused by the checks:
+    /// [`ModelCard::refused`]).
+    fn load(&self, sk: &Skeleton, folders: &[std::path::PathBuf], tag: &str) -> R<Arc<dyn Inbetweener>>;
 }
 
 pub trait Inbetweener: Send + Sync + std::fmt::Debug {
@@ -310,6 +364,11 @@ impl AiFiller {
         Ok((r, o, self.label()))
     }
 
+    /// The hash of the model's weights (empty when it gives none).
+    pub fn hash(&self) -> String {
+        self.model.hash().unwrap_or_default()
+    }
+
     /// The key label: the tag, and the style when the model honours one.
     pub fn label(&self) -> String {
         let info = self.model.info();
@@ -350,6 +409,10 @@ impl AiFiller {
 impl Filler for AiFiller {
     fn long(&self) -> bool {
         self.source.is_some()
+    }
+
+    fn hash(&self) -> String {
+        AiFiller::hash(self)
     }
 
     fn fill(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
@@ -499,6 +562,7 @@ impl crate::document::Document {
             from: a,
             to: b,
             model: filler.label(),
+            hash: filler.hash(),
             notes,
             kept,
             anchors: placed.anchors,
@@ -631,6 +695,7 @@ impl crate::document::Document {
             from: a,
             to: z,
             model: filler.label(),
+            hash: filler.hash(),
             notes: kept.notes.clone(),
             kept,
             anchors: Vec::new(),
@@ -668,6 +733,7 @@ impl crate::document::Document {
             from,
             to,
             model: label,
+            hash: _,
             notes,
             kept: _,
             anchors: _,
