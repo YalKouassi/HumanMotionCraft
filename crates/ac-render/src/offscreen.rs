@@ -35,6 +35,152 @@ pub fn view(name: &str, target: Vec3) -> Result<Camera, String> {
     })
 }
 
+/// What a picture is drawn on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Background {
+    /// The viewport's dark grey.
+    Usual,
+    Colour([u8; 3]),
+    /// Nothing: alpha 0, for a PNG.
+    Transparent,
+}
+
+impl Background {
+    /// `#rrggbb` (the `#` is optional) or `transparent`.
+    pub fn parse(text: &str) -> Result<Background, String> {
+        if text.eq_ignore_ascii_case("transparent") {
+            return Ok(Background::Transparent);
+        }
+        let hex = text.strip_prefix('#').unwrap_or(text);
+        let byte = |i: usize| hex.get(i..i + 2).and_then(|h| u8::from_str_radix(h, 16).ok());
+        match (hex.len(), byte(0), byte(2), byte(4)) {
+            (6, Some(r), Some(g), Some(b)) => Ok(Background::Colour([r, g, b])),
+            _ => Err(format!(
+                "background {text:?}: a colour as #rrggbb, or transparent"
+            )),
+        }
+    }
+
+    fn clear(self) -> wgpu::Color {
+        let unit = |c: u8| f64::from(c) / 255.0;
+        match self {
+            Background::Usual => crate::renderer::BACKGROUND,
+            Background::Colour([r, g, b]) => wgpu::Color {
+                r: unit(r),
+                g: unit(g),
+                b: unit(b),
+                a: 1.0,
+            },
+            Background::Transparent => wgpu::Color::TRANSPARENT,
+        }
+    }
+}
+
+/// A camera given by hand, in place of a named view's angles.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Orbit {
+    /// Radians about Z, as `Camera::yaw`: 0 looks at the rig's front.
+    pub azimuth: f64,
+    /// Radians above the floor.
+    pub elevation: f64,
+    /// Metres from the target.
+    pub distance: f64,
+    /// Where it looks; `None`: where the named view would (the body, or the fit of a fixed shot).
+    pub target: Option<[f64; 3]>,
+}
+
+impl Orbit {
+    pub const AZIMUTH: f64 = 6.3;
+    /// Short of straight up or down, where "up" stops meaning anything.
+    pub const ELEVATION: f64 = 1.55;
+    pub const NEAREST: f64 = 0.1;
+    /// Inside the far plane (200 m).
+    pub const FARTHEST: f64 = 150.0;
+    pub const REACH: f64 = 10_000.0;
+
+    /// Values from outside: each must be a finite number in its range.
+    pub fn new(
+        azimuth: f64,
+        elevation: f64,
+        distance: f64,
+        target: Option<[f64; 3]>,
+    ) -> Result<Orbit, String> {
+        let within = |name: &str, v: f64, lo: f64, hi: f64| {
+            if v.is_finite() && (lo..=hi).contains(&v) {
+                Ok(())
+            } else {
+                Err(format!("camera {name} {v}: from {lo} to {hi}"))
+            }
+        };
+        within("azimuth", azimuth, -Orbit::AZIMUTH, Orbit::AZIMUTH)?;
+        within("elevation", elevation, -Orbit::ELEVATION, Orbit::ELEVATION)?;
+        within("distance", distance, Orbit::NEAREST, Orbit::FARTHEST)?;
+        for v in target.iter().flatten() {
+            within("target", *v, -Orbit::REACH, Orbit::REACH)?;
+        }
+        Ok(Orbit {
+            azimuth,
+            elevation,
+            distance,
+            target,
+        })
+    }
+
+    /// `azimuth,elevation,distance[,x,y,z]`.
+    pub fn parse(text: &str) -> Result<Orbit, String> {
+        let usage = "azimuth,elevation,distance[,x,y,z]: radians and metres";
+        let v = text
+            .split(',')
+            .map(|t| {
+                t.trim()
+                    .parse::<f64>()
+                    .map_err(|e| format!("camera {t:?}: {e} ({usage})"))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        match v[..] {
+            [a, e, d] => Orbit::new(a, e, d, None),
+            [a, e, d, x, y, z] => Orbit::new(a, e, d, Some([x, y, z])),
+            _ => Err(format!("camera {text:?}: {usage}")),
+        }
+    }
+}
+
+/// How headless pictures are drawn. The default is what they have always looked like.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Look {
+    pub floor: bool,
+    pub background: Background,
+    pub camera: Option<Orbit>,
+}
+
+impl Default for Look {
+    fn default() -> Self {
+        Look {
+            floor: true,
+            background: Background::Usual,
+            camera: None,
+        }
+    }
+}
+
+impl Look {
+    /// `camera` with the hand-given values, if any, over its angles, distance and target.
+    fn aim(&self, camera: &Camera) -> Camera {
+        let Some(o) = self.camera else {
+            return *camera;
+        };
+        Camera {
+            target: o.target.map_or(camera.target, |t| {
+                Vec3::new(t[0] as f32, t[1] as f32, t[2] as f32)
+            }),
+            yaw: o.azimuth as f32,
+            pitch: o.elevation as f32,
+            distance: o.distance as f32,
+            ..*camera
+        }
+    }
+}
+
 /// The named views' vertical field of view.
 const FOV_Y: f64 = 0.7;
 /// How much of a tight picture's half-size the farthest point reaches.
@@ -152,6 +298,7 @@ pub struct Offscreen {
     skin_to_bone: Vec<usize>,
     /// The adapter the pictures come from (pictures differ a little between adapters).
     adapter: String,
+    look: Look,
 }
 
 impl Offscreen {
@@ -195,7 +342,15 @@ impl Offscreen {
             renderer,
             skin_to_bone,
             adapter: format!("{} ({:?}, {:?})", info.name, info.backend, info.device_type),
+            look: Look::default(),
         })
+    }
+
+    /// How the pictures from here on are drawn.
+    pub fn set_look(&mut self, look: Look) {
+        self.look = look;
+        self.renderer.draw_floor = look.floor;
+        self.renderer.background = look.background.clear();
     }
 
     /// The adapter the pictures come from: name, backend and kind.
@@ -229,8 +384,9 @@ impl Offscreen {
             tint: [0.72, 0.74, 0.78, 1.0],
             mesh: 0,
         };
+        let camera = self.look.aim(camera);
         self.renderer
-            .render(&self.device, &self.queue, w, h, camera, &[body])?;
+            .render(&self.device, &self.queue, w, h, &camera, &[body])?;
         Ok(self.renderer.read_rgba(&self.device, &self.queue)?.2)
     }
 }
@@ -365,7 +521,43 @@ pub fn base64(data: &[u8]) -> String {
 #[cfg(test)]
 #[allow(clippy::unwrap_used)]
 mod framing_tests {
-    use super::{Framing, grid};
+    use super::{Background, Framing, Orbit, grid};
+
+    #[test]
+    fn a_background_is_a_colour_or_transparent() {
+        assert_eq!(Background::parse("#00ff00"), Ok(Background::Colour([0, 255, 0])));
+        assert_eq!(Background::parse("10204A"), Ok(Background::Colour([16, 32, 74])));
+        assert_eq!(Background::parse("Transparent"), Ok(Background::Transparent));
+        for bad in ["", "#00ff0", "#00ff000", "green", "#gg0000", "\u{e9}00000"] {
+            assert!(Background::parse(bad).is_err(), "{bad}");
+        }
+    }
+
+    #[test]
+    fn a_hand_given_camera_is_checked() {
+        let o = Orbit::parse("0.6, 0.25, 3.6").unwrap();
+        assert_eq!(
+            (o.azimuth, o.elevation, o.distance, o.target),
+            (0.6, 0.25, 3.6, None)
+        );
+        assert_eq!(Orbit::parse("0,0,2,1,2,3").unwrap().target, Some([1.0, 2.0, 3.0]));
+        for bad in [
+            "0,0",
+            "0,0,3,1",
+            "0,0,3,1,2",
+            "x,0,3",
+            "NaN,0,3",
+            "inf,0,3",
+            "7,0,3",
+            "0,1.6,3",
+            "0,-1.6,3",
+            "0,0,0",
+            "0,0,151",
+            "0,0,3,1e9,0,0",
+        ] {
+            assert!(Orbit::parse(bad).is_err(), "{bad}");
+        }
+    }
 
     /// Worked by hand: points from the floor to 3.75 m tops out at 4.0 m with the head room, so
     /// the camera looks at z 2.0; the sphere's radius is 2.0 + 0.1, and a square picture's

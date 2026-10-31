@@ -104,6 +104,8 @@ pub fn plan(args: &Value, state: &Value) -> Result<(Value, Vec<String>), String>
         .map(|i| from + i as f64 * step)
         .filter(|t| *t <= to + 1e-9)
         .collect();
+    let look = ac_media::look_of(args)?;
+    ac_media::no_transparent(&look, "an animated preview")?;
     let mp4 = match args.get("mp4").and_then(Value::as_str) {
         Some(p) => {
             if width % 2 != 0 || height % 2 != 0 {
@@ -128,20 +130,23 @@ pub fn plan(args: &Value, state: &Value) -> Result<(Value, Vec<String>), String>
         Some(Value::Bool(b)) => *b,
         Some(v) => return Err(format!("fixed must be true or false, got {v}")),
     };
-    Ok((
-        json!({
-            "times": times,
-            "view": view,
-            "width": width,
-            "height": height,
-            "fixed": fixed,
-            "delay": ac_render::anim::delay_cs(clip_fps / step),
-            "fps": clip_fps / step,
-            "gif": gif,
-            "mp4": mp4,
-        }),
-        notes,
-    ))
+    let mut planned = json!({
+        "times": times,
+        "view": view,
+        "width": width,
+        "height": height,
+        "fixed": fixed,
+        "delay": ac_render::anim::delay_cs(clip_fps / step),
+        "fps": clip_fps / step,
+        "gif": gif,
+        "mp4": mp4,
+    });
+    for name in ac_media::LOOK_ARGS {
+        if let Some(v) = args.get(*name) {
+            planned[*name] = v.clone();
+        }
+    }
+    Ok((planned, notes))
 }
 
 /// The tool's result: the GIF inline (small) or written to a file, and what was drawn.
@@ -236,6 +241,12 @@ mod tests {
             json!({ "mp4": "relative.mp4" }),
             json!({ "mp4": "C:/x/out.mp4", "width": 321 }),
             json!({ "gif": false }),
+            json!({ "background": "transparent" }),
+            json!({ "background": "green" }),
+            json!({ "azimuth": 1.0 }),
+            json!({ "azimuth": 1.0, "elevation": 0.1, "distance": 1e9 }),
+            json!({ "target": [0, 0, 1] }),
+            json!({ "floor": "no" }),
         ] {
             assert!(plan(&bad, &state).is_err(), "{bad}");
         }

@@ -122,6 +122,7 @@
             "clip.move",
             "clip.new",
             "clip.open",
+            "clip.picture",
             "clip.possible",
             "clip.range",
             "clip.rename",
@@ -1643,6 +1644,109 @@
           "if": {
             "properties": {
               "command": {
+                "const": "clip.picture"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Export picture; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the .png to write"
+                  },
+                  "frame": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1000000.0,
+                    "description": "the frame as it plays (default the pose on show)"
+                  },
+                  "view": {
+                    "type": "string",
+                    "enum": [
+                      "front",
+                      "back",
+                      "left",
+                      "right",
+                      "side",
+                      "top",
+                      "three-quarter"
+                    ],
+                    "description": "the camera: front, back, left, right, side, top or three-quarter (default)"
+                  },
+                  "width": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 4096,
+                    "description": "pixels across"
+                  },
+                  "height": {
+                    "type": "integer",
+                    "minimum": 16,
+                    "maximum": 4096,
+                    "description": "pixels down"
+                  },
+                  "floor": {
+                    "type": "boolean",
+                    "description": "draw the floor and its grid (default true)",
+                    "default": true
+                  },
+                  "background": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "#rrggbb, or transparent (default the viewport's colour)"
+                  },
+                  "azimuth": {
+                    "type": "number",
+                    "minimum": -6.3,
+                    "maximum": 6.3,
+                    "description": "your own camera instead of the view's angles, with elevation and distance: radians about the vertical, 0 at the front of the body"
+                  },
+                  "elevation": {
+                    "type": "number",
+                    "minimum": -1.55,
+                    "maximum": 1.55,
+                    "description": "your own camera: radians above the floor"
+                  },
+                  "distance": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 150.0,
+                    "description": "your own camera: metres from what it looks at"
+                  },
+                  "target": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "your own camera: the point it looks at (default where the view would look) ([x, y, z])"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "clip.possible"
               }
             },
@@ -1974,6 +2078,44 @@
                     "minimum": 1,
                     "maximum": 64,
                     "description": "cells to a row (default: one row)"
+                  },
+                  "floor": {
+                    "type": "boolean",
+                    "description": "draw the floor and its grid (default true)",
+                    "default": true
+                  },
+                  "background": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "#rrggbb, or transparent (default the viewport's colour)"
+                  },
+                  "azimuth": {
+                    "type": "number",
+                    "minimum": -6.3,
+                    "maximum": 6.3,
+                    "description": "your own camera instead of the view's angles, with elevation and distance: radians about the vertical, 0 at the front of the body"
+                  },
+                  "elevation": {
+                    "type": "number",
+                    "minimum": -1.55,
+                    "maximum": 1.55,
+                    "description": "your own camera: radians above the floor"
+                  },
+                  "distance": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 150.0,
+                    "description": "your own camera: metres from what it looks at"
+                  },
+                  "target": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "your own camera: the point it looks at (default where the view would look) ([x, y, z])"
                   }
                 },
                 "required": [
@@ -2056,6 +2198,44 @@
                   "fixed": {
                     "type": "boolean",
                     "description": "one camera that sees the whole shot, so travel shows (default: it follows the body)"
+                  },
+                  "floor": {
+                    "type": "boolean",
+                    "description": "draw the floor and its grid (default true)",
+                    "default": true
+                  },
+                  "background": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the colour behind the body as #rrggbb (default the viewport's); a video can't be transparent"
+                  },
+                  "azimuth": {
+                    "type": "number",
+                    "minimum": -6.3,
+                    "maximum": 6.3,
+                    "description": "your own camera instead of the view's angles, with elevation and distance: radians about the vertical, 0 at the front of the body"
+                  },
+                  "elevation": {
+                    "type": "number",
+                    "minimum": -1.55,
+                    "maximum": 1.55,
+                    "description": "your own camera: radians above the floor"
+                  },
+                  "distance": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 150.0,
+                    "description": "your own camera: metres from what it looks at"
+                  },
+                  "target": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "description": "your own camera: the point it looks at (default where the view would look) ([x, y, z])"
                   }
                 },
                 "required": [
@@ -2927,7 +3107,6 @@
                   }
                 },
                 "required": [
-                  "foot",
                   "from",
                   "to"
                 ],
@@ -6972,6 +7151,7 @@
             "clip.save_as",
             "clip.sheet",
             "clip.video",
+            "clip.picture",
             "clip.write",
             "community.account",
             "community.browse",

@@ -34,6 +34,10 @@ pub struct Preview {
     view: String,
     size: usize,
     fixed: bool,
+    floor: bool,
+    /// One colour behind the body instead of the viewport's.
+    flat: bool,
+    colour: [u8; 3],
     /// Frames per second (starts at the animation's own).
     fps: f64,
     sheet_count: u32,
@@ -58,6 +62,9 @@ impl App {
             view: "side".into(),
             size: 1,
             fixed: false,
+            floor: true,
+            flat: false,
+            colour: [0, 255, 0],
             fps: if doc.clip.fps > 0.0 { doc.clip.fps } else { 30.0 },
             sheet_count: 6,
             folder: st
@@ -122,6 +129,18 @@ impl App {
                             "One camera that sees the whole shot, so travel shows; else it follows the body",
                         )
                         .tag("dialog.preview.fixed", "Fixed");
+                });
+                ui.horizontal(|ui| {
+                    ui.checkbox(&mut pv.floor, "Floor")
+                        .on_hover_text("The floor and its grid")
+                        .tag("dialog.preview.floor", "Floor");
+                    ui.checkbox(&mut pv.flat, "Flat background")
+                        .on_hover_text("One colour behind the body, to key it out later")
+                        .tag("dialog.preview.flat", "Flat background");
+                    if pv.flat {
+                        ui.color_edit_button_srgb(&mut pv.colour)
+                            .tag("dialog.preview.colour", "Background colour");
+                    }
                 });
                 ui.horizontal(|ui| {
                     ui.label("Size");
@@ -236,6 +255,11 @@ impl App {
         };
         if job == Job::Video {
             params["fps"] = json!(pv.fps);
+        }
+        params["floor"] = json!(pv.floor);
+        if pv.flat {
+            let [r, g, b] = pv.colour;
+            params["background"] = json!(format!("#{r:02x}{g:02x}{b:02x}"));
         }
         let Some(r) = self.run(cmd, params) else {
             pv.done = None;

@@ -26,6 +26,11 @@ impl Pictures {
         })
     }
 
+    /// How the pictures from here on are drawn.
+    pub fn set_look(&mut self, look: offscreen::Look) {
+        self.off.set_look(look);
+    }
+
     /// The pose shown, from a named view that follows the body, as PNG bytes.
     pub fn png(&mut self, doc: &Document, view: &str, w: u32, h: u32) -> Result<Vec<u8>, String> {
         let rgba = self.rgba(doc, view, w, h, None)?;
@@ -82,6 +87,19 @@ impl Pictures {
     pub fn adapter(&self) -> &str {
         self.off.adapter()
     }
+}
+
+/// The picture flags of `ac render` and `ac video`, checked.
+pub fn look_flags(
+    no_floor: bool,
+    background: Option<&str>,
+    camera: Option<&str>,
+) -> Result<offscreen::Look, String> {
+    Ok(offscreen::Look {
+        floor: !no_floor,
+        background: background.map_or(Ok(offscreen::Background::Usual), offscreen::Background::parse)?,
+        camera: camera.map(offscreen::Orbit::parse).transpose()?,
+    })
 }
 
 /// The fit for the body over these frames of the document, as shown (with the physics pass if it

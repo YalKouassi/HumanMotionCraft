@@ -190,15 +190,19 @@ impl Backend for Headless {
         let w = args["width"].as_u64().unwrap_or(800).clamp(16, 4096) as u32;
         let h = args["height"].as_u64().unwrap_or(600).clamp(16, 4096) as u32;
         let view = args["view"].as_str().unwrap_or("three-quarter").to_string();
+        let look = ac_media::look_of(args)?;
         self.pictures()?;
         let pictures = self.pictures.as_mut().ok_or("no renderer")?;
+        pictures.set_look(look);
         pictures.png(&self.session.document, &view, w, h)
     }
 
     fn sheet(&mut self, args: &Value) -> Result<(Vec<u8>, Vec<f64>), String> {
         let frames = self.session.document.sheet_frames(args)?;
+        let look = ac_media::look_of(args)?;
         self.pictures()?;
         let pictures = self.pictures.as_mut().ok_or("no renderer")?;
+        pictures.set_look(look);
         let view = args["view"].as_str().unwrap_or("side");
         let png = crate::render::sheet(
             pictures,
@@ -237,8 +241,10 @@ impl Backend for Headless {
         );
         let view = plan["view"].as_str().unwrap_or("side").to_string();
         let fixed = plan["fixed"].as_bool().unwrap_or(true);
+        let look = ac_media::look_of(plan)?;
         self.pictures()?;
         let pictures = self.pictures.as_mut().ok_or("no renderer")?;
+        pictures.set_look(look);
         let doc = &self.session.document;
         watched(tick, move || {
             let frames = pictures.frames(doc, &times, &view, size, fixed)?;

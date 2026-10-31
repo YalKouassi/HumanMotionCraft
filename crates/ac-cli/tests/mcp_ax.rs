@@ -422,6 +422,53 @@ fn animation_preview_makes_a_gif() {
     }
 }
 
+/// The picture options reach both picture tools, and don't stick to the next picture.
+#[test]
+fn picture_tools_take_the_look_options() {
+    let mut srv = server("look");
+    key_a_rise(&mut srv);
+    let picture = |srv: &mut _, args: Value| {
+        let r = call(srv, "render_preview", args);
+        assert_eq!(r["content"][0]["type"], "image", "{r}");
+        let png = ac_cli::render::unbase64(r["content"][0]["data"].as_str().unwrap()).unwrap();
+        ac_render::offscreen::unpng(&png).unwrap().2
+    };
+    let size = json!({ "width": 64, "height": 48 });
+    let usual = picture(&mut srv, size.clone());
+    let clean = picture(
+        &mut srv,
+        json!({ "width": 64, "height": 48, "floor": false, "background": "transparent" }),
+    );
+    assert_eq!(clean[3], 0, "a corner is clear");
+    assert!(clean.chunks(4).any(|p| p[3] == 255), "the body is there");
+    assert_eq!(picture(&mut srv, size), usual, "the options last for one picture");
+    let r = call(
+        &mut srv,
+        "animation_preview",
+        json!({ "from": 0, "to": 3, "width": 64, "height": 48, "floor": false, "background": "#00ff00", "azimuth": 0.6, "elevation": 0.25, "distance": 3.6 }),
+    );
+    assert_eq!(r["content"][0]["mimeType"], "image/gif", "{r}");
+    for bad in [
+        json!({ "background": "transparent" }),
+        json!({ "background": "green" }),
+        json!({ "azimuth": 0.6 }),
+    ] {
+        assert_eq!(
+            call(&mut srv, "animation_preview", bad.clone())["isError"],
+            true,
+            "{bad}"
+        );
+    }
+    assert_eq!(
+        call(
+            &mut srv,
+            "render_preview",
+            json!({ "elevation": 9, "azimuth": 0, "distance": 3 })
+        )["isError"],
+        true
+    );
+}
+
 /// Live: requests carry ids, a late reply to an earlier request is skipped, and progress lines
 /// become MCP progress notifications.
 #[test]

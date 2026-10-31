@@ -636,6 +636,35 @@ Outputs:
 | `id` | text | yes |  | the library id |
 | `length` | integer | yes |  | frames |
 
+### `clip.picture`: Export picture
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `sheet`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the .png to write |
+| `frame` | number |  | 0 to 1000000 | the frame as it plays (default the pose on show) |
+| `view` | one of front \| back \| left \| right \| side \| top \| three-quarter |  |  | the camera: front, back, left, right, side, top or three-quarter (default) |
+| `width` | integer |  | 16 to 4096 | pixels across |
+| `height` | integer |  | 16 to 4096 | pixels down |
+| `floor` | bool |  |  | draw the floor and its grid (default true) |
+| `background` | text |  |  | #rrggbb, or transparent (default the viewport's colour) |
+| `azimuth` | number |  | -6.3 to 6.3 | your own camera instead of the view's angles, with elevation and distance: radians about the vertical, 0 at the front of the body |
+| `elevation` | number |  | -1.55 to 1.55 | your own camera: radians above the floor |
+| `distance` | number |  | 0.1 to 150 | your own camera: metres from what it looks at |
+| `target` | [x, y, z] |  |  | your own camera: the point it looks at (default where the view would look) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file written |
+| `width` | integer | yes |  | pixels across |
+| `height` | integer | yes |  | pixels down |
+| `note` | text |  |  | how the pictures were made, when it matters (the software adapter) |
+
 ### `clip.possible`: Impossible poses
 
 not undoable, icon `graph`.
@@ -786,6 +815,12 @@ Inputs:
 | `width` | integer |  | 16 to 2048 | a cell's pixels across (default 320) |
 | `height` | integer |  | 16 to 2048 | a cell's pixels down (default 400) |
 | `cols` | integer |  | 1 to 64 | cells to a row (default: one row) |
+| `floor` | bool |  |  | draw the floor and its grid (default true) |
+| `background` | text |  |  | #rrggbb, or transparent (default the viewport's colour) |
+| `azimuth` | number |  | -6.3 to 6.3 | your own camera instead of the view's angles, with elevation and distance: radians about the vertical, 0 at the front of the body |
+| `elevation` | number |  | -1.55 to 1.55 | your own camera: radians above the floor |
+| `distance` | number |  | 0.1 to 150 | your own camera: metres from what it looks at |
+| `target` | [x, y, z] |  |  | your own camera: the point it looks at (default where the view would look) |
 
 Outputs:
 
@@ -813,6 +848,12 @@ Inputs:
 | `width` | integer |  | 16 to 4096 | pixels across |
 | `height` | integer |  | 16 to 4096 | pixels down |
 | `fixed` | bool |  |  | one camera that sees the whole shot, so travel shows (default: it follows the body) |
+| `floor` | bool |  |  | draw the floor and its grid (default true) |
+| `background` | text |  |  | the colour behind the body as #rrggbb (default the viewport's); a video can't be transparent |
+| `azimuth` | number |  | -6.3 to 6.3 | your own camera instead of the view's angles, with elevation and distance: radians about the vertical, 0 at the front of the body |
+| `elevation` | number |  | -1.55 to 1.55 | your own camera: radians above the floor |
+| `distance` | number |  | 0.1 to 150 | your own camera: metres from what it looks at |
+| `target` | [x, y, z] |  |  | your own camera: the point it looks at (default where the view would look) |
 
 Outputs:
 

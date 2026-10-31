@@ -22,10 +22,13 @@
 //!                                    --watch: run again when a fixture file changes
 //!                                    --schema: write fixtures/schema.json
 //! ac render [--script <file>] [--frame <n> | --frames <a,b,..> [--strip]] [--view <v>]
-//!           [--size <w>x<h>] --out <png>
+//!           [--size <w>x<h>] [--no-floor] [--background <#rrggbb|transparent>]
+//!           [--camera <azimuth,elevation,distance[,x,y,z]>] --out <png>
 //!                                    --frames without --strip writes <out>-<frame>.png
 //! ac video [--script <file>] [--from <f>] [--to <f>] [--fps <n>] [--view <v>] [--size <w>x<h>]
-//!          [--fixed] --out <mp4|gif> play the animation into a video (MP4 through ffmpeg)
+//!          [--fixed] [--no-floor] [--background <#rrggbb>]
+//!          [--camera <azimuth,elevation,distance[,x,y,z]>]
+//!          --out <mp4|gif>           play the animation into a video (MP4 through ffmpeg)
 //! ac samples [--only <name>] [--bless]
 //!                                    remake each sample from assets/samples/recipes and check it
 //!                                    matches the shipped assets/samples/<name>.clip.json (--bless
@@ -219,6 +222,7 @@ fn real_main() -> Result<ExitCode, String> {
         }
         Some("render") => {
             let (mut script, mut frames, mut view, mut wh, mut out, mut strip) = (None, None, "three-quarter", (800, 600), None, false);
+            let (mut no_floor, mut background, mut camera) = (false, None, None);
             while let Some(a) = args.next() {
                 let mut v = || args.next().ok_or(format!("{a} needs a value"));
                 match a {
@@ -228,16 +232,21 @@ fn real_main() -> Result<ExitCode, String> {
                     "--strip" => strip = true,
                     "--view" => view = v()?,
                     "--size" => wh = size(v()?)?,
+                    "--no-floor" => no_floor = true,
+                    "--background" => background = Some(v()?),
+                    "--camera" => camera = Some(v()?),
                     "--out" => out = Some(v()?),
                     other => return Err(format!("render: unknown argument {other:?}")),
                 }
             }
             let out = PathBuf::from(out.ok_or("render needs --out <png>")?);
+            let look = ac_cli::render::look_flags(no_floor, background, camera)?;
             let mut s = session(&f)?;
             if let Some(file) = script {
                 run_script(&mut s.session, file, None)?;
             }
             let mut pics = ac_cli::render::Pictures::new(&f.assets, &s.session.document.skeleton.names)?;
+            pics.set_look(look);
             let frames = frames.unwrap_or_default();
             if frames.is_empty() {
                 std::fs::write(&out, pics.png(&s.session.document, view, wh.0, wh.1)?).map_err(|e| format!("{}: {e}", out.display()))?;
@@ -298,6 +307,7 @@ fn real_main() -> Result<ExitCode, String> {
             Ok(ExitCode::SUCCESS)
         }
         Some("video") => {
+            let (mut no_floor, mut background, mut camera) = (false, None, None);
             let (mut script, mut from, mut to, mut fps, mut view, mut wh, mut out, mut fixed) = (None, None, None, None, "side", (960, 540), None, false);
             while let Some(a) = args.next() {
                 let mut v = || args.next().ok_or(format!("{a} needs a value"));
@@ -310,11 +320,22 @@ fn real_main() -> Result<ExitCode, String> {
                     "--view" => view = v()?,
                     "--size" => wh = size(v()?)?,
                     "--fixed" => fixed = true,
+                    "--no-floor" => no_floor = true,
+                    "--background" => background = Some(v()?),
+                    "--camera" => camera = Some(v()?),
                     "--out" => out = Some(v()?),
                     other => return Err(format!("video: unknown argument {other:?}")),
                 }
             }
             let out = PathBuf::from(out.ok_or("video needs --out <mp4|gif>")?);
+            let look = ac_cli::render::look_flags(no_floor, background, camera)?;
+            ac_media::no_transparent(
+                &look,
+                match ac_media::Format::of(&out)? {
+                    ac_media::Format::Mp4 => "an MP4",
+                    ac_media::Format::Gif => "a GIF",
+                },
+            )?;
             let mut s = session(&f)?;
             if let Some(file) = script {
                 run_script(&mut s.session, file, None)?;
@@ -331,6 +352,7 @@ fn real_main() -> Result<ExitCode, String> {
                 ac_media::Format::Gif => wh,
             };
             let mut shots = ac_media::Shots::new(&f.assets, &doc.skeleton.names)?;
+            shots.set_look(look);
             let enc = ac_media::Encoder::create(&out, w, h, fps)?;
             let n = shots.video(doc, &times, view, (w, h), fixed, enc)?;
             let out = out.display();

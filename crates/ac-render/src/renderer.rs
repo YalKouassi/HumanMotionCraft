@@ -136,7 +136,19 @@ struct Target {
     depth_view: wgpu::TextureView,
 }
 
+/// The viewport's usual background.
+pub const BACKGROUND: wgpu::Color = wgpu::Color {
+    r: 0.11,
+    g: 0.115,
+    b: 0.125,
+    a: 1.0,
+};
+
 pub struct Renderer {
+    /// What the picture is cleared to, and whether the floor is drawn (headless pictures can
+    /// change both, `offscreen::Look`).
+    pub background: wgpu::Color,
+    pub draw_floor: bool,
     format: wgpu::TextureFormat,
     layout: wgpu::BindGroupLayout,
     body: wgpu::RenderPipeline,
@@ -316,6 +328,8 @@ impl Renderer {
             layout,
             body,
             ghost,
+            background: BACKGROUND,
+            draw_floor: true,
             floor,
             vertices,
             indices,
@@ -513,12 +527,7 @@ impl Renderer {
                     depth_slice: None,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: 0.11,
-                            g: 0.115,
-                            b: 0.125,
-                            a: 1.0,
-                        }),
+                        load: wgpu::LoadOp::Clear(self.background),
                         store: wgpu::StoreOp::Store,
                     },
                 })],
@@ -534,7 +543,7 @@ impl Renderer {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            if let Some(bg) = self.bind_groups.first() {
+            if let Some(bg) = self.bind_groups.first().filter(|_| self.draw_floor) {
                 pass.set_pipeline(&self.floor);
                 pass.set_bind_group(0, bg, &[]);
                 pass.draw(0..6, 0..1);

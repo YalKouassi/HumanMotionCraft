@@ -6,7 +6,7 @@ use std::path::Path;
 use ac_core::Document;
 use ac_render::Mesh;
 use ac_render::glam::Vec3;
-use ac_render::offscreen::{self, Framing, Offscreen};
+use ac_render::offscreen::{self, Framing, Look, Offscreen};
 
 use crate::encode::Encoder;
 
@@ -38,6 +38,35 @@ impl Shots {
                 })
             }
         }
+    }
+
+    /// How the pictures from here on are drawn.
+    pub fn set_look(&mut self, look: Look) {
+        self.off.set_look(look);
+    }
+
+    /// A PNG of the document at `frame` as it plays, or the pose on show, from `view` following
+    /// the body.
+    pub fn picture(
+        &mut self,
+        doc: &Document,
+        frame: Option<f64>,
+        view: &str,
+        (w, h): (u32, u32),
+    ) -> Result<Vec<u8>, String> {
+        let sk = &doc.skeleton;
+        let (rots, pos) = match frame {
+            Some(f) => {
+                let poses = doc.shown_poses(&[f])?;
+                let p = poses.first().ok_or("no pose at that frame")?;
+                sk.fk(&p.rotations, p.root)
+            }
+            None => sk.fk(&doc.pose.rotations, doc.pose.root),
+        }
+        .map_err(|e| e.to_string())?;
+        let root = pos.first().copied().unwrap_or_default();
+        let camera = offscreen::view(view, Vec3::new(root[0] as f32, root[1] as f32, 0.9))?;
+        offscreen::png(w, h, &self.off.render(w, h, &camera, (&rots, &pos), &sk.heads)?)
     }
 
     /// RGBA rows of the document's shown motion at each of `times` (frames), from `view`: a

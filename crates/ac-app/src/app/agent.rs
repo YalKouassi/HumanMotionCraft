@@ -6,6 +6,7 @@ use std::collections::BTreeSet;
 use std::sync::atomic::Ordering;
 
 use ac_render::glam::Vec3;
+use ac_render::offscreen::Look;
 use serde_json::{Value, json};
 
 use super::{App, png_bytes};
@@ -196,6 +197,7 @@ impl App {
                 .run("frame.set", &json!({ "frame": f }))
                 .map_err(|e| e.to_string())?;
         }
+        let look = ac_media::look_of(msg)?;
         self.ensure_offscreen()?;
         let off = self.offscreen.as_mut().ok_or("no renderer")?;
         let doc = &self.session.document;
@@ -212,8 +214,11 @@ impl App {
             msg["view"].as_str().unwrap_or("three-quarter"),
             Vec3::new(root[0] as f32, root[1] as f32, 0.9),
         )?;
-        let rgba = off.render(w, h, &camera, (&rots, &pos), &doc.skeleton.heads)?;
-        ac_render::offscreen::png(w, h, &rgba)
+        // this renderer also draws the library's thumbnails: the look lasts for this picture
+        off.set_look(look);
+        let rgba = off.render(w, h, &camera, (&rots, &pos), &doc.skeleton.heads);
+        off.set_look(Look::default());
+        ac_render::offscreen::png(w, h, &rgba?)
     }
 
     /// A contact sheet of the open animation for the control port (`ac mcp --live`): the same
@@ -226,6 +231,7 @@ impl App {
             .iter()
             .map(|p| doc.skeleton.fk(&p.rotations, p.root).map_err(|e| e.to_string()))
             .collect::<Result<Vec<_>, String>>()?;
+        let look = ac_media::look_of(msg)?;
         let cell = (
             msg["width"].as_u64().unwrap_or(320).clamp(16, 2048) as u32,
             msg["height"].as_u64().unwrap_or(400).clamp(16, 2048) as u32,
@@ -234,13 +240,16 @@ impl App {
         self.ensure_offscreen()?;
         let doc = &self.session.document;
         let off = self.offscreen.as_mut().ok_or("no renderer")?;
+        off.set_look(look);
         let png = off.sheet(
             msg["view"].as_str().unwrap_or("side"),
             cell,
             &posed,
             &doc.skeleton.heads,
             true,
-        )?;
+        );
+        off.set_look(Look::default());
+        let png = png?;
         Ok(json!({ "png": ac_render::offscreen::base64(&png), "frames": frames }))
     }
 
@@ -273,6 +282,8 @@ impl App {
             }
             None => None,
         };
+        let look = ac_media::look_of(msg)?;
+        ac_media::no_transparent(&look, "an animated preview")?;
         let doc = &self.session.document;
         let posed = doc
             .shown_poses(&times)?
@@ -284,7 +295,10 @@ impl App {
         let off = self.offscreen.as_mut().ok_or("no renderer")?;
         let view = msg["view"].as_str().unwrap_or("side");
         let fixed = msg["fixed"].as_bool().unwrap_or(true);
-        let frames = off.frames(view, size, &posed, &doc.skeleton.heads, fixed)?;
+        off.set_look(look);
+        let frames = off.frames(view, size, &posed, &doc.skeleton.heads, fixed);
+        off.set_look(Look::default());
+        let frames = frames?;
         let mut out = json!({ "frames": frames.len() });
         if msg["gif"].as_bool().unwrap_or(true) {
             let delay = msg["delay"].as_u64().unwrap_or(4).clamp(2, 6000) as u16;
