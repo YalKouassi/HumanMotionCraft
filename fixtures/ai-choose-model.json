@@ -94,7 +94,7 @@
     {
       "command": "ai.fill",
       "params": { "from": 0, "to": 20 },
-      "expect": { "frames": 19, "model": "parts" }
+      "expect": { "frames": 19, "model": "parts walk" }
     },
     { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.3073286] } },
     {

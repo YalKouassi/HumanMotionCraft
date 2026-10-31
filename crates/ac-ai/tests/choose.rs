@@ -7,7 +7,10 @@ use std::path::PathBuf;
 
 use ac_ai::models::Models;
 use ac_core::Skeleton;
-use ac_core::ai::{Inbetweener, ModelSource};
+use ac_core::ai::ModelSource;
+
+/// What a hostile case does to a good card.
+type Damage = Box<dyn Fn(&mut serde_json::Value)>;
 
 fn repo() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
@@ -97,7 +100,7 @@ fn hostile_weights_files_are_refused() {
             .unwrap();
     let bin = std::fs::read(test_models().join("tiny/weights.bin")).unwrap();
     let dir = std::env::temp_dir().join(format!("ac-ai-hostile-{}", std::process::id()));
-    let cases: Vec<(&str, Box<dyn Fn(&mut serde_json::Value)>)> = vec![
+    let cases: Vec<(&str, Damage)> = vec![
         (
             "heads 0",
             Box::new(|v: &mut serde_json::Value| v["card"]["heads"] = serde_json::json!(0)),
@@ -176,7 +179,7 @@ fn hostile_weights_files_are_refused() {
     assert!(ac_ai::Model::load(&d).is_err());
     // and the listing carries each as a card that does not load, never an error
     let src = Models::bundled(&repo().join("assets"));
-    let cards = src.cards(&skeleton(), &[dir.clone()]);
+    let cards = src.cards(&skeleton(), std::slice::from_ref(&dir));
     assert!(
         cards
             .iter()
