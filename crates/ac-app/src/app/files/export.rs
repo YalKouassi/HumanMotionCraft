@@ -10,7 +10,7 @@ use serde_json::{Value, json};
 
 use super::super::App;
 use super::super::ui_ids::Tag;
-use super::{documents, reveal};
+use super::{AppState, documents, reveal};
 
 const PROFILES: &[(&str, &str, &str)] = &[
     ("full", "Full", "every joint of the rig (104)"),
@@ -75,7 +75,7 @@ impl App {
             filter: String::new(),
             profile: st.export_profile.clone().unwrap_or_else(|| "full".into()),
             bones: st.export_bones.clone(),
-            root: "hips".into(),
+            root: opening_root(st),
             one_file: true,
             folder: st
                 .export_dir
@@ -283,6 +283,15 @@ impl App {
                     }
                 });
             });
+        // kept when chosen, not only on export: a preset sets both, so both are remembered
+        let st = &self.files.state;
+        if st.export_root.as_deref() != Some(ex.root.as_str())
+            || st.export_profile.as_deref() != Some(ex.profile.as_str())
+        {
+            self.files.state.export_root = Some(ex.root.clone());
+            self.files.state.export_profile = Some(ex.profile.clone());
+            self.save_state();
+        }
         if go {
             self.run_export(&mut ex);
         }
@@ -387,10 +396,14 @@ impl App {
         self.status = said.clone();
         ex.done = Some((shown, said));
         self.files.state.export_dir = Some(folder.to_string_lossy().to_string());
-        self.files.state.export_profile = Some(ex.profile.clone());
         self.files.state.export_bones = ex.bones.clone();
         self.save_state();
     }
+}
+
+/// The root mode the dialog opens on: the one chosen last, else hips.
+fn opening_root(st: &AppState) -> String {
+    st.export_root.clone().unwrap_or_else(|| "hips".into())
 }
 
 fn merge(into: &mut Value, from: &Value) {
@@ -512,5 +525,20 @@ fn draw_root_visual(ui: &mut egui::Ui, root_mode: &str) {
                 egui::Color32::from_rgb(250, 190, 80),
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_dialog_opens_on_the_root_chosen_last() {
+        assert_eq!(opening_root(&AppState::default()), "hips");
+        let st = AppState {
+            export_root: Some("ground".into()),
+            ..AppState::default()
+        };
+        assert_eq!(opening_root(&st), "ground");
     }
 }

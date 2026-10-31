@@ -269,6 +269,8 @@ pub struct FilesPrefs {
     pub export_profile: Option<String>,
     /// The bone list (comma-separated) for the "bones" profile.
     pub export_bones: String,
+    /// The export's root motion bone: hips, ground or in_place.
+    pub export_root: Option<String>,
     /// Where preview videos and contact sheets went last.
     pub preview_dir: Option<String>,
     /// mp4 or gif.

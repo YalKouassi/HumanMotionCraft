@@ -31,6 +31,8 @@ pub struct AppState {
     pub export_profile: Option<String>,
     /// The bone list (comma-separated) for the "bones" profile.
     pub export_bones: String,
+    /// The export's root motion bone: hips, ground or in_place.
+    pub export_root: Option<String>,
     /// Where preview videos and contact sheets went last.
     pub preview_dir: Option<String>,
     /// mp4 or gif.
@@ -75,6 +77,7 @@ impl AppState {
         if self.export_bones.is_empty() {
             self.export_bones = old.export_bones;
         }
+        self.export_root = self.export_root.take().or(old.export_root);
         self.preview_dir = self.preview_dir.take().or(old.preview_dir);
         self.preview_format = self.preview_format.take().or(old.preview_format);
         self.project_dir = self.project_dir.take().or(old.project_dir);
@@ -110,6 +113,7 @@ impl FilesPrefs {
             export_dir: self.export_dir.clone(),
             export_profile: self.export_profile.clone(),
             export_bones: self.export_bones.clone(),
+            export_root: self.export_root.clone(),
             preview_dir: self.preview_dir.clone(),
             preview_format: self.preview_format.clone(),
             project_dir: self.project_dir.clone(),
@@ -124,6 +128,7 @@ impl FilesPrefs {
         self.export_dir = s.export_dir.clone();
         self.export_profile = s.export_profile.clone();
         self.export_bones = s.export_bones.clone();
+        self.export_root = s.export_root.clone();
         self.preview_dir = s.preview_dir.clone();
         self.preview_format = s.preview_format.clone();
         self.project_dir = s.project_dir.clone();
@@ -191,6 +196,21 @@ mod tests {
         assert_eq!(s.export_dir.as_deref(), Some("new"));
         assert_eq!(s.preview_format.as_deref(), Some("gif"));
         assert!(s.tips_seen && !s.welcome_seen);
+    }
+
+    #[test]
+    fn the_export_root_is_remembered_and_an_older_file_has_none() {
+        let mut p = FilesPrefs::default();
+        let lib = Path::new("lib-not-there");
+        let mut s = p.state_for(lib);
+        s.export_root = Some("ground".into());
+        p.keep(lib, &s);
+        let saved = serde_json::to_string(&p).unwrap();
+        let back: FilesPrefs = serde_json::from_str(&saved).unwrap();
+        assert_eq!(back.state_for(lib).export_root.as_deref(), Some("ground"));
+        let old: FilesPrefs = serde_json::from_str(r#"{"export_profile": "game"}"#).unwrap();
+        assert_eq!(old.export_profile.as_deref(), Some("game"));
+        assert_eq!(old.export_root, None);
     }
 
     #[test]
