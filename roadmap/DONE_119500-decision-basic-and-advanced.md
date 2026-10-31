@@ -1,6 +1,6 @@
 # Decision: a simpler interface for beginners
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** 115100; owner decision 2026-10-30
 
@@ -30,3 +30,5 @@ Code review of commit `119f430` (the part for this item) and the code as it is n
 | 4 | The Result says Advanced mode "makes all tool panels available" and the switch is "instant": switching to Advanced only changes the label and the status; the panels Simple closed stay closed until opened one by one from View. They are available in both modes (View menu, palette), so nothing is unreachable, but the file claimed more than the code does. | `crates/ac-app/src/app/shell/layout.rs` (`UiMode::Advanced` arm) | medium (a roadmap claim) | not fixed: whether Advanced should reopen the panels Simple closed (or restore the default dock) is the owner's call; the Decision text now lists Pose fill among the hidden panels, which it is |
 | 5 | The mode is applied only at the moment of switching; on start the saved `dock_json` carries the closed panels, so a Simple layout survives a restart, but `app.reset_layout` reopens everything while the header still says Simple. | `crates/ac-app/src/app/shell/layout.rs` (`reset_layout`, `set_ui_mode`) | low | not fixed: same decision as 4 |
 | 6 | The saved preference follows the rules: its own `#[serde(default)]` field on `Layout`, lower-case serialized names, never retyped. | `crates/ac-app/src/app/prefs.rs:326–351` | — | checked |
+
+Accepted by the owner (2026-10-31).

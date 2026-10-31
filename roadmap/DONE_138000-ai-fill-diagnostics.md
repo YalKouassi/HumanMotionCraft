@@ -1,6 +1,6 @@
 # Say why a fill might look wrong
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 126000
 - **Source:** 115000 (review 1 §4)
 
@@ -100,3 +100,5 @@ Code review of commits `720333a` and `3b3769c` and the code as it is now.
 | 6 | Panels: every JSON read in `fill_marks` and `fill_report` goes through `as_*` with a default; no indexing on hostile input. | `crates/ac-app/src/app/panels/ai.rs:52–160` | — | checked |
 
 What the coordinator should verify at build time: `ac fixtures --only ai-fill-diagnostics`. If the new step's numbers are off by more than the 1e-3 tolerance, the suspect is foot planting from the model's contacts on 10–20 (the review assumed none, as 20–30 showed none); the fix itself does not depend on the step.
+
+Accepted by the owner (2026-10-31).

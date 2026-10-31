@@ -1,6 +1,6 @@
 # Project files
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 101000, 104000
 - **Source:** old `ROADMAP.md` row 4
 
@@ -94,3 +94,5 @@ Reviewed `crates/ac-io/src/project.rs`, `crates/ac-io/tests/project.rs`, `fixtur
   1.5` is refused as "no version", a misleading wording. `project.save` drops the links the clip no longer
   reaches without counting them in the result (that drop is the point of the save).
 - The Result's claims hold: the 4 tests (5 now), the fixture, the hash pinned and marked pinned.
+
+Accepted by the owner (2026-10-31).

@@ -1,6 +1,6 @@
 # AI fill over long gaps
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 103000
 - **Source:** old `ROADMAP.md` row 1
 
@@ -90,3 +90,5 @@ line. Fixes are commits on this branch, one a finding.
 | 8 | Outputs match `returns.rs`: `anchors`, `anchor_segment` (JSON, required) on `ai.fill`; `anchors` on `ai.fill_all` and `ai.toggle`; `anchors` on each gap of `ai.gaps`. `docs/commands.md` and `fixtures/schema.json` carry them. Undo: one step, `AI fill 1–89` (fixture). | `crates/ac-core/src/commands/returns.rs:72–102` | — | checked |
 
 What the coordinator should verify at build time: `ac fixtures --only bug-anchors-untagged-after-key-move` (new) and `ai-fill-long-gap`, `ai-fill-all`, `ai-toggle` (unchanged behaviour; the tags were already set on the `ai.fill` path).
+
+Accepted by the owner (2026-10-31).

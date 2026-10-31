@@ -1,6 +1,6 @@
 # Live motion control: drive the character, then clip it
 
-- **Status:** built, waiting for the owner: the owner plays it with W A S D and a controller. No controller take has been made (2026-10-31)
+- **Status:** done (2026-10-31)
 - **Requires:** 157000
 - **Source:** owner's idea (2026-10-30)
 
@@ -178,3 +178,5 @@ Files: `training/ac_train/posetargets.py`, `tools/posefill/live.py`, `live_drive
 `live_start` and `live_step` ops in `helper.py`, tests in `training/tests/test_posetargets.py` and
 `tools/posefill/tests/test_helper.py`. The ops are additions, so the helper's protocol stays 1 and
 the Rust side will look for them in `ops`.
+
+Accepted by the owner (2026-10-31).

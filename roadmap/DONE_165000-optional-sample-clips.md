@@ -1,6 +1,6 @@
 # Optional sample clips, marked evaluation-only
 
-- **Status:** built, waiting for the owner (2026-10-31)
+- **Status:** done (2026-10-31)
 - **Requires:** none (157000's engine is built and approved)
 - **Source:** owner, 2026-10-31: choosing "Optional user download" when asked how to use MotionBricks' sample clips
 
@@ -67,3 +67,5 @@ Built 2026-10-31. Number 165000, because 164000 is the owner's FBX library.
 
 Review: `target/shots/2026-10-31/sample-clips/panel-before-download.png`, `panel-accepted.png` and
 `panel-installed.png`.
+
+Accepted by the owner (2026-10-31).

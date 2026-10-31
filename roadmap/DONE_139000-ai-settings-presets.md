@@ -1,6 +1,6 @@
 # AI settings presets
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 126000
 - **Source:** 115000 (review 1 §4)
 
@@ -33,3 +33,5 @@ Code review of commit `119f430` (the part for this item) and the code as it is n
 | 3 | `preset` accepts aliases the acceptance does not name (`preservemotion`, `preservemymotion`, `naturalmotion`, `naturalmovement`, `style`, and any case or spacing). Harmless, but the parameter's help and `docs/commands.md` name only the three. | `crates/ac-core/src/commands/keys.rs:650–662` | low | not fixed: left as the owner's choice (keep the aliases and document them, or drop them) |
 | 4 | `ai.settings` is not undoable (as before this item): a preset click cannot be undone with Ctrl+Z, only by another preset or the sliders. Pre-existing. | `crates/ac-core/src/commands/keys.rs:231` | low | not fixed: a product decision |
 | 5 | Outputs match `AI_SETTINGS` (the five settings, required); `docs/commands.md:184` and `fixtures/schema.json` carry `preset`. | `crates/ac-core/src/commands/returns.rs:112–123` | — | checked |
+
+Accepted by the owner (2026-10-31).

@@ -1,6 +1,6 @@
 # Preview your character while animating
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 146000
 - **Source:** 144000 (one rig, retarget on export)
 
@@ -115,3 +115,5 @@ Findings:
 5. The Result's claims match the code: the three views and their switches, the View menu action, the
    skinned and the bones-only drawing, the marks, and the document holding the character outside the
    project file.
+
+Accepted by the owner (2026-10-31).

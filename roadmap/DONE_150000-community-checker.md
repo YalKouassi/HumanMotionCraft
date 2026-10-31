@@ -1,6 +1,6 @@
 # Community checker: publish or refuse shared clips
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** owner request, 2026-10-30 (no manual approval; `CHECKER_SECRET` is set on GitHub;
   no instant wake-up, so the schedule alone)
@@ -66,3 +66,5 @@ Reviewed `.github/workflows/community-check.yml`, `tools/community_check.py`,
   nothing in a clip chooses a path, and `ac` runs no code from a clip.
 - **Not proven:** the Result records no live run, so "published within one scheduled run" waits for the
   owner (who holds `CHECKER_SECRET`) to watch one; the first run with a clip pending builds cold.
+
+Accepted by the owner (2026-10-31).

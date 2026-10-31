@@ -1,6 +1,6 @@
 # Reports in windows, so text doesn't move the panel
 
-- **Status:** built, waiting for the owner (2026-10-31)
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** owner, 2026-10-31, on the AI in-between panel's fill report: "This is all SLOP, i don't want text to move ui elements around, they should be in the messages log ... OR a button to open a floating panel, this is the same for the red/yellow warnings on the physics area"
 
@@ -39,3 +39,5 @@ itself is still long (50 flags on this clip): it moved, it wasn't shortened.
 
 Review: `target/shots/2026-10-31/panel-reports/ai-before-fill.png`, `ai-after-fill.png`,
 `fill-report-window.png`, `physics-problems-window.png`.
+
+Accepted by the owner (2026-10-31).

@@ -1,6 +1,6 @@
 # Export onto your own character (retarget)
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 144000, 122500
 - **Source:** 144000 (one rig, retarget on export)
 
@@ -181,3 +181,5 @@ Findings:
 7. **Low, not changed.** A node's segment with no length falls back to the parent's alignment with a
    note (`plan.rs:164`, `:181` to `:201`); the note is in the plan's notes and the command results,
    so it is announced. Noted here only because the fallback is where finding 1 came from.
+
+Accepted by the owner (2026-10-31).

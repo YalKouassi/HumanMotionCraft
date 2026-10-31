@@ -1,6 +1,6 @@
 # Export: a root bone on the floor
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 106000
 - **Source:** 144000 (one rig, retarget on export); owner request 2026-10-30
 
@@ -81,3 +81,5 @@ Findings:
 6. **Low, wording.** The Result's "interactive visual diagram" is a static drawing that changes with the
    selected root mode (`draw_root_visual`), not something the person can act on. The Result's other
    claims (the option on both commands, the fixture, the unit tests) match the code.
+
+Accepted by the owner (2026-10-31).

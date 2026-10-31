@@ -1,6 +1,6 @@
 # AI Fill can fill from poses, with a licence notice
 
-- **Status:** built, waiting for the owner (2026-10-31)
+- **Status:** done (2026-10-31)
 - **Requires:** none (157000's engine is built and approved; 157000 itself stays open for its training clips)
 - **Source:** owner, 2026-10-31: "I'd like to use motionbricks where possible (maybe just notify 'Check NVIDIA X License before usage' and give responsibility to user)"
 
@@ -51,3 +51,5 @@ Built 2026-10-31. `cargo xtask check` passes with 83 fixtures, and `ai.fill` and
 
 Review: `target/shots/2026-10-31/fill-from-poses/panel-pose-fill.png` (the choice and the notice) and
 `panel-pose-preview.png` (the ghost).
+
+Accepted by the owner (2026-10-31).

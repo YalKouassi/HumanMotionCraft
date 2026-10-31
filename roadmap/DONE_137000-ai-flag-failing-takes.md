@@ -1,6 +1,6 @@
 # Flag the takes the model fails on
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 126000
 - **Source:** 115000 (review 2 §14)
 
@@ -115,3 +115,5 @@ Reviewed `training/ac_train/flag.py`, `crates/ac-review/src/flags.rs`, the revie
   size cap (a dev-only reader of a file the pipeline writes); two flags with one id keep the last silently;
   flags of a set not loaded stay, as the doc comment says.
 - The Result's claims hold; the run's numbers are the owner's to read.
+
+Accepted by the owner (2026-10-31).

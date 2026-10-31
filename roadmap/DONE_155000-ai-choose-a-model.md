@@ -1,6 +1,6 @@
 # Choose which AI model fills
 
-- **Status:** built, waiting for the owner
+- **Status:** done (2026-10-31)
 - **Requires:** 154000
 - **Source:** owner's preferred direction (2026-10-30)
 
@@ -80,3 +80,6 @@ made on the way, all routine:
 - The panel: a Model menu above the Style menu, shown once there are two models or more (the
   bundled one alone has nothing to choose). The screenshot for the owner is still to take: run the app
   with `--script` holding `ai.models {folder: "<repo>/fixtures/data/models"}` and `--screenshot`.
+
+Accepted by the owner (2026-10-31).
+Accepted before its prerequisite 154000 was built and without the two-model panel screenshot; the two tiny test models stand in for a second model until then.

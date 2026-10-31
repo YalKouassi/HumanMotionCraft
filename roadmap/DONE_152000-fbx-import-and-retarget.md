@@ -1,6 +1,6 @@
 # FBX import and retarget onto the rig
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** owner request (2026-10-30)
 
@@ -186,3 +186,5 @@ Reviewed `crates/ac-io/src/fbx/{binary,scene,import,commands}.rs`, `crates/ac-co
 **Real files (2026-10-31).** The first run on the owner's animated FBX imported 24 of a random 150
 binary files, mostly refusing bone names it doesn't know. Text FBX is also common. The findings and
 the bulk port are in 164000.
+
+Accepted by the owner (2026-10-31).
