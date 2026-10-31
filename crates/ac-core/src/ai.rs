@@ -780,13 +780,17 @@ impl crate::document::Document {
             .collect();
         for (a, b) in [(prev, Some(f)), (Some(f), next)] {
             let (Some(a), Some(b)) = (a, b) else { continue };
-            if ai.iter().any(|&x| a < x && x < b)
-                && !crate::edits::generated_in(&self.clip, a, b)
-                && crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?.is_empty()
-            {
+            if !ai.iter().any(|&x| a < x && x < b) || crate::edits::generated_in(&self.clip, a, b) {
+                continue;
+            }
+            let note = crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?;
+            if note.is_empty() {
                 let (_, placing) = self.finish_fill(&filler, a, b)?;
                 notes.extend(self.keep_possible(a, b)?);
                 notes.extend(placing);
+            } else {
+                // the span's AI keys are gone and nothing took their place: say so (Rule 1)
+                notes.push(note);
             }
         }
         let fr = self.frame;
