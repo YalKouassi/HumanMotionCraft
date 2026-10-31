@@ -21,3 +21,6 @@ argument. `ai.fill`'s own path is untouched, so its goldens are not expected to 
 `bug-refill-finishes-like-a-fill` walks a short and a long fill with hand-worked bands and undo steps;
 `crates/ac-cli/tests/refill_finish.rs` compares every key with a fresh `ai.fill`, within 1e-6 (2026-10-31).
 Written without a build: neither has been run yet.
+
+## Build check (2026-10-31)
+A move, and a copy into a long fill, match a fresh fill to 1e-6. A copy beside short fills matches to 2e-3, not exactly: the span before it stays, so its frames next to the shared key are eased a second time (measured at most 0.0015 in a rotation, 0.0002 in the root).

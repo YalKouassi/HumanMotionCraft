@@ -27,3 +27,6 @@ untouched.
 Not measured yet: this was written without a build. `sliding_max_cm` in `ai-fill-long-gap` still holds the old
 11.5295 until the integration build pins it, and `crates/ac-cli/tests/long_fill_feet.rs` checks the 2 cm line. The
 owner's video is still to come.
+
+## Build check (2026-10-31)
+Measured in integration with the shipped `parts-natural`: `sliding_max_cm` 1.894, under the line. The same code on the previous model measured 2.006, so the line is met narrowly and depends on the model. Video for the owner, physics off: `target/shots/2026-10-31/long-fill/long-fill-feet.mp4` in the main checkout.

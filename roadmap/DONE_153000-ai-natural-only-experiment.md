@@ -235,3 +235,6 @@ Closed by the owner. parts-natural is the base for 154000; it is not exported.
 
 ## Decision (2026-10-31)
 The owner: `parts-natural` is not exported until add-ons work (154000), because the app would lose 41 of its 48 styles.
+
+## Decision changed (2026-10-31)
+The owner: ship the simplified model now. `parts-natural` (best checkpoint) is exported as `parts`, so the style menu goes from 48 to 7 (any, idle, jump, natural, range-of-motion, run, walk). The other 41 stay gone until add-ons exist (154000). The earlier decision not to export is replaced.

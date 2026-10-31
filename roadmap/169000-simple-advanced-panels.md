@@ -28,3 +28,6 @@ builds it and takes the screenshots).
 - New `--ui ui_mode=simple|advanced` and `--ui reset_layout=on` make the screenshots possible. Tests in
   `crates/ac-app/src/app/shell/tests.rs`; no command changed, so no fixture.
 - Not kept: which tab was in front of a tab group. The last panel reopened is in front.
+
+## Build check (2026-10-31)
+Screenshots for the owner: `target/shots/2026-10-31/simple-advanced/` in the main checkout. The switch back was looked at and says "1 panel back".
