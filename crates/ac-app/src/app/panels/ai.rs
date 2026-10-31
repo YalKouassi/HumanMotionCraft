@@ -682,7 +682,8 @@ impl App {
             if self.session.document.live_preview().is_some() {
                 self.ai_dirty = true;
             }
-            return;
+            // the sliders below show the preset's values this same frame
+            st = self.session.document.ai_settings.clone();
         }
         let mut changed = false;
         if !info.styles.is_empty() {

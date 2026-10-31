@@ -240,6 +240,13 @@ impl AiFiller {
     /// kept under [`AiFiller::placed_of`] for the caller to tag, ease and plant around.
     fn fill_long(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
         let max = self.max_gap();
+        // a model card saying it fills no frames: every sub-span would be long too, without end
+        if max < 1 {
+            return Err(format!(
+                "model {} fills no frames at once (max_gap {max}): the gap {a}–{b} cannot be split into spans it takes",
+                self.model.info().tag
+            ));
+        }
         let Some(source) = &self.source else {
             return Err(crate::error::hinted(
                 format!(
@@ -258,6 +265,12 @@ impl AiFiller {
             .filter_map(|n| sk.bone(n))
             .collect();
         let plan = anchors::plan(sk, clip, &self.links, &bones, source.as_ref(), (a, b), max)?;
+        if plan.anchors.is_empty() {
+            return Err(format!(
+                "no anchor frame was found for the gap {a}–{b} ({} frames, the model takes {max})",
+                b - a - 1
+            ));
+        }
         let mut tmp = clip.clone();
         let additive = tmp
             .layers
@@ -350,6 +363,19 @@ impl AiFiller {
 impl Filler for AiFiller {
     fn long(&self) -> bool {
         self.source.is_some()
+    }
+
+    /// The anchors `fill_long` placed in `a..b`, left in place for the fill's finishing step
+    /// ([`AiFiller::placed_of`] takes them).
+    fn anchor_tags(&self, a: i64, b: i64) -> Vec<(i64, String)> {
+        self.placed
+            .lock()
+            .ok()
+            .and_then(|m| {
+                m.get(&(a, b))
+                    .map(|p| p.anchors.iter().map(|an| (an.frame, anchors::tag(an))).collect())
+            })
+            .unwrap_or_default()
     }
 
     fn fill(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
@@ -767,13 +793,17 @@ impl crate::document::Document {
             .collect();
         for (a, b) in [(prev, Some(f)), (Some(f), next)] {
             let (Some(a), Some(b)) = (a, b) else { continue };
-            if ai.iter().any(|&x| a < x && x < b)
-                && !crate::edits::generated_in(&self.clip, a, b)
-                && crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?.is_empty()
-            {
+            if !ai.iter().any(|&x| a < x && x < b) || crate::edits::generated_in(&self.clip, a, b) {
+                continue;
+            }
+            let note = crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?;
+            if note.is_empty() {
                 let (_, placing) = self.finish_fill(&filler, a, b)?;
                 notes.extend(self.keep_possible(a, b)?);
                 notes.extend(placing);
+            } else {
+                // the span's AI keys are gone and nothing took their place: say so (Rule 1)
+                notes.push(note);
             }
         }
         let fr = self.frame;

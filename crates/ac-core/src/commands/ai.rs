@@ -60,7 +60,9 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
     let mut model = String::new();
     let mut notes: Vec<String> = Vec::new();
     let mut anchors: Vec<Value> = Vec::new();
-    let mut diagnostics: Vec<Value> = Vec::new();
+    // measured once every gap is filled: a later fill eases through the key it shares with an
+    // earlier one (up to 4 frames into it), so a seam measured before that would be stale
+    let mut fills: Vec<crate::ai::Filled> = Vec::new();
     let mut passes: Vec<Value> = Vec::new();
     let mut ready: Vec<(i64, i64)> = Vec::new();
     for g in gaps::gaps(doc) {
@@ -103,7 +105,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
                     anchors: Vec::new(),
                     segment: None,
                 };
-                diagnostics.push(crate::filldiag::diagnose(doc, &gap).json());
+                fills.push(gap);
                 filled.push(json!([p, q]));
             }
             model = f.model;
@@ -118,10 +120,14 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
                 "source_frame": an.source_frame,
             })
         }));
-        diagnostics.push(crate::filldiag::diagnose(doc, &f).json());
-        model = f.model;
+        model = f.model.clone();
         filled.push(json!([f.from, f.to]));
+        fills.push(f);
     }
+    let diagnostics: Vec<Value> = fills
+        .iter()
+        .map(|f| crate::filldiag::diagnose(doc, f).json())
+        .collect();
     if filled.is_empty() {
         let why: Vec<String> = skipped
             .iter()
