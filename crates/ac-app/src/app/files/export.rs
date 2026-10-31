@@ -19,8 +19,10 @@ const PROFILES: &[(&str, &str, &str)] = &[
     ("bones", "Bone list", "exactly the joints you list"),
 ];
 
+/// (id, label, profile, root). `custom` sets nothing: it is lit when no named preset matches the
+/// choices below, so one set of choices never lights two presets.
 const ENGINE_PRESETS: &[(&str, &str, &str, &str)] = &[
-    ("custom", "Custom", "full", "hips"),
+    ("custom", "Custom", "", ""),
     ("unreal", "Unreal Engine", "game", "ground"),
     ("unity", "Unity", "game", "ground"),
     ("godot", "Godot", "game", "hips"),
@@ -172,12 +174,21 @@ impl App {
                 ui.separator();
                 ui.label(egui::RichText::new("Target Engine Preset").strong());
                 ui.horizontal(|ui| {
+                    let (profile, root) = (ex.profile.clone(), ex.root.clone());
+                    let matches = |prof: &str, rt: &str| !prof.is_empty() && profile == prof && root == rt;
+                    let named = ENGINE_PRESETS.iter().any(|(_, _, prof, rt)| matches(prof, rt));
                     for (id, label, prof, rt) in ENGINE_PRESETS {
-                        let selected = ex.profile == *prof && ex.root == *rt;
+                        let selected = if prof.is_empty() { !named } else { matches(prof, rt) };
                         if ui
                             .selectable_label(selected, *label)
+                            .on_hover_text(if prof.is_empty() {
+                                "your own choices below".to_string()
+                            } else {
+                                format!("joints: {prof}; root motion bone: {rt}")
+                            })
                             .tag(format!("dialog.export.preset.{id}"), *label)
                             .clicked()
+                            && !prof.is_empty()
                         {
                             ex.profile = (*prof).to_string();
                             ex.root = (*rt).to_string();
