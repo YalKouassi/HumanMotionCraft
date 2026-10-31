@@ -83,3 +83,6 @@ Findings:
    claims (the option on both commands, the fixture, the unit tests) match the code.
 
 Accepted by the owner (2026-10-31).
+
+## Decisions on the review (2026-10-31)
+The owner: the presets keep the product names, with an exception in the rule, and the dialog remembers the root mode, both in 170000. The ground bone's yaw stays until an engine user complains.

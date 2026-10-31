@@ -232,3 +232,6 @@ it now would take 41 of the 48 styles out of the app with nothing to replace the
 
 ## Closed (2026-10-31)
 Closed by the owner. parts-natural is the base for 154000; it is not exported.
+
+## Decision (2026-10-31)
+The owner: `parts-natural` is not exported until add-ons work (154000), because the app would lose 41 of its 48 styles.

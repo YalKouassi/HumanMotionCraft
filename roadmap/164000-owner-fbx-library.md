@@ -1,6 +1,6 @@
 # Port the owner's FBX animations into a private clip library
 
-- **Status:** not started; the acceptance below is proposed and waits for the owner to agree
+- **Status:** not started; acceptance agreed by the owner (2026-10-31)
 - **Requires:** 152000
 - **Source:** owner request (2026-10-31)
 
@@ -62,7 +62,7 @@ that store packs stay out of `training/` unless their publisher has consented in
 - Clips are grouped by pack and action in the library. The library panel has about 220 clips today,
   so check that it copes with several thousand.
 
-## Acceptance (proposed)
+## Acceptance
 - **Accounted for:** every file in the inventory has one manifest outcome, the counts add up, and
   the owner agrees every refused group.
 - **Reads:** text FBX and FBX 6.1 either import or are refused with a reason, and each case has a
@@ -78,3 +78,12 @@ that store packs stay out of `training/` unless their publisher has consented in
   clip was chosen by name.
 - **Re-run:** running the port again changes nothing and skips finished files.
 - **Library:** the panel opens, searches and plays a clip from the full set without a visible stall.
+
+## Decision (2026-10-31)
+The owner agrees the acceptance above, with these terms:
+- **Order:** first the `.meta` bone map and clip ranges, then a pilot of about three varied packs, then
+  the full set.
+- **Training:** no clip from this collection trains anything for now. If the owner names a clip later,
+  that pack's licence is checked first, and 152000's rule on the publisher's written consent still applies.
+- **152000's low leftovers** (an unreadable folder passed over, animated scale inheritance, the `KeyTime`
+  wording, a default `TimeMode` note) are handled here, where real files show which matter.

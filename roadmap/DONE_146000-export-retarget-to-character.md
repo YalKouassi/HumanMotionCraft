@@ -183,3 +183,6 @@ Findings:
    so it is announced. Noted here only because the fallback is where finding 1 came from.
 
 Accepted by the owner (2026-10-31).
+
+## Decisions on the review (2026-10-31)
+The owner: the 1 cm allowance under the floor stays; a stricter test would only add false failures.

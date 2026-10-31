@@ -14,3 +14,6 @@ one of those here too.
 Three clips in each of the three bone profiles play in Unity with the same poses as the app, standing
 on the ground, with no mirrored sides and root motion on the root bone; screenshots in
 `target/shots/<date>/engine-check/unity/`.
+
+## Decision (2026-10-31)
+The owner: stays parked until a Unity user reports a problem.

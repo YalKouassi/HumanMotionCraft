@@ -35,3 +35,6 @@ this trained on?".
 - `community.share` and the `upload` function both refuse a model, and the app shows no option to share one.
 - Clips and their fixtures behave as before.
 - The owner approves the tab with a model in it.
+
+## Decision (2026-10-31)
+The owner: starts only after a good 154000 result; until then there is nothing to publish.

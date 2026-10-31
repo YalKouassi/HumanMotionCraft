@@ -92,3 +92,6 @@ line. Fixes are commits on this branch, one a finding.
 What the coordinator should verify at build time: `ac fixtures --only bug-anchors-untagged-after-key-move` (new) and `ai-fill-long-gap`, `ai-fill-all`, `ai-toggle` (unchanged behaviour; the tags were already set on the `ai.fill` path).
 
 Accepted by the owner (2026-10-31).
+
+## Decisions on the review (2026-10-31)
+The owner: the foot slide on long fills is fixed in 167000, and the unfinished refill after a key move or copy in 168000.

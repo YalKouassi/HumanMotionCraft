@@ -68,3 +68,6 @@ Reviewed `.github/workflows/community-check.yml`, `tools/community_check.py`,
   owner (who holds `CHECKER_SECRET`) to watch one; the first run with a clip pending builds cold.
 
 Accepted by the owner (2026-10-31).
+
+## Decisions on the review (2026-10-31)
+The owner: one watched live run, with `CHECKER_DISPATCH_TOKEN` set, in 172000.

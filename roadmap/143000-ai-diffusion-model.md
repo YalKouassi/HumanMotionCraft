@@ -12,3 +12,6 @@ the fast default. Each step is a forward pass in plain Rust, so 125000's speed t
 
 ## Acceptance
 To be agreed with the owner once 126000 shows where the regression model falls short.
+
+## Decision (2026-10-31)
+The owner: stays long-term; it helps none of the current work.

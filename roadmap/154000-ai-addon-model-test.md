@@ -1,6 +1,6 @@
 # Test add-on models: a natural base plus a short training run per style
 
-- **Status:** not started; starts only when the owner asks, because it trains
+- **Status:** not started; the next training run, agreed by the owner (2026-10-31); starts when the owner gives the word to train
 - **Requires:** 153000
 - **Base:** `training/data/models/parts-natural` (best checkpoint), the owner's choice (2026-10-31)
 - **Source:** owner's preferred direction (2026-10-30)
@@ -31,3 +31,6 @@ Try these on the owner's machine through the app's own models folder. Nothing sh
   how far it moved from the base.
 - The result gives each add-on's training time and whether the base idea holds: go on to 155000, or
   stay with one model.
+
+## Decision (2026-10-31)
+The next training run. Start with one or two styles and compare them by eye before training more.

@@ -117,3 +117,6 @@ Reviewed `training/ac_train/flag.py`, `crates/ac-review/src/flags.rs`, the revie
 - The Result's claims hold; the run's numbers are the owner's to read.
 
 Accepted by the owner (2026-10-31).
+
+## Decisions on the review (2026-10-31)
+The owner: the low leftovers stay as they are.

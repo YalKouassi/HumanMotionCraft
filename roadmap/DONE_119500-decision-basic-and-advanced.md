@@ -32,3 +32,6 @@ Code review of commit `119f430` (the part for this item) and the code as it is n
 | 6 | The saved preference follows the rules: its own `#[serde(default)]` field on `Layout`, lower-case serialized names, never retyped. | `crates/ac-app/src/app/prefs.rs:326–351` | — | checked |
 
 Accepted by the owner (2026-10-31).
+
+## Decisions on the review (2026-10-31)
+The owner: Advanced reopens what Simple closed and Reset returns to Advanced, in 169000.

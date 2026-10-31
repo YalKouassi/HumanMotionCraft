@@ -35,3 +35,6 @@ Code review of commit `119f430` (the part for this item) and the code as it is n
 | 5 | Outputs match `AI_SETTINGS` (the five settings, required); `docs/commands.md:184` and `fixtures/schema.json` carry `preset`. | `crates/ac-core/src/commands/returns.rs:112–123` | — | checked |
 
 Accepted by the owner (2026-10-31).
+
+## Decisions on the review (2026-10-31)
+The owner: the undocumented preset aliases go (171000). `ai.settings` stays out of undo: settings, not edits.

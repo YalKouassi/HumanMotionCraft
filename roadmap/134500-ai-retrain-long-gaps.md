@@ -1,7 +1,7 @@
 # Win back the long gaps
 
 - **Status:** not started; acceptance changed and agreed by the owner (2026-10-31)
-- **Requires:** 134000
+- **Requires:** 134000, 154000
 - **Source:** 134000's result (the owner: ship it, then keep improving)
 
 ## What
@@ -50,3 +50,6 @@ the natural held-out windows and the comparison tables. About 3.5 hours. The 140
 moved out and go in a later night, each 180 minutes on the same recipe and evaluated with
 `--checkpoint best`. Nothing is exported: the owner compares the cards against this file's acceptance
 line and judges side-by-side videos before any export (`ac_train.export <tag> --checkpoint best --as parts`).
+
+## Decision (2026-10-31)
+The owner: after 154000, so that if add-ons work this retrain is done on the new base and not the old one.
