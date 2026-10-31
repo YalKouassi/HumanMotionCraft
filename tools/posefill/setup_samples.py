@@ -38,8 +38,8 @@ STEPS = 3
 NEED_GB = 1
 # the licence and the note beside the clips: path, (sha256, size)
 TEXTS = {
-    "LICENSE.txt": ("474d99d5bcd285cee044eb172d277d1f287cc8d68978144c25079acf33c3eec8", 9521),
-    "README.md": ("3c9d43d76e0abd87c8257134f3f6e901c99ed9baef51bfd55d5ea9db3932001b", 6063),
+    "LICENSE.txt": ("237a1d70dfd78d5aa0d6a4c9ced68827aa0e2eb2514f3148c993258f733de065", 9450),
+    "README.md": ("094fb142e0283236c7de06aead9337153a7acd3e6cc1093c84357ac3ce8604ce", 5964),
 }
 # the clips, from GitHub's large-file store: path, (sha256, size)
 CLIPS = {

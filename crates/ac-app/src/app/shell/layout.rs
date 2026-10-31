@@ -103,7 +103,7 @@ impl DockPanel {
             DockPanel::Physics => {
                 let n = app.panels.physics.marks.len();
                 if n > 0 {
-                    format!("Physics ({n} problems)")
+                    format!("Physics ({n} problem{})", if n == 1 { "" } else { "s" })
                 } else {
                     "Physics".into()
                 }

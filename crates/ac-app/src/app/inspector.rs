@@ -41,7 +41,10 @@ impl App {
             |app, ui| app.layers_panel(ui),
         );
         let physics = if problems > 0 {
-            format!("Physics ({problems} problems)")
+            format!(
+                "Physics ({problems} problem{})",
+                if problems == 1 { "" } else { "s" }
+            )
         } else {
             "Physics".into()
         };

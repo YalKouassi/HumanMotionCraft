@@ -1,6 +1,7 @@
 //! The physics report: the switch, what `physics.solve` says the pass does (flights, frames lifted
-//! out of the ground, sliding feet held, still poses balanced) and the problem frames as a list
-//! to click (`frame.set`). The same problems are marks on the timeline (`timeline::marks`).
+//! out of the ground, sliding feet held, still poses balanced) and a button to the problem frames,
+//! a list to click (`frame.set`) in a window of its own, so they never push the panel about. The
+//! same problems are marks on the timeline (`timeline::marks`).
 
 use std::collections::BTreeMap;
 
@@ -9,6 +10,7 @@ use egui::Color32;
 use serde_json::{Value, json};
 
 use crate::app::App;
+use crate::app::shell::Level;
 use crate::app::timeline::marks::Mark;
 use crate::app::ui_ids::Tag;
 
@@ -27,14 +29,12 @@ pub struct ProblemMark {
 #[derive(Default)]
 pub struct PhysicsState {
     report: Option<Value>,
-    error: Option<String>,
+    /// The Physics problems window is open.
+    problems_open: bool,
     made_for: Option<(Clip, BTreeMap<String, Clip>)>,
     /// The problems, for the timeline.
     pub marks: Vec<ProblemMark>,
 }
-
-/// Most problem rows listed (the rest are counted).
-const MAX_ROWS: usize = 40;
 
 /// A problem's colour (the theme's: penetration, sliding, off balance, anything else).
 pub fn colour(pal: &crate::app::theme::Palette, kind: &str) -> Color32 {
@@ -65,7 +65,6 @@ impl App {
         st.made_for = Some(made_for);
         if self.session.document.clip.base().keys.is_empty() {
             st.report = None;
-            st.error = None;
             st.marks.clear();
             return;
         }
@@ -83,12 +82,13 @@ impl App {
                     })
                     .collect();
                 st.report = Some(r);
-                st.error = None;
             }
             Err(e) => {
                 st.report = None;
                 st.marks.clear();
-                st.error = Some(format!("the physics pass failed: {e}"));
+                self.shell
+                    .messages
+                    .push(Level::Error, format!("The physics pass failed: {e}"));
             }
         }
         let pal = self.palette();
@@ -106,7 +106,7 @@ impl App {
         let mut physics = self.session.document.clip.physics;
         if ui
             .checkbox(&mut physics, "Physics")
-            .on_hover_text("Play and export through the physics pass: feet on the ground, planted feet hold, still poses balance, jumps follow gravity")
+            .on_hover_text("Play and export through the physics pass: feet on the ground, planted feet hold, still poses balance, jumps follow gravity. Off: playback shows your keys, and the numbers below are what the pass would fix")
             .tag("panel.physics.on", "Physics")
             .changed()
         {
@@ -114,21 +114,10 @@ impl App {
             let f = self.session.document.frame;
             self.run("frame.set", json!({ "frame": f }));
         }
-        if let Some(e) = &self.panels.physics.error {
-            ui.label(egui::RichText::new(e).color(colour(self.palette(), "penetration")));
-            return;
-        }
         let Some(r) = self.panels.physics.report.clone() else {
             ui.label(egui::RichText::new("No keys yet: nothing for the pass to check.").weak());
             return;
         };
-        if !physics {
-            ui.label(
-                egui::RichText::new("Off: playback shows your keys. This is what the pass would fix.")
-                    .small()
-                    .weak(),
-            );
-        }
         let n = |k: &str| r[k].as_u64().unwrap_or(0);
         let count = |k: &str| r[k].as_array().map_or(0, Vec::len);
         egui::Grid::new("physics-report").num_columns(2).show(ui, |ui| {
@@ -159,38 +148,74 @@ impl App {
                 ui.end_row();
             }
         });
-        let problems: Vec<Value> = r["problems"].as_array().cloned().unwrap_or_default();
-        if problems.is_empty() {
-            ui.label(
-                egui::RichText::new("No problems: feet stay on the ground and still poses balance.")
-                    .small()
-                    .weak(),
-            );
+        let count = self.panels.physics.marks.len();
+        let label = format!("Problems ({count})");
+        if ui
+            .add_enabled(count > 0, egui::Button::new(&label))
+            .on_hover_text("The problem frames, in a window: a click goes to the frame")
+            .on_disabled_hover_text("No problems: feet stay on the ground and still poses balance")
+            .tag("panel.physics.problems", label.as_str())
+            .clicked()
+        {
+            self.panels.physics.problems_open = !self.panels.physics.problems_open;
+        }
+    }
+
+    /// The problem frames, a list to click.
+    pub(in crate::app) fn physics_problems_window(&mut self, ctx: &egui::Context) {
+        if !self.panels.physics.problems_open {
             return;
         }
-        ui.label(
-            egui::RichText::new("Problem frames (click to go there)")
-                .small()
-                .weak(),
-        );
-        for (idx, p) in problems.iter().take(MAX_ROWS).enumerate() {
-            let from = p["from"].as_i64().unwrap_or(0);
-            let kind = p["kind"].as_str().unwrap_or_default();
-            let label = p["label"].as_str().unwrap_or_default();
-            let text = egui::RichText::new(label).color(colour(self.palette(), kind));
-            let here = self.session.document.key_frame() == from;
-            if ui
-                .selectable_label(here, text)
-                .on_hover_text(format!("Go to frame {from}"))
-                .tag(format!("panel.physics.problem.{idx}"), label)
-                .clicked()
-            {
-                self.playing = false;
-                self.run("frame.set", json!({ "frame": from }));
-            }
+        let problems: Vec<Value> = self
+            .panels
+            .physics
+            .report
+            .as_ref()
+            .and_then(|r| r["problems"].as_array().cloned())
+            .unwrap_or_default();
+        if problems.is_empty() {
+            self.panels.physics.problems_open = false;
+            return;
         }
-        if problems.len() > MAX_ROWS {
-            ui.label(egui::RichText::new(format!("and {} more", problems.len() - MAX_ROWS)).small());
+        let pal = self.palette();
+        let here = self.session.document.key_frame();
+        let mut open = true;
+        let mut go = None;
+        egui::Window::new("Physics problems")
+            .open(&mut open)
+            .default_size([360.0, 380.0])
+            .show(ctx, |ui| {
+                ui.label(
+                    egui::RichText::new(format!(
+                        "{} problem{} · click one to go there",
+                        problems.len(),
+                        if problems.len() == 1 { "" } else { "s" }
+                    ))
+                    .weak()
+                    .small(),
+                );
+                ui.separator();
+                egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
+                    for (idx, p) in problems.iter().enumerate() {
+                        let from = p["from"].as_i64().unwrap_or(0);
+                        let kind = p["kind"].as_str().unwrap_or_default();
+                        let label = p["label"].as_str().unwrap_or_default();
+                        let text = egui::RichText::new(label).color(colour(pal, kind));
+                        if ui
+                            .selectable_label(here == from, text)
+                            .on_hover_text(format!("Go to frame {from}"))
+                            .tag(format!("window.physics_problems.{idx}"), label)
+                            .clicked()
+                        {
+                            go = Some(from);
+                        }
+                    }
+                });
+            });
+        self.panels.physics.problems_open = open;
+        if let Some(from) = go {
+            self.playing = false;
+            self.run("frame.set", json!({ "frame": from }));
         }
     }
 }
