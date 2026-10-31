@@ -14,6 +14,10 @@
 # It is created as a draft, uploaded, then published as the latest release, so an interrupted run
 # never leaves a half-uploaded public one. Data releases (training/ac_train/publish.py) are
 # prereleases and never take "latest" from it.
+#
+# The zip's contents are checked against tools/release_manifest.txt here; the clean-machine check
+# (tools/release_check.ps1, Windows Sandbox: tools/release_check.wsb) is run by hand on the zip,
+# see roadmap/124000-packaging.md.
 
 name: release
 
@@ -91,14 +95,27 @@ jobs:
           # the setups read the product's name from product.rs and copy the rig maths
           pkg="target/package/$stem"
           mkdir -p "$pkg/tools/textmotion" "$pkg/tools/posefill" "$pkg/training/ac_train" "$pkg/crates/ac-core/src"
+          # (tools/release_manifest.txt lists the same files: keep the two in step)
           cp tools/textmotion/{setup_textmotion,helper,generate,engine}.py "$pkg/tools/textmotion/"
-          cp tools/posefill/{setup_posefill,helper,engine,live}.py tools/posefill/LICENSE-APACHE "$pkg/tools/posefill/"
-          cp training/ac_train/{rig,quat,retarget}.py "$pkg/training/ac_train/"
+          # posefill.samples runs setup_samples.py, which imports setup_posefill and runs convert_samples.py
+          cp tools/posefill/{setup_posefill,helper,engine,live,setup_samples,convert_samples}.py tools/posefill/LICENSE-APACHE "$pkg/tools/posefill/"
+          # RIG_MODULES of both setups (bvh.py is pose fill's and the sample clips')
+          cp training/ac_train/{rig,quat,retarget,bvh}.py "$pkg/training/ac_train/"
           cp crates/ac-core/src/product.rs "$pkg/crates/ac-core/src/"
           # Python's zipfile writes `/` separators (Compress-Archive may write `\`, which the
           # launcher refuses; Git Bash's tar can't write zips).
           (cd target/package && python -I -m zipfile -c "../../dist/$stem.zip" "$stem")
           cp craft-app.json "assets/icon/$id-256.png" dist/
+
+      - name: check the zip's contents
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          # every path tools/release_manifest.txt requires is in the zip, and nothing it forbids
+          $id = (Get-Content craft-app.json | ConvertFrom-Json).id
+          & tools/release_contents.ps1 -Path "dist/$id-$env:VERSION-windows-x64-portable.zip"
+          if ($LASTEXITCODE -ne 0) { throw "the zip's contents don't match tools/release_manifest.txt" }
 
       - name: check against the launcher's contract
         shell: bash

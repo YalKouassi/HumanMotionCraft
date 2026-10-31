@@ -1,0 +1,69 @@
+# What the release zip must hold, one path a line, relative to the zip's one top folder
+# (humanmotioncraft-<version>-windows-x64-portable/). The list follows the "release folder" step
+# of .github/workflows/release.yml: when that step copies something new, add it here, and when a
+# setup under tools/ copies a new module from training/ac_train, add it to both.
+#
+#   path/to/file     the file must be in the zip
+#   path/to/folder/  the folder must be in the zip with at least one file under it
+#   !pattern         no entry may match the wildcard pattern
+#   # ...            a comment
+#
+# Read by tools/release_contents.ps1 (the workflow's own check, right after the zip is made, and
+# tools/release_check.ps1's first check).
+
+# the app and the headless CLI
+humanmotioncraft.exe
+ac.exe
+
+# the licence files and the readme
+LICENSE
+NOTICE
+ATTRIBUTION.md
+README.md
+
+# the assets: the rig the app can't start without, the mannequin, the built-in library, the models
+assets/rig/default_rig.json
+assets/rig/limits.json
+assets/rig/ranges.json
+assets/rig/mannequin.glb
+assets/library/animations/
+assets/library/poses/
+assets/models/MANIFEST.json
+assets/models/parts/
+assets/icon/
+assets/SOURCES.json
+
+# motion from text: text.install runs this setup from next to assets/ (ac_helper::setup), and the
+# setup copies the helper scripts and the rig maths from the same tree
+tools/textmotion/setup_textmotion.py
+tools/textmotion/helper.py
+tools/textmotion/engine.py
+tools/textmotion/generate.py
+
+# pose fill: posefill.install runs setup_posefill.py the same way; posefill.samples runs
+# setup_samples.py, which imports setup_posefill and runs convert_samples.py
+tools/posefill/setup_posefill.py
+tools/posefill/helper.py
+tools/posefill/engine.py
+tools/posefill/live.py
+tools/posefill/setup_samples.py
+tools/posefill/convert_samples.py
+tools/posefill/LICENSE-APACHE
+
+# the rig maths both setups copy into their install (RIG_MODULES in each setup; bvh.py is pose
+# fill's and the sample clips')
+training/ac_train/rig.py
+training/ac_train/quat.py
+training/ac_train/retarget.py
+training/ac_train/bvh.py
+
+# the setups read the product's name from here
+crates/ac-core/src/product.rs
+
+# never shipped: training data, the owner's or anyone's motion-capture clips, the evaluation-only
+# sample clips (AGENTS.md "Non-negotiables", roadmap 157000 and 165000)
+!training/data/*
+!assets/motions/*
+!*.bvh
+!*.npz
+!*.fbx
