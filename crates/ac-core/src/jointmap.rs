@@ -5,6 +5,8 @@
 //! A name is cut into words (`LeftUpLeg` -> left, up, leg; `mixamorig:Spine1` -> spine, 1;
 //! `upperleg01.L` -> upperleg, 01, l), its side read from the `left`/`right`/`l`/`r` words, and
 //! the rest joined into a key (`upleg`) that is matched against each landmark's known names.
+//! A leading `b` or `humanoid` word is a rig's prefix and no part of the key (`B_L_Thigh` -> left,
+//! thigh; `humanoid_ R Hand` -> right, hand).
 //! Joints with an end, twist, roll, helper or control word are never landmarks. Where names
 //! leave a doubt the hierarchy decides: the hips are the joint the two thighs meet under, the
 //! spine landmark is the hips' child on the way to the neck, and `Leg` is the knee when a thigh
@@ -27,6 +29,8 @@ const BODY_WORDS: [&str; 22] = [
     "femur", "tibia", "foot", "toes", "toe", "humerus", "radius", "ulna", "hand", "wrist", "clavicle",
     "shoulder", "arm", "forearm", "upleg", "leg", "thigh", "shin", "calf", "knee", "ankle", "elbow",
 ];
+/// First words that only say whose rig it is (`B_Pelvis`, `humanoid_ Pelvis`).
+const PREFIXES: [&str; 2] = ["b", "humanoid"];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Side {
@@ -80,7 +84,10 @@ fn words(name: &str) -> Vec<String> {
 }
 
 fn parse(index: usize, name: &str) -> Parsed {
-    let ws = words(name);
+    let mut ws = words(name);
+    if ws.first().is_some_and(|w| PREFIXES.contains(&w.as_str())) {
+        ws.remove(0);
+    }
     let mut side = Side::None;
     let mut sides = 0;
     let mut body: Vec<&str> = Vec::new();
@@ -473,6 +480,84 @@ mod tests {
         assert_eq!(names[g.map["hips"]], "root", "the thighs meet under root");
         assert_eq!(names[g.map["spine"]], "Chest");
         assert_eq!(g.notes.len(), 3, "{:?}", g.notes);
+    }
+
+    /// A body under `prefix`: `sep` joins the prefix, the side and the name. The hierarchy is worked
+    /// from the order the real lists give: spine chain, arms off the top of it, then neck, then legs.
+    fn prefixed(prefix: &str, sep: &str) -> (Vec<String>, Vec<Option<usize>>) {
+        let n = |rest: &str| format!("{prefix}{sep}{rest}");
+        let mut names = vec!["Top".to_string()];
+        let mut parents = vec![None];
+        let mut chain = |names: &mut Vec<String>, from: usize, list: &[String]| -> usize {
+            let mut at = from;
+            for j in list {
+                names.push(j.clone());
+                parents.push(Some(at));
+                at = names.len() - 1;
+            }
+            at
+        };
+        let pelvis = chain(&mut names, 0, &[n("Pelvis")]);
+        let top = chain(&mut names, pelvis, &[n("Spine"), n("Spine1"), n("Spine2")]);
+        for s in ["L", "R"] {
+            let side = |b: &str| n(&format!("{s}{sep}{b}"));
+            chain(
+                &mut names,
+                top,
+                &[
+                    side("Clavicle"),
+                    side("UpperArm"),
+                    side("Forearm"),
+                    side("ForeArmTwist"),
+                ],
+            );
+            let forearm = names.len() - 2;
+            chain(&mut names, forearm, &[side("Hand"), side("Finger0"), side("Finger01")]);
+        }
+        chain(&mut names, top, &[n("Neck"), n("Head"), n("HeadNub")]);
+        for s in ["L", "R"] {
+            let side = |b: &str| n(&format!("{s}{sep}{b}"));
+            chain(
+                &mut names,
+                pelvis,
+                &[side("Thigh"), side("Calf"), side("Foot"), side("Toe0")],
+            );
+        }
+        (names, parents)
+    }
+
+    #[test]
+    fn a_b_prefix_and_a_humanoid_prefix_are_read_past() {
+        for (prefix, sep, l, r) in [
+            ("B", "_", "B_L_", "B_R_"),
+            ("humanoid_", " ", "humanoid_ L ", "humanoid_ R "),
+        ] {
+            let (names, parents) = prefixed(prefix, sep);
+            let g = guess(&names, &parents);
+            assert!(g.missing.is_empty(), "{prefix}: {:?}", g.missing);
+            assert!(g.notes.is_empty(), "{prefix}: {:?}", g.notes);
+            let at = |lm: &str| names[g.map[lm]].clone();
+            let bare = |n: &str| format!("{prefix}{sep}{n}");
+            assert_eq!(at("hips"), bare("Pelvis"));
+            assert_eq!(at("spine"), bare("Spine"), "the lowest of the three");
+            assert_eq!(at("neck"), bare("Neck"));
+            assert_eq!(at("head"), bare("Head"));
+            for (side, s) in [("l", l), ("r", r)] {
+                let want = |n: &str| format!("{s}{n}");
+                assert_eq!(at(&format!("{side}_shoulder")), want("UpperArm"));
+                assert_eq!(at(&format!("{side}_elbow")), want("Forearm"));
+                assert_eq!(at(&format!("{side}_wrist")), want("Hand"));
+                assert_eq!(at(&format!("{side}_hip")), want("Thigh"));
+                assert_eq!(at(&format!("{side}_knee")), want("Calf"));
+                assert_eq!(at(&format!("{side}_ankle")), want("Foot"));
+                assert_eq!(at(&format!("{side}_toe")), want("Toe0"));
+            }
+        }
+        // a bare prefix joint is no landmark, and a name that only starts with the letter is not cut
+        assert_eq!(parse(0, "humanoid_").key, "");
+        assert_eq!(parse(0, "B").key, "");
+        assert_eq!(parse(0, "Back").key, "back");
+        assert_eq!(parse(0, "Ball").key, "ball");
     }
 
     #[test]
