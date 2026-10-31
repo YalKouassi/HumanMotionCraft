@@ -295,7 +295,11 @@ fn simple_then_advanced_gives_the_panels_back() {
     let mut dock = dock_with(&[Range, Layers, Picker]);
     let (closed, kept) = layout::close_for_simple(&mut dock, &[]);
     assert!(kept.is_empty(), "{kept:?}");
-    assert_eq!(closed, ["layers", "range"], "only what was open, in Simple's order");
+    assert_eq!(
+        closed,
+        ["layers", "range"],
+        "only what was open, in Simple's order"
+    );
     assert!(!dock.layout.contains(&Range) && !dock.layout.contains(&Layers));
     assert!(dock.layout.contains(&Picker), "Simple keeps the picker");
 
@@ -379,6 +383,12 @@ fn a_panel_that_cannot_come_back_is_said() {
         layout::advanced_status(0, &[]),
         "switched to advanced mode; Simple had closed no panels"
     );
-    assert_eq!(layout::advanced_status(1, &[]), "switched to advanced mode; 1 panel back");
-    assert_eq!(layout::advanced_status(3, &[]), "switched to advanced mode; 3 panels back");
+    assert_eq!(
+        layout::advanced_status(1, &[]),
+        "switched to advanced mode; 1 panel back"
+    );
+    assert_eq!(
+        layout::advanced_status(3, &[]),
+        "switched to advanced mode; 3 panels back"
+    );
 }

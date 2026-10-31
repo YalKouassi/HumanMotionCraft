@@ -888,9 +888,11 @@ impl Document {
                 if by.iter().all(|x| x.abs() < 1e-6) {
                     continue;
                 }
-                let (Some(r), Some(o), Some(at)) =
-                    (rots.get(i), roots.get(i), posed.get(i).and_then(|x| x.1.get(ankle)))
-                else {
+                let (Some(r), Some(o), Some(at)) = (
+                    rots.get(i),
+                    roots.get(i),
+                    posed.get(i).and_then(|x| x.1.get(ankle)),
+                ) else {
                     continue;
                 };
                 let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
@@ -1332,8 +1334,16 @@ mod tests {
     #[test]
     fn one_frame_is_not_a_contact_and_height_stays() {
         let one: Vec<bool> = (0..7).map(|i| i == 2).collect();
-        assert!(hold_moves(&drift(), &one, &[false; 7]).iter().all(|m| *m == [0.0; 3]));
+        assert!(
+            hold_moves(&drift(), &one, &[false; 7])
+                .iter()
+                .all(|m| *m == [0.0; 3])
+        );
         let high: Vec<Vec3> = (0..7).map(|i| [0.0, 0.0, 0.01 * i as f64]).collect();
-        assert!(hold_moves(&high, &down(), &[false; 7]).iter().all(|m| m[2] == 0.0));
+        assert!(
+            hold_moves(&high, &down(), &[false; 7])
+                .iter()
+                .all(|m| m[2] == 0.0)
+        );
     }
 }

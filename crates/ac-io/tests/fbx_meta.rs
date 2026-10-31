@@ -85,8 +85,8 @@ fn a_bone_map_and_clip_ranges_import_as_named_clips() {
     for (cut, at) in [(&start, 0), (&end, 20)] {
         for (f, key) in cut.clip.keys().iter().enumerate() {
             let want = whole.clip.keys()[f + at].root;
-            for axis in 0..3 {
-                let off = (key.root[axis] - want[axis]).abs() * sk.hip_height;
+            for (axis, (got, want)) in key.root.iter().zip(&want).enumerate() {
+                let off = (got - want).abs() * sk.hip_height;
                 assert!(off < 0.02, "{} frame {f} axis {axis}: {off} m", cut.clip.name);
             }
         }

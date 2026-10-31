@@ -20,13 +20,16 @@ fn a_long_fill_slides_under_the_line_and_meets_its_keys() {
         .unwrap()
         .session;
     s.run("physics.set", &json!({ "on": false })).unwrap();
-    s.run("ai.settings", &json!({ "ai_force": 1, "style": "any" })).unwrap();
+    s.run("ai.settings", &json!({ "ai_force": 1, "style": "any" }))
+        .unwrap();
     s.run("clip.open", &json!({ "id": "Locomotion/Walk" })).unwrap();
     s.run("keys.copy", &json!({ "frames": [8] })).unwrap();
     s.run("pose.reset", &json!({})).unwrap();
-    s.run("clip.new", &json!({ "name": "Long gap", "group": "Mine" })).unwrap();
+    s.run("clip.new", &json!({ "name": "Long gap", "group": "Mine" }))
+        .unwrap();
     s.run("keys.paste", &json!({ "at": 90 })).unwrap();
-    s.run("pose.set_root", &json!({ "root": [0, -2.2993044, 0.9027198] })).unwrap();
+    s.run("pose.set_root", &json!({ "root": [0, -2.2993044, 0.9027198] }))
+        .unwrap();
     s.run("key.set", &json!({})).unwrap();
     let mine = |s: &ac_core::Session| -> Vec<_> {
         s.document

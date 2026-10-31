@@ -6,7 +6,7 @@
   {
    "tag": "parts",
    "path": "parts",
-   "source": "training/data/models/parts-lowweights/best.pt (ac_train.train, 180 min, best of 69,026 steps at step 65,000) on builtin_loops, cmu, 100style, accad, addbiomechanics, kimodo",
+   "source": "training/data/models/parts-natural/best.pt (ac_train.train, 180 min, the natural-only run of roadmap 153000) on builtin_loops, cmu, 100style, accad, addbiomechanics, kimodo; shipped by the owner 2026-10-31",
    "commercial": true,
    "default": true
   }

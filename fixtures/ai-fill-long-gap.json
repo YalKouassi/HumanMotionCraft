@@ -34,11 +34,11 @@
         "diagnostics": {
           "from": 0,
           "to": 90,
-          "sliding_max_cm": 11.5295,
+          "sliding_max_cm": 1.894,
           "seams": [
             { "frame": 0, "dv": null, "dw": null },
-            { "frame": 30, "dv": 0.5748, "dw": 0.658 },
-            { "frame": 60, "dv": 0.3198, "dw": 0.7749 },
+            { "frame": 30, "dv": 0.3273, "dw": 1.427 },
+            { "frame": 60, "dv": 0.4965, "dw": 1.0743 },
             { "frame": 90, "dv": null, "dw": null }
           ],
           "bent": []
@@ -58,7 +58,7 @@
       }
     },
     { "command": "frame.set", "params": { "frame": 45 } },
-    { "command": "bone.world", "params": { "bone": "foot.L" }, "expect": { "position": [0.0811178, -1.1225773, 0.0881823] } },
+    { "command": "bone.world", "params": { "bone": "foot.L" }, "expect": { "position": [0.0683701, -0.8917281, 0.0993517] } },
     { "command": "edit.undo", "expect": { "command": "ai.fill", "label": "AI fill 1–89" } },
     { "command": "editor.state", "expect": { "bands": [] } },
     {
@@ -73,7 +73,7 @@
       }
     },
     { "command": "frame.set", "params": { "frame": 45 } },
-    { "command": "bone.world", "params": { "bone": "foot.L" }, "expect": { "position": [0.0811178, -1.1225773, 0.0881823] } }
+    { "command": "bone.world", "params": { "bone": "foot.L" }, "expect": { "position": [0.0683701, -0.8917281, 0.0993517] } }
   ],
   "expect": { "tolerance": 1e-3 },
   "errors": [

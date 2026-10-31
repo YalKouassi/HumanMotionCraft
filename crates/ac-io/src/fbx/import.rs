@@ -493,7 +493,7 @@ impl Source {
         for (f, (q, &ro)) in rots.iter().zip(&roots).enumerate() {
             clip.set_key(Key::new(f as i64, q.clone(), ro, Interp::Linear))?;
         }
-        let joints_json: Map<String, Value> = guess
+        let joints_json: Map<String, Value> = self
             .map
             .iter()
             .map(|(lm, &i)| {

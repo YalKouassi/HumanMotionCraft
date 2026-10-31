@@ -24,9 +24,7 @@
             "$contains": [
               "walk",
               "run",
-              "fall",
-              "dance",
-              "natural"
+              "jump", "idle", "natural"
             ]
           }
         }
