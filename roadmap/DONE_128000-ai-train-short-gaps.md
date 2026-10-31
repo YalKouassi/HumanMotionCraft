@@ -1,6 +1,6 @@
 # Train on short gaps (1–4 frames)
 
-- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
+- **Status:** done (2026-10-31), by the owner's decision: the line is not fully met
 - **Requires:** 126000
 - **Source:** 115000 (review 1 §2, review 2 §9)
 
@@ -21,3 +21,6 @@ shipped model's 1–4 bin is 5.5 mm against the interpolation's 4.1 mm (126000):
 
 ## Measured by the retrain
 2026-10-30 (134000, its Result has the table). Gaps 1-4: 3.1 mm against the old model's 4.9 and interpolation's 4.4, as asked. The other bins are worse than the old model's, so this line is not fully met. 134500 is on them.
+
+## Closed
+The owner's decision, 2026-10-31. The training change is in the shipped model, which the owner chose to ship (134000, then 134500's lower-weights candidate) with the other bins worse than the old model's. Those bins are 134500's work.

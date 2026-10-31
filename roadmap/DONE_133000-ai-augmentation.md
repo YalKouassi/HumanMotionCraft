@@ -1,6 +1,6 @@
 # Augmentation that matches the task
 
-- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
+- **Status:** done (2026-10-31), by the owner's decision: the line was not measured
 - **Requires:** 126000
 - **Source:** 115000 (review 2 §8)
 
@@ -22,3 +22,6 @@ Not needed: shifting the window by ±1 frame. Windows already start on any valid
 half the spline contexts' frames before key A (about 2 degrees, 1 cm), key A exact; a speed change
 of 0.8–1.25 times except for jump, acrobatic and fall takes, kept inside the window's clean frames
 (`Sets.batch(warp=...)`, `--no-warp`). The card's `augment` lists them.
+
+## Closed
+The owner's decision, 2026-10-31. The augmentation is in the shipped model, which the owner chose to ship (134000). The line was never measured: the old model's numbers by type aren't recorded (its weights are in git at `5c81eaa`), and overall joint error is worse than the old model's (134500). `parts-lowweights`, joint error by type: walk 19.6, run 34.3, jump 44.1, ground 57.0 mm; there is no acrobatic or fall row in the card.

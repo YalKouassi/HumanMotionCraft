@@ -1,6 +1,6 @@
 # Train on the part masks the app sends
 
-- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
+- **Status:** done (2026-10-31), by the owner's decision: the line is not met
 - **Requires:** 126000
 - **Source:** 115000 (review 2 §4, corrected)
 
@@ -22,3 +22,6 @@ drops against today's model, and full-body fills are no worse.
 a part group (what a part layer sends) and 40 % the group itself, over every group in
 `PART_GROUPS` including the unions (`tests/test_train.py`). The shipped model on the part layers
 (126000, free bones): legs 18.5 mm against 37.8 for a plain fill, arms 7.0 against 8.5.
+
+## Closed
+The owner's decision, 2026-10-31. The training change is in the shipped model, which the owner chose to ship (134000). Measured from `parts-lowweights`'s `evaluation_best` when closing, never written here before: free bones legs 21.6 mm and arms 8.2 mm, against 18.5 and 7.0 for the old model (which trained on other takes of most of these subjects, so it is flattered) and 36.5 and 8.3 for interpolation. So no drop against the old model. Full-body fills are worse too; 134500 carries that.

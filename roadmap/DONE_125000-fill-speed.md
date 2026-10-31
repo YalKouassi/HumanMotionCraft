@@ -1,6 +1,6 @@
 # Fill speed
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 103000
 - **Source:** old `ROADMAP.md` row 7
 
@@ -58,3 +58,6 @@ nothing but the input projection (2.7 M of 197 M multiply-adds) and is not worth
 Skipping the network when `ai_force` is 0 was left out: `interp + 0 × (pred − interp)` can differ
 from `interp` in the sign of a zero, so it would not be bit-identical. Further speed (AVX2 lanes)
 needs `#[target_feature]` dispatch, which is `unsafe` to call, so it is off the table.
+
+## Confirmed
+The owner confirmed it 2026-10-31 on the numbers above: under the 50 ms line on a quiet machine, the output bit-identical. `ac fixtures --only ai-fill-speed` rerun that day: passes.

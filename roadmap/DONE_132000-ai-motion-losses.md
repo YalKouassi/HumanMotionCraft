@@ -1,6 +1,6 @@
 # Losses that match how a fill looks
 
-- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
+- **Status:** done (2026-10-31), by the owner's decision: the line is not met
 - **Requires:** 126000
 - **Source:** 115000 (review 1 §2B, review 2 §7)
 
@@ -26,3 +26,6 @@ error. Each is logged every `--eval-every` steps and its weight is in the card (
 `--loss-weights` changes them). The losses see the fill as the app keeps it: the network's output
 on a known frame is replaced by the known frame. A training step with them runs at 12.5 steps a
 second on the RTX 3080 Ti (20.9 with the old loss; the old run made 15.4).
+
+## Closed
+The owner's decision, 2026-10-31. The losses are in the shipped model, which the owner chose to ship (134000), with lower velocity, jerk and skate weights (134500). Measured from `parts-lowweights`'s `evaluation_best` when closing, never written here before: seams 0.198 / 0.228 m/s against the old model's 0.13 / 0.17, so no improvement, and joint error is worse (134500). The card logs each term, as asked.

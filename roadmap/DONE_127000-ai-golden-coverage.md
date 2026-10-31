@@ -1,6 +1,6 @@
 # AI golden coverage
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 103000
 - **Source:** 115000 (review 2 §13)
 
@@ -56,3 +56,6 @@ failed since the model gained its contact and path heads (it built the network w
 `load_state_dict` refused `contact.weight`); it now builds the heads the card names, feeds the
 golden's path and checks the contact logits too (`uv run --with pytest python -m pytest
 tests/test_export.py`: 2 passed).
+
+## Confirmed
+The owner confirmed it 2026-10-31 on the result above.

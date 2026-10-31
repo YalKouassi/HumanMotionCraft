@@ -1,6 +1,6 @@
 # Train the model away from impossible poses
 
-- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
+- **Status:** done (2026-10-31), by the owner's decision: the line is not met
 - **Requires:** 120000, 126000
 - **Source:** commit `bd70d5b`, 115000
 
@@ -31,3 +31,6 @@ joint error on the recordings no worse.
 
 ## Measured by the retrain
 2026-10-30 (134000, its Result has the table). Posed keys: 19.8 impossible frames per 1,000 against the old model's 17. **Not met**.
+
+## Closed
+The owner's decision, 2026-10-31. The loss is in the shipped model, which the owner chose to ship (134000). The shipped `parts-lowweights` makes 20.0 impossible frames per 1,000 on the posed keys, against the old model's 17 and interpolation's 20, so no drop. `keep_possible` still corrects every fill in the app. 134500's acceptance now holds this number.

@@ -1,6 +1,6 @@
 # Root path as an input
 
-- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
+- **Status:** done (2026-10-31)
 - **Requires:** 130000
 - **Source:** 115000 (review 2 §3)
 
@@ -35,3 +35,6 @@ The evaluation's root-path case (126000) puts `given` beside `blend`: the accept
 
 ## Measured by the retrain
 2026-10-30 (134000, its Result has the table). Foot slide with the path given 0.0738 m/s against 0.0772 with the blend alone: met, by 4 %.
+
+## Confirmed
+The owner confirmed it 2026-10-31: the line is met. The model that replaced 134000's (`parts-lowweights`, its `evaluation_best`) meets it too: foot slide 0.0772 m/s with the path given against 0.0812 with the blend alone, 5 % less.

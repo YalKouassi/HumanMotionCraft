@@ -35,7 +35,8 @@ long gaps are still far from the target.
 ## Acceptance
 On the 126000 held-out windows: gaps 5-10 / 11-20 / 21-30 / 31-45 closer to the previous model's 6.2 /
 11.5 / 17.5 / 23.4 mm than today's 10.3 / 22.2 / 34.0 / 54.2 mm; step and still contexts stay under
-interpolation's 41.4 mm; foot slide no worse than 0.045 m/s; the owner judges side-by-side videos.
+interpolation's 41.4 mm; foot slide no worse than 0.045 m/s; impossible frames on the posed keys under today's 20.0 per 1,000
+(the old model's 17; added 2026-10-31 when 136000 closed unmet); the owner judges side-by-side videos.
 
 ## Overnight plan (prepared 2026-10-30, not run; changed the same day)
 `training/overnight-2026-10-30.ps1` now runs 153000's night (owner's decision, 2026-10-30: the

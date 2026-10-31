@@ -1,6 +1,6 @@
 # Train on the context the app gives
 
-- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
+- **Status:** done (2026-10-31), by the owner's decision: the line is not fully met
 - **Requires:** 126000
 - **Source:** 115000 (review 1 §1, review 2 §8 context noise)
 
@@ -33,3 +33,6 @@ mm clean, 17.6 smooth, 56.8 step, 45.6 still. Not modelled: a context that is an
 
 ## Measured by the retrain
 2026-10-30 (134000, its Result has the table). Step keys 25.4 mm and a still context 28.0 mm, against the old model's 53.1 and 42.6 and interpolation's 41.4. Clean-context numbers got worse (24.7 mm against 12.6), so this line is not fully met. The fill_all kink has not been measured. One stepped walk looked better from the old model.
+
+## Closed
+The owner's decision, 2026-10-31. The training change is in the shipped model, which the owner chose to ship (134000). Step and still contexts improved; clean context is worse, and 134500's line holds the long gaps it shows up in. The `fill_all` kink at shared keys was never measured.
