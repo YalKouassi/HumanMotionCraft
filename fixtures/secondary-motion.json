@@ -1,0 +1,26 @@
+{
+  "$schema": "./schema.json",
+  "name": "secondary-motion",
+  "feature": "layer.secondary",
+  "description": "Secondary motion on two identical hand keys, frames 0 and 10, root offset 0, physics off. Nothing moves, so nothing is driven and every turn is the identity: the layer has 11 keys (frames 0..10), turns 0 bones, largest turn 0, ankles drift 0, and the root stays at 0.0504142 (its head with offset 0, as layer-solo works it). The base keeps its 2 keys and stays the edited layer. Running again replaces the layer (2 layers, not 3). Undo's label is the command's.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0] } },
+    { "command": "key.set" },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "key.set" },
+    { "command": "layer.secondary", "params": {}, "expect": { "i": 1, "name": "Secondary motion", "keys": 11, "bones": 0, "largest": 0, "foot_drift": 0, "replaced": false } },
+    { "command": "layers.list", "expect": { "edit": 0, "layers": [{ "name": "Base", "keys": 2 }, { "name": "Secondary motion", "keys": 11, "muted": false }] } },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 0.0504142] } },
+    { "command": "layer.secondary", "params": { "amount": 0.5, "parts": ["arms", "hands"] }, "expect": { "i": 1, "replaced": true } },
+    { "command": "layers.list", "expect": { "layers": [{ "name": "Base" }, { "name": "Secondary motion" }] } },
+    { "command": "edit.undo", "expect": { "label": "Secondary motion" } }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": [
+    { "command": "layer.secondary", "params": { "amount": 0 } },
+    { "command": "layer.secondary", "params": { "amount": 9 } },
+    { "command": "layer.secondary", "params": { "parts": ["tail"] } }
+  ],
+  "views": ["front"]
+}

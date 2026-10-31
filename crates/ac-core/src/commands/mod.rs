@@ -9,6 +9,7 @@ mod pose;
 mod possible;
 mod quality;
 mod returns;
+mod secondary;
 mod session;
 mod steps;
 mod timeline;
@@ -35,4 +36,5 @@ pub static AREAS: &[&[CommandSpec]] = &[
     view::SPECS,
     timeline::SPECS,
     steps::SPECS,
+    secondary::SPECS,
 ];
