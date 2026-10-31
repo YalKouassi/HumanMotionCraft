@@ -617,6 +617,8 @@ impl App {
         self.shell.prefs.update(|p| p.layout.ui_mode = mode);
         match mode {
             super::super::prefs::UiMode::Simple => {
+                // a panel that will not close is said, not passed over (Rule 1)
+                let mut kept: Vec<String> = Vec::new();
                 for &p in &[
                     DockPanel::Layers,
                     DockPanel::Physics,
@@ -628,9 +630,15 @@ impl App {
                     DockPanel::Pins,
                     DockPanel::Range,
                 ] {
-                    let _ = self.shell.dock.set_visible(p, false, None, dock_permissions);
+                    if let Err(e) = self.shell.dock.set_visible(p, false, None, dock_permissions) {
+                        kept.push(format!("{} ({e})", p.short_label()));
+                    }
                 }
-                self.status = "switched to simple mode".into();
+                self.status = if kept.is_empty() {
+                    "switched to simple mode".into()
+                } else {
+                    format!("switched to simple mode; still open: {}", kept.join(", "))
+                };
             }
             super::super::prefs::UiMode::Advanced => {
                 self.status = "switched to advanced mode".into();
