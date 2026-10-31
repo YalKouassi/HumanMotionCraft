@@ -166,17 +166,6 @@ impl App {
         self.refresh_library();
     }
 
-    pub(super) fn delete_animation(&mut self, id: &str) {
-        if self.session.document.clip_id.as_deref() == Some(id) {
-            // deleted on purpose: its unsaved work isn't offered back later
-            self.clear_recovery();
-        }
-        if self.run("clip.delete", json!({ "id": id })).is_some() {
-            self.status = format!("deleted {id} (Ctrl+Z brings it back to save again)");
-            self.refresh_library();
-        }
-    }
-
     /// The question on screen, if any.
     pub(super) fn confirm_dialog(&mut self, ctx: &egui::Context) {
         let Some(confirm) = self.confirm.take() else {
@@ -282,12 +271,9 @@ impl App {
                 self.do_switch(to);
             }
             (Some("delete"), Confirm::DeletePose(id)) => {
-                if self.run("pose.delete", json!({ "id": id })).is_some() {
-                    self.status = format!("deleted the pose {id}");
-                    self.refresh_library();
-                }
+                self.lib_remove(false, &id);
             }
-            (Some("delete"), Confirm::Delete(id)) => self.delete_animation(&id),
+            (Some("delete"), Confirm::Delete(id)) => self.lib_remove(true, &id),
             _ => {}
         }
     }

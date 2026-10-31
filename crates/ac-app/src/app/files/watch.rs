@@ -31,11 +31,15 @@ pub struct Watch {
 
 fn add(p: &mut Print, path: &Path) {
     if let Ok(m) = std::fs::metadata(path) {
-        p.0 += 1;
-        p.1 = p.1.wrapping_add(m.len());
-        if let Ok(t) = m.modified() {
-            p.2 = Some(p.2.map_or(t, |x| x.max(t)));
-        }
+        add_meta(p, &m);
+    }
+}
+
+fn add_meta(p: &mut Print, m: &std::fs::Metadata) {
+    p.0 += 1;
+    p.1 = p.1.wrapping_add(m.len());
+    if let Ok(t) = m.modified() {
+        p.2 = Some(p.2.map_or(t, |x| x.max(t)));
     }
 }
 
@@ -51,7 +55,12 @@ fn tree(p: &mut Print, dir: &Path, depth: usize) {
         let hidden = e.file_name().to_string_lossy().starts_with('.');
         match e.file_type() {
             Ok(t) if t.is_dir() && !hidden && depth > 0 => tree(p, &path, depth - 1),
-            Ok(t) if t.is_file() => add(p, &path),
+            // the folder's own record: opening thousands of files each poll would hitch the window
+            Ok(t) if t.is_file() => {
+                if let Ok(m) = e.metadata() {
+                    add_meta(p, &m);
+                }
+            }
             _ => {}
         }
     }

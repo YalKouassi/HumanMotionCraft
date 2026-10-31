@@ -5,7 +5,10 @@
 //! - Poses: apply, apply to the selected joint's part or any part only (`pose.apply {parts}`),
 //!   save the current pose, rename, move to group, delete (`pose.save/rename/group/delete`).
 //! - Keys while the library has focus (it is clicked): arrows move the selection (and its
-//!   preview), Enter opens or applies, F2 renames, Delete deletes (asked first).
+//!   preview), Enter opens or applies, F2 renames, Delete deletes.
+//! - Deleting is one action in a library folder of your own: its file goes, the next item is
+//!   selected and the status line says so. Asked first in the app's own library, and for an open
+//!   animation with unsaved changes anywhere. Built-ins stay.
 
 use serde_json::json;
 
@@ -27,6 +30,35 @@ pub struct Nav {
     pub dialog: Option<Dialog>,
     /// The open dialog's text field was given the keys.
     pub focused: bool,
+}
+
+/// Delete asks first in the app's own library, and always when unsaved work would go with the file.
+fn asks_first(library_of_your_own: bool, open_with_changes: bool) -> bool {
+    !library_of_your_own || open_with_changes
+}
+
+/// What is selected once `deleted` has gone: the selection, unless it was that; then the row
+/// after it, or before it at the end of the list.
+fn after_delete<K: PartialEq + Clone>(order: &[K], deleted: &K, sel: Option<&K>) -> Option<K> {
+    if let Some(s) = sel.filter(|s| *s != deleted) {
+        return Some(s.clone());
+    }
+    let at = order.iter().position(|o| o == deleted)?;
+    order
+        .get(at + 1)
+        .or_else(|| at.checked_sub(1).and_then(|i| order.get(i)))
+        .cloned()
+}
+
+/// The status line after a delete. Undo only brings back an animation that was open: it is in the
+/// document, while a file deleted from the list is gone.
+fn delete_status(anims: bool, id: &str, was_open: bool) -> String {
+    let what = if anims { "" } else { "the pose " };
+    if was_open {
+        format!("deleted {what}{id}: its file is removed (Ctrl+Z brings it back to save again)")
+    } else {
+        format!("deleted {what}{id}: its file is removed")
+    }
 }
 
 /// A menu choice, run once the menu is closed.
@@ -134,16 +166,69 @@ impl App {
         });
     }
 
-    fn lib_delete(&mut self, anims: bool, id: &str) {
+    pub(in super::super) fn lib_delete(&mut self, anims: bool, id: &str) {
         if self.is_builtin_item(anims, id) {
             self.status = format!("{id} is a built-in and stays in the library");
             return;
         }
-        self.confirm = Some(if anims {
-            Confirm::Delete(id.to_string())
+        let doc = &self.session.document;
+        let open_with_changes = anims && doc.clip_id.as_deref() == Some(id) && doc.unsaved();
+        let own = doc
+            .library
+            .as_ref()
+            .is_some_and(|l| *l != ac_io::library::app_library_dir());
+        if asks_first(own, open_with_changes) {
+            self.confirm = Some(if anims {
+                Confirm::Delete(id.to_string())
+            } else {
+                Confirm::DeletePose(id.to_string())
+            });
         } else {
-            Confirm::DeletePose(id.to_string())
-        });
+            self.lib_remove(anims, id);
+        }
+    }
+
+    /// Delete an item's file, select the next and say so. The list is mended in place: listing
+    /// thousands of items again for each delete is what would make it slow.
+    pub(in super::super) fn lib_remove(&mut self, anims: bool, id: &str) {
+        let was_open = anims && self.session.document.clip_id.as_deref() == Some(id);
+        if was_open {
+            // deleted on purpose: its unsaved work isn't offered back later
+            self.clear_recovery();
+        }
+        let cmd = if anims { "clip.delete" } else { "pose.delete" };
+        if self.run(cmd, json!({ "id": id })).is_none() {
+            return;
+        }
+        let deleted = (anims, id.to_string());
+        let next = after_delete(&self.files.nav.order, &deleted, self.files.nav.sel.as_ref());
+        match next {
+            Some((a, next)) => self.lib_select(a, &next),
+            None => self.files.nav.sel = None,
+        }
+        let kind = if anims { "animations" } else { "poses" };
+        super::forget_item(&mut self.library, kind, id);
+        self.lib_view.generation += 1;
+        let key = format!("{kind}/{id}");
+        self.thumbs.cache.remove(&key);
+        self.lib_view.preview.cache.remove(&key);
+        self.status = delete_status(anims, id, was_open);
+        if let Some(root) = self.session.document.library.clone() {
+            let name = format!("{id}.png");
+            let thumbs = root.join(".thumbs");
+            for file in [
+                thumbs.join(kind).join(&name),
+                thumbs.join("preview").join(kind).join(&name),
+            ] {
+                if let Err(e) = std::fs::remove_file(&file)
+                    && e.kind() != std::io::ErrorKind::NotFound
+                {
+                    self.status
+                        .push_str(&format!("; its thumbnail {} stays: {e}", file.display()));
+                }
+            }
+        }
+        self.library_synced();
     }
 
     /// The groups an item can move to.
@@ -165,13 +250,12 @@ impl App {
     }
 
     /// An item's right-click menu.
-    pub(super) fn item_menu(&mut self, r: &egui::Response, anims: bool, id: &str) {
-        let builtin = self.is_builtin_item(anims, id);
-        let groups = self.groups();
-        let part = self.selected_part();
-        let custom: Vec<String> = self.session.document.custom_parts.keys().cloned().collect();
+    pub(super) fn item_menu(&mut self, r: &egui::Response, anims: bool, id: &str, builtin: bool) {
         let mut act: Option<Action> = None;
         r.context_menu(|ui| {
+            let groups = self.groups();
+            let part = self.selected_part();
+            let custom: Vec<String> = self.session.document.custom_parts.keys().cloned().collect();
             let id = id.to_string();
             if anims {
                 if ui.button("Open").tag("library.item_menu.open", "Open").clicked() {
@@ -467,5 +551,49 @@ impl App {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn delete_asks_only_in_the_apps_library_or_over_unsaved_work() {
+        assert!(!asks_first(true, false));
+        assert!(asks_first(true, true));
+        assert!(asks_first(false, false));
+        assert!(asks_first(false, true));
+    }
+
+    #[test]
+    fn the_next_row_is_selected_after_a_delete() {
+        let order = ["a", "b", "c"];
+        // the selected one goes: the row after it, the row before it at the end, none when alone
+        assert_eq!(after_delete(&order, &"a", Some(&"a")), Some("b"));
+        assert_eq!(after_delete(&order, &"b", Some(&"b")), Some("c"));
+        assert_eq!(after_delete(&order, &"c", Some(&"c")), Some("b"));
+        assert_eq!(after_delete(&["a"], &"a", Some(&"a")), None);
+        // another row's button: the selection stays; with none, the row after it
+        assert_eq!(after_delete(&order, &"c", Some(&"a")), Some("a"));
+        assert_eq!(after_delete(&order, &"a", None), Some("b"));
+        // not in the order (a folded group, a filter): nothing to walk from
+        assert_eq!(after_delete(&order, &"z", Some(&"z")), None);
+    }
+
+    #[test]
+    fn the_status_line_promises_undo_only_when_it_can_keep_it() {
+        assert_eq!(
+            delete_status(true, "Pack/A", false),
+            "deleted Pack/A: its file is removed"
+        );
+        assert_eq!(
+            delete_status(true, "Pack/A", true),
+            "deleted Pack/A: its file is removed (Ctrl+Z brings it back to save again)"
+        );
+        assert_eq!(
+            delete_status(false, "Mine/P", false),
+            "deleted the pose Mine/P: its file is removed"
+        );
     }
 }

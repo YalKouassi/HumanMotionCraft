@@ -422,6 +422,7 @@ impl App {
                 Value::Null
             }
         };
+        self.lib_view.generation += 1;
         self.lib_view.preview.cache.clear();
         // items may have changed: thumbnails come back from the disk cache, or are redrawn
         self.thumbs.cache.clear();

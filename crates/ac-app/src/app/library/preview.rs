@@ -6,7 +6,7 @@
 //! The pictures are drawn like the thumbnails (`thumb_png`), larger, and kept in
 //! `<library>/.thumbs/preview/`.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::time::Duration;
 
 use egui::{Rect, vec2};
@@ -14,7 +14,7 @@ use serde_json::Value;
 
 use super::super::App;
 use super::super::ui_ids::Tag;
-use super::{Thumb, hover};
+use super::{Thumb, hover, insert_capped};
 
 /// Frames an animation's preview shows, and the size of each (points).
 pub const FRAMES: usize = 12;
@@ -23,10 +23,14 @@ pub const CELL: (u32, u32) = (120, 160);
 pub const AREA: &str = "library.preview";
 /// The popover's width (points).
 const WIDTH: f32 = 220.0;
+/// Previews kept in memory: each is a few megabytes, and browsing thousands passes through them all.
+const MAX_KEPT: usize = 32;
 
 #[derive(Default)]
 pub struct Preview {
     pub cache: HashMap<String, Thumb>,
+    /// The cache's keys, oldest first.
+    kept: VecDeque<String>,
     /// Escape or × hid it (until something else is selected).
     pub hidden: bool,
     /// The selected row, as drawn this frame (none: not on screen).
@@ -172,6 +176,15 @@ impl App {
                         {
                             act = Some("duplicate");
                         }
+                        if !builtin
+                            && ui
+                                .button("Delete")
+                                .on_hover_text("Delete it (Delete key): its file is removed")
+                                .tag("library.preview.delete", "Delete")
+                                .clicked()
+                        {
+                            act = Some("delete");
+                        }
                     });
                 });
             });
@@ -179,6 +192,10 @@ impl App {
             Some("open") => self.lib_activate(anims, &id),
             Some("star") => self.lib_star(anims, &id, !starred),
             Some("duplicate") => self.lib_duplicate(&id),
+            Some("delete") => {
+                self.lib_delete(anims, &id);
+                return;
+            }
             Some("close") => self.lib_view.preview.hidden = true,
             _ => {}
         }
@@ -204,7 +221,8 @@ impl App {
                 )),
                 Err(e) => Thumb::Failed(e),
             };
-            self.lib_view.preview.cache.insert(key, thumb);
+            let p = &mut self.lib_view.preview;
+            insert_capped(&mut p.cache, &mut p.kept, key, thumb, MAX_KEPT);
         }
     }
 }
