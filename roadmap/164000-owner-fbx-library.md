@@ -262,3 +262,15 @@ Built from generated files only: this worktree built and ran nothing, and no rea
 - An imported source isn't tried again, so clips it left out (a stale take among them) stay left out. Getting those needs a clip-level retry, not built.
 - A head hanging directly from a chest no landmark has reads that chest as the neck. The rule allows it, and how those clips look is the owner's to see.
 - A duplicate of a refused source stays a duplicate; if the first is imported, its clips stand for both.
+
+## Refused groups, second pass (2026-10-31)
+Built from generated files and the joint lists given to this worktree: it built and ran nothing, and read no real file, so how many refusals this frees isn't known.
+- **Two more name conventions.** A first word `B` or `humanoid` is a rig's prefix and is read past, so `B_L_Thigh` is the left thigh and `humanoid_ R Hand` the right hand. Hips come from `Pelvis`, sides from the `L`/`R` words.
+- **A clip running past its take** is cut to the take, with a note giving the frames cut. No overlap, or under 2 frames left, is still refused. This is the one code path, so `clip.import` and `clip.import_batch` cut too.
+- **A floor below z = 0 in `clip.port`** is moved up so the feet rest on z = 0, with a note and the distance in `raised`. Hanging handling is unchanged. A floor up to 0.03 m below stays as it is.
+- **`clip.import` is unchanged here, and never refused this:** it keeps its note and leaves the floor where it is. The move is in `clip.port`'s own step.
+
+**For the retry to show:**
+- The `humanoid_` list given stopped at the left hand, so its legs are taken to follow the same form. A rig with no toe joint is still refused.
+- A clip with no still feet and a floor far below z = 0 is raised, not called hanging. How those look is the owner's to see.
+- The `feet_on_floor` check no longer fails any clip, so the 56 refused for it should import on a retry.
