@@ -40,6 +40,9 @@ pub struct Posed {
     pub hands_unreached: [f64; 2],
 }
 
+/// A limb segment shorter than this (m) can't be solved: it has no direction to aim.
+const MIN_SEGMENT: f64 = 1e-6;
+
 fn unit(v: Vec3) -> Vec3 {
     let l = quat::len3(v);
     if l > 1e-12 {
@@ -96,16 +99,22 @@ fn two_bone(worlds: &[World], limb: &Limb, target: Vec3, pole: Vec3) -> Option<(
     let b = worlds.get(limb.lower)?.p;
     let c = worlds.get(limb.end)?.p;
     let (la, lb) = (quat::len3(quat::sub3(b, a)), quat::len3(quat::sub3(c, b)));
-    if la < 1e-9 || lb < 1e-9 {
+    // a segment under a micrometre has no direction to aim, and the clamp below would have its
+    // low end above its high end (a panic): such a limb is not solved, and the caller says so
+    if la < MIN_SEGMENT || lb < MIN_SEGMENT {
         return None;
     }
     let to = quat::sub3(target, a);
     let dist = quat::len3(to);
-    if dist < 1e-9 {
+    if !dist.is_finite() || dist < 1e-9 {
         return None;
     }
     let reach = la + lb;
-    let d = dist.clamp((la - lb).abs() + 1e-6, reach - 1e-6);
+    let (lo, hi) = ((la - lb).abs() + 1e-6, reach - 1e-6);
+    if lo > hi {
+        return None;
+    }
+    let d = dist.clamp(lo, hi);
     let short = (dist - reach).max(0.0);
     let u = unit(to);
     // the bend direction: the pole across u; falling back on the current bend, then any side
@@ -257,5 +266,29 @@ mod tests {
         assert!(knee[1] < -0.1, "the knee bends towards the pole (-Y): {knee:?}");
         let (_, gap) = two_bone(&worlds, &limb, [0.0, 0.0, -0.5], [0.0, -1.0, 0.0]).unwrap();
         assert!((gap - 0.5).abs() < 1e-9, "{gap}");
+    }
+
+    #[test]
+    fn a_limb_with_a_near_zero_segment_is_not_solved_and_does_not_panic() {
+        // the knee a tenth of a micrometre below the hip: the clamp's low end would be above
+        // its high end
+        let nodes = vec![
+            node("hip", None, [0.0, 0.0, 1.0]),
+            node("knee", Some(0), [0.0, 0.0, -1e-7]),
+            node("ankle", Some(1), [0.0, 0.0, -0.5]),
+        ];
+        let c = Character::new(nodes, vec![], vec![], false).unwrap();
+        let worlds = c.rest_worlds();
+        let limb = Limb {
+            upper: 0,
+            lower: 1,
+            end: 2,
+            upper_bone: 0,
+            lower_bone: 0,
+            end_bone: 0,
+        };
+        assert!(two_bone(&worlds, &limb, [0.0, 0.0, 0.2], [0.0, -1.0, 0.0]).is_none());
+        // a target that is not a number is refused the same way
+        assert!(two_bone(&worlds, &limb, [f64::NAN, 0.0, 0.2], [0.0, -1.0, 0.0]).is_none());
     }
 }
