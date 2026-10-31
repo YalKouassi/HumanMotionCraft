@@ -1,0 +1,4583 @@
+{
+ "note": "roadmap 153000, from ac_train.walkgroups: reject a group by its G number on the review video",
+ "too_short": [
+  "addbiomechanics/walk_addbiomechanics_falisse2017_subject_0_gait_7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_falisse2017_subject_10_gait_14_segment_1",
+  "addbiomechanics/walk_addbiomechanics_falisse2017_subject_1_gait_7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_falisse2017_subject_5_gait_6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_mtgait_4_segment_1",
+  "addbiomechanics/walk_addbiomechanics_han2023_s003_split3_20220523_step_3_segment_1",
+  "addbiomechanics/walk_addbiomechanics_han2023_s004_split3_20220524_step_1_segment_1",
+  "addbiomechanics/walk_addbiomechanics_han2023_s004_split3_20220524_step_2_segment_1",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject10_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t33_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t34_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t37_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t38_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t39_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t40_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t41_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t42_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t43_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t44_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t45_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t46_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t47_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t48_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t49_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t50_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t51_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t52_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t53_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t54_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t55_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t56_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t57_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject11_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject13_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject14_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject15_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject16_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject16_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject16_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t33_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t34_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t37_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t38_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t39_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t40_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t41_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t43_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject18_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject18_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject18_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject18_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject18_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject18_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject18_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject18_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t33_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t34_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t39_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t40_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t41_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t43_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t44_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t45_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t46_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t47_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t48_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t49_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t50_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t51_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject19_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t33_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t34_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t37_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t38_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject1_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t33_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t34_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t37_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t38_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t39_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject20_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t37_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t38_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t39_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t40_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t41_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t42_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t43_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t44_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t45_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t46_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject22_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject23_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject23_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject23_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject23_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject23_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject24_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject25_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject25_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject25_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject26_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject27_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject27_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject27_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject27_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject27_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject27_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject27_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject28_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject28_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject28_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t37_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t38_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t39_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t40_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t41_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t42_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t43_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t44_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject2_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject30_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject31_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject31_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject31_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject31_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject31_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject31_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject32_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject32_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject32_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject33_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject34_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject34_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t37_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject35_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject37_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject37_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject37_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject37_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject37_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject37_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject38_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject39_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject39_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject39_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject39_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject39_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject39_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject3_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject3_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject3_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject3_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject3_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject3_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject3_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject3_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject40_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject41_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject42_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject43_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject43_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject43_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject43_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject43_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject43_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject43_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject43_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject44_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject45_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject46_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject47_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject48_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject49_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject4_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject50_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t34_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t39_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject5_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t33_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t34_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t38_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject6_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t13_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t14_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t21_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t28_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t29_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t30_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t31_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t32_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t33_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t34_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t35_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t37_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t38_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t39_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t40_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t41_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t42_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t43_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t44_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t45_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t46_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t47_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t48_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t52_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t53_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject7_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t10_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t12_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t22_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t23_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t24_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t25_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t26_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t27_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t33_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t36_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject8_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t0_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t11_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t15_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t16_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t17_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t18_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t19_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t20_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t5_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t6_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t7_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t8_segment_0",
+  "addbiomechanics/walk_addbiomechanics_tiziana2019_subject9_t9_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject10_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject10_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject10_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject10_walkingts1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject10_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject10_walkingts3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject11_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject11_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject11_walking4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject11_walkingts1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject11_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject11_walkingts3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject2_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject2_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject2_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject2_walkingts1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject2_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject2_walkingts4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject3_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject3_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject3_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject3_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject3_walkingts3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject3_walkingts4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject4_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject4_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject4_walking4_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject4_walkingts1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject4_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject4_walkingts3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject5_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject5_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject5_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject5_walkingts1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject5_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject5_walkingts3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject6_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject6_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject6_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject6_walkingts1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject6_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject6_walkingts3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject7_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject7_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject7_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject7_walkingts1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject7_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject7_walkingts3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject8_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject8_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject8_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject8_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject8_walkingts3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject9_walking1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject9_walking2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject9_walking3_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject9_walkingts1_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject9_walkingts2_segment_0",
+  "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject9_walkingts3_segment_0",
+  "cmu/walk_cmu_104_12",
+  "cmu/walk_cmu_141_25",
+  "cmu/walk_cmu_141_29",
+  "cmu/walk_cmu_141_30",
+  "cmu/walk_cmu_16_29",
+  "cmu/walk_cmu_20_08",
+  "cmu/walk_cmu_21_08",
+  "cmu/walk_cmu_78_18",
+  "cmu/walk_cmu_78_19"
+ ],
+ "flagged": [
+  {
+   "take": "accad/sidestep_accad_female1_b22_sidestepleft",
+   "why": "wrist_out +4.2"
+  },
+  {
+   "take": "accad/sidestep_accad_female1_b23_sidestepright",
+   "why": "wrist_out +3.8"
+  },
+  {
+   "take": "accad/sidestep_accad_female1_c24_sidestepleft",
+   "why": "wrist_ahead +5.3; hips -4.3"
+  },
+  {
+   "take": "accad/sidestep_accad_female1_c25_sidestepright",
+   "why": "hips -4.2; wrist_ahead +4.1"
+  },
+  {
+   "take": "accad/walk_accad_eric1",
+   "why": "eric"
+  },
+  {
+   "take": "accad/walk_accad_ericdog",
+   "why": "ericdog"
+  },
+  {
+   "take": "accad/walk_accad_female1_a13_skipping",
+   "why": "Skipping"
+  },
+  {
+   "take": "accad/walk_accad_female1_a14_standtoskip",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_female1_a15_skiptostand",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_female1_b26_walktoskip",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_female1_b27_skiptowalk1",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male1_a13_skipping",
+   "why": "Skipping"
+  },
+  {
+   "take": "accad/walk_accad_male1_a14_standtoskip",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male1_a15_skiptostand_take_001",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male1_b10_walkturnleft45",
+   "why": "hips +3.7"
+  },
+  {
+   "take": "accad/walk_accad_male1_b1_standtowalk",
+   "why": "hips +3.8"
+  },
+  {
+   "take": "accad/walk_accad_male1_b26_walktoskip",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male1_b27_skiptowalk",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male1_b4_standtowalkback",
+   "why": "hips +3.7"
+  },
+  {
+   "take": "accad/walk_accad_male1_b5_walkbacktostand",
+   "why": "hips +3.5"
+  },
+  {
+   "take": "accad/walk_accad_male1_b6_walkbackwards",
+   "why": "hips +3.8"
+  },
+  {
+   "take": "accad/walk_accad_male1_b7_walkbackturnforward",
+   "why": "hips +3.5"
+  },
+  {
+   "take": "accad/walk_accad_male1_b9_walktoturnleft90",
+   "why": "hips +3.5"
+  },
+  {
+   "take": "accad/walk_accad_male2_a13_skip",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male2_a14_standtoskip",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male2_a15_skiptostand",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male2_b26_walktoskip",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_male2_b27_skiptowalk",
+   "why": "Skip"
+  },
+  {
+   "take": "accad/walk_accad_swagger",
+   "why": "swagger"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_falisse2017_subject_7_gait_17_segment_1",
+   "why": "stance_uneven +4.1"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_mtgait_10_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_mtgait_12_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_mtgait_13_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_mtgait_17_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_mtgait_2_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_tsgait_10_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_tsgait_2_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_tsgait_3_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_tsgait_5_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_wpgait_10_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_wpgait_11_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_wpgait_6_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_wpgait_8_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_mtgait_10_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_mtgait_3_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_mtgait_5_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_mtgait_6_segment_0",
+   "why": "mtgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_tsgait_1_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_tsgait_2_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_tsgait_6_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_tsgait_7_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_tsgait_8_segment_0",
+   "why": "tsgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_wpgait_11_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_wpgait_12_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_wpgait_13_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_wpgait_17_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_wpgait_9_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_bouncy_og3_segment_0",
+   "why": "bouncy"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_bouncy_og5_segment_0",
+   "why": "bouncy"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_bouncy_og6_segment_0",
+   "why": "bouncy"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_bouncy_og8_segment_0",
+   "why": "bouncy"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_medialthrust3_segment_0",
+   "why": "medialthrust"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_medialthrust4_segment_0",
+   "why": "medialthrust"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_medialthrust5_segment_0",
+   "why": "medialthrust"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_medialthrust6_segment_0",
+   "why": "medialthrust"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_medialthrust8_segment_0",
+   "why": "medialthrust"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_mtpgait1_segment_0",
+   "why": "mtpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_mtpgait2_segment_0",
+   "why": "mtpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_mtpgait3_segment_0",
+   "why": "mtpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_mtpgait4_segment_0",
+   "why": "mtpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_mtpgait6_segment_0",
+   "why": "mtpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_smooth_og1_segment_0",
+   "why": "smooth og"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_smooth_og2_segment_0",
+   "why": "smooth og"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_smooth_og3_segment_0",
+   "why": "smooth og"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_smooth_og4_segment_0",
+   "why": "smooth og"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_smooth_og5_segment_0",
+   "why": "smooth og"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_wpgait_l5_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_wpgait_l8_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_wpgait_s1_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_wpgait_s5_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_wpgait_s6_segment_0",
+   "why": "wpgait"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_fregly2012_5gc_ps_rightturn4_segment_0",
+   "why": "step_uneven +4.5"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_han2023_s002_split3_20220520_walk_2_segment_0",
+   "why": "hips +5.3"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_han2023_s005_split3_20220610_step_1_segment_1",
+   "why": "hips +8.9"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_han2023_s005_split3_20220610_step_2_segment_1",
+   "why": "hips +6.6"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_han2023_s005_split3_20220610_step_3_segment_1",
+   "why": "hips +5.5"
+  },
+  {
+   "take": "addbiomechanics/walk_addbiomechanics_uhlrich2023_subject8_walkingts1_segment_0",
+   "why": "walkingTS"
+  },
+  {
+   "take": "cmu/sidestep_cmu_111_26",
+   "why": "lean_side +4.0"
+  },
+  {
+   "take": "cmu/sidestep_cmu_139_14",
+   "why": "Sneak"
+  },
+  {
+   "take": "cmu/sidestep_cmu_139_15",
+   "why": "Sneak"
+  },
+  {
+   "take": "cmu/sidestep_cmu_141_32",
+   "why": "Cross"
+  },
+  {
+   "take": "cmu/sidestep_cmu_141_33",
+   "why": "Foot"
+  },
+  {
+   "take": "cmu/sidestep_cmu_143_40",
+   "why": "wrist_ahead -3.6"
+  },
+  {
+   "take": "cmu/sidestep_cmu_69_60",
+   "why": "lean_side +3.8"
+  },
+  {
+   "take": "cmu/sidestep_cmu_69_61",
+   "why": "lean_side +4.0"
+  },
+  {
+   "take": "cmu/sidestep_cmu_83_02",
+   "why": "up"
+  },
+  {
+   "take": "cmu/sidestep_cmu_83_05",
+   "why": "very"
+  },
+  {
+   "take": "cmu/sidestep_cmu_83_07",
+   "why": "down"
+  },
+  {
+   "take": "cmu/sidestep_cmu_83_12",
+   "why": "down"
+  },
+  {
+   "take": "cmu/sidestep_cmu_83_14",
+   "why": "down"
+  },
+  {
+   "take": "cmu/sidestep_cmu_83_16",
+   "why": "down"
+  },
+  {
+   "take": "cmu/sidestep_cmu_83_23",
+   "why": "up"
+  },
+  {
+   "take": "cmu/walk_cmu_08_05",
+   "why": "stride"
+  },
+  {
+   "take": "cmu/walk_cmu_08_07",
+   "why": "exaggerated"
+  },
+  {
+   "take": "cmu/walk_cmu_08_11",
+   "why": "stride"
+  },
+  {
+   "take": "cmu/walk_cmu_104_02",
+   "why": "neutral"
+  },
+  {
+   "take": "cmu/walk_cmu_104_03",
+   "why": "Frankenstein"
+  },
+  {
+   "take": "cmu/walk_cmu_104_11",
+   "why": "Happy"
+  },
+  {
+   "take": "cmu/walk_cmu_104_13",
+   "why": "Stumble"
+  },
+  {
+   "take": "cmu/walk_cmu_104_14",
+   "why": "Happy"
+  },
+  {
+   "take": "cmu/walk_cmu_104_28",
+   "why": "Stern"
+  },
+  {
+   "take": "cmu/walk_cmu_104_29",
+   "why": "Stern"
+  },
+  {
+   "take": "cmu/walk_cmu_104_30",
+   "why": "Stern"
+  },
+  {
+   "take": "cmu/walk_cmu_104_32",
+   "why": "Stern"
+  },
+  {
+   "take": "cmu/walk_cmu_104_41",
+   "why": "Zombie"
+  },
+  {
+   "take": "cmu/walk_cmu_104_42",
+   "why": "Zombie"
+  },
+  {
+   "take": "cmu/walk_cmu_104_43",
+   "why": "Zombie"
+  },
+  {
+   "take": "cmu/walk_cmu_104_44",
+   "why": "Attitude"
+  },
+  {
+   "take": "cmu/walk_cmu_104_45",
+   "why": "Attitude"
+  },
+  {
+   "take": "cmu/walk_cmu_104_46",
+   "why": "Attitude"
+  },
+  {
+   "take": "cmu/walk_cmu_111_01",
+   "why": "lean_side +4.3"
+  },
+  {
+   "take": "cmu/walk_cmu_111_13",
+   "why": "March"
+  },
+  {
+   "take": "cmu/walk_cmu_111_29",
+   "why": "over"
+  },
+  {
+   "take": "cmu/walk_cmu_111_30",
+   "why": "over"
+  },
+  {
+   "take": "cmu/walk_cmu_111_31",
+   "why": "up"
+  },
+  {
+   "take": "cmu/walk_cmu_113_09",
+   "why": "March"
+  },
+  {
+   "take": "cmu/walk_cmu_113_10",
+   "why": "mope"
+  },
+  {
+   "take": "cmu/walk_cmu_113_22",
+   "why": "over"
+  },
+  {
+   "take": "cmu/walk_cmu_120_08",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_120_09",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_120_10",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_120_11",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_120_12",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_120_13",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_120_14",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_120_17",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_120_18",
+   "why": "Mickey"
+  },
+  {
+   "take": "cmu/walk_cmu_131_01",
+   "why": "hips -4.6"
+  },
+  {
+   "take": "cmu/walk_cmu_132_01",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_02",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_03",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_04",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_05",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_06",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_07",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_08",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_09",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_10",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_11",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_12",
+   "why": "Arms"
+  },
+  {
+   "take": "cmu/walk_cmu_132_14",
+   "why": "Duck"
+  },
+  {
+   "take": "cmu/walk_cmu_132_15",
+   "why": "Knees"
+  },
+  {
+   "take": "cmu/walk_cmu_132_16",
+   "why": "Crossover"
+  },
+  {
+   "take": "cmu/walk_cmu_132_29",
+   "why": "Bouncy"
+  },
+  {
+   "take": "cmu/walk_cmu_132_30",
+   "why": "Bouncy"
+  },
+  {
+   "take": "cmu/walk_cmu_132_31",
+   "why": "Bouncy"
+  },
+  {
+   "take": "cmu/walk_cmu_132_32",
+   "why": "Bouncy"
+  },
+  {
+   "take": "cmu/walk_cmu_132_33",
+   "why": "Bouncy"
+  },
+  {
+   "take": "cmu/walk_cmu_132_34",
+   "why": "Bouncy"
+  },
+  {
+   "take": "cmu/walk_cmu_132_35",
+   "why": "Leaning"
+  },
+  {
+   "take": "cmu/walk_cmu_132_36",
+   "why": "Leaning"
+  },
+  {
+   "take": "cmu/walk_cmu_132_37",
+   "why": "Marching"
+  },
+  {
+   "take": "cmu/walk_cmu_132_39",
+   "why": "Pigeon"
+  },
+  {
+   "take": "cmu/walk_cmu_132_40",
+   "why": "Stiff"
+  },
+  {
+   "take": "cmu/walk_cmu_132_41",
+   "why": "Stiff"
+  },
+  {
+   "take": "cmu/walk_cmu_132_49",
+   "why": "stance_uneven +6.3"
+  },
+  {
+   "take": "cmu/walk_cmu_132_53",
+   "why": "Legs"
+  },
+  {
+   "take": "cmu/walk_cmu_132_54",
+   "why": "Wild"
+  },
+  {
+   "take": "cmu/walk_cmu_132_55",
+   "why": "Wild"
+  },
+  {
+   "take": "cmu/walk_cmu_132_56",
+   "why": "Wild"
+  },
+  {
+   "take": "cmu/walk_cmu_133_11",
+   "why": "step_uneven +7.8"
+  },
+  {
+   "take": "cmu/walk_cmu_133_12",
+   "why": "step_uneven +6.9"
+  },
+  {
+   "take": "cmu/walk_cmu_133_13",
+   "why": "step_uneven +11.0"
+  },
+  {
+   "take": "cmu/walk_cmu_133_16",
+   "why": "lean_side +3.9"
+  },
+  {
+   "take": "cmu/walk_cmu_133_20",
+   "why": "step_uneven +5.0"
+  },
+  {
+   "take": "cmu/walk_cmu_133_22",
+   "why": "lean_side +3.8"
+  },
+  {
+   "take": "cmu/walk_cmu_133_24",
+   "why": "Zig"
+  },
+  {
+   "take": "cmu/walk_cmu_136_01",
+   "why": "Bent"
+  },
+  {
+   "take": "cmu/walk_cmu_136_02",
+   "why": "Bent"
+  },
+  {
+   "take": "cmu/walk_cmu_136_03",
+   "why": "Bent"
+  },
+  {
+   "take": "cmu/walk_cmu_136_04",
+   "why": "Bent"
+  },
+  {
+   "take": "cmu/walk_cmu_136_05",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_06",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_07",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_08",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_09",
+   "why": "Crouched"
+  },
+  {
+   "take": "cmu/walk_cmu_136_10",
+   "why": "Crouched"
+  },
+  {
+   "take": "cmu/walk_cmu_136_11",
+   "why": "Crouched"
+  },
+  {
+   "take": "cmu/walk_cmu_136_12",
+   "why": "Crouched"
+  },
+  {
+   "take": "cmu/walk_cmu_136_13",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_14",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_15",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_16",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_27",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_28",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_29",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_30",
+   "why": "Toes"
+  },
+  {
+   "take": "cmu/walk_cmu_136_31",
+   "why": "Quail"
+  },
+  {
+   "take": "cmu/walk_cmu_136_32",
+   "why": "Quail"
+  },
+  {
+   "take": "cmu/walk_cmu_137_04",
+   "why": "Cat"
+  },
+  {
+   "take": "cmu/walk_cmu_137_12",
+   "why": "Dinosaur"
+  },
+  {
+   "take": "cmu/walk_cmu_137_16",
+   "why": "Drunk"
+  },
+  {
+   "take": "cmu/walk_cmu_137_20",
+   "why": "Gangly"
+  },
+  {
+   "take": "cmu/walk_cmu_137_24",
+   "why": "Graceful"
+  },
+  {
+   "take": "cmu/walk_cmu_137_33",
+   "why": "Old"
+  },
+  {
+   "take": "cmu/walk_cmu_137_38",
+   "why": "Sexy"
+  },
+  {
+   "take": "cmu/walk_cmu_137_42",
+   "why": "Strong"
+  },
+  {
+   "take": "cmu/walk_cmu_139_34",
+   "why": "Sneaking"
+  },
+  {
+   "take": "cmu/walk_cmu_142_11",
+   "why": "Marching"
+  },
+  {
+   "take": "cmu/walk_cmu_142_22",
+   "why": "Sneaky"
+  },
+  {
+   "take": "cmu/walk_cmu_143_14",
+   "why": "Over"
+  },
+  {
+   "take": "cmu/walk_cmu_143_15",
+   "why": "Over"
+  },
+  {
+   "take": "cmu/walk_cmu_143_16",
+   "why": "Over"
+  },
+  {
+   "take": "cmu/walk_cmu_143_41",
+   "why": "Sneak"
+  },
+  {
+   "take": "cmu/walk_cmu_17_01",
+   "why": "anger"
+  },
+  {
+   "take": "cmu/walk_cmu_17_02",
+   "why": "anger"
+  },
+  {
+   "take": "cmu/walk_cmu_17_03",
+   "why": "stealthily"
+  },
+  {
+   "take": "cmu/walk_cmu_17_04",
+   "why": "stealthily"
+  },
+  {
+   "take": "cmu/walk_cmu_17_05",
+   "why": "hobble"
+  },
+  {
+   "take": "cmu/walk_cmu_17_06",
+   "why": "whistle"
+  },
+  {
+   "take": "cmu/walk_cmu_17_07",
+   "why": "whistle"
+  },
+  {
+   "take": "cmu/walk_cmu_17_08",
+   "why": "muscular"
+  },
+  {
+   "take": "cmu/walk_cmu_17_09",
+   "why": "muscular"
+  },
+  {
+   "take": "cmu/walk_cmu_18_01",
+   "why": "shake"
+  },
+  {
+   "take": "cmu/walk_cmu_18_02",
+   "why": "shake"
+  },
+  {
+   "take": "cmu/walk_cmu_18_07",
+   "why": "busy"
+  },
+  {
+   "take": "cmu/walk_cmu_18_09",
+   "why": "conversation"
+  },
+  {
+   "take": "cmu/walk_cmu_19_01",
+   "why": "shake"
+  },
+  {
+   "take": "cmu/walk_cmu_19_02",
+   "why": "shake"
+  },
+  {
+   "take": "cmu/walk_cmu_19_07",
+   "why": "busy"
+  },
+  {
+   "take": "cmu/walk_cmu_19_09",
+   "why": "conversation"
+  },
+  {
+   "take": "cmu/walk_cmu_20_02",
+   "why": "arms"
+  },
+  {
+   "take": "cmu/walk_cmu_20_03",
+   "why": "arms"
+  },
+  {
+   "take": "cmu/walk_cmu_20_04",
+   "why": "synchronized"
+  },
+  {
+   "take": "cmu/walk_cmu_20_05",
+   "why": "synchronized"
+  },
+  {
+   "take": "cmu/walk_cmu_20_06",
+   "why": "soldiers"
+  },
+  {
+   "take": "cmu/walk_cmu_20_07",
+   "why": "soldiers"
+  },
+  {
+   "take": "cmu/walk_cmu_20_11",
+   "why": "high"
+  },
+  {
+   "take": "cmu/walk_cmu_20_12",
+   "why": "low"
+  },
+  {
+   "take": "cmu/walk_cmu_21_02",
+   "why": "arms"
+  },
+  {
+   "take": "cmu/walk_cmu_21_03",
+   "why": "arms"
+  },
+  {
+   "take": "cmu/walk_cmu_21_04",
+   "why": "synchronized"
+  },
+  {
+   "take": "cmu/walk_cmu_21_05",
+   "why": "synchronized"
+  },
+  {
+   "take": "cmu/walk_cmu_21_06",
+   "why": "soldiers"
+  },
+  {
+   "take": "cmu/walk_cmu_21_07",
+   "why": "soldiers"
+  },
+  {
+   "take": "cmu/walk_cmu_21_11",
+   "why": "high"
+  },
+  {
+   "take": "cmu/walk_cmu_21_12",
+   "why": "low"
+  },
+  {
+   "take": "cmu/walk_cmu_38_04",
+   "why": "along"
+  },
+  {
+   "take": "cmu/walk_cmu_69_28",
+   "why": "smooth"
+  },
+  {
+   "take": "cmu/walk_cmu_69_29",
+   "why": "smooth"
+  },
+  {
+   "take": "cmu/walk_cmu_69_30",
+   "why": "smooth"
+  },
+  {
+   "take": "cmu/walk_cmu_69_31",
+   "why": "smooth"
+  },
+  {
+   "take": "cmu/walk_cmu_69_32",
+   "why": "smooth"
+  },
+  {
+   "take": "cmu/walk_cmu_69_33",
+   "why": "smooth"
+  },
+  {
+   "take": "cmu/walk_cmu_74_01",
+   "why": "stiff"
+  },
+  {
+   "take": "cmu/walk_cmu_74_02",
+   "why": "stiff"
+  },
+  {
+   "take": "cmu/walk_cmu_74_20",
+   "why": "stiff"
+  },
+  {
+   "take": "cmu/walk_cmu_76_06",
+   "why": "avoid"
+  },
+  {
+   "take": "cmu/walk_cmu_76_08",
+   "why": "careful"
+  },
+  {
+   "take": "cmu/walk_cmu_76_11",
+   "why": "wrist_out +5.7"
+  },
+  {
+   "take": "cmu/walk_cmu_77_19",
+   "why": "limping"
+  },
+  {
+   "take": "cmu/walk_cmu_77_20",
+   "why": "limping"
+  },
+  {
+   "take": "cmu/walk_cmu_77_22",
+   "why": "limping"
+  },
+  {
+   "take": "cmu/walk_cmu_77_23",
+   "why": "limping"
+  },
+  {
+   "take": "cmu/walk_cmu_77_24",
+   "why": "limping"
+  },
+  {
+   "take": "cmu/walk_cmu_77_25",
+   "why": "careful"
+  },
+  {
+   "take": "cmu/walk_cmu_77_26",
+   "why": "careful"
+  },
+  {
+   "take": "cmu/walk_cmu_77_27",
+   "why": "careful"
+  },
+  {
+   "take": "cmu/walk_cmu_77_28",
+   "why": "careful"
+  },
+  {
+   "take": "cmu/walk_cmu_77_29",
+   "why": "creeping"
+  },
+  {
+   "take": "cmu/walk_cmu_77_30",
+   "why": "creeping"
+  },
+  {
+   "take": "cmu/walk_cmu_77_31",
+   "why": "silent"
+  },
+  {
+   "take": "cmu/walk_cmu_77_32",
+   "why": "creeping"
+  },
+  {
+   "take": "cmu/walk_cmu_77_33",
+   "why": "creeping"
+  },
+  {
+   "take": "cmu/walk_cmu_81_01",
+   "why": "hair"
+  },
+  {
+   "take": "cmu/walk_cmu_81_18",
+   "why": "hair"
+  },
+  {
+   "take": "cmu/walk_cmu_82_09",
+   "why": "confident"
+  },
+  {
+   "take": "cmu/walk_cmu_82_10",
+   "why": "sad"
+  },
+  {
+   "take": "cmu/walk_cmu_82_12",
+   "why": "happy"
+  },
+  {
+   "take": "cmu/walk_cmu_82_14",
+   "why": "down"
+  },
+  {
+   "take": "cmu/walk_cmu_83_03",
+   "why": "ledge"
+  },
+  {
+   "take": "cmu/walk_cmu_83_08",
+   "why": "down"
+  },
+  {
+   "take": "cmu/walk_cmu_83_09",
+   "why": "down"
+  },
+  {
+   "take": "cmu/walk_cmu_83_10",
+   "why": "down"
+  },
+  {
+   "take": "cmu/walk_cmu_83_17",
+   "why": "down"
+  },
+  {
+   "take": "cmu/walk_cmu_83_24",
+   "why": "up"
+  },
+  {
+   "take": "cmu/walk_cmu_83_25",
+   "why": "up"
+  },
+  {
+   "take": "cmu/walk_cmu_83_26",
+   "why": "up"
+  },
+  {
+   "take": "cmu/walk_cmu_86_12",
+   "why": "dragging"
+  },
+  {
+   "take": "cmu/walk_cmu_90_32",
+   "why": "moonwalk"
+  },
+  {
+   "take": "cmu/walk_cmu_91_05",
+   "why": "Mummy"
+  },
+  {
+   "take": "cmu/walk_cmu_91_09",
+   "why": "Drunk"
+  },
+  {
+   "take": "cmu/walk_cmu_91_11",
+   "why": "Lavish"
+  },
+  {
+   "take": "cmu/walk_cmu_91_12",
+   "why": "Too"
+  },
+  {
+   "take": "cmu/walk_cmu_91_13",
+   "why": "Sad"
+  },
+  {
+   "take": "cmu/walk_cmu_91_14",
+   "why": "Depressed"
+  },
+  {
+   "take": "cmu/walk_cmu_91_15",
+   "why": "Clumsy"
+  },
+  {
+   "take": "cmu/walk_cmu_91_16",
+   "why": "Limp"
+  },
+  {
+   "take": "cmu/walk_cmu_91_18",
+   "why": "Careful"
+  },
+  {
+   "take": "cmu/walk_cmu_91_19",
+   "why": "March"
+  },
+  {
+   "take": "cmu/walk_cmu_91_20",
+   "why": "Shy"
+  },
+  {
+   "take": "cmu/walk_cmu_91_21",
+   "why": "achey"
+  },
+  {
+   "take": "cmu/walk_cmu_91_23",
+   "why": "Cool"
+  },
+  {
+   "take": "cmu/walk_cmu_91_24",
+   "why": "Hurt"
+  },
+  {
+   "take": "cmu/walk_cmu_91_25",
+   "why": "Drag"
+  },
+  {
+   "take": "cmu/walk_cmu_91_26",
+   "why": "Hurt"
+  },
+  {
+   "take": "cmu/walk_cmu_91_28",
+   "why": "Ghetto"
+  },
+  {
+   "take": "cmu/walk_cmu_91_30",
+   "why": "Sexy"
+  },
+  {
+   "take": "cmu/walk_cmu_91_32",
+   "why": "Scared"
+  },
+  {
+   "take": "cmu/walk_cmu_91_33",
+   "why": "Macho"
+  },
+  {
+   "take": "cmu/walk_cmu_91_35",
+   "why": "Traffic"
+  },
+  {
+   "take": "kimodo/small_steps_kimodo_small_steps_s1",
+   "why": "careful"
+  },
+  {
+   "take": "kimodo/small_steps_kimodo_small_steps_s2",
+   "why": "careful"
+  },
+  {
+   "take": "kimodo/small_steps_kimodo_small_steps_s3",
+   "why": "careful"
+  },
+  {
+   "take": "kimodo/turning_in_place_kimodo_turn_in_place_s1",
+   "why": "face"
+  },
+  {
+   "take": "kimodo/turning_in_place_kimodo_turn_in_place_s2",
+   "why": "face"
+  },
+  {
+   "take": "kimodo/turning_in_place_kimodo_turn_in_place_s3",
+   "why": "face"
+  },
+  {
+   "take": "kimodo/turning_in_place_kimodo_turn_left_s1",
+   "why": "their"
+  },
+  {
+   "take": "kimodo/turning_in_place_kimodo_turn_left_s2",
+   "why": "their"
+  },
+  {
+   "take": "kimodo/turning_in_place_kimodo_turn_left_s3",
+   "why": "their"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_backwards_s1",
+   "why": "carefully"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_backwards_s2",
+   "why": "carefully"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_backwards_s3",
+   "why": "carefully"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_proud_s1",
+   "why": "confidently"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_proud_s2",
+   "why": "confidently"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_proud_s3",
+   "why": "confidently"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_tired_s1",
+   "why": "tired"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_tired_s2",
+   "why": "tired"
+  },
+  {
+   "take": "kimodo/walk_kimodo_walk_tired_s3",
+   "why": "tired"
+  }
+ ],
+ "groups": [
+  {
+   "group": "G001",
+   "kind": "steady walk",
+   "label": "Female1 B03 Walk1",
+   "shown": "accad/walk_accad_female1_b03_walk1",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "accad/walk_accad_female1_b03_walk1"
+   ]
+  },
+  {
+   "group": "G002",
+   "kind": "steady walk",
+   "label": "Female1 B10 Walk Turn Left45",
+   "shown": "accad/walk_accad_female1_b10_walkturnleft45",
+   "change": null,
+   "minutes": 0.27,
+   "takes": [
+    "accad/walk_accad_female1_b10_walkturnleft45",
+    "accad/walk_accad_female1_b11_walkturnleft135"
+   ]
+  },
+  {
+   "group": "G003",
+   "kind": "steady walk",
+   "label": "Female1 B14 Walk Turn Right135",
+   "shown": "accad/walk_accad_female1_b14_walkturnright135",
+   "change": null,
+   "minutes": 0.15,
+   "takes": [
+    "accad/walk_accad_female1_b14_walkturnright135"
+   ]
+  },
+  {
+   "group": "G004",
+   "kind": "steady walk",
+   "label": "Male1 B13 Walk Turn Right45",
+   "shown": "accad/walk_accad_male1_b13_walkturnright45",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "accad/walk_accad_male1_b13_walkturnright45"
+   ]
+  },
+  {
+   "group": "G005",
+   "kind": "steady walk",
+   "label": "Male1 B3 Walk",
+   "shown": "accad/walk_accad_male1_b3_walk",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "accad/walk_accad_male1_b3_walk"
+   ]
+  },
+  {
+   "group": "G006",
+   "kind": "steady walk",
+   "label": "Male2 B11 Walk Turn Left135",
+   "shown": "accad/walk_accad_male2_b11_walkturnleft135",
+   "change": null,
+   "minutes": 0.25,
+   "takes": [
+    "accad/walk_accad_male2_b10_walkturnleft45",
+    "accad/walk_accad_male2_b11_walkturnleft135",
+    "accad/walk_accad_male2_b9_walkturnleft90"
+   ]
+  },
+  {
+   "group": "G007",
+   "kind": "steady walk",
+   "label": "Male2 B14 Walk Turn Right45",
+   "shown": "accad/walk_accad_male2_b14_walkturnright45",
+   "change": null,
+   "minutes": 0.28,
+   "takes": [
+    "accad/walk_accad_male2_b12_walkturnright90",
+    "accad/walk_accad_male2_b13_walkturnright135",
+    "accad/walk_accad_male2_b14_walkturnright45"
+   ]
+  },
+  {
+   "group": "G008",
+   "kind": "steady walk",
+   "label": "Male2 B3 Walk",
+   "shown": "accad/walk_accad_male2_b3_walk",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "accad/walk_accad_male2_b3_walk"
+   ]
+  },
+  {
+   "group": "G009",
+   "kind": "steady walk",
+   "label": "falisse2017 subject_10: Gait 2 segment 1",
+   "shown": "addbiomechanics/walk_addbiomechanics_falisse2017_subject_10_gait_2_segment_1",
+   "change": null,
+   "minutes": 0.94,
+   "takes": [
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_10_gait_15_segment_1",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_10_gait_16_segment_1",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_10_gait_2_segment_1",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_1_gait_5_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_2_gait_10_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_2_gait_13_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_2_gait_15_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_2_gait_8_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_3_gait_10_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_3_gait_1_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_3_gait_7_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_3_gait_8_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_3_gait_9_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_6_gait_10_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_6_gait_5_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_7_gait_11_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_7_gait_13_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_7_gait_15_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_8_gait_10_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_8_gait_11_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_8_gait_4_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_8_gait_6_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_9_gait_10_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_9_gait_6_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_9_gait_7_segment_0",
+    "addbiomechanics/walk_addbiomechanics_falisse2017_subject_9_gait_9_segment_0"
+   ]
+  },
+  {
+   "group": "G010",
+   "kind": "steady walk",
+   "label": "fregly2012 1GC: jw ngait 5 segment 0",
+   "shown": "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_ngait_5_segment_0",
+   "change": null,
+   "minutes": 0.69,
+   "takes": [
+    "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_ngait_2_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_ngait_3_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_ngait_4_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_ngait_5_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_1gc_jw_ngait_6_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_ngait_10_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_ngait_11_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_ngait_12_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_ngait_13_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_2gc_dm_ngait_4_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_ngait_og5_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_ngait_og6_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_ngait_og7_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_ngait_og8_segment_0",
+    "addbiomechanics/walk_addbiomechanics_fregly2012_3gc_sc_ngait_og9_segment_0"
+   ]
+  },
+  {
+   "group": "G011",
+   "kind": "steady walk",
+   "label": "han2023 s003_split3: 20220523 walk 4 segment 0",
+   "shown": "addbiomechanics/walk_addbiomechanics_han2023_s003_split3_20220523_walk_4_segment_0",
+   "change": null,
+   "minutes": 1.08,
+   "takes": [
+    "addbiomechanics/walk_addbiomechanics_han2023_s001_split3_20220513_step_2_segment_1",
+    "addbiomechanics/walk_addbiomechanics_han2023_s001_split3_20220513_step_3_segment_1",
+    "addbiomechanics/walk_addbiomechanics_han2023_s001_split3_20220513_walk_1_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s001_split3_20220513_walk_2_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s001_split3_20220513_walk_3_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s002_split3_20220520_walk_1_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s002_split3_20220520_walk_3_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s003_split3_20220523_walk_1_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s003_split3_20220523_walk_3_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s003_split3_20220523_walk_4_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s004_split3_20220524_walk_2_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s004_split3_20220524_walk_5_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s005_split3_20220610_walk_1_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s005_split3_20220610_walk_2_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s005_split3_20220610_walk_4_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s006_split3_20220614_walk_1_segment_0",
+    "addbiomechanics/walk_addbiomechanics_han2023_s006_split3_20220614_walk_3_segment_0"
+   ]
+  },
+  {
+   "group": "G012",
+   "kind": "steady walk",
+   "label": "tiziana2019 Subject17: t25 segment 0",
+   "shown": "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t25_segment_0",
+   "change": null,
+   "minutes": 0.03,
+   "takes": [
+    "addbiomechanics/walk_addbiomechanics_tiziana2019_subject17_t25_segment_0"
+   ]
+  },
+  {
+   "group": "G013",
+   "kind": "steady walk",
+   "label": "navigate - walk forward, backward, sideways",
+   "shown": "cmu/sidestep_cmu_09_12",
+   "change": null,
+   "minutes": 0.27,
+   "takes": [
+    "cmu/sidestep_cmu_09_12"
+   ]
+  },
+  {
+   "group": "G014",
+   "kind": "steady walk",
+   "label": "walk forward and turn sideways",
+   "shown": "cmu/sidestep_cmu_82_15",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "cmu/sidestep_cmu_82_15"
+   ]
+  },
+  {
+   "group": "G015",
+   "kind": "steady walk",
+   "label": "sidestep to right then back to left",
+   "shown": "cmu/sidestep_cmu_83_33",
+   "change": null,
+   "minutes": 0.18,
+   "takes": [
+    "cmu/sidestep_cmu_83_33"
+   ]
+  },
+  {
+   "group": "G016",
+   "kind": "steady walk",
+   "label": "short sidestep to right",
+   "shown": "cmu/sidestep_cmu_83_66",
+   "change": null,
+   "minutes": 0.09,
+   "takes": [
+    "cmu/sidestep_cmu_83_66"
+   ]
+  },
+  {
+   "group": "G017",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_02_01",
+   "change": null,
+   "minutes": 0.09,
+   "takes": [
+    "cmu/walk_cmu_02_01",
+    "cmu/walk_cmu_02_02"
+   ]
+  },
+  {
+   "group": "G018",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_05_01",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/walk_cmu_05_01"
+   ]
+  },
+  {
+   "group": "G019",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_06_01",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/walk_cmu_06_01"
+   ]
+  },
+  {
+   "group": "G020",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_07_11",
+   "change": null,
+   "minutes": 0.43,
+   "takes": [
+    "cmu/walk_cmu_07_01",
+    "cmu/walk_cmu_07_02",
+    "cmu/walk_cmu_07_03",
+    "cmu/walk_cmu_07_06",
+    "cmu/walk_cmu_07_07",
+    "cmu/walk_cmu_07_08",
+    "cmu/walk_cmu_07_09",
+    "cmu/walk_cmu_07_10",
+    "cmu/walk_cmu_07_11"
+   ]
+  },
+  {
+   "group": "G021",
+   "kind": "steady walk",
+   "label": "slow walk",
+   "shown": "cmu/walk_cmu_07_05",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/walk_cmu_07_04",
+    "cmu/walk_cmu_07_05"
+   ]
+  },
+  {
+   "group": "G022",
+   "kind": "steady walk",
+   "label": "brisk walk",
+   "shown": "cmu/walk_cmu_07_12",
+   "change": null,
+   "minutes": 0.04,
+   "takes": [
+    "cmu/walk_cmu_07_12"
+   ]
+  },
+  {
+   "group": "G023",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_08_02",
+   "change": null,
+   "minutes": 0.29,
+   "takes": [
+    "cmu/walk_cmu_08_01",
+    "cmu/walk_cmu_08_02",
+    "cmu/walk_cmu_08_03",
+    "cmu/walk_cmu_08_06",
+    "cmu/walk_cmu_08_08",
+    "cmu/walk_cmu_08_09",
+    "cmu/walk_cmu_08_10"
+   ]
+  },
+  {
+   "group": "G024",
+   "kind": "steady walk",
+   "label": "slow walk",
+   "shown": "cmu/walk_cmu_08_04",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/walk_cmu_08_04"
+   ]
+  },
+  {
+   "group": "G025",
+   "kind": "steady walk",
+   "label": "Walk",
+   "shown": "cmu/walk_cmu_111_34",
+   "change": null,
+   "minutes": 0.26,
+   "takes": [
+    "cmu/walk_cmu_111_34"
+   ]
+  },
+  {
+   "group": "G026",
+   "kind": "steady walk",
+   "label": "Walk",
+   "shown": "cmu/walk_cmu_114_14",
+   "change": null,
+   "minutes": 1.43,
+   "takes": [
+    "cmu/walk_cmu_114_13",
+    "cmu/walk_cmu_114_14",
+    "cmu/walk_cmu_114_15"
+   ]
+  },
+  {
+   "group": "G027",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_12_02",
+   "change": null,
+   "minutes": 0.24,
+   "takes": [
+    "cmu/walk_cmu_12_01",
+    "cmu/walk_cmu_12_02",
+    "cmu/walk_cmu_12_03"
+   ]
+  },
+  {
+   "group": "G028",
+   "kind": "steady walk",
+   "label": "Start Walk Stop",
+   "shown": "cmu/walk_cmu_131_02",
+   "change": null,
+   "minutes": 0.17,
+   "takes": [
+    "cmu/walk_cmu_131_02"
+   ]
+  },
+  {
+   "group": "G029",
+   "kind": "steady walk",
+   "label": "Walk Fast",
+   "shown": "cmu/walk_cmu_132_20",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/walk_cmu_132_20"
+   ]
+  },
+  {
+   "group": "G030",
+   "kind": "steady walk",
+   "label": "Walk Slow",
+   "shown": "cmu/walk_cmu_132_50",
+   "change": null,
+   "minutes": 0.3,
+   "takes": [
+    "cmu/walk_cmu_132_50"
+   ]
+  },
+  {
+   "group": "G031",
+   "kind": "steady walk",
+   "label": "Walk Right",
+   "shown": "cmu/walk_cmu_133_17",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/walk_cmu_133_17"
+   ]
+  },
+  {
+   "group": "G032",
+   "kind": "steady walk",
+   "label": "Normal Walk",
+   "shown": "cmu/walk_cmu_136_23",
+   "change": null,
+   "minutes": 0.18,
+   "takes": [
+    "cmu/walk_cmu_136_21",
+    "cmu/walk_cmu_136_23"
+   ]
+  },
+  {
+   "group": "G033",
+   "kind": "steady walk",
+   "label": "Walk",
+   "shown": "cmu/walk_cmu_141_19",
+   "change": null,
+   "minutes": 0.11,
+   "takes": [
+    "cmu/walk_cmu_141_19"
+   ]
+  },
+  {
+   "group": "G034",
+   "kind": "steady walk",
+   "label": "Walk",
+   "shown": "cmu/walk_cmu_143_32",
+   "change": null,
+   "minutes": 0.11,
+   "takes": [
+    "cmu/walk_cmu_143_32"
+   ]
+  },
+  {
+   "group": "G035",
+   "kind": "steady walk",
+   "label": "Walk Digital 8",
+   "shown": "cmu/walk_cmu_143_38",
+   "change": null,
+   "minutes": 0.18,
+   "takes": [
+    "cmu/walk_cmu_143_38"
+   ]
+  },
+  {
+   "group": "G036",
+   "kind": "steady walk",
+   "label": "walk, veer left",
+   "shown": "cmu/walk_cmu_16_23",
+   "change": null,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/walk_cmu_16_11",
+    "cmu/walk_cmu_16_12",
+    "cmu/walk_cmu_16_23",
+    "cmu/walk_cmu_16_24"
+   ]
+  },
+  {
+   "group": "G037",
+   "kind": "steady walk",
+   "label": "walk, veer right",
+   "shown": "cmu/walk_cmu_16_25",
+   "change": null,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/walk_cmu_16_13",
+    "cmu/walk_cmu_16_14",
+    "cmu/walk_cmu_16_25",
+    "cmu/walk_cmu_16_26"
+   ]
+  },
+  {
+   "group": "G038",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_16_22",
+   "change": null,
+   "minutes": 0.38,
+   "takes": [
+    "cmu/walk_cmu_16_15",
+    "cmu/walk_cmu_16_16",
+    "cmu/walk_cmu_16_21",
+    "cmu/walk_cmu_16_22",
+    "cmu/walk_cmu_16_31",
+    "cmu/walk_cmu_16_47",
+    "cmu/walk_cmu_16_58"
+   ]
+  },
+  {
+   "group": "G039",
+   "kind": "steady walk",
+   "label": "walk, 90-degree left turn",
+   "shown": "cmu/walk_cmu_16_27",
+   "change": null,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/walk_cmu_16_17",
+    "cmu/walk_cmu_16_18",
+    "cmu/walk_cmu_16_27",
+    "cmu/walk_cmu_16_28"
+   ]
+  },
+  {
+   "group": "G040",
+   "kind": "steady walk",
+   "label": "walk, 90-degree right turn",
+   "shown": "cmu/walk_cmu_16_30",
+   "change": null,
+   "minutes": 0.17,
+   "takes": [
+    "cmu/walk_cmu_16_19",
+    "cmu/walk_cmu_16_20",
+    "cmu/walk_cmu_16_30"
+   ]
+  },
+  {
+   "group": "G041",
+   "kind": "steady walk",
+   "label": "slow walk, stop",
+   "shown": "cmu/walk_cmu_16_33",
+   "change": null,
+   "minutes": 0.04,
+   "takes": [
+    "cmu/walk_cmu_16_33"
+   ]
+  },
+  {
+   "group": "G042",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_32_01",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/walk_cmu_32_01",
+    "cmu/walk_cmu_32_02"
+   ]
+  },
+  {
+   "group": "G043",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_35_01",
+   "change": null,
+   "minutes": 1.34,
+   "takes": [
+    "cmu/walk_cmu_35_01",
+    "cmu/walk_cmu_35_02",
+    "cmu/walk_cmu_35_03",
+    "cmu/walk_cmu_35_04",
+    "cmu/walk_cmu_35_05",
+    "cmu/walk_cmu_35_06",
+    "cmu/walk_cmu_35_07",
+    "cmu/walk_cmu_35_08",
+    "cmu/walk_cmu_35_09",
+    "cmu/walk_cmu_35_10",
+    "cmu/walk_cmu_35_11",
+    "cmu/walk_cmu_35_12",
+    "cmu/walk_cmu_35_13",
+    "cmu/walk_cmu_35_14",
+    "cmu/walk_cmu_35_15",
+    "cmu/walk_cmu_35_16",
+    "cmu/walk_cmu_35_28",
+    "cmu/walk_cmu_35_29",
+    "cmu/walk_cmu_35_30",
+    "cmu/walk_cmu_35_31",
+    "cmu/walk_cmu_35_32",
+    "cmu/walk_cmu_35_33",
+    "cmu/walk_cmu_35_34"
+   ]
+  },
+  {
+   "group": "G044",
+   "kind": "steady walk",
+   "label": "slow walk",
+   "shown": "cmu/walk_cmu_37_01",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/walk_cmu_37_01"
+   ]
+  },
+  {
+   "group": "G045",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_38_01",
+   "change": null,
+   "minutes": 0.11,
+   "takes": [
+    "cmu/walk_cmu_38_01",
+    "cmu/walk_cmu_38_02"
+   ]
+  },
+  {
+   "group": "G046",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_39_12",
+   "change": null,
+   "minutes": 0.72,
+   "takes": [
+    "cmu/walk_cmu_39_01",
+    "cmu/walk_cmu_39_02",
+    "cmu/walk_cmu_39_03",
+    "cmu/walk_cmu_39_04",
+    "cmu/walk_cmu_39_05",
+    "cmu/walk_cmu_39_06",
+    "cmu/walk_cmu_39_07",
+    "cmu/walk_cmu_39_08",
+    "cmu/walk_cmu_39_09",
+    "cmu/walk_cmu_39_10",
+    "cmu/walk_cmu_39_12",
+    "cmu/walk_cmu_39_13",
+    "cmu/walk_cmu_39_14"
+   ]
+  },
+  {
+   "group": "G047",
+   "kind": "steady walk",
+   "label": "walk forward, turn around, walk back",
+   "shown": "cmu/walk_cmu_39_11",
+   "change": null,
+   "minutes": 0.12,
+   "takes": [
+    "cmu/walk_cmu_39_11"
+   ]
+  },
+  {
+   "group": "G048",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_43_01",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/walk_cmu_43_01"
+   ]
+  },
+  {
+   "group": "G049",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_45_01",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/walk_cmu_45_01"
+   ]
+  },
+  {
+   "group": "G050",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_46_01",
+   "change": null,
+   "minutes": 0.09,
+   "takes": [
+    "cmu/walk_cmu_46_01"
+   ]
+  },
+  {
+   "group": "G051",
+   "kind": "steady walk",
+   "label": "walk forward, turn around, walk back",
+   "shown": "cmu/walk_cmu_47_01",
+   "change": null,
+   "minutes": 0.18,
+   "takes": [
+    "cmu/walk_cmu_47_01"
+   ]
+  },
+  {
+   "group": "G052",
+   "kind": "steady walk",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_49_01",
+   "change": null,
+   "minutes": 0.09,
+   "takes": [
+    "cmu/walk_cmu_49_01"
+   ]
+  },
+  {
+   "group": "G053",
+   "kind": "steady walk",
+   "label": "follow path, walk around obstacles",
+   "shown": "cmu/walk_cmu_54_22",
+   "change": null,
+   "minutes": 0.32,
+   "takes": [
+    "cmu/walk_cmu_54_22"
+   ]
+  },
+  {
+   "group": "G054",
+   "kind": "steady walk",
+   "label": "walk around",
+   "shown": "cmu/walk_cmu_56_01",
+   "change": null,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/walk_cmu_56_01"
+   ]
+  },
+  {
+   "group": "G055",
+   "kind": "steady walk",
+   "label": "walk forward",
+   "shown": "cmu/walk_cmu_69_02",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/walk_cmu_69_02"
+   ]
+  },
+  {
+   "group": "G056",
+   "kind": "steady walk",
+   "label": "walk and turn (repeated)",
+   "shown": "cmu/walk_cmu_69_07",
+   "change": null,
+   "minutes": 2.18,
+   "takes": [
+    "cmu/walk_cmu_69_07",
+    "cmu/walk_cmu_69_08",
+    "cmu/walk_cmu_69_09"
+   ]
+  },
+  {
+   "group": "G057",
+   "kind": "steady walk",
+   "label": "walk forward 90 degree right turn",
+   "shown": "cmu/walk_cmu_69_23",
+   "change": null,
+   "minutes": 0.31,
+   "takes": [
+    "cmu/walk_cmu_69_20",
+    "cmu/walk_cmu_69_21",
+    "cmu/walk_cmu_69_22",
+    "cmu/walk_cmu_69_23"
+   ]
+  },
+  {
+   "group": "G058",
+   "kind": "steady walk",
+   "label": "walk forward 90 degree left turn",
+   "shown": "cmu/walk_cmu_69_26",
+   "change": null,
+   "minutes": 0.24,
+   "takes": [
+    "cmu/walk_cmu_69_24",
+    "cmu/walk_cmu_69_25",
+    "cmu/walk_cmu_69_26",
+    "cmu/walk_cmu_69_27"
+   ]
+  },
+  {
+   "group": "G059",
+   "kind": "steady walk",
+   "label": "walk forward",
+   "shown": "cmu/walk_cmu_81_02",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/walk_cmu_81_02"
+   ]
+  },
+  {
+   "group": "G060",
+   "kind": "steady walk",
+   "label": "normal walk forward",
+   "shown": "cmu/walk_cmu_82_13",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/walk_cmu_82_13"
+   ]
+  },
+  {
+   "group": "G061",
+   "kind": "steady walk",
+   "label": "short step to left and forward",
+   "shown": "cmu/walk_cmu_83_18",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/walk_cmu_83_18"
+   ]
+  },
+  {
+   "group": "G062",
+   "kind": "steady walk",
+   "label": "Casual Walk",
+   "shown": "cmu/walk_cmu_93_07",
+   "change": null,
+   "minutes": 0.03,
+   "takes": [
+    "cmu/walk_cmu_93_07"
+   ]
+  },
+  {
+   "group": "G063",
+   "kind": "steady walk",
+   "label": "A person walks in a circle clockwise.",
+   "shown": "kimodo/circular_kimodo_walk_circle_s1",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "kimodo/circular_kimodo_walk_circle_s1"
+   ]
+  },
+  {
+   "group": "G064",
+   "kind": "steady walk",
+   "label": "A person walks in a circle clockwise.",
+   "shown": "kimodo/circular_kimodo_walk_circle_s2",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "kimodo/circular_kimodo_walk_circle_s2"
+   ]
+  },
+  {
+   "group": "G065",
+   "kind": "steady walk",
+   "label": "A person walks in a circle clockwise.",
+   "shown": "kimodo/circular_kimodo_walk_circle_s3",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "kimodo/circular_kimodo_walk_circle_s3"
+   ]
+  },
+  {
+   "group": "G066",
+   "kind": "steady walk",
+   "label": "A person side steps to the right, then back to the left.",
+   "shown": "kimodo/side_step_kimodo_side_step_s2",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/side_step_kimodo_side_step_s2"
+   ]
+  },
+  {
+   "group": "G067",
+   "kind": "steady walk",
+   "label": "A person side steps to the right, then back to the left.",
+   "shown": "kimodo/side_step_kimodo_side_step_s3",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/side_step_kimodo_side_step_s3"
+   ]
+  },
+  {
+   "group": "G068",
+   "kind": "starts or stops",
+   "label": "Neutral: Normal walking (forwards walk)",
+   "shown": "100style/walk_100style_FW_052",
+   "change": 39,
+   "minutes": 1.98,
+   "takes": [
+    "100style/walk_100style_FW_052"
+   ]
+  },
+  {
+   "group": "G069",
+   "kind": "starts or stops",
+   "label": "Male1 B22 Side Step Left",
+   "shown": "accad/sidestep_accad_male1_b22_sidestepleft",
+   "change": 67,
+   "minutes": 0.08,
+   "takes": [
+    "accad/sidestep_accad_male1_b22_sidestepleft"
+   ]
+  },
+  {
+   "group": "G070",
+   "kind": "starts or stops",
+   "label": "Male1 B23 Side Step Right",
+   "shown": "accad/sidestep_accad_male1_b23_sidestepright",
+   "change": 21,
+   "minutes": 0.06,
+   "takes": [
+    "accad/sidestep_accad_male1_b23_sidestepright"
+   ]
+  },
+  {
+   "group": "G071",
+   "kind": "starts or stops",
+   "label": "Male1 C24 Quick Side Step Left",
+   "shown": "accad/sidestep_accad_male1_c24_quicksidestepleft",
+   "change": 22,
+   "minutes": 0.05,
+   "takes": [
+    "accad/sidestep_accad_male1_c24_quicksidestepleft"
+   ]
+  },
+  {
+   "group": "G072",
+   "kind": "starts or stops",
+   "label": "Male1 C25 Quick Side Step Right",
+   "shown": "accad/sidestep_accad_male1_c25_quicksidestepright",
+   "change": 24,
+   "minutes": 0.06,
+   "takes": [
+    "accad/sidestep_accad_male1_c25_quicksidestepright"
+   ]
+  },
+  {
+   "group": "G073",
+   "kind": "starts or stops",
+   "label": "Male2 B22 Side Step Left",
+   "shown": "accad/sidestep_accad_male2_b22_sidestepleft",
+   "change": 27,
+   "minutes": 0.04,
+   "takes": [
+    "accad/sidestep_accad_male2_b22_sidestepleft"
+   ]
+  },
+  {
+   "group": "G074",
+   "kind": "starts or stops",
+   "label": "Male2 B23 Side Step Right",
+   "shown": "accad/sidestep_accad_male2_b23_sidestepright",
+   "change": 30,
+   "minutes": 0.05,
+   "takes": [
+    "accad/sidestep_accad_male2_b23_sidestepright"
+   ]
+  },
+  {
+   "group": "G075",
+   "kind": "starts or stops",
+   "label": "Male2 C24 Quick Sidestep Left",
+   "shown": "accad/sidestep_accad_male2_c24_quicksidestepleft",
+   "change": 34,
+   "minutes": 0.03,
+   "takes": [
+    "accad/sidestep_accad_male2_c24_quicksidestepleft"
+   ]
+  },
+  {
+   "group": "G076",
+   "kind": "starts or stops",
+   "label": "Male2 C25 Quick Sidestep Right",
+   "shown": "accad/sidestep_accad_male2_c25_quicksidestepright",
+   "change": 35,
+   "minutes": 0.03,
+   "takes": [
+    "accad/sidestep_accad_male2_c25_quicksidestepright"
+   ]
+  },
+  {
+   "group": "G077",
+   "kind": "starts or stops",
+   "label": "Female1 B01 Stand To Walk",
+   "shown": "accad/walk_accad_female1_b01_standtowalk",
+   "change": 44,
+   "minutes": 0.1,
+   "takes": [
+    "accad/walk_accad_female1_b01_standtowalk"
+   ]
+  },
+  {
+   "group": "G078",
+   "kind": "starts or stops",
+   "label": "Female1 B02 Walk To Stand T2",
+   "shown": "accad/walk_accad_female1_b02_walktostandt2",
+   "change": 111,
+   "minutes": 0.17,
+   "takes": [
+    "accad/walk_accad_female1_b02_walktostand",
+    "accad/walk_accad_female1_b02_walktostandt2"
+   ]
+  },
+  {
+   "group": "G079",
+   "kind": "starts or stops",
+   "label": "Female1 B09 Walk Turn Left90",
+   "shown": "accad/walk_accad_female1_b09_walkturnleft90",
+   "change": 23,
+   "minutes": 0.12,
+   "takes": [
+    "accad/walk_accad_female1_b09_walkturnleft90"
+   ]
+  },
+  {
+   "group": "G080",
+   "kind": "starts or stops",
+   "label": "Female1 B13 Walk Turn Right45",
+   "shown": "accad/walk_accad_female1_b13_walkturnright45",
+   "change": 22,
+   "minutes": 0.27,
+   "takes": [
+    "accad/walk_accad_female1_b12_walkturnright90",
+    "accad/walk_accad_female1_b13_walkturnright45"
+   ]
+  },
+  {
+   "group": "G081",
+   "kind": "starts or stops",
+   "label": "Female1 B15 Walk Turn Around180",
+   "shown": "accad/walk_accad_female1_b15_walkturnaround180",
+   "change": 23,
+   "minutes": 0.17,
+   "takes": [
+    "accad/walk_accad_female1_b15_walkturnaround180"
+   ]
+  },
+  {
+   "group": "G082",
+   "kind": "starts or stops",
+   "label": "Female1 B16 Walk Turn Change Direction",
+   "shown": "accad/walk_accad_female1_b16_walkturnchangedirection",
+   "change": 105,
+   "minutes": 0.18,
+   "takes": [
+    "accad/walk_accad_female1_b16_walkturnchangedirection"
+   ]
+  },
+  {
+   "group": "G083",
+   "kind": "starts or stops",
+   "label": "Male1 B11 Walk Turn Left135",
+   "shown": "accad/walk_accad_male1_b11_walkturnleft135",
+   "change": 27,
+   "minutes": 0.13,
+   "takes": [
+    "accad/walk_accad_male1_b11_walkturnleft135"
+   ]
+  },
+  {
+   "group": "G084",
+   "kind": "starts or stops",
+   "label": "Male1 B12 Walk Turn Right90",
+   "shown": "accad/walk_accad_male1_b12_walkturnright90",
+   "change": 46,
+   "minutes": 0.27,
+   "takes": [
+    "accad/walk_accad_male1_b12_walkturnright90",
+    "accad/walk_accad_male1_b14_walkturnright135"
+   ]
+  },
+  {
+   "group": "G085",
+   "kind": "starts or stops",
+   "label": "Male1 B15 Walk Turn Around",
+   "shown": "accad/walk_accad_male1_b15_walkturnaround",
+   "change": 26,
+   "minutes": 0.17,
+   "takes": [
+    "accad/walk_accad_male1_b15_walkturnaround"
+   ]
+  },
+  {
+   "group": "G086",
+   "kind": "starts or stops",
+   "label": "Male1 B2 Walk To Stand",
+   "shown": "accad/walk_accad_male1_b2_walktostand",
+   "change": 166,
+   "minutes": 0.13,
+   "takes": [
+    "accad/walk_accad_male1_b2_walktostand"
+   ]
+  },
+  {
+   "group": "G087",
+   "kind": "starts or stops",
+   "label": "Male2 B15 Walk Turn Around",
+   "shown": "accad/walk_accad_male2_b15_walkturnaround",
+   "change": 103,
+   "minutes": 0.12,
+   "takes": [
+    "accad/walk_accad_male2_b15_walkturnaround"
+   ]
+  },
+  {
+   "group": "G088",
+   "kind": "starts or stops",
+   "label": "Male2 B16 Walk Turn Change",
+   "shown": "accad/walk_accad_male2_b16_walkturnchange",
+   "change": 86,
+   "minutes": 0.12,
+   "takes": [
+    "accad/walk_accad_male2_b16_walkturnchange"
+   ]
+  },
+  {
+   "group": "G089",
+   "kind": "starts or stops",
+   "label": "Male2 B1 Stand To Walk",
+   "shown": "accad/walk_accad_male2_b1_standtowalk",
+   "change": 31,
+   "minutes": 0.06,
+   "takes": [
+    "accad/walk_accad_male2_b1_standtowalk"
+   ]
+  },
+  {
+   "group": "G090",
+   "kind": "starts or stops",
+   "label": "Male2 B2 Walk To Stand",
+   "shown": "accad/walk_accad_male2_b2_walktostand",
+   "change": 86,
+   "minutes": 0.06,
+   "takes": [
+    "accad/walk_accad_male2_b2_walktostand"
+   ]
+  },
+  {
+   "group": "G091",
+   "kind": "starts or stops",
+   "label": "han2023 s001_split3: 20220513 step 1 segment 1",
+   "shown": "addbiomechanics/walk_addbiomechanics_han2023_s001_split3_20220513_step_1_segment_1",
+   "change": 49,
+   "minutes": 0.05,
+   "takes": [
+    "addbiomechanics/walk_addbiomechanics_han2023_s001_split3_20220513_step_1_segment_1"
+   ]
+  },
+  {
+   "group": "G092",
+   "kind": "starts or stops",
+   "label": "navigate - walk forward, backward, sideways, on a diagonal",
+   "shown": "cmu/sidestep_cmu_41_02",
+   "change": 115,
+   "minutes": 1.44,
+   "takes": [
+    "cmu/sidestep_cmu_41_02",
+    "cmu/sidestep_cmu_41_03"
+   ]
+  },
+  {
+   "group": "G093",
+   "kind": "starts or stops",
+   "label": "large sidestep to right",
+   "shown": "cmu/sidestep_cmu_83_01",
+   "change": 74,
+   "minutes": 0.2,
+   "takes": [
+    "cmu/sidestep_cmu_83_01",
+    "cmu/sidestep_cmu_83_04",
+    "cmu/sidestep_cmu_83_13"
+   ]
+  },
+  {
+   "group": "G094",
+   "kind": "starts or stops",
+   "label": "medium sidestep to left",
+   "shown": "cmu/sidestep_cmu_83_19",
+   "change": 55,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/sidestep_cmu_83_19"
+   ]
+  },
+  {
+   "group": "G095",
+   "kind": "starts or stops",
+   "label": "medium sidestep to right",
+   "shown": "cmu/sidestep_cmu_83_55",
+   "change": 97,
+   "minutes": 0.18,
+   "takes": [
+    "cmu/sidestep_cmu_83_55",
+    "cmu/sidestep_cmu_83_68"
+   ]
+  },
+  {
+   "group": "G096",
+   "kind": "starts or stops",
+   "label": "large sidestep to right and forward",
+   "shown": "cmu/sidestep_cmu_83_63",
+   "change": 86,
+   "minutes": 0.1,
+   "takes": [
+    "cmu/sidestep_cmu_83_63"
+   ]
+  },
+  {
+   "group": "G097",
+   "kind": "starts or stops",
+   "label": "short sidestep to the right",
+   "shown": "cmu/sidestep_cmu_83_67",
+   "change": 75,
+   "minutes": 0.09,
+   "takes": [
+    "cmu/sidestep_cmu_83_67"
+   ]
+  },
+  {
+   "group": "G098",
+   "kind": "starts or stops",
+   "label": "CasualWalk",
+   "shown": "cmu/walk_cmu_104_19",
+   "change": 41,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/walk_cmu_104_19"
+   ]
+  },
+  {
+   "group": "G099",
+   "kind": "starts or stops",
+   "label": "RegularWalk8",
+   "shown": "cmu/walk_cmu_104_22",
+   "change": 64,
+   "minutes": 0.26,
+   "takes": [
+    "cmu/walk_cmu_104_22"
+   ]
+  },
+  {
+   "group": "G100",
+   "kind": "starts or stops",
+   "label": "RegularWalkRightAngleTurns",
+   "shown": "cmu/walk_cmu_104_27",
+   "change": 51,
+   "minutes": 0.34,
+   "takes": [
+    "cmu/walk_cmu_104_27"
+   ]
+  },
+  {
+   "group": "G101",
+   "kind": "starts or stops",
+   "label": "SlowWalk",
+   "shown": "cmu/walk_cmu_104_35",
+   "change": 55,
+   "minutes": 0.47,
+   "takes": [
+    "cmu/walk_cmu_104_35",
+    "cmu/walk_cmu_104_36"
+   ]
+  },
+  {
+   "group": "G102",
+   "kind": "starts or stops",
+   "label": "SlowWalkRightAngleTurns",
+   "shown": "cmu/walk_cmu_104_39",
+   "change": 53,
+   "minutes": 0.45,
+   "takes": [
+    "cmu/walk_cmu_104_39"
+   ]
+  },
+  {
+   "group": "G103",
+   "kind": "starts or stops",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_10_04",
+   "change": 27,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/walk_cmu_10_04"
+   ]
+  },
+  {
+   "group": "G104",
+   "kind": "starts or stops",
+   "label": "Walk",
+   "shown": "cmu/walk_cmu_111_35",
+   "change": 341,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/walk_cmu_111_35"
+   ]
+  },
+  {
+   "group": "G105",
+   "kind": "starts or stops",
+   "label": "Walk digital 8",
+   "shown": "cmu/walk_cmu_113_05",
+   "change": 257,
+   "minutes": 0.37,
+   "takes": [
+    "cmu/walk_cmu_113_05"
+   ]
+  },
+  {
+   "group": "G106",
+   "kind": "starts or stops",
+   "label": "Walk figure 8",
+   "shown": "cmu/walk_cmu_113_06",
+   "change": 459,
+   "minutes": 0.28,
+   "takes": [
+    "cmu/walk_cmu_113_06"
+   ]
+  },
+  {
+   "group": "G107",
+   "kind": "starts or stops",
+   "label": "Walk",
+   "shown": "cmu/walk_cmu_113_25",
+   "change": 131,
+   "minutes": 0.1,
+   "takes": [
+    "cmu/walk_cmu_113_25"
+   ]
+  },
+  {
+   "group": "G108",
+   "kind": "starts or stops",
+   "label": "Walk slow",
+   "shown": "cmu/walk_cmu_120_19",
+   "change": 102,
+   "minutes": 1.78,
+   "takes": [
+    "cmu/walk_cmu_120_19"
+   ]
+  },
+  {
+   "group": "G109",
+   "kind": "starts or stops",
+   "label": "Walk",
+   "shown": "cmu/walk_cmu_120_20",
+   "change": 75,
+   "minutes": 1.49,
+   "takes": [
+    "cmu/walk_cmu_120_20"
+   ]
+  },
+  {
+   "group": "G110",
+   "kind": "starts or stops",
+   "label": "Start Walk Left",
+   "shown": "cmu/walk_cmu_131_11",
+   "change": 70,
+   "minutes": 0.16,
+   "takes": [
+    "cmu/walk_cmu_131_11"
+   ]
+  },
+  {
+   "group": "G111",
+   "kind": "starts or stops",
+   "label": "Start Walk Right",
+   "shown": "cmu/walk_cmu_131_12",
+   "change": 142,
+   "minutes": 0.29,
+   "takes": [
+    "cmu/walk_cmu_131_12",
+    "cmu/walk_cmu_131_13"
+   ]
+  },
+  {
+   "group": "G112",
+   "kind": "starts or stops",
+   "label": "Walk Fast",
+   "shown": "cmu/walk_cmu_132_21",
+   "change": 25,
+   "minutes": 0.24,
+   "takes": [
+    "cmu/walk_cmu_132_17",
+    "cmu/walk_cmu_132_18",
+    "cmu/walk_cmu_132_19",
+    "cmu/walk_cmu_132_21",
+    "cmu/walk_cmu_132_22"
+   ]
+  },
+  {
+   "group": "G113",
+   "kind": "starts or stops",
+   "label": "Walk Slow",
+   "shown": "cmu/walk_cmu_132_48",
+   "change": 155,
+   "minutes": 0.82,
+   "takes": [
+    "cmu/walk_cmu_132_45",
+    "cmu/walk_cmu_132_46",
+    "cmu/walk_cmu_132_47",
+    "cmu/walk_cmu_132_48"
+   ]
+  },
+  {
+   "group": "G114",
+   "kind": "starts or stops",
+   "label": "Walk Left",
+   "shown": "cmu/walk_cmu_133_15",
+   "change": 39,
+   "minutes": 0.24,
+   "takes": [
+    "cmu/walk_cmu_133_14",
+    "cmu/walk_cmu_133_15"
+   ]
+  },
+  {
+   "group": "G115",
+   "kind": "starts or stops",
+   "label": "Walk Right",
+   "shown": "cmu/walk_cmu_133_18",
+   "change": 90,
+   "minutes": 0.19,
+   "takes": [
+    "cmu/walk_cmu_133_18",
+    "cmu/walk_cmu_133_19"
+   ]
+  },
+  {
+   "group": "G116",
+   "kind": "starts or stops",
+   "label": "Walk",
+   "shown": "cmu/walk_cmu_133_21",
+   "change": 65,
+   "minutes": 0.23,
+   "takes": [
+    "cmu/walk_cmu_133_21",
+    "cmu/walk_cmu_133_23"
+   ]
+  },
+  {
+   "group": "G117",
+   "kind": "starts or stops",
+   "label": "Normal Walk",
+   "shown": "cmu/walk_cmu_136_20",
+   "change": 62,
+   "minutes": 0.41,
+   "takes": [
+    "cmu/walk_cmu_136_20",
+    "cmu/walk_cmu_136_22",
+    "cmu/walk_cmu_136_24"
+   ]
+  },
+  {
+   "group": "G118",
+   "kind": "starts or stops",
+   "label": "Normal Walk",
+   "shown": "cmu/walk_cmu_137_29",
+   "change": 36,
+   "minutes": 0.16,
+   "takes": [
+    "cmu/walk_cmu_137_29"
+   ]
+  },
+  {
+   "group": "G119",
+   "kind": "starts or stops",
+   "label": "Walking",
+   "shown": "cmu/walk_cmu_144_33",
+   "change": 147,
+   "minutes": 1.35,
+   "takes": [
+    "cmu/walk_cmu_144_33",
+    "cmu/walk_cmu_144_34"
+   ]
+  },
+  {
+   "group": "G120",
+   "kind": "starts or stops",
+   "label": "walk/wander",
+   "shown": "cmu/walk_cmu_15_01",
+   "change": 113,
+   "minutes": 4.83,
+   "takes": [
+    "cmu/walk_cmu_15_01",
+    "cmu/walk_cmu_15_03",
+    "cmu/walk_cmu_15_09",
+    "cmu/walk_cmu_15_14"
+   ]
+  },
+  {
+   "group": "G121",
+   "kind": "starts or stops",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_16_32",
+   "change": 31,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/walk_cmu_16_32"
+   ]
+  },
+  {
+   "group": "G122",
+   "kind": "starts or stops",
+   "label": "slow walk, stop",
+   "shown": "cmu/walk_cmu_16_34",
+   "change": 63,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/walk_cmu_16_34"
+   ]
+  },
+  {
+   "group": "G123",
+   "kind": "starts or stops",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_26_01",
+   "change": 83,
+   "minutes": 0.12,
+   "takes": [
+    "cmu/walk_cmu_26_01"
+   ]
+  },
+  {
+   "group": "G124",
+   "kind": "starts or stops",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_27_01",
+   "change": 117,
+   "minutes": 0.14,
+   "takes": [
+    "cmu/walk_cmu_27_01"
+   ]
+  },
+  {
+   "group": "G125",
+   "kind": "starts or stops",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_29_01",
+   "change": 33,
+   "minutes": 0.18,
+   "takes": [
+    "cmu/walk_cmu_29_01"
+   ]
+  },
+  {
+   "group": "G126",
+   "kind": "starts or stops",
+   "label": "walk forward, turn around, walk back",
+   "shown": "cmu/walk_cmu_36_09",
+   "change": 21,
+   "minutes": 1.66,
+   "takes": [
+    "cmu/walk_cmu_36_02",
+    "cmu/walk_cmu_36_03",
+    "cmu/walk_cmu_36_09"
+   ]
+  },
+  {
+   "group": "G127",
+   "kind": "starts or stops",
+   "label": "navigate - walk forward, backward, on a diagonal",
+   "shown": "cmu/walk_cmu_40_04",
+   "change": 30,
+   "minutes": 3.22,
+   "takes": [
+    "cmu/walk_cmu_40_02",
+    "cmu/walk_cmu_40_03",
+    "cmu/walk_cmu_40_04",
+    "cmu/walk_cmu_40_05"
+   ]
+  },
+  {
+   "group": "G128",
+   "kind": "starts or stops",
+   "label": "navigate - walk forward, backward, on a diagonal",
+   "shown": "cmu/walk_cmu_41_04",
+   "change": 73,
+   "minutes": 2.97,
+   "takes": [
+    "cmu/walk_cmu_41_04",
+    "cmu/walk_cmu_41_05",
+    "cmu/walk_cmu_41_06"
+   ]
+  },
+  {
+   "group": "G129",
+   "kind": "starts or stops",
+   "label": "follow path, walk around obstacles",
+   "shown": "cmu/walk_cmu_54_21",
+   "change": 61,
+   "minutes": 1.59,
+   "takes": [
+    "cmu/walk_cmu_54_20",
+    "cmu/walk_cmu_54_21"
+   ]
+  },
+  {
+   "group": "G130",
+   "kind": "starts or stops",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_55_04",
+   "change": 28,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/walk_cmu_55_04"
+   ]
+  },
+  {
+   "group": "G131",
+   "kind": "starts or stops",
+   "label": "walk forward",
+   "shown": "cmu/walk_cmu_69_01",
+   "change": 38,
+   "minutes": 0.25,
+   "takes": [
+    "cmu/walk_cmu_69_01",
+    "cmu/walk_cmu_69_03",
+    "cmu/walk_cmu_69_04",
+    "cmu/walk_cmu_69_05"
+   ]
+  },
+  {
+   "group": "G132",
+   "kind": "starts or stops",
+   "label": "walk and turn (repeated)",
+   "shown": "cmu/walk_cmu_69_10",
+   "change": 551,
+   "minutes": 2.21,
+   "takes": [
+    "cmu/walk_cmu_69_06",
+    "cmu/walk_cmu_69_10",
+    "cmu/walk_cmu_69_11"
+   ]
+  },
+  {
+   "group": "G133",
+   "kind": "starts or stops",
+   "label": "walk and turn both directions (repeated)",
+   "shown": "cmu/walk_cmu_69_12",
+   "change": 22,
+   "minutes": 0.67,
+   "takes": [
+    "cmu/walk_cmu_69_12"
+   ]
+  },
+  {
+   "group": "G134",
+   "kind": "starts or stops",
+   "label": "walk, turn in place (repeated)",
+   "shown": "cmu/walk_cmu_69_13",
+   "change": 23,
+   "minutes": 1.97,
+   "takes": [
+    "cmu/walk_cmu_69_13",
+    "cmu/walk_cmu_69_14",
+    "cmu/walk_cmu_69_15"
+   ]
+  },
+  {
+   "group": "G135",
+   "kind": "starts or stops",
+   "label": "walking backwards",
+   "shown": "cmu/walk_cmu_76_09",
+   "change": 253,
+   "minutes": 0.22,
+   "takes": [
+    "cmu/walk_cmu_76_09"
+   ]
+  },
+  {
+   "group": "G136",
+   "kind": "starts or stops",
+   "label": "walk",
+   "shown": "cmu/walk_cmu_81_03",
+   "change": 29,
+   "minutes": 0.15,
+   "takes": [
+    "cmu/walk_cmu_81_03"
+   ]
+  },
+  {
+   "group": "G137",
+   "kind": "starts or stops",
+   "label": "walk at a brisk pace",
+   "shown": "cmu/walk_cmu_81_04",
+   "change": 87,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/walk_cmu_81_04"
+   ]
+  },
+  {
+   "group": "G138",
+   "kind": "starts or stops",
+   "label": "walk forward",
+   "shown": "cmu/walk_cmu_81_17",
+   "change": 74,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/walk_cmu_81_17"
+   ]
+  },
+  {
+   "group": "G139",
+   "kind": "starts or stops",
+   "label": "stand still; casual walk forward",
+   "shown": "cmu/walk_cmu_82_08",
+   "change": 277,
+   "minutes": 0.24,
+   "takes": [
+    "cmu/walk_cmu_82_08"
+   ]
+  },
+  {
+   "group": "G140",
+   "kind": "starts or stops",
+   "label": "normal walk forward",
+   "shown": "cmu/walk_cmu_82_11",
+   "change": 28,
+   "minutes": 0.1,
+   "takes": [
+    "cmu/walk_cmu_82_11"
+   ]
+  },
+  {
+   "group": "G141",
+   "kind": "starts or stops",
+   "label": "short step forward",
+   "shown": "cmu/walk_cmu_83_15",
+   "change": 48,
+   "minutes": 0.04,
+   "takes": [
+    "cmu/walk_cmu_83_15"
+   ]
+  },
+  {
+   "group": "G142",
+   "kind": "starts or stops",
+   "label": "medium step forward",
+   "shown": "cmu/walk_cmu_83_44",
+   "change": 78,
+   "minutes": 0.16,
+   "takes": [
+    "cmu/walk_cmu_83_20",
+    "cmu/walk_cmu_83_44"
+   ]
+  },
+  {
+   "group": "G143",
+   "kind": "starts or stops",
+   "label": "large step to left and forward",
+   "shown": "cmu/walk_cmu_83_21",
+   "change": 46,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/walk_cmu_83_21"
+   ]
+  },
+  {
+   "group": "G144",
+   "kind": "starts or stops",
+   "label": "walk forward turn 90 degrees left walk forward",
+   "shown": "cmu/walk_cmu_83_36",
+   "change": 54,
+   "minutes": 0.29,
+   "takes": [
+    "cmu/walk_cmu_83_36",
+    "cmu/walk_cmu_83_38"
+   ]
+  },
+  {
+   "group": "G145",
+   "kind": "starts or stops",
+   "label": "walk forward turn 90 degrees right walk forward",
+   "shown": "cmu/walk_cmu_83_39",
+   "change": 38,
+   "minutes": 0.26,
+   "takes": [
+    "cmu/walk_cmu_83_37",
+    "cmu/walk_cmu_83_39"
+   ]
+  },
+  {
+   "group": "G146",
+   "kind": "starts or stops",
+   "label": "straight walk",
+   "shown": "cmu/walk_cmu_90_22",
+   "change": 46,
+   "minutes": 0.27,
+   "takes": [
+    "cmu/walk_cmu_90_22",
+    "cmu/walk_cmu_90_23"
+   ]
+  },
+  {
+   "group": "G147",
+   "kind": "starts or stops",
+   "label": "Walk digital figure eight",
+   "shown": "cmu/walk_cmu_91_01",
+   "change": 80,
+   "minutes": 0.37,
+   "takes": [
+    "cmu/walk_cmu_91_01"
+   ]
+  },
+  {
+   "group": "G148",
+   "kind": "starts or stops",
+   "label": "WalkStraight",
+   "shown": "cmu/walk_cmu_91_02",
+   "change": 100,
+   "minutes": 0.36,
+   "takes": [
+    "cmu/walk_cmu_91_02",
+    "cmu/walk_cmu_91_36"
+   ]
+  },
+  {
+   "group": "G149",
+   "kind": "starts or stops",
+   "label": "Walk figure eight",
+   "shown": "cmu/walk_cmu_91_03",
+   "change": 91,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/walk_cmu_91_03"
+   ]
+  },
+  {
+   "group": "G150",
+   "kind": "starts or stops",
+   "label": "Walking",
+   "shown": "cmu/walk_cmu_91_04",
+   "change": 75,
+   "minutes": 0.29,
+   "takes": [
+    "cmu/walk_cmu_91_04"
+   ]
+  },
+  {
+   "group": "G151",
+   "kind": "starts or stops",
+   "label": "SlowWalk",
+   "shown": "cmu/walk_cmu_91_10",
+   "change": 102,
+   "minutes": 0.83,
+   "takes": [
+    "cmu/walk_cmu_91_10",
+    "cmu/walk_cmu_91_27"
+   ]
+  },
+  {
+   "group": "G152",
+   "kind": "starts or stops",
+   "label": "QuickWalk",
+   "shown": "cmu/walk_cmu_91_17",
+   "change": 65,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/walk_cmu_91_17"
+   ]
+  },
+  {
+   "group": "G153",
+   "kind": "starts or stops",
+   "label": "CasualQuickWalk",
+   "shown": "cmu/walk_cmu_91_22",
+   "change": 94,
+   "minutes": 0.29,
+   "takes": [
+    "cmu/walk_cmu_91_22"
+   ]
+  },
+  {
+   "group": "G154",
+   "kind": "starts or stops",
+   "label": "NormalWalk",
+   "shown": "cmu/walk_cmu_91_31",
+   "change": 184,
+   "minutes": 0.88,
+   "takes": [
+    "cmu/walk_cmu_91_29",
+    "cmu/walk_cmu_91_31",
+    "cmu/walk_cmu_91_34"
+   ]
+  },
+  {
+   "group": "G155",
+   "kind": "starts or stops",
+   "label": "WalkForward",
+   "shown": "cmu/walk_cmu_91_57",
+   "change": 66,
+   "minutes": 0.16,
+   "takes": [
+    "cmu/walk_cmu_91_57"
+   ]
+  },
+  {
+   "group": "G156",
+   "kind": "starts or stops",
+   "label": "walkFigure8",
+   "shown": "cmu/walk_cmu_91_62",
+   "change": 27,
+   "minutes": 0.24,
+   "takes": [
+    "cmu/walk_cmu_91_62"
+   ]
+  },
+  {
+   "group": "G157",
+   "kind": "starts or stops",
+   "label": "A person walks forward and stops, standing still.",
+   "shown": "kimodo/braking_kimodo_stop_walk_s1",
+   "change": 89,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/braking_kimodo_stop_walk_s1"
+   ]
+  },
+  {
+   "group": "G158",
+   "kind": "starts or stops",
+   "label": "A person walks forward and stops, standing still.",
+   "shown": "kimodo/braking_kimodo_stop_walk_s2",
+   "change": 75,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/braking_kimodo_stop_walk_s2"
+   ]
+  },
+  {
+   "group": "G159",
+   "kind": "starts or stops",
+   "label": "A person walks forward and stops, standing still.",
+   "shown": "kimodo/braking_kimodo_stop_walk_s3",
+   "change": 77,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/braking_kimodo_stop_walk_s3"
+   ]
+  },
+  {
+   "group": "G160",
+   "kind": "backwards or sideways",
+   "label": "Neutral: Normal walking (sideways walk)",
+   "shown": "100style/sidestep_100style_SW_052",
+   "change": 288,
+   "minutes": 1.49,
+   "takes": [
+    "100style/sidestep_100style_SW_052"
+   ]
+  },
+  {
+   "group": "G161",
+   "kind": "backwards or sideways",
+   "label": "Neutral: Normal walking (backwards walk)",
+   "shown": "100style/walk_100style_BW_052",
+   "change": 902,
+   "minutes": 2.18,
+   "takes": [
+    "100style/walk_100style_BW_052"
+   ]
+  },
+  {
+   "group": "G162",
+   "kind": "backwards or sideways",
+   "label": "Female1 B04 Stand To Walk Back",
+   "shown": "accad/walk_accad_female1_b04_standtowalkback",
+   "change": 62,
+   "minutes": 0.12,
+   "takes": [
+    "accad/walk_accad_female1_b04_standtowalkback"
+   ]
+  },
+  {
+   "group": "G163",
+   "kind": "backwards or sideways",
+   "label": "Female1 B05 Walk Backwards",
+   "shown": "accad/walk_accad_female1_b05_walkbackwards",
+   "change": 55,
+   "minutes": 0.19,
+   "takes": [
+    "accad/walk_accad_female1_b05_walkbackwards"
+   ]
+  },
+  {
+   "group": "G164",
+   "kind": "backwards or sideways",
+   "label": "Female1 B06 Walk Backwards To Stand",
+   "shown": "accad/walk_accad_female1_b06_walkbackwardstostand",
+   "change": 33,
+   "minutes": 0.14,
+   "takes": [
+    "accad/walk_accad_female1_b06_walkbackwardstostand"
+   ]
+  },
+  {
+   "group": "G165",
+   "kind": "backwards or sideways",
+   "label": "Female1 B07 Walk Backwards Turn Forwards",
+   "shown": "accad/walk_accad_female1_b07_walkbackwardsturnforwards",
+   "change": null,
+   "minutes": 0.14,
+   "takes": [
+    "accad/walk_accad_female1_b07_walkbackwardsturnforwards"
+   ]
+  },
+  {
+   "group": "G166",
+   "kind": "backwards or sideways",
+   "label": "Female1 B08 Walk Backwards Stop Forwards",
+   "shown": "accad/walk_accad_female1_b08_walkbackwardsstopforwards",
+   "change": 161,
+   "minutes": 0.18,
+   "takes": [
+    "accad/walk_accad_female1_b08_walkbackwardsstopforwards"
+   ]
+  },
+  {
+   "group": "G167",
+   "kind": "backwards or sideways",
+   "label": "Male1 B8 Walk Back To Forward",
+   "shown": "accad/walk_accad_male1_b8_walkbacktoforward",
+   "change": 177,
+   "minutes": 0.21,
+   "takes": [
+    "accad/walk_accad_male1_b8_walkbacktoforward"
+   ]
+  },
+  {
+   "group": "G168",
+   "kind": "backwards or sideways",
+   "label": "Male2 B4 Stand To Walk Backwards",
+   "shown": "accad/walk_accad_male2_b4_standtowalkbackwards",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "accad/walk_accad_male2_b4_standtowalkbackwards"
+   ]
+  },
+  {
+   "group": "G169",
+   "kind": "backwards or sideways",
+   "label": "Male2 B5 Walk Backwards",
+   "shown": "accad/walk_accad_male2_b5_walkbackwards",
+   "change": null,
+   "minutes": 0.11,
+   "takes": [
+    "accad/walk_accad_male2_b5_walkbackwards"
+   ]
+  },
+  {
+   "group": "G170",
+   "kind": "backwards or sideways",
+   "label": "Male2 B6 Walk Backwards To Stand",
+   "shown": "accad/walk_accad_male2_b6_walkbackwardstostand",
+   "change": 147,
+   "minutes": 0.1,
+   "takes": [
+    "accad/walk_accad_male2_b6_walkbackwardstostand"
+   ]
+  },
+  {
+   "group": "G171",
+   "kind": "backwards or sideways",
+   "label": "Male2 B7 Walk Backwards Turn Forward",
+   "shown": "accad/walk_accad_male2_b7_walkbackwardsturnforward",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "accad/walk_accad_male2_b7_walkbackwardsturnforward"
+   ]
+  },
+  {
+   "group": "G172",
+   "kind": "backwards or sideways",
+   "label": "Male2 B8 Walk Backwards Stop Forward",
+   "shown": "accad/walk_accad_male2_b8_walkbackwardsstopforward",
+   "change": null,
+   "minutes": 0.11,
+   "takes": [
+    "accad/walk_accad_male2_b8_walkbackwardsstopforward"
+   ]
+  },
+  {
+   "group": "G173",
+   "kind": "backwards or sideways",
+   "label": "Walk sideways",
+   "shown": "cmu/sidestep_cmu_113_18",
+   "change": 27,
+   "minutes": 0.3,
+   "takes": [
+    "cmu/sidestep_cmu_113_18"
+   ]
+  },
+  {
+   "group": "G174",
+   "kind": "backwards or sideways",
+   "label": "walk sideways and turn (repeated)",
+   "shown": "cmu/sidestep_cmu_69_44",
+   "change": 37,
+   "minutes": 4.37,
+   "takes": [
+    "cmu/sidestep_cmu_69_42",
+    "cmu/sidestep_cmu_69_43",
+    "cmu/sidestep_cmu_69_44",
+    "cmu/sidestep_cmu_69_45",
+    "cmu/sidestep_cmu_69_46",
+    "cmu/sidestep_cmu_69_47"
+   ]
+  },
+  {
+   "group": "G175",
+   "kind": "backwards or sideways",
+   "label": "walk sideways and turn (opposite direction)",
+   "shown": "cmu/sidestep_cmu_69_49",
+   "change": 131,
+   "minutes": 2.04,
+   "takes": [
+    "cmu/sidestep_cmu_69_48",
+    "cmu/sidestep_cmu_69_49",
+    "cmu/sidestep_cmu_69_56",
+    "cmu/sidestep_cmu_69_57",
+    "cmu/sidestep_cmu_69_58",
+    "cmu/sidestep_cmu_69_62",
+    "cmu/sidestep_cmu_69_63",
+    "cmu/sidestep_cmu_69_64"
+   ]
+  },
+  {
+   "group": "G176",
+   "kind": "backwards or sideways",
+   "label": "walk sideways and backwards",
+   "shown": "cmu/sidestep_cmu_69_50",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/sidestep_cmu_69_50"
+   ]
+  },
+  {
+   "group": "G177",
+   "kind": "backwards or sideways",
+   "label": "walk sideways and turn",
+   "shown": "cmu/sidestep_cmu_69_59",
+   "change": null,
+   "minutes": 0.36,
+   "takes": [
+    "cmu/sidestep_cmu_69_59",
+    "cmu/sidestep_cmu_69_65",
+    "cmu/sidestep_cmu_69_66",
+    "cmu/sidestep_cmu_69_67"
+   ]
+  },
+  {
+   "group": "G178",
+   "kind": "backwards or sideways",
+   "label": "Walk backwards",
+   "shown": "cmu/walk_cmu_113_01",
+   "change": 27,
+   "minutes": 0.12,
+   "takes": [
+    "cmu/walk_cmu_113_01"
+   ]
+  },
+  {
+   "group": "G179",
+   "kind": "backwards or sideways",
+   "label": "Walk sideway",
+   "shown": "cmu/walk_cmu_113_17",
+   "change": 21,
+   "minutes": 0.26,
+   "takes": [
+    "cmu/walk_cmu_113_17"
+   ]
+  },
+  {
+   "group": "G180",
+   "kind": "backwards or sideways",
+   "label": "Start Walk Left",
+   "shown": "cmu/walk_cmu_131_10",
+   "change": 97,
+   "minutes": 0.56,
+   "takes": [
+    "cmu/walk_cmu_131_09",
+    "cmu/walk_cmu_131_10"
+   ]
+  },
+  {
+   "group": "G181",
+   "kind": "backwards or sideways",
+   "label": "Start Walk Right",
+   "shown": "cmu/walk_cmu_131_14",
+   "change": 95,
+   "minutes": 0.27,
+   "takes": [
+    "cmu/walk_cmu_131_14"
+   ]
+  },
+  {
+   "group": "G182",
+   "kind": "backwards or sideways",
+   "label": "Walk Backwards",
+   "shown": "cmu/walk_cmu_132_13",
+   "change": 36,
+   "minutes": 1.32,
+   "takes": [
+    "cmu/walk_cmu_132_13"
+   ]
+  },
+  {
+   "group": "G183",
+   "kind": "backwards or sideways",
+   "label": "Normal Walk Backwards",
+   "shown": "cmu/walk_cmu_136_25",
+   "change": 57,
+   "minutes": 0.45,
+   "takes": [
+    "cmu/walk_cmu_136_25",
+    "cmu/walk_cmu_136_26"
+   ]
+  },
+  {
+   "group": "G184",
+   "kind": "backwards or sideways",
+   "label": "Walk Backwards",
+   "shown": "cmu/walk_cmu_141_31",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/walk_cmu_141_31"
+   ]
+  },
+  {
+   "group": "G185",
+   "kind": "backwards or sideways",
+   "label": "Walk Backwards",
+   "shown": "cmu/walk_cmu_143_39",
+   "change": 25,
+   "minutes": 0.15,
+   "takes": [
+    "cmu/walk_cmu_143_39"
+   ]
+  },
+  {
+   "group": "G186",
+   "kind": "backwards or sideways",
+   "label": "navigate around obstacles",
+   "shown": "cmu/walk_cmu_35_27",
+   "change": 196,
+   "minutes": 1.35,
+   "takes": [
+    "cmu/walk_cmu_35_27"
+   ]
+  },
+  {
+   "group": "G187",
+   "kind": "backwards or sideways",
+   "label": "walk backwards and turn",
+   "shown": "cmu/walk_cmu_69_53",
+   "change": null,
+   "minutes": 2.84,
+   "takes": [
+    "cmu/walk_cmu_69_34",
+    "cmu/walk_cmu_69_35",
+    "cmu/walk_cmu_69_36",
+    "cmu/walk_cmu_69_37",
+    "cmu/walk_cmu_69_51",
+    "cmu/walk_cmu_69_52",
+    "cmu/walk_cmu_69_53",
+    "cmu/walk_cmu_69_54",
+    "cmu/walk_cmu_69_55"
+   ]
+  },
+  {
+   "group": "G188",
+   "kind": "backwards or sideways",
+   "label": "walk backwards and turn (repeated)",
+   "shown": "cmu/walk_cmu_69_38",
+   "change": 121,
+   "minutes": 0.68,
+   "takes": [
+    "cmu/walk_cmu_69_38"
+   ]
+  },
+  {
+   "group": "G189",
+   "kind": "backwards or sideways",
+   "label": "walk backward, turn in place",
+   "shown": "cmu/walk_cmu_69_41",
+   "change": 30,
+   "minutes": 1.92,
+   "takes": [
+    "cmu/walk_cmu_69_39",
+    "cmu/walk_cmu_69_40",
+    "cmu/walk_cmu_69_41"
+   ]
+  },
+  {
+   "group": "G190",
+   "kind": "backwards or sideways",
+   "label": "A person side steps to the right, then back to the left.",
+   "shown": "kimodo/side_step_kimodo_side_step_s1",
+   "change": 76,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/side_step_kimodo_side_step_s1"
+   ]
+  }
+ ]
+}

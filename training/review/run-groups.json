@@ -1,0 +1,1046 @@
+{
+ "note": "roadmap 153000, from ac_train.walkgroups --type run: reject a group by its number on the review video",
+ "too_short": [
+  "accad/run_accad_female1_c03_run",
+  "accad/run_accad_male1_c03_run",
+  "accad/run_accad_male1_c15_runturnright45",
+  "accad/run_accad_male2_c12_runturnleft45",
+  "accad/sprint_accad_ericrun",
+  "cmu/run_cmu_02_03",
+  "cmu/run_cmu_09_01",
+  "cmu/run_cmu_09_02",
+  "cmu/run_cmu_09_03",
+  "cmu/run_cmu_09_04",
+  "cmu/run_cmu_09_05",
+  "cmu/run_cmu_09_06",
+  "cmu/run_cmu_09_07",
+  "cmu/run_cmu_09_08",
+  "cmu/run_cmu_09_09",
+  "cmu/run_cmu_09_10",
+  "cmu/run_cmu_09_11",
+  "cmu/run_cmu_127_06",
+  "cmu/run_cmu_127_07",
+  "cmu/run_cmu_127_08",
+  "cmu/run_cmu_127_09",
+  "cmu/run_cmu_127_10",
+  "cmu/run_cmu_127_11",
+  "cmu/run_cmu_127_12",
+  "cmu/run_cmu_127_13",
+  "cmu/run_cmu_127_14",
+  "cmu/run_cmu_127_15",
+  "cmu/run_cmu_127_33",
+  "cmu/run_cmu_127_34",
+  "cmu/run_cmu_127_36",
+  "cmu/run_cmu_128_02",
+  "cmu/run_cmu_128_03",
+  "cmu/run_cmu_128_04",
+  "cmu/run_cmu_128_05",
+  "cmu/run_cmu_128_06",
+  "cmu/run_cmu_128_09",
+  "cmu/run_cmu_128_10",
+  "cmu/run_cmu_141_01",
+  "cmu/run_cmu_143_02",
+  "cmu/run_cmu_16_35",
+  "cmu/run_cmu_16_36",
+  "cmu/run_cmu_16_37",
+  "cmu/run_cmu_16_38",
+  "cmu/run_cmu_16_39",
+  "cmu/run_cmu_16_40",
+  "cmu/run_cmu_16_41",
+  "cmu/run_cmu_16_42",
+  "cmu/run_cmu_16_43",
+  "cmu/run_cmu_16_44",
+  "cmu/run_cmu_16_45",
+  "cmu/run_cmu_16_46",
+  "cmu/run_cmu_16_48",
+  "cmu/run_cmu_16_49",
+  "cmu/run_cmu_16_50",
+  "cmu/run_cmu_16_51",
+  "cmu/run_cmu_16_52",
+  "cmu/run_cmu_16_53",
+  "cmu/run_cmu_16_54",
+  "cmu/run_cmu_16_55",
+  "cmu/run_cmu_16_56",
+  "cmu/run_cmu_35_17",
+  "cmu/run_cmu_35_18",
+  "cmu/run_cmu_35_19",
+  "cmu/run_cmu_35_20",
+  "cmu/run_cmu_35_21",
+  "cmu/run_cmu_35_22",
+  "cmu/run_cmu_35_23",
+  "cmu/run_cmu_35_24",
+  "cmu/run_cmu_35_25",
+  "cmu/run_cmu_35_26",
+  "cmu/run_cmu_75_05",
+  "cmu/run_cmu_78_06",
+  "cmu/run_cmu_78_07",
+  "cmu/run_cmu_78_08",
+  "cmu/run_cmu_78_09",
+  "cmu/run_cmu_78_10"
+ ],
+ "flagged": [
+  {
+   "take": "addbiomechanics/run_addbiomechanics_fregly2012_3gc_sc_trunksway4_segment_0",
+   "why": "trunksway"
+  },
+  {
+   "take": "addbiomechanics/run_addbiomechanics_fregly2012_3gc_sc_trunksway5_segment_0",
+   "why": "trunksway"
+  },
+  {
+   "take": "addbiomechanics/run_addbiomechanics_fregly2012_3gc_sc_trunksway6_segment_0",
+   "why": "trunksway"
+  },
+  {
+   "take": "addbiomechanics/run_addbiomechanics_fregly2012_3gc_sc_trunksway7_segment_0",
+   "why": "trunksway"
+  },
+  {
+   "take": "cmu/run_cmu_127_23",
+   "why": "Dive"
+  },
+  {
+   "take": "cmu/run_cmu_127_24",
+   "why": "Dive"
+  },
+  {
+   "take": "cmu/run_cmu_128_11",
+   "why": "Dive"
+  },
+  {
+   "take": "cmu/run_cmu_18_13",
+   "why": "scramble"
+  },
+  {
+   "take": "cmu/run_cmu_18_14",
+   "why": "scramble"
+  },
+  {
+   "take": "cmu/run_cmu_19_13",
+   "why": "scramble"
+  },
+  {
+   "take": "cmu/run_cmu_19_14",
+   "why": "scramble"
+  },
+  {
+   "take": "kimodo/acrobat_kimodo_dive_roll_s1",
+   "why": "dives"
+  },
+  {
+   "take": "kimodo/acrobat_kimodo_dive_roll_s2",
+   "why": "dives"
+  },
+  {
+   "take": "kimodo/acrobat_kimodo_dive_roll_s3",
+   "why": "dives"
+  }
+ ],
+ "groups": [
+  {
+   "group": "R001",
+   "kind": "steady run",
+   "label": "Neutral: Normal walking (forwards run)",
+   "shown": "100style/run_100style_FR_052",
+   "change": null,
+   "minutes": 1.08,
+   "takes": [
+    "100style/run_100style_FR_052"
+   ]
+  },
+  {
+   "group": "R002",
+   "kind": "steady run",
+   "label": "Neutral: Normal walking (sideways run)",
+   "shown": "100style/run_100style_SR_052",
+   "change": null,
+   "minutes": 0.76,
+   "takes": [
+    "100style/run_100style_SR_052"
+   ]
+  },
+  {
+   "group": "R003",
+   "kind": "steady run",
+   "label": "Female1 C04 Run To Walk1",
+   "shown": "accad/run_accad_female1_c04_runtowalk1",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "accad/run_accad_female1_c04_runtowalk1"
+   ]
+  },
+  {
+   "group": "R004",
+   "kind": "steady run",
+   "label": "Female1 C07 Run Backwards",
+   "shown": "accad/run_accad_female1_c07_runbackwards",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "accad/run_accad_female1_c07_runbackwards"
+   ]
+  },
+  {
+   "group": "R005",
+   "kind": "steady run",
+   "label": "Female1 C09 Run Backwards Turn Run Forward",
+   "shown": "accad/run_accad_female1_c09_runbackwardsturnrunforward",
+   "change": null,
+   "minutes": 0.03,
+   "takes": [
+    "accad/run_accad_female1_c09_runbackwardsturnrunforward"
+   ]
+  },
+  {
+   "group": "R006",
+   "kind": "steady run",
+   "label": "Female1 C10 Run Backwards Stop Run Forward",
+   "shown": "accad/run_accad_female1_c10_runbackwardsstoprunforward",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "accad/run_accad_female1_c10_runbackwardsstoprunforward"
+   ]
+  },
+  {
+   "group": "R007",
+   "kind": "steady run",
+   "label": "Female1 C13 Run Turn Left135",
+   "shown": "accad/run_accad_female1_c13_runturnleft135",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "accad/run_accad_female1_c11_runturnleft90",
+    "accad/run_accad_female1_c12_runturnleft45",
+    "accad/run_accad_female1_c13_runturnleft135"
+   ]
+  },
+  {
+   "group": "R008",
+   "kind": "steady run",
+   "label": "Female1 C15 Run Turn Right45",
+   "shown": "accad/run_accad_female1_c15_runturnright45",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "accad/run_accad_female1_c15_runturnright45",
+    "accad/run_accad_female1_c16_runturnright135"
+   ]
+  },
+  {
+   "group": "R009",
+   "kind": "steady run",
+   "label": "Female1 C17 Run Turn Around",
+   "shown": "accad/run_accad_female1_c17_runturnaround",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "accad/run_accad_female1_c17_runturnaround"
+   ]
+  },
+  {
+   "group": "R010",
+   "kind": "steady run",
+   "label": "Female1 C18 Run Change Direction",
+   "shown": "accad/run_accad_female1_c18_runchangedirection",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "accad/run_accad_female1_c18_runchangedirection"
+   ]
+  },
+  {
+   "group": "R011",
+   "kind": "steady run",
+   "label": "Male1 C04 Run To Walk",
+   "shown": "accad/run_accad_male1_c04_runtowalk",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "accad/run_accad_male1_c04_runtowalk"
+   ]
+  },
+  {
+   "group": "R012",
+   "kind": "steady run",
+   "label": "Male1 C05 Walk To Run",
+   "shown": "accad/run_accad_male1_c05_walktorun",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "accad/run_accad_male1_c05_walktorun"
+   ]
+  },
+  {
+   "group": "R013",
+   "kind": "steady run",
+   "label": "Male1 C07 Run Back",
+   "shown": "accad/run_accad_male1_c07_runback",
+   "change": null,
+   "minutes": 0.04,
+   "takes": [
+    "accad/run_accad_male1_c07_runback"
+   ]
+  },
+  {
+   "group": "R014",
+   "kind": "steady run",
+   "label": "Male1 C09 Run Back Turn Run Forward",
+   "shown": "accad/run_accad_male1_c09_runbackturnrunforward",
+   "change": null,
+   "minutes": 0.03,
+   "takes": [
+    "accad/run_accad_male1_c09_runbackturnrunforward"
+   ]
+  },
+  {
+   "group": "R015",
+   "kind": "steady run",
+   "label": "Male1 C10 Run Back Stop Run Forward",
+   "shown": "accad/run_accad_male1_c10_runbackstoprunforward",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "accad/run_accad_male1_c10_runbackstoprunforward"
+   ]
+  },
+  {
+   "group": "R016",
+   "kind": "steady run",
+   "label": "Male1 C11 Run Turn Left90",
+   "shown": "accad/run_accad_male1_c11_runturnleft90",
+   "change": null,
+   "minutes": 0.11,
+   "takes": [
+    "accad/run_accad_male1_c11_runturnleft90",
+    "accad/run_accad_male1_c12_runturnleft45",
+    "accad/run_accad_male1_c13_runturnleft135"
+   ]
+  },
+  {
+   "group": "R017",
+   "kind": "steady run",
+   "label": "Male1 C14 Run Turn Right90",
+   "shown": "accad/run_accad_male1_c14_runturnright90",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "accad/run_accad_male1_c14_runturnright90",
+    "accad/run_accad_male1_c16_runturnright135"
+   ]
+  },
+  {
+   "group": "R018",
+   "kind": "steady run",
+   "label": "Male1 C17 Run Turn Around",
+   "shown": "accad/run_accad_male1_c17_runturnaround",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "accad/run_accad_male1_c17_runturnaround"
+   ]
+  },
+  {
+   "group": "R019",
+   "kind": "steady run",
+   "label": "Male1 C18 Run Turn Change Direction",
+   "shown": "accad/run_accad_male1_c18_runturnchangedirection",
+   "change": null,
+   "minutes": 0.04,
+   "takes": [
+    "accad/run_accad_male1_c18_runturnchangedirection"
+   ]
+  },
+  {
+   "group": "R020",
+   "kind": "steady run",
+   "label": "Male2 C10 Run Backwards Stop Run Forward",
+   "shown": "accad/run_accad_male2_c10_runbackwardsstoprunforward",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "accad/run_accad_male2_c10_runbackwardsstoprunforward"
+   ]
+  },
+  {
+   "group": "R021",
+   "kind": "steady run",
+   "label": "Male2 C11 Run Turn Left90",
+   "shown": "accad/run_accad_male2_c11_runturnleft90",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "accad/run_accad_male2_c11_runturnleft90",
+    "accad/run_accad_male2_c13_runturnleft135"
+   ]
+  },
+  {
+   "group": "R022",
+   "kind": "steady run",
+   "label": "Male2 C14 Run Turn Right90",
+   "shown": "accad/run_accad_male2_c14_runturnright90",
+   "change": null,
+   "minutes": 0.12,
+   "takes": [
+    "accad/run_accad_male2_c14_runturnright90",
+    "accad/run_accad_male2_c15_runturnright45",
+    "accad/run_accad_male2_c16_runturnright135"
+   ]
+  },
+  {
+   "group": "R023",
+   "kind": "steady run",
+   "label": "Male2 C16 Run Turn Around",
+   "shown": "accad/run_accad_male2_c16_runturnaround",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "accad/run_accad_male2_c16_runturnaround"
+   ]
+  },
+  {
+   "group": "R024",
+   "kind": "steady run",
+   "label": "Male2 C17 Run Change Direction",
+   "shown": "accad/run_accad_male2_c17_runchangedirection",
+   "change": null,
+   "minutes": 0.04,
+   "takes": [
+    "accad/run_accad_male2_c17_runchangedirection"
+   ]
+  },
+  {
+   "group": "R025",
+   "kind": "steady run",
+   "label": "Male2 C2 Run To Stand",
+   "shown": "accad/run_accad_male2_c2_runtostand",
+   "change": null,
+   "minutes": 0.04,
+   "takes": [
+    "accad/run_accad_male2_c2_runtostand"
+   ]
+  },
+  {
+   "group": "R026",
+   "kind": "steady run",
+   "label": "Male2 C3 Run",
+   "shown": "accad/run_accad_male2_c3_run",
+   "change": null,
+   "minutes": 0.03,
+   "takes": [
+    "accad/run_accad_male2_c3_run"
+   ]
+  },
+  {
+   "group": "R027",
+   "kind": "steady run",
+   "label": "Male2 C4 Run To Walk",
+   "shown": "accad/run_accad_male2_c4_runtowalk",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "accad/run_accad_male2_c4_runtowalk"
+   ]
+  },
+  {
+   "group": "R028",
+   "kind": "steady run",
+   "label": "Male2 C5 Walk To Run",
+   "shown": "accad/run_accad_male2_c5_walktorun",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "accad/run_accad_male2_c5_walktorun"
+   ]
+  },
+  {
+   "group": "R029",
+   "kind": "steady run",
+   "label": "Male2 C7 Run Backwards",
+   "shown": "accad/run_accad_male2_c7_runbackwards",
+   "change": null,
+   "minutes": 0.04,
+   "takes": [
+    "accad/run_accad_male2_c7_runbackwards"
+   ]
+  },
+  {
+   "group": "R030",
+   "kind": "steady run",
+   "label": "Male2 C9 Run Backwards Turn Run Forward",
+   "shown": "accad/run_accad_male2_c9_runbackwardsturnrunforward",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "accad/run_accad_male2_c9_runbackwardsturnrunforward"
+   ]
+  },
+  {
+   "group": "R031",
+   "kind": "steady run",
+   "label": "Run",
+   "shown": "cmu/run_cmu_111_24",
+   "change": null,
+   "minutes": 0.12,
+   "takes": [
+    "cmu/run_cmu_111_24"
+   ]
+  },
+  {
+   "group": "R032",
+   "kind": "steady run",
+   "label": "Run to Quick Stop",
+   "shown": "cmu/run_cmu_127_05",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/run_cmu_127_05"
+   ]
+  },
+  {
+   "group": "R033",
+   "kind": "steady run",
+   "label": "Run Turn Right",
+   "shown": "cmu/run_cmu_127_16",
+   "change": null,
+   "minutes": 0.04,
+   "takes": [
+    "cmu/run_cmu_127_16"
+   ]
+  },
+  {
+   "group": "R034",
+   "kind": "steady run",
+   "label": "Run Quick Stop Run",
+   "shown": "cmu/run_cmu_127_20",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/run_cmu_127_20"
+   ]
+  },
+  {
+   "group": "R035",
+   "kind": "steady run",
+   "label": "Run Duck Underneath",
+   "shown": "cmu/run_cmu_127_30",
+   "change": null,
+   "minutes": 0.03,
+   "takes": [
+    "cmu/run_cmu_127_30"
+   ]
+  },
+  {
+   "group": "R036",
+   "kind": "steady run",
+   "label": "Run Over",
+   "shown": "cmu/run_cmu_127_35",
+   "change": null,
+   "minutes": 0.03,
+   "takes": [
+    "cmu/run_cmu_127_35"
+   ]
+  },
+  {
+   "group": "R037",
+   "kind": "steady run",
+   "label": "run/jog, sudden stop",
+   "shown": "cmu/run_cmu_16_57",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/run_cmu_16_08",
+    "cmu/run_cmu_16_57"
+   ]
+  },
+  {
+   "group": "R038",
+   "kind": "steady run",
+   "label": "run around in a circle",
+   "shown": "cmu/run_cmu_38_03",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "cmu/run_cmu_38_03"
+   ]
+  },
+  {
+   "group": "R039",
+   "kind": "steady run",
+   "label": "A person jogs forward at an easy pace.",
+   "shown": "kimodo/run_kimodo_run_jog_s1",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/run_kimodo_run_jog_s1"
+   ]
+  },
+  {
+   "group": "R040",
+   "kind": "steady run",
+   "label": "A person jogs forward at an easy pace.",
+   "shown": "kimodo/run_kimodo_run_jog_s2",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/run_kimodo_run_jog_s2"
+   ]
+  },
+  {
+   "group": "R041",
+   "kind": "steady run",
+   "label": "A person jogs forward at an easy pace.",
+   "shown": "kimodo/run_kimodo_run_jog_s3",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/run_kimodo_run_jog_s3"
+   ]
+  },
+  {
+   "group": "R042",
+   "kind": "steady run",
+   "label": "A person sprints forward as fast as they can.",
+   "shown": "kimodo/sprint_kimodo_sprint_s3",
+   "change": null,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/sprint_kimodo_sprint_s3"
+   ]
+  },
+  {
+   "group": "R043",
+   "kind": "steady run",
+   "label": "A person walks forward, then speeds up into a run.",
+   "shown": "kimodo/transitions_between_kimodo_transition_walk_to_run_s2",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/transitions_between_kimodo_transition_walk_to_run_s2"
+   ]
+  },
+  {
+   "group": "R044",
+   "kind": "steady run",
+   "label": "A person walks forward, then speeds up into a run.",
+   "shown": "kimodo/transitions_between_kimodo_transition_walk_to_run_s3",
+   "change": null,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/transitions_between_kimodo_transition_walk_to_run_s3"
+   ]
+  },
+  {
+   "group": "R045",
+   "kind": "starts or stops",
+   "label": "Neutral: Normal walking (backwards run)",
+   "shown": "100style/run_100style_BR_052",
+   "change": 2197,
+   "minutes": 1.43,
+   "takes": [
+    "100style/run_100style_BR_052"
+   ]
+  },
+  {
+   "group": "R046",
+   "kind": "starts or stops",
+   "label": "Female1 C02 Run To Stand",
+   "shown": "accad/run_accad_female1_c02_runtostand",
+   "change": 52,
+   "minutes": 0.08,
+   "takes": [
+    "accad/run_accad_female1_c02_runtostand"
+   ]
+  },
+  {
+   "group": "R047",
+   "kind": "starts or stops",
+   "label": "Female1 C05 Walk To Run",
+   "shown": "accad/run_accad_female1_c05_walktorun",
+   "change": 40,
+   "minutes": 0.09,
+   "takes": [
+    "accad/run_accad_female1_c05_walktorun"
+   ]
+  },
+  {
+   "group": "R048",
+   "kind": "starts or stops",
+   "label": "Female1 C06 Stand To Run Backwards",
+   "shown": "accad/run_accad_female1_c06_standtorunbackwards",
+   "change": 126,
+   "minutes": 0.12,
+   "takes": [
+    "accad/run_accad_female1_c06_standtorunbackwards"
+   ]
+  },
+  {
+   "group": "R049",
+   "kind": "starts or stops",
+   "label": "Female1 C08 Run Backwards To Stand",
+   "shown": "accad/run_accad_female1_c08_runbackwardstostand",
+   "change": 87,
+   "minutes": 0.07,
+   "takes": [
+    "accad/run_accad_female1_c08_runbackwardstostand"
+   ]
+  },
+  {
+   "group": "R050",
+   "kind": "starts or stops",
+   "label": "Female1 C14 Run Turn Right90",
+   "shown": "accad/run_accad_female1_c14_runturnright90",
+   "change": 33,
+   "minutes": 0.07,
+   "takes": [
+    "accad/run_accad_female1_c14_runturnright90"
+   ]
+  },
+  {
+   "group": "R051",
+   "kind": "starts or stops",
+   "label": "Male1 B16 Walk Trun Change",
+   "shown": "accad/run_accad_male1_b16_walktrunchange",
+   "change": 22,
+   "minutes": 0.17,
+   "takes": [
+    "accad/run_accad_male1_b16_walktrunchange"
+   ]
+  },
+  {
+   "group": "R052",
+   "kind": "starts or stops",
+   "label": "Male1 C01 Stand To Run",
+   "shown": "accad/run_accad_male1_c01_standtorun",
+   "change": 39,
+   "minutes": 0.06,
+   "takes": [
+    "accad/run_accad_male1_c01_standtorun"
+   ]
+  },
+  {
+   "group": "R053",
+   "kind": "starts or stops",
+   "label": "Male1 C02 Run To Stand",
+   "shown": "accad/run_accad_male1_c02_runtostand",
+   "change": 76,
+   "minutes": 0.06,
+   "takes": [
+    "accad/run_accad_male1_c02_runtostand"
+   ]
+  },
+  {
+   "group": "R054",
+   "kind": "starts or stops",
+   "label": "Male1 C06 Stand To Run Back",
+   "shown": "accad/run_accad_male1_c06_standtorunback",
+   "change": 25,
+   "minutes": 0.12,
+   "takes": [
+    "accad/run_accad_male1_c06_standtorunback"
+   ]
+  },
+  {
+   "group": "R055",
+   "kind": "starts or stops",
+   "label": "Male1 C08 Run Back To Stand",
+   "shown": "accad/run_accad_male1_c08_runbacktostand",
+   "change": 79,
+   "minutes": 0.09,
+   "takes": [
+    "accad/run_accad_male1_c08_runbacktostand"
+   ]
+  },
+  {
+   "group": "R056",
+   "kind": "starts or stops",
+   "label": "Male2 C1 Stand To Run",
+   "shown": "accad/run_accad_male2_c1_standtorun",
+   "change": 57,
+   "minutes": 0.06,
+   "takes": [
+    "accad/run_accad_male2_c1_standtorun"
+   ]
+  },
+  {
+   "group": "R057",
+   "kind": "starts or stops",
+   "label": "Male2 C6 Stand To Run Backwards",
+   "shown": "accad/run_accad_male2_c6_standtorunbackwards",
+   "change": 97,
+   "minutes": 0.09,
+   "takes": [
+    "accad/run_accad_male2_c6_standtorunbackwards"
+   ]
+  },
+  {
+   "group": "R058",
+   "kind": "starts or stops",
+   "label": "Male2 C8 Run Backwards To Stand",
+   "shown": "accad/run_accad_male2_c8_runbackwardstostand",
+   "change": 69,
+   "minutes": 0.05,
+   "takes": [
+    "accad/run_accad_male2_c8_runbackwardstostand"
+   ]
+  },
+  {
+   "group": "R059",
+   "kind": "starts or stops",
+   "label": "StartRun",
+   "shown": "cmu/run_cmu_104_55",
+   "change": 50,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/run_cmu_104_55"
+   ]
+  },
+  {
+   "group": "R060",
+   "kind": "starts or stops",
+   "label": "RunStop",
+   "shown": "cmu/run_cmu_104_56",
+   "change": 53,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/run_cmu_104_56",
+    "cmu/run_cmu_104_57"
+   ]
+  },
+  {
+   "group": "R061",
+   "kind": "starts or stops",
+   "label": "Run",
+   "shown": "cmu/run_cmu_111_23",
+   "change": 254,
+   "minutes": 0.16,
+   "takes": [
+    "cmu/run_cmu_111_23"
+   ]
+  },
+  {
+   "group": "R062",
+   "kind": "starts or stops",
+   "label": "Run",
+   "shown": "cmu/run_cmu_113_07",
+   "change": 108,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/run_cmu_113_07"
+   ]
+  },
+  {
+   "group": "R063",
+   "kind": "starts or stops",
+   "label": "Run",
+   "shown": "cmu/run_cmu_127_03",
+   "change": 37,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/run_cmu_127_03"
+   ]
+  },
+  {
+   "group": "R064",
+   "kind": "starts or stops",
+   "label": "Walk to Run",
+   "shown": "cmu/run_cmu_127_04",
+   "change": 50,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/run_cmu_127_04"
+   ]
+  },
+  {
+   "group": "R065",
+   "kind": "starts or stops",
+   "label": "Run Stop Run",
+   "shown": "cmu/run_cmu_127_17",
+   "change": 34,
+   "minutes": 0.1,
+   "takes": [
+    "cmu/run_cmu_127_17",
+    "cmu/run_cmu_127_18"
+   ]
+  },
+  {
+   "group": "R066",
+   "kind": "starts or stops",
+   "label": "Run Quick Stop Run",
+   "shown": "cmu/run_cmu_127_19",
+   "change": 48,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/run_cmu_127_19"
+   ]
+  },
+  {
+   "group": "R067",
+   "kind": "starts or stops",
+   "label": "Run Duck Underneath",
+   "shown": "cmu/run_cmu_127_37",
+   "change": 25,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/run_cmu_127_37"
+   ]
+  },
+  {
+   "group": "R068",
+   "kind": "starts or stops",
+   "label": "Run Stop Run",
+   "shown": "cmu/run_cmu_128_07",
+   "change": 28,
+   "minutes": 0.1,
+   "takes": [
+    "cmu/run_cmu_128_07",
+    "cmu/run_cmu_128_08"
+   ]
+  },
+  {
+   "group": "R069",
+   "kind": "starts or stops",
+   "label": "Start to Run",
+   "shown": "cmu/run_cmu_143_03",
+   "change": 29,
+   "minutes": 0.03,
+   "takes": [
+    "cmu/run_cmu_143_03"
+   ]
+  },
+  {
+   "group": "R070",
+   "kind": "starts or stops",
+   "label": "Run Figure 8",
+   "shown": "cmu/run_cmu_143_04",
+   "change": 37,
+   "minutes": 0.15,
+   "takes": [
+    "cmu/run_cmu_143_04"
+   ]
+  },
+  {
+   "group": "R071",
+   "kind": "starts or stops",
+   "label": "Run",
+   "shown": "cmu/run_cmu_143_42",
+   "change": 26,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/run_cmu_143_42"
+   ]
+  },
+  {
+   "group": "R072",
+   "kind": "starts or stops",
+   "label": "careful run",
+   "shown": "cmu/run_cmu_77_10",
+   "change": 38,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/run_cmu_77_10",
+    "cmu/run_cmu_77_11"
+   ]
+  },
+  {
+   "group": "R073",
+   "kind": "starts or stops",
+   "label": "careful run in circle",
+   "shown": "cmu/run_cmu_77_12",
+   "change": 24,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/run_cmu_77_12"
+   ]
+  },
+  {
+   "group": "R074",
+   "kind": "starts or stops",
+   "label": "careful run in figure eight",
+   "shown": "cmu/run_cmu_77_13",
+   "change": 24,
+   "minutes": 0.19,
+   "takes": [
+    "cmu/run_cmu_77_13"
+   ]
+  },
+  {
+   "group": "R075",
+   "kind": "starts or stops",
+   "label": "walk around, sit, stand up, and running",
+   "shown": "cmu/run_cmu_86_10",
+   "change": 496,
+   "minutes": 1.05,
+   "takes": [
+    "cmu/run_cmu_86_10"
+   ]
+  },
+  {
+   "group": "R076",
+   "kind": "starts or stops",
+   "label": "A person runs forward and comes to a stop.",
+   "shown": "kimodo/braking_kimodo_transition_run_to_stop_s1",
+   "change": 74,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/braking_kimodo_transition_run_to_stop_s1"
+   ]
+  },
+  {
+   "group": "R077",
+   "kind": "starts or stops",
+   "label": "A person runs forward and comes to a stop.",
+   "shown": "kimodo/braking_kimodo_transition_run_to_stop_s2",
+   "change": 70,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/braking_kimodo_transition_run_to_stop_s2"
+   ]
+  },
+  {
+   "group": "R078",
+   "kind": "starts or stops",
+   "label": "A person runs forward and comes to a stop.",
+   "shown": "kimodo/braking_kimodo_transition_run_to_stop_s3",
+   "change": 80,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/braking_kimodo_transition_run_to_stop_s3"
+   ]
+  },
+  {
+   "group": "R079",
+   "kind": "starts or stops",
+   "label": "A person sprints forward as fast as they can.",
+   "shown": "kimodo/sprint_kimodo_sprint_s1",
+   "change": 40,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/sprint_kimodo_sprint_s1"
+   ]
+  },
+  {
+   "group": "R080",
+   "kind": "starts or stops",
+   "label": "A person sprints forward as fast as they can.",
+   "shown": "kimodo/sprint_kimodo_sprint_s2",
+   "change": 38,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/sprint_kimodo_sprint_s2"
+   ]
+  },
+  {
+   "group": "R081",
+   "kind": "starts or stops",
+   "label": "A person walks forward, then speeds up into a run.",
+   "shown": "kimodo/transitions_between_kimodo_transition_walk_to_run_s1",
+   "change": 22,
+   "minutes": 0.08,
+   "takes": [
+    "kimodo/transitions_between_kimodo_transition_walk_to_run_s1"
+   ]
+  }
+ ]
+}

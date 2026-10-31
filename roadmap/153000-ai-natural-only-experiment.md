@@ -121,3 +121,54 @@ which runs, in order, with one log (`training/data/models/overnight-2026-10-30.l
 
 About 3.5 hours. Nothing is exported; the 140000 and 142000 runs the script held before go in a
 later night (134500). Side-by-side videos for the owner come after the run.
+
+## Walk review cut down (2026-10-31)
+
+The owner found `walk.mp4` too long at 77 minutes, with limps and zombies in it. `ac_train/walkgroups.py`
+(tests in `training/tests/test_walkgroups.py`) sorts the 1,687 walks using `ac_train/gaitcheck.py`:
+
+| Walks | Takes | Minutes | What happens |
+|---|---|---|---|
+| Too short to train (under `WINDOW`, 56 frames) | 951 | 18 | out: training never read them, though the table above counts them |
+| Flagged by description or motion | 329 | 62 | out without a review |
+| Steady walk | 209 | 17 | reviewed in 67 groups |
+| Starts or stops in the take | 140 | 43 | reviewed in 92 groups, shown around the first change |
+| Backwards or sideways | 58 | 22 | reviewed in 31 groups |
+
+Starts and stops stay because they are the fills between standing and walking. The ACCAD performers
+stay apart: Female1, Male1 and Male2 recorded the same script, and only ACCAD says who is who.
+
+The gait check's motion measures catch 20 of 28 clearly odd 100STYLE walks (Stiff 0 of 3, DragLeftLeg
+and DragRightLeg 1 of 3 each) and flag 0 of 3 Neutral, so the review is still needed. Each group shows
+its most unusual take, 3 s for a steady walk and 4 s otherwise; the rest of a long take isn't seen.
+
+Review video: `target/shots/2026-10-31/walk-review/walk-review.mp4` (10.5 min, 1x, a chapter a group),
+with `walk-review.index.csv`. Physics off, fixed three-quarter camera.
+
+The owner reviewed it and rejected nothing (2026-10-31), so `review/natural-takes.json`, which the
+overnight script reads, now has these walks: walk 79.3 train minutes, all types 124.8. Rejects would go
+in with `uv run python -m ac_train.walkgroups apply --reject G003,G017`.
+
+A one-off step check of the 407 kept walks (not in the repo; each foot's swings while the hips move,
+first 60 s of a take): the 209 steady takes have a median 1.76 steps/s, 1.11 m/s, and left and right
+alternate. 354 pass; 53 in 38 groups don't, and all are still in. 30 have under 1.5 s of movement,
+many of them single steps or sidesteps (ACCAD G069-G076, CMU subject 83). 19 don't alternate, which
+sidesteps can't be judged on: 100STYLE's Neutral sideways walk fails too. Three step fast for a walk,
+G035, G062 and G184. The test can't tell a limp or a sneak from a normal walk.
+
+## Idle, run and jump review (2026-10-31)
+
+The same tool with `--type idle`, `run` or `jump`, without the gait check, whose measures read a walk.
+These types are short of minutes, so only descriptions naming a character or a stunt
+(`walkgroups.STYLED`: `Drunk Wait`, dive rolls, flips) are out without a review. A group shows its longest take.
+
+| Video (`target/shots/2026-10-31/`) | Length | Clips | Reviewed takes | Reviewed min | Too short | Styled |
+|---|---|---|---|---|---|---|
+| `idle-review/idle-review.mp4` | 2.1 min | 33 | 59 | 10.7 | 8 | 11 |
+| `run-review/run-review.mp4` | 4.2 min | 81 | 95 | 10.1 | 76 | 14 |
+| `jump-review/jump-review.mp4` | 3.5 min | 75 | 178 | 16.1 | 65 | 7 |
+
+Each has a chapter a group and an `index.csv`. Physics off, fixed three-quarter camera. Jump clips are
+3 s around the highest point, so a take with several jumps shows one. `natural-takes.json` still has
+these types as they were until the owner has reviewed: `uv run python -m ac_train.walkgroups --type run
+apply --reject R012` takes out the too short, the styled and the rejected.

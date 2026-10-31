@@ -1,0 +1,1030 @@
+{
+ "note": "roadmap 153000, from ac_train.walkgroups --type jump: reject a group by its number on the review video",
+ "too_short": [
+  "addbiomechanics/jump_addbiomechanics_han2023_s002_split1_20220520_balletsmalljump_1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_han2023_s002_split1_20220520_balletsmalljump_2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_han2023_s003_split1_20220523_balletsmalljump_4_segment_1",
+  "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject10_dj1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject10_dj2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject10_dj3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject10_djasym1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject10_djasym3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject11_dj1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject11_dj4_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject11_dj5_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject11_djasym3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject11_djasym5_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject3_dj1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject3_djasym2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject3_djasym4_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject4_dj1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject4_dj2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject4_dj3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject4_djasym1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject4_djasym2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject4_djasym3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject5_dj1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject5_dj2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject5_dj3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject5_djasym1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject5_djasym2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject5_djasym3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject6_dj1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject6_dj2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject6_dj3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject6_djasym2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject7_dj2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject7_dj3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject7_dj4_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject7_djasym1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject7_djasym2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject7_djasym3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject8_dj1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject8_dj2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject8_dj3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject8_djasym1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject8_djasym2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject8_djasym3_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject9_dj1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject9_djasym1_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject9_djasym2_segment_1",
+  "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject9_djasym3_segment_1",
+  "cmu/jump_cmu_127_28",
+  "cmu/jump_cmu_141_04",
+  "cmu/jump_cmu_141_05",
+  "cmu/jump_cmu_143_05",
+  "cmu/jump_cmu_143_06",
+  "cmu/jump_cmu_143_07",
+  "cmu/jump_cmu_49_05",
+  "cmu/jump_cmu_75_01",
+  "cmu/jump_cmu_75_02",
+  "cmu/jump_cmu_75_03",
+  "cmu/jump_cmu_75_10",
+  "cmu/jump_cmu_75_11",
+  "cmu/jump_cmu_83_57",
+  "cmu/jump_cmu_91_40",
+  "cmu/jump_cmu_91_45"
+ ],
+ "flagged": [
+  {
+   "take": "cmu/jump_cmu_142_20",
+   "why": "Singing"
+  },
+  {
+   "take": "cmu/jump_cmu_142_21",
+   "why": "Singing"
+  },
+  {
+   "take": "cmu/jump_cmu_79_10",
+   "why": "chopping"
+  },
+  {
+   "take": "cmu/jump_cmu_80_02",
+   "why": "chopping"
+  },
+  {
+   "take": "cmu/jump_cmu_80_71",
+   "why": "chopping"
+  },
+  {
+   "take": "kimodo/acrobat_kimodo_front_flip_s1",
+   "why": "flip"
+  },
+  {
+   "take": "kimodo/acrobat_kimodo_handspring_s1",
+   "why": "handspring"
+  }
+ ],
+ "groups": [
+  {
+   "group": "J001",
+   "kind": "jump",
+   "label": "Female1 B17 Walk To Hop To Walk1",
+   "shown": "accad/jump_accad_female1_b17_walktohoptowalk1",
+   "change": 96,
+   "minutes": 0.1,
+   "takes": [
+    "accad/jump_accad_female1_b17_walktohoptowalk1"
+   ]
+  },
+  {
+   "group": "J002",
+   "kind": "jump",
+   "label": "Female1 B18 Walk To Leap To Walk",
+   "shown": "accad/jump_accad_female1_b18_walktoleaptowalk",
+   "change": 88,
+   "minutes": 0.1,
+   "takes": [
+    "accad/jump_accad_female1_b18_walktoleaptowalk"
+   ]
+  },
+  {
+   "group": "J003",
+   "kind": "jump",
+   "label": "Female1 C19 Run To Hop To Walk",
+   "shown": "accad/jump_accad_female1_c19_runtohoptowalk",
+   "change": 40,
+   "minutes": 0.07,
+   "takes": [
+    "accad/jump_accad_female1_c19_runtohoptowalk"
+   ]
+  },
+  {
+   "group": "J004",
+   "kind": "jump",
+   "label": "Female1 C20 Run To Jump To Walk",
+   "shown": "accad/jump_accad_female1_c20_runtojumptowalk",
+   "change": 45,
+   "minutes": 0.07,
+   "takes": [
+    "accad/jump_accad_female1_c20_runtojumptowalk"
+   ]
+  },
+  {
+   "group": "J005",
+   "kind": "jump",
+   "label": "Male1 B17 Walk2 Hop2 Walk",
+   "shown": "accad/jump_accad_male1_b17_walk2hop2walk",
+   "change": 105,
+   "minutes": 0.1,
+   "takes": [
+    "accad/jump_accad_male1_b17_walk2hop2walk"
+   ]
+  },
+  {
+   "group": "J006",
+   "kind": "jump",
+   "label": "Male1 B18 Walk2 Leap2 Walk",
+   "shown": "accad/jump_accad_male1_b18_walk2leap2walk",
+   "change": 115,
+   "minutes": 0.11,
+   "takes": [
+    "accad/jump_accad_male1_b18_walk2leap2walk"
+   ]
+  },
+  {
+   "group": "J007",
+   "kind": "jump",
+   "label": "Male1 C19 Run2 Hop2 Walk",
+   "shown": "accad/jump_accad_male1_c19_run2hop2walk",
+   "change": 21,
+   "minutes": 0.06,
+   "takes": [
+    "accad/jump_accad_male1_c19_run2hop2walk"
+   ]
+  },
+  {
+   "group": "J008",
+   "kind": "jump",
+   "label": "Male1 C20 Run2 Jump2 Walk",
+   "shown": "accad/jump_accad_male1_c20_run2jump2walk",
+   "change": 39,
+   "minutes": 0.06,
+   "takes": [
+    "accad/jump_accad_male1_c20_run2jump2walk"
+   ]
+  },
+  {
+   "group": "J009",
+   "kind": "jump",
+   "label": "Male2 B17 Walk To Hop To Walk",
+   "shown": "accad/jump_accad_male2_b17_walktohoptowalk",
+   "change": 60,
+   "minutes": 0.06,
+   "takes": [
+    "accad/jump_accad_male2_b17_walktohoptowalk"
+   ]
+  },
+  {
+   "group": "J010",
+   "kind": "jump",
+   "label": "Male2 B18 Walk To Leap To Walk",
+   "shown": "accad/jump_accad_male2_b18_walktoleaptowalk",
+   "change": 81,
+   "minutes": 0.07,
+   "takes": [
+    "accad/jump_accad_male2_b18_walktoleaptowalk"
+   ]
+  },
+  {
+   "group": "J011",
+   "kind": "jump",
+   "label": "Male2 C18 Run To Hop To Walk",
+   "shown": "accad/jump_accad_male2_c18_runtohoptowalk",
+   "change": 28,
+   "minutes": 0.07,
+   "takes": [
+    "accad/jump_accad_male2_c18_runtohoptowalk"
+   ]
+  },
+  {
+   "group": "J012",
+   "kind": "jump",
+   "label": "Male2 C19 Run To Jump To Walk",
+   "shown": "accad/jump_accad_male2_c19_runtojumptowalk",
+   "change": 22,
+   "minutes": 0.04,
+   "takes": [
+    "accad/jump_accad_male2_c19_runtojumptowalk"
+   ]
+  },
+  {
+   "group": "J013",
+   "kind": "jump",
+   "label": "han2023 s001_split1: 20220513 balletsmalljump 2 segment 0",
+   "shown": "addbiomechanics/jump_addbiomechanics_han2023_s001_split1_20220513_balletsmalljump_2_segment_0",
+   "change": 239,
+   "minutes": 1.69,
+   "takes": [
+    "addbiomechanics/jump_addbiomechanics_han2023_s001_split1_20220513_balletsmalljump_2_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s001_split1_20220513_balletsmalljump_2_segment_1",
+    "addbiomechanics/jump_addbiomechanics_han2023_s001_split1_20220513_balletsmalljump_3_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s001_split1_20220513_balletsmalljump_3_segment_1",
+    "addbiomechanics/jump_addbiomechanics_han2023_s001_split1_20220513_balletsmalljump_4_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s001_split1_20220513_balletsmalljump_4_segment_1",
+    "addbiomechanics/jump_addbiomechanics_han2023_s002_split1_20220520_balletsmalljump_1_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s002_split1_20220520_balletsmalljump_2_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s002_split1_20220520_balletsmalljump_3_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s003_split1_20220523_balletsmalljump_4_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_1_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_3_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_4_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s006_split1_20220614_balletsmalljump_2_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s006_split1_20220614_balletsmalljump_3_segment_0"
+   ]
+  },
+  {
+   "group": "J014",
+   "kind": "jump",
+   "label": "han2023 s005_split1: 20220610 balletsmalljump 1 full segment 0",
+   "shown": "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_1_full_segment_0",
+   "change": 213,
+   "minutes": 0.71,
+   "takes": [
+    "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_1_full_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_3_full_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_3_full_segment_1",
+    "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_4_full_segment_0",
+    "addbiomechanics/jump_addbiomechanics_han2023_s005_split1_20220610_balletsmalljump_4_full_segment_1",
+    "addbiomechanics/jump_addbiomechanics_han2023_s006_split1_20220614_balletsmalljump_2_full_segment_0"
+   ]
+  },
+  {
+   "group": "J015",
+   "kind": "jump",
+   "label": "han2023 s006_split1: 20220614 hopping 1 segment 1",
+   "shown": "addbiomechanics/jump_addbiomechanics_han2023_s006_split1_20220614_hopping_1_segment_1",
+   "change": 29,
+   "minutes": 0.08,
+   "takes": [
+    "addbiomechanics/jump_addbiomechanics_han2023_s006_split1_20220614_hopping_1_segment_1"
+   ]
+  },
+  {
+   "group": "J016",
+   "kind": "jump",
+   "label": "uhlrich2023 subject10: DJAsym2 segment 0",
+   "shown": "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject10_djasym2_segment_0",
+   "change": 51,
+   "minutes": 0.11,
+   "takes": [
+    "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject10_djasym2_segment_0",
+    "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject6_djasym1_segment_0",
+    "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject6_djasym3_segment_0"
+   ]
+  },
+  {
+   "group": "J017",
+   "kind": "jump",
+   "label": "uhlrich2023 subject9: DJ2 segment 0",
+   "shown": "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject9_dj2_segment_0",
+   "change": 54,
+   "minutes": 0.08,
+   "takes": [
+    "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject9_dj2_segment_0",
+    "addbiomechanics/jump_addbiomechanics_uhlrich2023_subject9_dj3_segment_0"
+   ]
+  },
+  {
+   "group": "J018",
+   "kind": "jump",
+   "label": "Jump",
+   "shown": "builtin_loops/Jump",
+   "change": 24,
+   "minutes": 0.04,
+   "takes": [
+    "builtin_loops/Jump"
+   ]
+  },
+  {
+   "group": "J019",
+   "kind": "jump",
+   "label": "jump, balance",
+   "shown": "cmu/jump_cmu_02_04",
+   "change": 36,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/jump_cmu_02_04"
+   ]
+  },
+  {
+   "group": "J020",
+   "kind": "jump",
+   "label": "Jump",
+   "shown": "cmu/jump_cmu_118_14",
+   "change": 93,
+   "minutes": 2.71,
+   "takes": [
+    "cmu/jump_cmu_118_01",
+    "cmu/jump_cmu_118_02",
+    "cmu/jump_cmu_118_03",
+    "cmu/jump_cmu_118_04",
+    "cmu/jump_cmu_118_05",
+    "cmu/jump_cmu_118_06",
+    "cmu/jump_cmu_118_07",
+    "cmu/jump_cmu_118_08",
+    "cmu/jump_cmu_118_09",
+    "cmu/jump_cmu_118_10",
+    "cmu/jump_cmu_118_11",
+    "cmu/jump_cmu_118_12",
+    "cmu/jump_cmu_118_13",
+    "cmu/jump_cmu_118_14",
+    "cmu/jump_cmu_118_15",
+    "cmu/jump_cmu_118_16",
+    "cmu/jump_cmu_118_17",
+    "cmu/jump_cmu_118_18",
+    "cmu/jump_cmu_118_19",
+    "cmu/jump_cmu_118_20",
+    "cmu/jump_cmu_118_21",
+    "cmu/jump_cmu_118_22",
+    "cmu/jump_cmu_118_23",
+    "cmu/jump_cmu_118_24",
+    "cmu/jump_cmu_118_25",
+    "cmu/jump_cmu_118_26",
+    "cmu/jump_cmu_118_27",
+    "cmu/jump_cmu_118_28",
+    "cmu/jump_cmu_118_29",
+    "cmu/jump_cmu_118_30"
+   ]
+  },
+  {
+   "group": "J021",
+   "kind": "jump",
+   "label": "2 Foot Jump",
+   "shown": "cmu/jump_cmu_124_11",
+   "change": 53,
+   "minutes": 0.14,
+   "takes": [
+    "cmu/jump_cmu_124_11"
+   ]
+  },
+  {
+   "group": "J022",
+   "kind": "jump",
+   "label": "Run Jump Stop Run",
+   "shown": "cmu/jump_cmu_127_21",
+   "change": 25,
+   "minutes": 0.1,
+   "takes": [
+    "cmu/jump_cmu_127_21",
+    "cmu/jump_cmu_127_22"
+   ]
+  },
+  {
+   "group": "J023",
+   "kind": "jump",
+   "label": "Run Jump Over",
+   "shown": "cmu/jump_cmu_127_25",
+   "change": 24,
+   "minutes": 0.09,
+   "takes": [
+    "cmu/jump_cmu_127_25",
+    "cmu/jump_cmu_127_26",
+    "cmu/jump_cmu_127_27"
+   ]
+  },
+  {
+   "group": "J024",
+   "kind": "jump",
+   "label": "Start Hop Stop",
+   "shown": "cmu/jump_cmu_131_03",
+   "change": 203,
+   "minutes": 0.3,
+   "takes": [
+    "cmu/jump_cmu_131_03",
+    "cmu/jump_cmu_131_04"
+   ]
+  },
+  {
+   "group": "J025",
+   "kind": "jump",
+   "label": "Jump Stop",
+   "shown": "cmu/jump_cmu_131_08",
+   "change": 53,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/jump_cmu_131_07",
+    "cmu/jump_cmu_131_08"
+   ]
+  },
+  {
+   "group": "J026",
+   "kind": "jump",
+   "label": "Hop on left foot",
+   "shown": "cmu/jump_cmu_132_23",
+   "change": 113,
+   "minutes": 0.57,
+   "takes": [
+    "cmu/jump_cmu_132_23",
+    "cmu/jump_cmu_132_24",
+    "cmu/jump_cmu_132_25",
+    "cmu/jump_cmu_132_26",
+    "cmu/jump_cmu_132_27",
+    "cmu/jump_cmu_132_28"
+   ]
+  },
+  {
+   "group": "J027",
+   "kind": "jump",
+   "label": "Walk Jump",
+   "shown": "cmu/jump_cmu_133_03",
+   "change": 192,
+   "minutes": 0.68,
+   "takes": [
+    "cmu/jump_cmu_133_03",
+    "cmu/jump_cmu_133_04",
+    "cmu/jump_cmu_133_05",
+    "cmu/jump_cmu_133_06",
+    "cmu/jump_cmu_133_07"
+   ]
+  },
+  {
+   "group": "J028",
+   "kind": "jump",
+   "label": "Pump Jump",
+   "shown": "cmu/jump_cmu_134_05",
+   "change": 73,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/jump_cmu_134_05"
+   ]
+  },
+  {
+   "group": "J029",
+   "kind": "jump",
+   "label": "jump up to grab, reach for, tiptoe",
+   "shown": "cmu/jump_cmu_13_12",
+   "change": 361,
+   "minutes": 0.81,
+   "takes": [
+    "cmu/jump_cmu_13_10",
+    "cmu/jump_cmu_13_12"
+   ]
+  },
+  {
+   "group": "J030",
+   "kind": "jump",
+   "label": "forward jump",
+   "shown": "cmu/jump_cmu_13_11",
+   "change": 66,
+   "minutes": 0.23,
+   "takes": [
+    "cmu/jump_cmu_13_11",
+    "cmu/jump_cmu_13_13",
+    "cmu/jump_cmu_13_19",
+    "cmu/jump_cmu_13_32"
+   ]
+  },
+  {
+   "group": "J031",
+   "kind": "jump",
+   "label": "jump",
+   "shown": "cmu/jump_cmu_13_42",
+   "change": 54,
+   "minutes": 0.2,
+   "takes": [
+    "cmu/jump_cmu_13_39",
+    "cmu/jump_cmu_13_40",
+    "cmu/jump_cmu_13_41",
+    "cmu/jump_cmu_13_42"
+   ]
+  },
+  {
+   "group": "J032",
+   "kind": "jump",
+   "label": "Hopscotch",
+   "shown": "cmu/jump_cmu_143_31",
+   "change": 73,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/jump_cmu_143_31"
+   ]
+  },
+  {
+   "group": "J033",
+   "kind": "jump",
+   "label": "jump up to grab, reach for, tiptoe",
+   "shown": "cmu/jump_cmu_14_09",
+   "change": 661,
+   "minutes": 1.13,
+   "takes": [
+    "cmu/jump_cmu_14_07",
+    "cmu/jump_cmu_14_08",
+    "cmu/jump_cmu_14_09"
+   ]
+  },
+  {
+   "group": "J034",
+   "kind": "jump",
+   "label": "jump",
+   "shown": "cmu/jump_cmu_16_02",
+   "change": 63,
+   "minutes": 0.12,
+   "takes": [
+    "cmu/jump_cmu_16_01",
+    "cmu/jump_cmu_16_02"
+   ]
+  },
+  {
+   "group": "J035",
+   "kind": "jump",
+   "label": "high jump",
+   "shown": "cmu/jump_cmu_16_03",
+   "change": 54,
+   "minutes": 0.11,
+   "takes": [
+    "cmu/jump_cmu_16_03",
+    "cmu/jump_cmu_16_04"
+   ]
+  },
+  {
+   "group": "J036",
+   "kind": "jump",
+   "label": "forward jump",
+   "shown": "cmu/jump_cmu_16_09",
+   "change": 81,
+   "minutes": 0.29,
+   "takes": [
+    "cmu/jump_cmu_16_05",
+    "cmu/jump_cmu_16_06",
+    "cmu/jump_cmu_16_07",
+    "cmu/jump_cmu_16_09",
+    "cmu/jump_cmu_16_10"
+   ]
+  },
+  {
+   "group": "J037",
+   "kind": "jump",
+   "label": "jump up and down, hop on one foot",
+   "shown": "cmu/jump_cmu_49_02",
+   "change": 157,
+   "minutes": 0.49,
+   "takes": [
+    "cmu/jump_cmu_49_02",
+    "cmu/jump_cmu_49_03"
+   ]
+  },
+  {
+   "group": "J038",
+   "kind": "jump",
+   "label": "run, leap",
+   "shown": "cmu/jump_cmu_49_04",
+   "change": 47,
+   "minutes": 0.04,
+   "takes": [
+    "cmu/jump_cmu_49_04"
+   ]
+  },
+  {
+   "group": "J039",
+   "kind": "jump",
+   "label": "180 jump",
+   "shown": "cmu/jump_cmu_75_06",
+   "change": 45,
+   "minutes": 0.15,
+   "takes": [
+    "cmu/jump_cmu_75_06",
+    "cmu/jump_cmu_75_09"
+   ]
+  },
+  {
+   "group": "J040",
+   "kind": "jump",
+   "label": "angle jumps",
+   "shown": "cmu/jump_cmu_75_07",
+   "change": 240,
+   "minutes": 0.14,
+   "takes": [
+    "cmu/jump_cmu_75_07"
+   ]
+  },
+  {
+   "group": "J041",
+   "kind": "jump",
+   "label": "360 jumps",
+   "shown": "cmu/jump_cmu_75_08",
+   "change": 74,
+   "minutes": 0.14,
+   "takes": [
+    "cmu/jump_cmu_75_08"
+   ]
+  },
+  {
+   "group": "J042",
+   "kind": "jump",
+   "label": "box jump",
+   "shown": "cmu/jump_cmu_75_12",
+   "change": 94,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/jump_cmu_75_12"
+   ]
+  },
+  {
+   "group": "J043",
+   "kind": "jump",
+   "label": "hopscotch",
+   "shown": "cmu/jump_cmu_75_14",
+   "change": 27,
+   "minutes": 0.11,
+   "takes": [
+    "cmu/jump_cmu_75_13",
+    "cmu/jump_cmu_75_14"
+   ]
+  },
+  {
+   "group": "J044",
+   "kind": "jump",
+   "label": "long jumps",
+   "shown": "cmu/jump_cmu_75_15",
+   "change": 37,
+   "minutes": 0.23,
+   "takes": [
+    "cmu/jump_cmu_75_15"
+   ]
+  },
+  {
+   "group": "J045",
+   "kind": "jump",
+   "label": "jump backwards off ledge",
+   "shown": "cmu/jump_cmu_81_13",
+   "change": 29,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/jump_cmu_81_12",
+    "cmu/jump_cmu_81_13"
+   ]
+  },
+  {
+   "group": "J046",
+   "kind": "jump",
+   "label": "Jump off ledge",
+   "shown": "cmu/jump_cmu_82_04",
+   "change": 61,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/jump_cmu_82_04"
+   ]
+  },
+  {
+   "group": "J047",
+   "kind": "jump",
+   "label": "hop forward",
+   "shown": "cmu/jump_cmu_83_40",
+   "change": 92,
+   "minutes": 0.21,
+   "takes": [
+    "cmu/jump_cmu_83_40",
+    "cmu/jump_cmu_83_41",
+    "cmu/jump_cmu_83_45"
+   ]
+  },
+  {
+   "group": "J048",
+   "kind": "jump",
+   "label": "long jump forward",
+   "shown": "cmu/jump_cmu_83_42",
+   "change": 86,
+   "minutes": 0.14,
+   "takes": [
+    "cmu/jump_cmu_83_42",
+    "cmu/jump_cmu_83_43"
+   ]
+  },
+  {
+   "group": "J049",
+   "kind": "jump",
+   "label": "medium hop forward",
+   "shown": "cmu/jump_cmu_83_46",
+   "change": 76,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/jump_cmu_83_46",
+    "cmu/jump_cmu_83_49"
+   ]
+  },
+  {
+   "group": "J050",
+   "kind": "jump",
+   "label": "short hop forward",
+   "shown": "cmu/jump_cmu_83_48",
+   "change": 76,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/jump_cmu_83_48"
+   ]
+  },
+  {
+   "group": "J051",
+   "kind": "jump",
+   "label": "hop turn 90 degrees left in air",
+   "shown": "cmu/jump_cmu_83_51",
+   "change": 84,
+   "minutes": 0.35,
+   "takes": [
+    "cmu/jump_cmu_83_51",
+    "cmu/jump_cmu_83_52",
+    "cmu/jump_cmu_83_53",
+    "cmu/jump_cmu_83_54",
+    "cmu/jump_cmu_83_61"
+   ]
+  },
+  {
+   "group": "J052",
+   "kind": "jump",
+   "label": "hop turn left 270 degrees in air",
+   "shown": "cmu/jump_cmu_83_59",
+   "change": 99,
+   "minutes": 0.32,
+   "takes": [
+    "cmu/jump_cmu_83_56",
+    "cmu/jump_cmu_83_58",
+    "cmu/jump_cmu_83_59",
+    "cmu/jump_cmu_83_60",
+    "cmu/jump_cmu_83_62"
+   ]
+  },
+  {
+   "group": "J053",
+   "kind": "jump",
+   "label": "hop and turn right 360 degrees in air",
+   "shown": "cmu/jump_cmu_83_64",
+   "change": 93,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/jump_cmu_83_64",
+    "cmu/jump_cmu_83_65"
+   ]
+  },
+  {
+   "group": "J054",
+   "kind": "jump",
+   "label": "JumpForward",
+   "shown": "cmu/jump_cmu_91_42",
+   "change": 75,
+   "minutes": 0.19,
+   "takes": [
+    "cmu/jump_cmu_91_39",
+    "cmu/jump_cmu_91_41",
+    "cmu/jump_cmu_91_42"
+   ]
+  },
+  {
+   "group": "J055",
+   "kind": "jump",
+   "label": "JumpSmallForward",
+   "shown": "cmu/jump_cmu_91_44",
+   "change": 51,
+   "minutes": 0.08,
+   "takes": [
+    "cmu/jump_cmu_91_43",
+    "cmu/jump_cmu_91_44"
+   ]
+  },
+  {
+   "group": "J056",
+   "kind": "jump",
+   "label": "Jump Turn",
+   "shown": "cmu/jump_cmu_91_47",
+   "change": 66,
+   "minutes": 0.17,
+   "takes": [
+    "cmu/jump_cmu_91_46",
+    "cmu/jump_cmu_91_47",
+    "cmu/jump_cmu_91_49"
+   ]
+  },
+  {
+   "group": "J057",
+   "kind": "jump",
+   "label": "JumpTurn",
+   "shown": "cmu/jump_cmu_91_50",
+   "change": 117,
+   "minutes": 0.15,
+   "takes": [
+    "cmu/jump_cmu_91_48",
+    "cmu/jump_cmu_91_50"
+   ]
+  },
+  {
+   "group": "J058",
+   "kind": "jump",
+   "label": "FurtherJumpTurn",
+   "shown": "cmu/jump_cmu_91_51",
+   "change": 51,
+   "minutes": 0.06,
+   "takes": [
+    "cmu/jump_cmu_91_51"
+   ]
+  },
+  {
+   "group": "J059",
+   "kind": "jump",
+   "label": "SmallJumpTurn",
+   "shown": "cmu/jump_cmu_91_52",
+   "change": 91,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/jump_cmu_91_52"
+   ]
+  },
+  {
+   "group": "J060",
+   "kind": "jump",
+   "label": "180 degree jump",
+   "shown": "cmu/jump_cmu_91_53",
+   "change": 90,
+   "minutes": 0.07,
+   "takes": [
+    "cmu/jump_cmu_91_53"
+   ]
+  },
+  {
+   "group": "J061",
+   "kind": "jump",
+   "label": "A person crouches, then jumps forward with both feet and lands.",
+   "shown": "kimodo/jump_kimodo_jump_forward_s1",
+   "change": 67,
+   "minutes": 0.05,
+   "takes": [
+    "kimodo/jump_kimodo_jump_forward_s1"
+   ]
+  },
+  {
+   "group": "J062",
+   "kind": "jump",
+   "label": "A person crouches, then jumps forward with both feet and lands.",
+   "shown": "kimodo/jump_kimodo_jump_forward_s2",
+   "change": 1,
+   "minutes": 0.05,
+   "takes": [
+    "kimodo/jump_kimodo_jump_forward_s2"
+   ]
+  },
+  {
+   "group": "J063",
+   "kind": "jump",
+   "label": "A person crouches, then jumps forward with both feet and lands.",
+   "shown": "kimodo/jump_kimodo_jump_forward_s3",
+   "change": 58,
+   "minutes": 0.05,
+   "takes": [
+    "kimodo/jump_kimodo_jump_forward_s3"
+   ]
+  },
+  {
+   "group": "J064",
+   "kind": "jump",
+   "label": "A person runs forward and leaps over a gap, landing on one foot and continuing to run.",
+   "shown": "kimodo/jump_kimodo_jump_run_s1",
+   "change": 65,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/jump_kimodo_jump_run_s1"
+   ]
+  },
+  {
+   "group": "J065",
+   "kind": "jump",
+   "label": "A person runs forward and leaps over a gap, landing on one foot and continuing to run.",
+   "shown": "kimodo/jump_kimodo_jump_run_s2",
+   "change": 65,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/jump_kimodo_jump_run_s2"
+   ]
+  },
+  {
+   "group": "J066",
+   "kind": "jump",
+   "label": "A person runs forward and leaps over a gap, landing on one foot and continuing to run.",
+   "shown": "kimodo/jump_kimodo_jump_run_s3",
+   "change": 60,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/jump_kimodo_jump_run_s3"
+   ]
+  },
+  {
+   "group": "J067",
+   "kind": "jump",
+   "label": "A person jumps sideways to the left with both feet and lands.",
+   "shown": "kimodo/jump_kimodo_jump_side_s1",
+   "change": 46,
+   "minutes": 0.05,
+   "takes": [
+    "kimodo/jump_kimodo_jump_side_s1"
+   ]
+  },
+  {
+   "group": "J068",
+   "kind": "jump",
+   "label": "A person jumps sideways to the left with both feet and lands.",
+   "shown": "kimodo/jump_kimodo_jump_side_s2",
+   "change": 89,
+   "minutes": 0.05,
+   "takes": [
+    "kimodo/jump_kimodo_jump_side_s2"
+   ]
+  },
+  {
+   "group": "J069",
+   "kind": "jump",
+   "label": "A person jumps sideways to the left with both feet and lands.",
+   "shown": "kimodo/jump_kimodo_jump_side_s3",
+   "change": 89,
+   "minutes": 0.05,
+   "takes": [
+    "kimodo/jump_kimodo_jump_side_s3"
+   ]
+  },
+  {
+   "group": "J070",
+   "kind": "jump",
+   "label": "A person hops forward on their right leg three times.",
+   "shown": "kimodo/leg_jump_kimodo_jump_hop_one_leg_s1",
+   "change": 68,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/leg_jump_kimodo_jump_hop_one_leg_s1"
+   ]
+  },
+  {
+   "group": "J071",
+   "kind": "jump",
+   "label": "A person hops forward on their right leg three times.",
+   "shown": "kimodo/leg_jump_kimodo_jump_hop_one_leg_s2",
+   "change": 34,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/leg_jump_kimodo_jump_hop_one_leg_s2"
+   ]
+  },
+  {
+   "group": "J072",
+   "kind": "jump",
+   "label": "A person hops forward on their right leg three times.",
+   "shown": "kimodo/leg_jump_kimodo_jump_hop_one_leg_s3",
+   "change": 60,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/leg_jump_kimodo_jump_hop_one_leg_s3"
+   ]
+  },
+  {
+   "group": "J073",
+   "kind": "jump",
+   "label": "A person skips forward happily.",
+   "shown": "kimodo/leg_jump_kimodo_jump_skip_s1",
+   "change": 58,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/leg_jump_kimodo_jump_skip_s1"
+   ]
+  },
+  {
+   "group": "J074",
+   "kind": "jump",
+   "label": "A person skips forward happily.",
+   "shown": "kimodo/leg_jump_kimodo_jump_skip_s2",
+   "change": 31,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/leg_jump_kimodo_jump_skip_s2"
+   ]
+  },
+  {
+   "group": "J075",
+   "kind": "jump",
+   "label": "A person skips forward happily.",
+   "shown": "kimodo/leg_jump_kimodo_jump_skip_s3",
+   "change": 107,
+   "minutes": 0.07,
+   "takes": [
+    "kimodo/leg_jump_kimodo_jump_skip_s3"
+   ]
+  }
+ ]
+}
