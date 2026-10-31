@@ -1,0 +1,53 @@
+{
+  "$schema": "./schema.json",
+  "name": "bug-anchors-untagged-after-key-move",
+  "feature": "key.move",
+  "description": "Moving (or copying) a key of yours refills every filled span it touches (edits::refill_touching). For a gap over the model's 45 frames that refill went through the anchor poses from the library (ai-fill-long-gap) but wrote them as ordinary model keys: the tag \"anchor <id> @<frame>\" was only set by ai.fill's own finishing step, so after a key move the timeline showed one band with no anchors in it and the ease no longer went through them. The anchor tags are now set by the refill itself. Setup as ai-fill-long-gap: a standing key on 0 and the built-in walk's frame 8 on 90, filled with two anchors (frames 30 and 60, five bands). key.move 90 to 91 refills 0–91: the anchor frames are worked by hand, the fewest evenly spaced frames keeping every span at or under 30 frames key to key, ceil(91 / 30) = 4 spans, so a + (2 i 91 + 4) / 8 for i = 1..3: 23, 46, 68. The bands must split there: 1–22, 23, 24–45, 46, 47–67, 68, 69–90 (seven bands; before the fix one band 1–90). Which library segment the anchors come from is not pinned here (ai-fill-long-gap checks the match): the split alone shows the tags. Physics is off: this checks the keys.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "ai.settings", "params": { "ai_force": 1, "style": "any" } },
+    { "command": "clip.open", "params": { "id": "Locomotion/Walk" } },
+    { "command": "keys.copy", "params": { "frames": [8] }, "expect": { "copied": 1 } },
+    { "command": "pose.reset" },
+    { "command": "clip.new", "params": { "name": "Moved long gap", "group": "Mine" }, "expect": { "id": "Mine/Moved long gap" } },
+    { "command": "keys.paste", "params": { "at": 90 }, "expect": { "frames": [90] } },
+    { "command": "pose.set_root", "params": { "root": [0, -2.2993044, 0.9027198] } },
+    { "command": "key.set", "expect": { "frame": 90 } },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 90 },
+      "expect": { "anchors": [{ "frame": 30 }, { "frame": 60 }] }
+    },
+    {
+      "command": "editor.state",
+      "expect": {
+        "bands": [
+          { "from": 1, "to": 29 },
+          { "from": 30, "to": 30 },
+          { "from": 31, "to": 59 },
+          { "from": 60, "to": 60 },
+          { "from": 61, "to": 89 }
+        ]
+      }
+    },
+    { "command": "key.move", "params": { "from": 90, "to": 91 }, "expect": { "notes": [] } },
+    {
+      "command": "editor.state",
+      "expect": {
+        "bands": [
+          { "from": 1, "to": 22 },
+          { "from": 23, "to": 23 },
+          { "from": 24, "to": 45 },
+          { "from": 46, "to": 46 },
+          { "from": 47, "to": 67 },
+          { "from": 68, "to": 68 },
+          { "from": 69, "to": 90 }
+        ]
+      }
+    }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": [
+    { "command": "key.move", "params": { "from": 200, "to": 210 } }
+  ]
+}

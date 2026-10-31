@@ -39,6 +39,13 @@ pub trait Filler {
     fn long(&self) -> bool {
         false
     }
+    /// The model tags of the anchor keys a long fill placed inside `a..b` (`(frame, tag)`,
+    /// `crate::anchors::tag`), set by [`refill`] once the frames are written, so a key move or
+    /// copy that refills a long span keeps its anchors marked as the first fill did (the default:
+    /// none).
+    fn anchor_tags(&self, _a: i64, _b: i64) -> Vec<(i64, String)> {
+        Vec::new()
+    }
     /// Several of your keys at once (a model trained with several keys in a window): the frames
     /// `keys[0]+1 .. keys[last]-1`, the keys inside given back as they are. The default refuses.
     fn fill_keys(&self, _clip: &Clip, keys: &[i64]) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
@@ -228,6 +235,15 @@ pub fn refill(clip: &mut Clip, a: i64, b: i64, filler: &dyn Filler, links: &dyn 
         k.source = KeySource::Ai;
         k.model = tag.clone();
         clip.set_key(k)?;
+    }
+    // the anchor poses of a long fill keep their own tag (the timeline's band, the ease through them)
+    for (f, tag) in filler.anchor_tags(a, b) {
+        if let Some(k) = keys_mut(clip)?
+            .iter_mut()
+            .find(|k| k.frame == f && k.source == KeySource::Ai)
+        {
+            k.model = tag;
+        }
     }
     Ok(String::new())
 }

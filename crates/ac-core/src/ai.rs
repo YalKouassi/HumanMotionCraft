@@ -352,6 +352,19 @@ impl Filler for AiFiller {
         self.source.is_some()
     }
 
+    /// The anchors `fill_long` placed in `a..b`, left in place for the fill's finishing step
+    /// ([`AiFiller::placed_of`] takes them).
+    fn anchor_tags(&self, a: i64, b: i64) -> Vec<(i64, String)> {
+        self.placed
+            .lock()
+            .ok()
+            .and_then(|m| {
+                m.get(&(a, b))
+                    .map(|p| p.anchors.iter().map(|an| (an.frame, anchors::tag(an))).collect())
+            })
+            .unwrap_or_default()
+    }
+
     fn fill(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
         if b - a - 1 > self.max_gap() {
             return self.fill_long(clip, a, b);
