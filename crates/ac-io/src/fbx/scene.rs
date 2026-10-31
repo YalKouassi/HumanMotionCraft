@@ -6,7 +6,7 @@
 //! A model's local transform is, as the format defines it,
 //! `T · Roff · Rp · Rpre · R · Rpost⁻¹ · Rp⁻¹ · Soff · Sp · S · Sp⁻¹` (Euler angles in degrees,
 //! the rotation order naming which axis turns first), and its world transform is its parent's
-//! times that. `UpAxis`, `FrontAxis`, `CoordAxis` (with their signs) and `UnitScaleFactor` are
+//! times that, as `InheritType` says ([`World::child`]). `UpAxis`, `FrontAxis`, `CoordAxis` (with their signs) and `UnitScaleFactor` are
 //! read from `GlobalSettings`, never assumed; a file without them is refused.
 
 use std::collections::BTreeMap;
@@ -27,6 +27,8 @@ pub const MAX_KEYS: usize = 10_000_000;
 /// memory, so a long take of a scene with many nodes is refused rather than swapped to death.
 pub const MAX_SAMPLES: usize = 20_000_000;
 /// Frame rates by the `TimeMode` enum; a rate of 0 means the mode does not fix one.
+/// `KeyAttrFlags`: the bit saying a key's interpolation is cubic.
+const CUBIC_FLAG: i64 = 0x8;
 const TIME_MODES: [f64; 19] = [
     0.0, 120.0, 100.0, 60.0, 50.0, 48.0, 30.0, 30.0, 29.97, 29.97, 25.0, 24.0, 1000.0, 23.976, 0.0, 96.0,
     72.0, 59.94, 119.88,
@@ -139,8 +141,8 @@ impl Default for Transform {
 }
 
 impl Transform {
-    /// The local matrix with `t`, `r`, `s` as sampled this frame.
-    fn local(&self, t: Vec3, r: Vec3, s: Vec3) -> Affine {
+    /// The local matrix with `t`, `r`, `s` as sampled this frame, and its rotation part alone.
+    fn local(&self, t: Vec3, r: Vec3, s: Vec3) -> (Affine, Mat3) {
         let (pre, post) = if self.rotation_active {
             (euler(self.pre_rotation, 0), euler(self.post_rotation, 0))
         } else {
@@ -148,7 +150,7 @@ impl Transform {
         };
         let rot = quat::mat3_mul(&pre, &quat::mat3_mul(&euler(r, self.order), &transpose(&post)));
         let neg = |v: Vec3| quat::scale3(v, -1.0);
-        Affine::translation(t)
+        let local = Affine::translation(t)
             .then(&Affine::translation(self.rotation_offset))
             .then(&Affine::translation(self.rotation_pivot))
             .then(&Affine::linear(rot))
@@ -156,8 +158,88 @@ impl Transform {
             .then(&Affine::translation(self.scaling_offset))
             .then(&Affine::translation(self.scaling_pivot))
             .then(&Affine::linear(diag(s)))
-            .then(&Affine::translation(neg(self.scaling_pivot)))
+            .then(&Affine::translation(neg(self.scaling_pivot)));
+        (local, rot)
     }
+}
+
+/// `InheritType`: how a parent's scale reaches its child. The child's position is the parent's
+/// whole matrix times the local position in all three; the matrix handed on differs:
+/// - 0 (the format's default): `Rp · r · Sp · s`, the parent's scale after the child's rotation.
+/// - 1: `Rp · Sp · r · s`, a plain matrix product.
+/// - 2: `Rp · r · (Sp / sp) · s`, leaving out the parent's own local scale `sp`.
+///
+/// They agree when no scale is present, and 0 and 1 agree when the parent's scale is uniform. So
+/// a world transform keeps its rotation and scale apart. A type 1 child of a non-uniform scale
+/// shears, and a shear has no one split: type 1 children below it are still exact, and a type 0
+/// or 2 child is refused.
+#[derive(Debug, Clone, Copy)]
+struct World {
+    a: Affine,
+    rot: Mat3,
+    /// The world scale; `None` once sheared.
+    scale: Option<Vec3>,
+    local_scale: Vec3,
+}
+
+impl World {
+    fn root(local: Affine, rot: Mat3, s: Vec3) -> World {
+        World {
+            a: local,
+            rot,
+            scale: Some(s),
+            local_scale: s,
+        }
+    }
+
+    fn child(&self, local: Affine, rot: Mat3, s: Vec3, inherit: i64, name: &str) -> R<World> {
+        let mul = |a: Vec3, b: Vec3| [a[0] * b[0], a[1] * b[1], a[2] * b[2]];
+        let new_rot = quat::mat3_mul(&self.rot, &rot);
+        let t = quat::add3(self.a.t, quat::mat3_vec(&self.a.m, local.t));
+        // no scale above: all three types are this product, kept free of rounding from the split
+        if self.scale == Some([1.0; 3]) && (inherit != 2 || self.local_scale == [1.0; 3]) {
+            return Ok(World {
+                a: self.a.then(&local),
+                rot: new_rot,
+                scale: Some(s),
+                local_scale: s,
+            });
+        }
+        let (m, scale) = if inherit == 1 {
+            let scale = self.scale.filter(|p| is_uniform(*p)).map(|p| mul(p, s));
+            (quat::mat3_mul(&self.a.m, &local.m), scale)
+        } else {
+            let Some(above) = self.scale else {
+                return Err(format!(
+                    "{name}: its scale inheritance (type {inherit}) sits below a sheared node, a type 1 child of a non-uniform scale; this reader has no one rotation and scale to split it into: bake the scale and export again"
+                ));
+            };
+            let above = if inherit == 2 {
+                let sp = self.local_scale;
+                if sp.contains(&0.0) {
+                    return Err(format!(
+                        "{name}: scale inheritance type 2 under a parent scaled by zero"
+                    ));
+                }
+                [above[0] / sp[0], above[1] / sp[1], above[2] / sp[2]]
+            } else {
+                above
+            };
+            let scale = mul(above, s);
+            (quat::mat3_mul(&new_rot, &diag(scale)), Some(scale))
+        };
+        Ok(World {
+            a: Affine { m, t },
+            rot: new_rot,
+            scale,
+            local_scale: s,
+        })
+    }
+}
+
+fn is_uniform(s: Vec3) -> bool {
+    let tolerance = 1e-9 * s[0].abs().max(s[1].abs()).max(s[2].abs());
+    (s[0] - s[1]).abs() <= tolerance && (s[1] - s[2]).abs() <= tolerance
 }
 
 /// Values of a `Properties70` block by property name.
@@ -215,6 +297,8 @@ fn object_name(raw: &str) -> String {
 struct Curve {
     times: Vec<i64>,
     values: Vec<f64>,
+    /// A key says cubic: this reader draws straight lines all the same, and says so.
+    cubic: bool,
 }
 
 impl Curve {
@@ -411,6 +495,12 @@ pub fn motion(doc: &Document) -> R<Motion> {
             rotation_active: int_of(&p, "RotationActive", 0) != 0 || p.contains_key("PreRotation"),
             inherit: int_of(&p, "InheritType", 0),
         };
+        if !(0..=2).contains(&transform.inherit) {
+            return Err(format!(
+                "model {name}: InheritType {} is not one of the format's three",
+                transform.inherit
+            ));
+        }
         if !(0..=5).contains(&transform.order) {
             notes.push(format!(
                 "{name}: rotation order {} is not one of the six Euler orders; read as ZYX",
@@ -444,6 +534,7 @@ pub fn motion(doc: &Document) -> R<Motion> {
     // animation objects
     let mut stacks: Vec<(i64, String, BTreeMap<String, Vec<Prop>>)> = Vec::new();
     let mut layers: Vec<i64> = Vec::new();
+    let mut layer_nodes: BTreeMap<i64, (String, BTreeMap<String, Vec<Prop>>)> = BTreeMap::new();
     let mut curve_nodes: BTreeMap<i64, [Option<f64>; 3]> = BTreeMap::new();
     let mut curves: BTreeMap<i64, Curve> = BTreeMap::new();
     for n in &objects.children {
@@ -456,6 +547,7 @@ pub fn motion(doc: &Document) -> R<Motion> {
             "AnimationLayer" => {
                 if let Some(id) = n.i64_at(0) {
                     layers.push(id);
+                    layer_nodes.insert(id, (object_name(n.str_at(1).unwrap_or("")), properties(n)));
                 }
             }
             "AnimationCurveNode" => {
@@ -469,11 +561,17 @@ pub fn motion(doc: &Document) -> R<Motion> {
             }
             "AnimationCurve" => {
                 if let Some(id) = n.i64_at(0) {
-                    let times = n
-                        .child("KeyTime")
+                    let times = match n.child("KeyTime").and_then(|k| k.prop(0)) {
+                        None => Vec::new(),
+                        Some(k) => k.as_i64s().ok_or_else(|| {
+                            format!("animation curve {id}: its key times are not whole numbers of ticks")
+                        })?,
+                    };
+                    let cubic = n
+                        .child("KeyAttrFlags")
                         .and_then(|k| k.prop(0))
                         .and_then(Prop::as_i64s)
-                        .unwrap_or_default();
+                        .is_some_and(|flags| flags.iter().any(|f| f & CUBIC_FLAG != 0));
                     let values = n
                         .child("KeyValueFloat")
                         .and_then(|k| k.prop(0))
@@ -498,7 +596,7 @@ pub fn motion(doc: &Document) -> R<Motion> {
                     if values.iter().any(|v| !v.is_finite()) {
                         return Err(format!("animation curve {id}: a key value is not finite"));
                     }
-                    curves.insert(id, Curve { times, values });
+                    curves.insert(id, Curve { times, values, cubic });
                 }
             }
             _ => {}
@@ -507,7 +605,9 @@ pub fn motion(doc: &Document) -> R<Motion> {
 
     // connections
     let mut layer_of_node: BTreeMap<i64, i64> = BTreeMap::new();
-    let mut stack_of_layer: BTreeMap<i64, i64> = BTreeMap::new();
+    // in the file's connection order: that, not where the objects sit, is the layers' order
+    let mut stack_of_layer: Vec<(i64, i64)> = Vec::new();
+    let mut weight_animated: Vec<i64> = Vec::new();
     let mut node_targets: Vec<(i64, i64, String)> = Vec::new(); // curve node -> model, property
     let mut curve_targets: Vec<(i64, i64, String)> = Vec::new(); // curve -> curve node, d|X
     for c in connections.children_named("C") {
@@ -523,14 +623,16 @@ pub fn motion(doc: &Document) -> R<Motion> {
                         m.parent = Some(parent);
                     }
                 } else if layers.contains(&child) && stacks.iter().any(|s| s.0 == parent) {
-                    stack_of_layer.insert(child, parent);
+                    stack_of_layer.push((child, parent));
                 } else if curve_nodes.contains_key(&child) && layers.contains(&parent) {
                     layer_of_node.insert(child, parent);
                 }
             }
             "OP" => {
                 let prop = c.str_at(3).unwrap_or("").to_string();
-                if curve_nodes.contains_key(&child) && by_id.contains_key(&parent) {
+                if curve_nodes.contains_key(&child) && layers.contains(&parent) && prop == "Weight" {
+                    weight_animated.push(parent);
+                } else if curve_nodes.contains_key(&child) && by_id.contains_key(&parent) {
                     node_targets.push((child, parent, prop));
                 } else if curves.contains_key(&child) && curve_nodes.contains_key(&parent) {
                     curve_targets.push((child, parent, prop));
@@ -549,18 +651,25 @@ pub fn motion(doc: &Document) -> R<Motion> {
                     stacks.len()
                 ));
             }
-            let mut of_stack: Vec<i64> = layers
+            let of_stack: Vec<i64> = stack_of_layer
                 .iter()
-                .copied()
-                .filter(|l| stack_of_layer.get(l) == Some(sid))
+                .filter(|(_, s)| s == sid)
+                .map(|(l, _)| *l)
                 .collect();
-            if of_stack.len() > 1 {
-                notes.push(format!(
-                    "take {name:?} has {} animation layers: only the first was read (layers are not blended)",
-                    of_stack.len()
-                ));
+            let plan = LayerPlan {
+                take: name,
+                nodes: &layer_nodes,
+                weight_animated: &weight_animated,
+                layer_of_node: &layer_of_node,
+                node_targets: &node_targets,
+                curve_targets: &curve_targets,
+                curves: &curves,
+                curve_nodes: &curve_nodes,
+            };
+            if let Some(note) = plan.check(&of_stack)? {
+                notes.push(note);
             }
-            (name.clone(), Some(p), of_stack.drain(..).next())
+            (name.clone(), Some(p), of_stack.first().copied())
         }
         None => (String::new(), None, None),
     };
@@ -704,12 +813,25 @@ pub fn motion(doc: &Document) -> R<Motion> {
             "{off_grid} curves have keys between frames: they are read with straight lines between keys"
         ));
     }
-    if models
+    let sparse_cubic = models
         .iter()
-        .any(|m| m.transform.inherit != 0 && m.transform.scaling != [1.0; 3])
-    {
+        .flat_map(|m| [&m.translation, &m.rotation, &m.scaling])
+        .flat_map(|ch| ch.curves.iter().flatten())
+        .filter(|c| {
+            c.cubic
+                && c.times
+                    .windows(2)
+                    .any(|w| (w[1] as f64 - w[0] as f64) > ticks * 1.001)
+        })
+        .count();
+    if sparse_cubic > 0 {
+        notes.push(format!(
+            "{sparse_cubic} curves have cubic keys more than a frame apart: they are read with straight lines between keys, which can differ from the curve; bake every frame to be exact"
+        ));
+    }
+    if mode == 0 {
         notes.push(
-            "a scaled node uses a scale inheritance other than the default: read as the default".into(),
+            "the file leaves TimeMode at its default: the frame rate was read from the keys' spacing".into(),
         );
     }
 
@@ -752,7 +874,7 @@ pub fn motion(doc: &Document) -> R<Motion> {
     // sample
     let to_metres = unit_scale / 100.0;
     let mut positions: Vec<Vec<Vec3>> = Vec::with_capacity(frames);
-    let mut world = vec![Affine::IDENTITY; models.len()];
+    let mut world = vec![World::root(Affine::IDENTITY, MAT3_IDENTITY, [1.0; 3]); models.len()];
     for f in 0..frames {
         let t = start as f64 + f as f64 * ticks;
         for &i in &order {
@@ -760,10 +882,10 @@ pub fn motion(doc: &Document) -> R<Motion> {
             let tr = m.translation.at(t, m.transform.translation);
             let ro = m.rotation.at(t, m.transform.rotation);
             let sc = m.scaling.at(t, m.transform.scaling);
-            let local = m.transform.local(tr, ro, sc);
+            let (local, rot) = m.transform.local(tr, ro, sc);
             let w = match parent_index.get(i).copied().flatten().and_then(|p| world.get(p)) {
-                Some(pw) => pw.then(&local),
-                None => local,
+                Some(pw) => pw.child(local, rot, sc, m.transform.inherit, &m.name)?,
+                None => World::root(local, rot, sc),
             };
             if let Some(slot) = world.get_mut(i) {
                 *slot = w;
@@ -771,7 +893,7 @@ pub fn motion(doc: &Document) -> R<Motion> {
         }
         let row: Vec<Vec3> = world
             .iter()
-            .map(|w| quat::scale3(quat::mat3_vec(&axes, w.t), to_metres))
+            .map(|w| quat::scale3(quat::mat3_vec(&axes, w.a.t), to_metres))
             .collect();
         if row.iter().any(|p| p.iter().any(|x| !x.is_finite())) {
             return Err(format!("frame {f}: a joint position is not finite"));
@@ -794,6 +916,113 @@ pub fn motion(doc: &Document) -> R<Motion> {
         take,
         notes,
     })
+}
+
+/// What says whether a take's extra animation layers change its pose. Layers blend, so a later one
+/// that does anything would move the joints from what the first alone gives, and this reader doesn't
+/// blend them: such a take is refused. A layer that is muted, at weight 0, or additive with nothing
+/// but zero offsets (a scale of 1) changes nothing, and is passed over and said.
+struct LayerPlan<'a> {
+    take: &'a str,
+    nodes: &'a BTreeMap<i64, (String, BTreeMap<String, Vec<Prop>>)>,
+    weight_animated: &'a [i64],
+    layer_of_node: &'a BTreeMap<i64, i64>,
+    node_targets: &'a [(i64, i64, String)],
+    curve_targets: &'a [(i64, i64, String)],
+    curves: &'a BTreeMap<i64, Curve>,
+    curve_nodes: &'a BTreeMap<i64, [Option<f64>; 3]>,
+}
+
+impl LayerPlan<'_> {
+    /// Does `layer`, on top of what is below it, move anything?
+    fn moves_anything(&self, layer: i64) -> bool {
+        let additive = self
+            .nodes
+            .get(&layer)
+            .is_none_or(|(_, p)| int_of(p, "BlendMode", 0) == 0);
+        self.node_targets.iter().any(|(cn, _, prop)| {
+            if self.layer_of_node.get(cn) != Some(&layer)
+                || !matches!(prop.as_str(), "Lcl Translation" | "Lcl Rotation" | "Lcl Scaling")
+            {
+                return false;
+            }
+            if !additive {
+                return true;
+            }
+            let neutral = if prop == "Lcl Scaling" { 1.0 } else { 0.0 };
+            let of_node: Vec<&(i64, i64, String)> =
+                self.curve_targets.iter().filter(|(_, n, _)| n == cn).collect();
+            let curved = of_node
+                .iter()
+                .filter_map(|(c, _, _)| self.curves.get(c))
+                .any(|c| c.values.iter().any(|v| *v != neutral));
+            let default = ["d|X", "d|Y", "d|Z"].iter().enumerate().any(|(k, axis)| {
+                !of_node.iter().any(|(_, _, a)| a == axis)
+                    && self
+                        .curve_nodes
+                        .get(cn)
+                        .and_then(|d| d.get(k).copied().flatten())
+                        .is_some_and(|v| v != neutral)
+            });
+            curved || default
+        })
+    }
+
+    /// Refuse what can't be read from the first layer alone; a note if layers were passed over.
+    fn check(&self, of_stack: &[i64]) -> R<Option<String>> {
+        let take = self.take;
+        let (Some(&base), Some(rest)) = (of_stack.first(), of_stack.get(1..)) else {
+            return Ok(None);
+        };
+        let about = |l: i64| -> (&str, f64, i64, i64, i64) {
+            self.nodes.get(&l).map_or(("", 100.0, 0, 0, 0), |(name, p)| {
+                (
+                    name.as_str(),
+                    float_of(p, "Weight").unwrap_or(100.0),
+                    int_of(p, "Mute", 0),
+                    int_of(p, "Solo", 0),
+                    int_of(p, "BlendMode", 0),
+                )
+            })
+        };
+        let bake = "bake the layers into one and export again";
+        let (base_name, base_weight, base_mute, base_solo, _) = about(base);
+        if base_mute != 0 || base_weight != 100.0 || self.weight_animated.contains(&base) {
+            return Err(format!(
+                "take {take:?}: its first animation layer, {base_name:?}, is muted or not at full weight, and layers are not blended: {bake}"
+            ));
+        }
+        let mut passed = 0;
+        for &l in rest {
+            let (name, weight, mute, solo, blend) = about(l);
+            if solo != 0 && self.moves_anything(l) {
+                return Err(format!(
+                    "take {take:?}: animation layer {name:?} is soloed, and layers are not blended: {bake}"
+                ));
+            }
+            let silent = (base_solo != 0 && solo == 0)
+                || mute != 0
+                || (weight == 0.0 && !self.weight_animated.contains(&l))
+                || !self.moves_anything(l);
+            if !silent {
+                let kind = match blend {
+                    0 => "additive",
+                    1 => "override",
+                    2 => "override passthrough",
+                    _ => "an unknown blend mode",
+                };
+                return Err(format!(
+                    "take {take:?}: animation layer {name:?} ({kind}, weight {weight}) changes the pose, and layers are not blended: {bake}"
+                ));
+            }
+            passed += 1;
+        }
+        Ok((passed > 0).then(|| {
+            format!(
+                "take {take:?}: {passed} more animation layers change nothing (muted, weight 0 or no offset) and were passed over"
+            )
+        }))
+    }
 }
 
 /// The frame rate the keys suggest: the median spacing of the longest curve's keys.
@@ -842,6 +1071,7 @@ mod tests {
         let c = Curve {
             times: vec![0, 10, 20],
             values: vec![1.0, 3.0, 2.0],
+            cubic: false,
         };
         assert_eq!(c.at(-5.0), Some(1.0));
         assert_eq!(c.at(5.0), Some(2.0));
@@ -1045,5 +1275,245 @@ mod tests {
             e.contains("share the id 1000") && e.contains("J0") && e.contains("J1"),
             "{e}"
         );
+    }
+
+    fn model_mut(d: &mut Document, i: usize) -> &mut Node {
+        d.nodes[1]
+            .children
+            .iter_mut()
+            .filter(|n| n.name == "Model")
+            .nth(i)
+            .unwrap()
+    }
+
+    fn set_props(d: &mut Document, i: usize, entries: Vec<Node>) {
+        model_mut(d, i).children.push(p70(entries));
+    }
+
+    fn vec3_p(name: &str, v: Vec3) -> Node {
+        let mut n = p(name, Prop::F64(v[0]));
+        n.props.push(Prop::F64(v[1]));
+        n.props.push(Prop::F64(v[2]));
+        n
+    }
+
+    /// J0 scaled by `scale`; J1 its child, turned 90° about Z, of `inherit`; J2 J1's child, 1 unit
+    /// along J1's X, of type 1. Where J2 lands, in centimetres, on frame 0.
+    fn inherited(scale: Vec3, inherit: i32) -> R<Vec3> {
+        let mut d = scene(3, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        set_props(&mut d, 0, vec![vec3_p("Lcl Scaling", scale)]);
+        set_props(
+            &mut d,
+            1,
+            vec![
+                vec3_p("Lcl Rotation", [0.0, 0.0, 90.0]),
+                p("InheritType", Prop::I32(inherit)),
+            ],
+        );
+        set_props(
+            &mut d,
+            2,
+            vec![
+                vec3_p("Lcl Translation", [1.0, 0.0, 0.0]),
+                p("InheritType", Prop::I32(1)),
+            ],
+        );
+        let conns = &mut d.nodes[2].children;
+        conns.push(c("OO", 1001, 1000, None));
+        conns.push(c("OO", 1002, 1001, None));
+        let m = motion(&d)?;
+        // the file's Y up: the rig's (x, y, z) is the file's (x, -z, y); back to the file's cm
+        let p = m.positions[0][2];
+        Ok([p[0] * 100.0, p[2] * 100.0, -p[1] * 100.0])
+    }
+
+    fn near(a: Vec3, b: Vec3) {
+        for k in 0..3 {
+            assert!((a[k] - b[k]).abs() < 1e-9, "{a:?} against {b:?}");
+        }
+    }
+
+    #[test]
+    fn scale_inheritance_follows_the_format() {
+        // Worked by hand. The turn takes X to Y. With a uniform scale of 2 on J0: types 0 and 1
+        // give J1 the matrix 2·Rz, so J2 is at (0, 2, 0); type 2 leaves J0's own scale out: (0, 1, 0).
+        near(inherited([2.0; 3], 0).unwrap(), [0.0, 2.0, 0.0]);
+        near(inherited([2.0; 3], 1).unwrap(), [0.0, 2.0, 0.0]);
+        near(inherited([2.0; 3], 2).unwrap(), [0.0, 1.0, 0.0]);
+        // A scale of 2 along X alone. Type 0: Rz · diag(2,1,1) takes X to 2X to 2Y: (0, 2, 0).
+        // Type 1: diag(2,1,1) · Rz takes X to Y, which the scale leaves: (0, 1, 0). Type 2: (0, 1, 0).
+        near(inherited([2.0, 1.0, 1.0], 0).unwrap(), [0.0, 2.0, 0.0]);
+        near(inherited([2.0, 1.0, 1.0], 1).unwrap(), [0.0, 1.0, 0.0]);
+        near(inherited([2.0, 1.0, 1.0], 2).unwrap(), [0.0, 1.0, 0.0]);
+        assert!(inherited([1.0; 3], 3).unwrap_err().contains("InheritType 3"));
+    }
+
+    #[test]
+    fn a_type_0_child_below_a_shear_is_refused() {
+        let mut d = scene(3, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        set_props(&mut d, 0, vec![vec3_p("Lcl Scaling", [2.0, 1.0, 1.0])]);
+        set_props(
+            &mut d,
+            1,
+            vec![
+                vec3_p("Lcl Rotation", [0.0, 0.0, 90.0]),
+                p("InheritType", Prop::I32(1)),
+            ],
+        );
+        let conns = &mut d.nodes[2].children;
+        conns.push(c("OO", 1001, 1000, None));
+        conns.push(c("OO", 1002, 1001, None));
+        let e = motion(&d).unwrap_err();
+        assert!(e.contains("J2") && e.contains("sheared"), "{e}");
+    }
+
+    #[test]
+    fn an_animated_scale_is_inherited() {
+        // the curve scales J0's X from 0 by 1 a second; J1 sits 1 cm along it, of the default type:
+        // on frame 10, a third of a second, at 1/3 cm
+        let ticks = (TICKS_PER_SECOND / 30.0) as i64;
+        let mut d = scene(2, 0, 10 * ticks);
+        set_props(&mut d, 1, vec![vec3_p("Lcl Translation", [1.0, 0.0, 0.0])]);
+        let conns = &mut d.nodes[2].children;
+        conns[2] = c("OP", 3, 1000, Some("Lcl Scaling"));
+        conns.push(c("OO", 1001, 1000, None));
+        let m = motion(&d).unwrap();
+        assert!(
+            (m.positions[10][1][0] - 0.01 / 3.0).abs() < 1e-9,
+            "{:?}",
+            m.positions[10][1]
+        );
+    }
+
+    /// `scene` with a second layer, id 5, of the first take, holding a curve node, id 6, on J0's
+    /// rotation with a curve, id 7, of `values`; `layer` is that layer's properties.
+    fn two_layers(values: Vec<f32>, layer: Vec<Node>) -> Document {
+        let mut d = scene(1, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        let objects = &mut d.nodes[1].children;
+        objects.push(object("AnimationLayer", 5, "Upper", "", vec![p70(layer)]));
+        objects.push(object("AnimationCurveNode", 6, "R", "", vec![]));
+        let times = vec![0, TICKS_PER_SECOND as i64];
+        objects.push(object(
+            "AnimationCurve",
+            7,
+            "",
+            "",
+            vec![
+                node("KeyTime", vec![Prop::I64s(times)], vec![]),
+                node("KeyValueFloat", vec![Prop::F32s(values)], vec![]),
+            ],
+        ));
+        let conns = &mut d.nodes[2].children;
+        conns.push(c("OO", 5, 1, None));
+        conns.push(c("OO", 6, 5, None));
+        conns.push(c("OP", 6, 1000, Some("Lcl Rotation")));
+        conns.push(c("OP", 7, 6, Some("d|X")));
+        d
+    }
+
+    #[test]
+    fn a_later_layer_that_moves_anything_is_refused() {
+        let e = motion(&two_layers(vec![0.0, 10.0], vec![])).unwrap_err();
+        assert!(
+            e.contains("\"Upper\"") && e.contains("additive") && e.contains("changes the pose"),
+            "{e}"
+        );
+        // an override layer changes the pose even at zero
+        let e = motion(&two_layers(vec![0.0, 0.0], vec![p("BlendMode", Prop::I32(1))])).unwrap_err();
+        assert!(e.contains("override"), "{e}");
+    }
+
+    #[test]
+    fn a_later_layer_that_moves_nothing_is_passed_over_and_said() {
+        for layer in [vec![p("Mute", Prop::I32(1))], vec![p("Weight", Prop::F64(0.0))]] {
+            let m = motion(&two_layers(vec![0.0, 10.0], layer)).unwrap();
+            assert!(
+                m.notes.iter().any(|n| n.contains("1 more animation layers")),
+                "{:?}",
+                m.notes
+            );
+        }
+        // additive offsets of zero
+        let m = motion(&two_layers(vec![0.0, 0.0], vec![])).unwrap();
+        assert!(m.notes.iter().any(|n| n.contains("passed over")), "{:?}", m.notes);
+    }
+
+    #[test]
+    fn the_first_layer_is_the_first_connected_and_must_be_whole() {
+        // the layer connected first is the base, wherever the objects sit: connect "Upper" first,
+        // and the old base, which moves J0, is the later layer that gets refused
+        let mut d = two_layers(vec![0.0, 10.0], vec![]);
+        let conns = &mut d.nodes[2].children;
+        let upper = conns
+            .iter()
+            .position(|n| n.props.get(1) == Some(&Prop::I64(5)))
+            .unwrap();
+        conns.swap(0, upper);
+        let e = motion(&d).unwrap_err();
+        assert!(e.contains("\"Base\"") && e.contains("changes the pose"), "{e}");
+        // a muted first layer
+        let mut d = scene(1, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        d.nodes[1]
+            .children
+            .iter_mut()
+            .find(|n| n.name == "AnimationLayer")
+            .unwrap()
+            .children
+            .push(p70(vec![p("Mute", Prop::I32(1))]));
+        assert!(motion(&d).unwrap_err().contains("first animation layer"));
+    }
+
+    #[test]
+    fn an_animated_layer_weight_counts_as_moving() {
+        let mut d = two_layers(vec![0.0, 10.0], vec![p("Weight", Prop::F64(0.0))]);
+        d.nodes[1]
+            .children
+            .push(object("AnimationCurveNode", 8, "Weight", "", vec![]));
+        d.nodes[2].children.push(c("OP", 8, 5, Some("Weight")));
+        assert!(motion(&d).unwrap_err().contains("changes the pose"));
+    }
+
+    #[test]
+    fn sparse_cubic_keys_and_a_default_time_mode_are_said() {
+        // the scene's curve has keys a second apart at 30 fps
+        let mut d = scene(1, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        let curve = d.nodes[1]
+            .children
+            .iter_mut()
+            .find(|n| n.name == "AnimationCurve")
+            .unwrap();
+        curve
+            .children
+            .push(node("KeyAttrFlags", vec![Prop::I32s(vec![8])], vec![]));
+        let m = motion(&d).unwrap();
+        assert!(
+            m.notes.iter().any(|n| n.contains("1 curves have cubic keys")),
+            "{:?}",
+            m.notes
+        );
+        for s in d.nodes[0].children[0].children.iter_mut() {
+            if s.str_at(0) == Some("TimeMode") {
+                s.props[4] = Prop::I32(0);
+            }
+        }
+        let m = motion(&d).unwrap();
+        assert_eq!(m.fps_from, "keys");
+        assert!(
+            m.notes.iter().any(|n| n.contains("TimeMode at its default")),
+            "{:?}",
+            m.notes
+        );
+    }
+
+    #[test]
+    fn key_times_that_are_not_whole_ticks_are_refused_in_those_words() {
+        let mut d = scene(1, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        let curve = d.nodes[1]
+            .children
+            .iter_mut()
+            .find(|n| n.name == "AnimationCurve")
+            .unwrap();
+        curve.children[0].props[0] = Prop::F64s(vec![0.5, 1.5]);
+        assert!(motion(&d).unwrap_err().contains("not whole numbers"));
     }
 }
