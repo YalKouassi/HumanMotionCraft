@@ -137,6 +137,11 @@ side (`target/draw_source.py` was a throwaway for the stick figures).
 - Scale inheritance types other than the default and animation layers beyond the first are not
   blended (said in the result).
 
+**Real files (2026-10-31).** The first run on the owner's animated FBX imported 24 of a random 150
+binary files, mostly refusing bone names it doesn't know. Text FBX is also common. The findings and
+the bulk port are in 164000.
+
+<<<<<<< ours
 ## Review (2026-10-31)
 Reviewed `crates/ac-io/src/fbx/{binary,scene,import,commands}.rs`, `crates/ac-core/src/retarget.rs`,
 `crates/ac-io/tests/fbx.rs` and `clip.import` in `crates/ac-io/src/commands.rs` (commits c9d63e2,
@@ -178,3 +183,8 @@ Reviewed `crates/ac-io/src/fbx/{binary,scene,import,commands}.rs`, `crates/ac-co
 - The Result's claims hold (numbers not re-run: no builder in this worktree). "Every count, offset and
   length is checked" was true of each number alone, not of their products, which is what the three caps
   above add.
+=======
+**Real files (2026-10-31).** The first run on the owner's animated FBX imported 24 of a random 150
+binary files, mostly refusing bone names it doesn't know. Text FBX is also common. The findings and
+the bulk port are in 164000.
+>>>>>>> theirs
