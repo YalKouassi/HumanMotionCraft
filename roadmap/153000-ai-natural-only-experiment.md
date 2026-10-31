@@ -185,7 +185,7 @@ all             739      114.3             8.5            11.6             8.0  
 ```
 
 Jump's held-out set fell from 1.1 to 0.2 minutes, so the natural-subset jump row of the acceptance table
-rests on about 12 s of motion; the full evaluation (step 3 of the overnight script) reads every
+rests on about 14 s of motion; the full evaluation (step 3 of the overnight script) reads every
 held-out window and doesn't change.
 
 ## Result (2026-10-31)
@@ -208,7 +208,7 @@ The natural model wins walk and jump and loses run on joint error; idle's foot s
 Foot slide is better in every gap bin from 5 frames up. The run row is mostly a sideways run: 45.5 of the
 50.4 held-out seconds are `100style/run_100style_SR_052`, and the only other take is `cmu/run_cmu_113_07`.
 The natural model trained on no sideways run; the shipped one saw 100STYLE's styled ones. So the row may
-overstate the loss on forward running. The jump row is 15 s of 5 takes; on every held-out window jump is
+overstate the loss on forward running. The jump row is about 14 s of 5 takes; on every held-out window jump is
 42 / 65.5 against 44.1 / 65.5 joint with slide 0.169 against 0.152, so the jump gain isn't firm.
 
 **The cost, every held-out window** (natural / shipped joint mm; interpolation in brackets): sit 98.9 / 69.9
