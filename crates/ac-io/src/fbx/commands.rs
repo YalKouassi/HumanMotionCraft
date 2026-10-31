@@ -66,14 +66,26 @@ pub fn joints_param(p: &P) -> Result<BTreeMap<String, String>, String> {
     Ok(out)
 }
 
-/// Every `.fbx` under `from`, sorted, with its path below `from`.
-fn find(from: &Path) -> Vec<(PathBuf, String)> {
+/// Every `.fbx` under `from`, sorted, with its path below `from`, and the folders that couldn't be
+/// read, with why.
+fn find(from: &Path) -> (Vec<(PathBuf, String)>, Vec<(String, String)>) {
     let mut out = Vec::new();
+    let mut unreadable = Vec::new();
     let mut stack = vec![(from.to_path_buf(), Vec::<String>::new())];
     while let Some((dir, parts)) = stack.pop() {
         let mut files = Vec::new();
         let mut dirs = Vec::new();
-        for e in std::fs::read_dir(&dir).into_iter().flatten().flatten() {
+        let entries = match std::fs::read_dir(&dir) {
+            Ok(entries) => entries,
+            Err(e) => {
+                unreadable.push((
+                    parts.join("/"),
+                    format!("can't read the folder {}: {e}", dir.display()),
+                ));
+                continue;
+            }
+        };
+        for e in entries.flatten() {
             let name = e.file_name().to_string_lossy().to_string();
             match e.file_type() {
                 Ok(t) if t.is_dir() && !name.starts_with('.') && parts.len() < MAX_DEPTH => dirs.push(name),
@@ -92,7 +104,7 @@ fn find(from: &Path) -> Vec<(PathBuf, String)> {
                 .join("/");
             out.push((dir.join(&f), rel));
             if out.len() >= MAX_BATCH {
-                return out;
+                return (out, unreadable);
             }
         }
         for d in dirs.into_iter().rev() {
@@ -101,7 +113,7 @@ fn find(from: &Path) -> Vec<(PathBuf, String)> {
             stack.push((dir.join(&d), sub));
         }
     }
-    out
+    (out, unreadable)
 }
 
 /// A clip's name as part of a file name: what a file name can't hold (a `.meta` is input, and a
@@ -193,9 +205,12 @@ fn import_batch(doc: &mut Document, p: &P) -> Out {
         return Err("give the folder the clips go in (to)".into());
     }
     let joints = joints_param(p)?;
-    let found = find(&from);
+    let (found, unreadable) = find(&from);
     if found.is_empty() {
-        return Err(format!("no .fbx files under {}", from.display()));
+        let why = unreadable
+            .first()
+            .map_or(String::new(), |(_, e)| format!(" ({e})"));
+        return Err(format!("no .fbx files under {}{why}", from.display()));
     }
     std::fs::create_dir_all(&to).map_err(|e| format!("{}: {e}", to.display()))?;
     let mut w = Written {
@@ -204,6 +219,9 @@ fn import_batch(doc: &mut Document, p: &P) -> Out {
         failed: Vec::new(),
         outputs: BTreeMap::new(),
     };
+    for (folder, error) in unreadable {
+        w.fail(&folder, None, error);
+    }
     for (path, rel) in &found {
         let stem = path
             .file_stem()
@@ -238,4 +256,21 @@ fn import_batch(doc: &mut Document, p: &P) -> Out {
         out["cut"] = json!(format!("stopped after {MAX_BATCH} files"));
     }
     Ok(out)
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
+    use super::*;
+
+    #[test]
+    fn a_folder_that_cannot_be_read_is_said() {
+        let (found, unreadable) = find(Path::new("no/such/folder/of/fbx"));
+        assert!(found.is_empty());
+        assert_eq!(unreadable.len(), 1);
+        assert!(
+            unreadable[0].1.contains("can't read the folder"),
+            "{unreadable:?}"
+        );
+    }
 }

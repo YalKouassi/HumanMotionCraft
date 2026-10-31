@@ -1,0 +1,1662 @@
+; FBX 6.1.0 project file
+; written by ac_train.fbxwrite
+
+FBXHeaderExtension: {
+	FBXHeaderVersion: 1003
+	FBXVersion: 6100
+	Creator: "ac_train.fbxwrite"
+}
+Objects: {
+	Model: "Model::Hips", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -3.3881317890172057e-19, 86.83915245005986, 1.0822916666666655
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 3.317925767113984, 2.1700798545656964e-16, -0.05915270535927046
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 3
+		}
+	}
+	Model: "Model::LHipJoint", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.0, 0.0, 0.0
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -9.71911164786267e-17, -9.999035945655756e-19, -1.0033269694158491e-17
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftUpLeg", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 10.194208333333332, -1.1474166666666692, -0.2892499999999992
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -21.716288887252162, 2.1636994058277117, -4.48962020808883
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftUpLegRoll", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -0.14508333333333318, -9.317250000000001, 2.4328750000000032
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -9.149180270223439e-15, -7.353986092819326e-16, 7.538731031683127e-16
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftLeg", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 3.4572708333333333, -29.582916666666666, 0.7918958333333406
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 4.313617378873619, 0.4254393295434736, 0.49097729181361616
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 4
+		}
+	}
+	Model: "Model::LeftLegRoll", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 2.041854166666668, -20.117041666666655, -1.7563124999999933
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -8.62464622041825e-15, -4.1457432510894387e-16, -5.674739982103364e-16
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftFoot", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 2.1141666666666654, -19.734979166666673, -1.874270833333326
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 12.256511108005476, -13.574764263525733, -7.609369898112214
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftToeBase", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 1.3668124999999995, -4.706187499999979, 13.580250000000005
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -1.5895124538063413e-15, -6.5124054108913376e-15, -1.9742295879520883e-16
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RHipJoint", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.0, 0.0, 0.0
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -9.71911164786267e-17, -9.999035945655756e-19, -1.0033269694158491e-17
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightUpLeg", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -10.194208333333334, -1.1474166666666668, -0.28924999999999934
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 11.038882305990958, -2.8934602127171782, 4.4313611435624
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightUpLegRoll", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.14508333333333212, -9.317250000000007, 2.4328750000000032
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.714154817756454e-15, -7.494994726182564e-16, 3.590461848381898e-17
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightLeg", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -3.457270833333334, -29.58291666666666, 0.7918958333333392
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 8.946503327468312, -0.7626128329622828, -1.0451976520616828
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightLegRoll", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -2.0418541666666665, -20.11704166666665, -1.756312499999997
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 2.87307515514823e-15, -1.637055882273589e-15, -3.732565778533851e-18
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightFoot", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -2.114166666666663, -19.734979166666673, -1.8742708333333273
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 5.178014076456068, 26.591854830930505, 11.005003102318728
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightToeBase", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -1.366812499999998, -4.70618749999998, 13.58025
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 2.1522655609926767e-15, 5.239860080408921e-16, -6.806295318690774e-16
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::Spine", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.0, 0.0, 0.0
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -90.11220743029902, -0.22829923884573244, -0.3422684361765307
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+			Property: "PreRotation", "Vector3D", "", 90.0, 0.0, 0.0
+		}
+	}
+	Model: "Model::Spine1", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -1.8973538018496328e-17, 6.734375000000002, -3.308958333333336
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -0.11220743029901206, 0.34226843617653097, -0.22829923884573247
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 1
+		}
+	}
+	Model: "Model::Spine2", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -1.0570971181733668e-16, 6.840291666666674, 1.243624999999999
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -0.1135712366182339, 0.34226571907974657, -0.2283033123180079
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::Spine3", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -7.860465750519907e-17, 7.499791666666667, 0.21983333333333122
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -0.11357123661823448, 0.34226571907974696, -0.228303312318008
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::Spine4", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -8.673617379884035e-17, 13.26962499999999, -2.4290833333333373
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -0.11357123661823477, 0.3422657190797474, -0.22830331231800816
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::Neck", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -1.5178830414797062e-16, 16.583249999999982, 3.9438333333333326
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 3.9747509152971174, -0.799478267490958, 2.03206535574929
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::Neck1", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.015666666666666464, 2.920083333333345, 0.8861250000000013
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.872790058109755e-15, 1.0759773857456838e-15, 2.000284816129484e-16
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::Neck2", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.01483333333333337, 3.8957499999999796, 1.1832916666666657
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.872790058109755e-15, 1.0759773857456838e-15, 2.000284816129484e-16
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::Head", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -0.030499999999999854, 2.8890833333333483, 1.3671666666666655
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.872790058109755e-15, 1.0759773857456838e-15, 2.000284816129484e-16
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftShoulder", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 2.199666666666664, 9.910708333333343, 5.748125000000001
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 0.24354225824925946, 2.341651381685463, -2.260177984893539
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftShoulderTwist", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 7.948781249999991, 1.7672500000000115, 0.18533333333333116
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -5.740335401212491e-16, 4.758364480079605e-15, -1.7060479619143883e-15
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftArm", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 6.009520833333327, -4.31457291666667, -1.0285833333333338
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.2925447194495152, 4.335702411505858, -1.7726358132166522
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+			Property: "PreRotation", "Vector3D", "", 0.0, 0.0, -30.0
+		}
+	}
+	Model: "Model::LeftArmRoll", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 5.193156249999998, -5.595510416666662, 0.12266666666666814
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -3.395814108159363e-15, 8.707987819487126e-15, -1.577374686285594e-14
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftForeArm", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 11.595833333333326, -13.262958333333327, 0.286333333333335
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 34.05977578345867, 27.65925861142639, 5.667630351535456
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftForeArmRoll", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 5.604875000000007, -5.559416666666664, 7.797458333333333
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.2315700047528282e-14, 2.7435294193265368e-14, -2.7196254389540956e-14
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftHand", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 6.011458333333322, -5.954437499999996, 7.962708333333332
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.2315700047528282e-14, 2.7435294193265368e-14, -2.7196254389540956e-14
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftHandThumb1", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.12631249999999794, -0.6914999999999987, 4.389000000000002
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.2315700047528282e-14, 2.7435294193265368e-14, -2.7196254389540956e-14
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightShoulder", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -2.199666666666665, 9.910708333333337, 5.748125000000002
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 0.46275621845211745, -2.319757036076838, -0.488463226057967
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightShoulderTwist", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -7.948781249999993, 1.7672500000000182, 0.1853333333333315
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -2.116686871012152e-16, -6.499720065205909e-16, -9.093981293400519e-16
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightArm", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -6.009520833333329, -4.314572916666665, -1.0285833333333338
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", -6.3818792180995105, 6.594903939347807, 36.58996423540413
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 5
+		}
+	}
+	Model: "Model::RightArmRoll", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -5.193156249999999, -5.595510416666667, 0.12266666666666937
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 2.2972317793420234e-16, 7.568087822350356e-15, 6.3694980762520755e-15
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightForeArm", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -11.59583333333333, -13.262958333333335, 0.28633333333333755
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 31.529152862504432, -25.984400570888944, -4.708561587807177
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightForeArmRoll", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -5.604875000000006, -5.55941666666666, 7.797458333333335
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.9886684545808195e-14, -1.7094893969385295e-14, 1.3173754218867432e-14
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightHand", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -6.011458333333321, -5.954437499999993, 7.962708333333332
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 1.9886684545808195e-14, -1.7094893969385295e-14, 1.3173754218867432e-14
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::LeftToe_End", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.1207500000000028, -0.23916666666666808, 1.8869999999999998
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 0.0, 0.0, 0.0
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::RightToe_End", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", -0.1207500000000028, -0.23916666666666808, 1.8869999999999998
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 0.0, 0.0, 0.0
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::HeadTop_End", "Limb" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.0, 15.0, 0.0
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 0.0, 0.0, 0.0
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	Model: "Model::Prop_Sword", "Null" {
+		Version: 232
+		Properties60: {
+			Property: "Lcl Translation", "Lcl Translation", "A+", 0.0, 0.0, 30.0
+			Property: "Lcl Rotation", "Lcl Rotation", "A+", 0.0, 0.0, 0.0
+			Property: "Lcl Scaling", "Lcl Scaling", "A+", 1.0, 1.0, 1.0
+			Property: "RotationActive", "bool", "", 1
+			Property: "RotationOrder", "enum", "", 0
+		}
+	}
+	GlobalSettings: {
+		Version: 1000
+		Properties60: {
+			Property: "UpAxis", "int", "", 1
+			Property: "UpAxisSign", "int", "", 1
+			Property: "FrontAxis", "int", "", 2
+			Property: "FrontAxisSign", "int", "", 1
+			Property: "CoordAxis", "int", "", 0
+			Property: "CoordAxisSign", "int", "", 1
+			Property: "UnitScaleFactor", "double", "", 1.0
+			Property: "TimeMode", "enum", "", 6
+		}
+	}
+}
+Connections: {
+	Connect: "OO", "Model::Hips", "Model::Scene"
+	Connect: "OO", "Model::LHipJoint", "Model::Hips"
+	Connect: "OO", "Model::LeftUpLeg", "Model::LHipJoint"
+	Connect: "OO", "Model::LeftUpLegRoll", "Model::LeftUpLeg"
+	Connect: "OO", "Model::LeftLeg", "Model::LeftUpLegRoll"
+	Connect: "OO", "Model::LeftLegRoll", "Model::LeftLeg"
+	Connect: "OO", "Model::LeftFoot", "Model::LeftLegRoll"
+	Connect: "OO", "Model::LeftToeBase", "Model::LeftFoot"
+	Connect: "OO", "Model::RHipJoint", "Model::Hips"
+	Connect: "OO", "Model::RightUpLeg", "Model::RHipJoint"
+	Connect: "OO", "Model::RightUpLegRoll", "Model::RightUpLeg"
+	Connect: "OO", "Model::RightLeg", "Model::RightUpLegRoll"
+	Connect: "OO", "Model::RightLegRoll", "Model::RightLeg"
+	Connect: "OO", "Model::RightFoot", "Model::RightLegRoll"
+	Connect: "OO", "Model::RightToeBase", "Model::RightFoot"
+	Connect: "OO", "Model::Spine", "Model::Hips"
+	Connect: "OO", "Model::Spine1", "Model::Spine"
+	Connect: "OO", "Model::Spine2", "Model::Spine1"
+	Connect: "OO", "Model::Spine3", "Model::Spine2"
+	Connect: "OO", "Model::Spine4", "Model::Spine3"
+	Connect: "OO", "Model::Neck", "Model::Spine4"
+	Connect: "OO", "Model::Neck1", "Model::Neck"
+	Connect: "OO", "Model::Neck2", "Model::Neck1"
+	Connect: "OO", "Model::Head", "Model::Neck2"
+	Connect: "OO", "Model::LeftShoulder", "Model::Spine4"
+	Connect: "OO", "Model::LeftShoulderTwist", "Model::LeftShoulder"
+	Connect: "OO", "Model::LeftArm", "Model::LeftShoulderTwist"
+	Connect: "OO", "Model::LeftArmRoll", "Model::LeftArm"
+	Connect: "OO", "Model::LeftForeArm", "Model::LeftArmRoll"
+	Connect: "OO", "Model::LeftForeArmRoll", "Model::LeftForeArm"
+	Connect: "OO", "Model::LeftHand", "Model::LeftForeArmRoll"
+	Connect: "OO", "Model::LeftHandThumb1", "Model::LeftHand"
+	Connect: "OO", "Model::RightShoulder", "Model::Spine4"
+	Connect: "OO", "Model::RightShoulderTwist", "Model::RightShoulder"
+	Connect: "OO", "Model::RightArm", "Model::RightShoulderTwist"
+	Connect: "OO", "Model::RightArmRoll", "Model::RightArm"
+	Connect: "OO", "Model::RightForeArm", "Model::RightArmRoll"
+	Connect: "OO", "Model::RightForeArmRoll", "Model::RightForeArm"
+	Connect: "OO", "Model::RightHand", "Model::RightForeArmRoll"
+	Connect: "OO", "Model::LeftToe_End", "Model::LeftToeBase"
+	Connect: "OO", "Model::RightToe_End", "Model::RightToeBase"
+	Connect: "OO", "Model::HeadTop_End", "Model::Head"
+	Connect: "OO", "Model::Prop_Sword", "Model::RightHand"
+}
+Takes: {
+	Current: "Take 001"
+	Take: "Take 001" {
+		FileName: "Take_001.tak"
+		LocalTime: 0, 16934924600
+		ReferenceTime: 0, 16934924600
+		Model: "Model::Hips" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "T" {
+					Channel: "X" {
+						Default: -3.3881317890172057e-19
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -3.3881317890172057e-19, L, 1539538600, 0.8295512078192658, L, 3079077200, 1.8935137465574003, L, 4618615800, 2.858835783169366, L, 6158154400, 3.7688043939083498, L, 7697693000, 4.552907006373397, L, 9237231600, 5.219490733481905, L, 10776770200, 5.744719038414574, L, 12316308800, 6.15463029798053, L, 13855847400, 6.461744273340815, L, 15395386000, 6.682780274620381, L, 16934924600, 6.830962610996784, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 86.83915245005986
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 86.83915245005986, L, 1539538600, 86.85864912250389, L, 3079077200, 86.94313470309476, L, 4618615800, 87.20093354383607, L, 6158154400, 87.53268545883397, L, 7697693000, 87.84405413550883, L, 9237231600, 88.15865281535686, L, 10776770200, 88.48245188446, L, 12316308800, 88.77404359648128, L, 13855847400, 89.00814980660347, L, 15395386000, 89.142352096349, L, 16934924600, 89.16925366772091, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 1.0822916666666655
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.0822916666666655, L, 1539538600, 3.8777025825756373, L, 3079077200, 7.395633196095296, L, 4618615800, 10.360210545428487, L, 6158154400, 13.175790776980783, L, 7697693000, 15.800927987802282, L, 9237231600, 18.29715536416227, L, 10776770200, 20.710603758324773, L, 12316308800, 23.04603426935566, L, 13855847400, 25.313161252264692, L, 15395386000, 27.5432557914842, L, 16934924600, 29.764150679373458, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				Channel: "R" {
+					Channel: "X" {
+						Default: 3.317925767113984
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 3.317925767113984, L, 1539538600, 2.6987047806082036, L, 3079077200, 1.997368348479838, L, 4618615800, 1.6019416221304201, L, 6158154400, 1.318237030958958, L, 7697693000, 1.090840754090377, L, 9237231600, 0.921733238502633, L, 10776770200, 0.7913828348736693, L, 12316308800, 0.7573502996914385, L, 13855847400, 0.9568456593940793, L, 15395386000, 1.3043312235585114, L, 16934924600, 1.6813038255148955, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 2.1700798545656964e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.1700798545656964e-16, L, 1539538600, -0.35078882655402077, L, 3079077200, -0.9630286033915907, L, 4618615800, -1.9498316391034607, L, 6158154400, -3.027476667299133, L, 7697693000, -4.0093120372180335, L, 9237231600, -4.732000161209095, L, 10776770200, -4.974570496617399, L, 12316308800, -5.002818387643958, L, 13855847400, -4.673969305572645, L, 15395386000, -4.157812707272972, L, 16934924600, -3.8012742711545484, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -0.05915270535927046
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.05915270535927046, L, 1539538600, -0.33672550122624656, L, 3079077200, -0.5582074895781527, L, 4618615800, -0.3792147097078248, L, 6158154400, -0.12367608230934148, L, 7697693000, -0.007941351088520591, L, 9237231600, 0.02875080698261224, L, 10776770200, -0.2582662097381745, L, 12316308800, -0.7607383013108956, L, 13855847400, -1.2577489605221446, L, 15395386000, -1.7297260523811755, L, 16934924600, -2.134959818724232, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LHipJoint" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -9.71911164786267e-17
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -9.71911164786267e-17, L, 1539538600, 4.957339232326357e-16, L, 3079077200, 1.3437114343054108e-17, L, 4618615800, 2.5049079839697573e-16, L, 6158154400, 1.3820703531834528e-16, L, 7697693000, -1.776523192165886e-17, L, 9237231600, -1.0922793496592802e-16, L, 10776770200, -5.453220982619513e-17, L, 12316308800, 9.278672742007397e-17, L, 13855847400, -1.5434074553264736e-16, L, 15395386000, 5.964211775373759e-17, L, 16934924600, -2.932992198030234e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -9.999035945655756e-19
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -9.999035945655756e-19, L, 1539538600, 1.5644950847469892e-17, L, 3079077200, -2.779923015041879e-16, L, 4618615800, 3.696624400014867e-16, L, 6158154400, -1.3104570770944643e-16, L, 7697693000, -2.8415249886891584e-16, L, 9237231600, 9.271361550641725e-16, L, 10776770200, -8.400927089355951e-16, L, 12316308800, 9.73653289679163e-16, L, 13855847400, 4.960819703779778e-16, L, 15395386000, 2.2916722503399926e-16, L, 16934924600, 7.295664848759464e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -1.0033269694158491e-17
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.0033269694158491e-17, L, 1539538600, 4.458372504369201e-17, L, 3079077200, 2.2634680711080045e-17, L, 4618615800, 1.2822147864777276e-17, L, 6158154400, -5.146516028250264e-18, L, 7697693000, 2.2554643098339922e-17, L, 9237231600, -2.0668809620826258e-18, L, 10776770200, 1.0944152768484252e-17, L, 12316308800, -1.8389971209878643e-17, L, 13855847400, 2.1572894817559182e-16, L, 15395386000, 4.636934732550048e-17, L, 16934924600, -1.0877195377181518e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftUpLeg" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -21.716288887252162
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -21.716288887252162, L, 1539538600, -20.39792437935312, L, 3079077200, -18.468357805821867, L, 4618615800, -16.12513045648085, L, 6158154400, -13.581456949958643, L, 7697693000, -11.156921953756909, L, 9237231600, -8.724482257264942, L, 10776770200, -6.212252833929811, L, 12316308800, -3.7835137877518665, L, 13855847400, -1.5830901056994695, L, 15395386000, 0.41902681455155605, L, 16934924600, 2.1703754990115174, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 2.1636994058277117
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.1636994058277117, L, 1539538600, 2.3273028642728324, L, 3079077200, 2.561525630709528, L, 4618615800, 2.8289581028181554, L, 6158154400, 3.1523052623300143, L, 7697693000, 3.511919073450727, L, 9237231600, 3.9307544656617117, L, 10776770200, 4.4082067486010015, L, 12316308800, 4.870709830795134, L, 13855847400, 5.272318515757284, L, 15395386000, 5.62566514902419, L, 16934924600, 5.93291179607879, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -4.48962020808883
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -4.48962020808883, L, 1539538600, -4.639639091320676, L, 3079077200, -4.926331687649773, L, 4618615800, -5.445181505230563, L, 6158154400, -6.022849645374887, L, 7697693000, -6.590675569529533, L, 9237231600, -6.941165866262172, L, 10776770200, -6.878022416634701, L, 12316308800, -6.635624541157098, L, 13855847400, -6.244383480093041, L, 15395386000, -5.807725202262558, L, 16934924600, -5.382556471337153, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftUpLegRoll" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -9.149180270223439e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -9.149180270223439e-15, L, 1539538600, 1.2781805067211132e-15, L, 3079077200, -4.261977074151713e-15, L, 4618615800, -1.9709714537358227e-15, L, 6158154400, 4.3325883564509724e-16, L, 7697693000, 2.1153492593142867e-15, L, 9237231600, -6.114510108461464e-16, L, 10776770200, 6.246808208146173e-17, L, 12316308800, -7.221455164608731e-16, L, 13855847400, -1.0391236206096411e-16, L, 15395386000, 2.2595820326132547e-16, L, 16934924600, -6.402560211391124e-17, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -7.353986092819326e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -7.353986092819326e-16, L, 1539538600, 1.455488672869472e-15, L, 3079077200, -3.0073271388003077e-16, L, 4618615800, 9.643068023797646e-16, L, 6158154400, 3.8715238628544776e-16, L, 7697693000, -3.9734038041814366e-16, L, 9237231600, 1.7732004165407668e-16, L, 10776770200, -1.4433131794392593e-15, L, 12316308800, 5.424668827416322e-16, L, 13855847400, 1.5017336522460255e-16, L, 15395386000, 6.043498732867562e-17, L, 16934924600, 5.141701062593231e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 7.538731031683127e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 7.538731031683127e-16, L, 1539538600, -2.485526487475477e-16, L, 3079077200, 1.1170956298648308e-15, L, 4618615800, 3.6041707215576766e-16, L, 6158154400, -1.349517332571069e-15, L, 7697693000, 1.987772961857168e-15, L, 9237231600, 2.6822351425003576e-16, L, 10776770200, -2.1045888792974152e-16, L, 12316308800, 8.323922323458212e-16, L, 13855847400, 2.8009503050246797e-15, L, 15395386000, 9.55082784382561e-16, L, 16934924600, 1.271137017591117e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftLeg" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 4.313617378873619
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 4.313617378873619, L, 1539538600, 5.641111337643939, L, 3079077200, 6.673336583782974, L, 4618615800, 6.662909020088837, L, 6158154400, 6.589915390896466, L, 7697693000, 6.13275845368248, L, 9237231600, 5.233841965217425, L, 10776770200, 4.009741644877793, L, 12316308800, 2.5548059614865952, L, 13855847400, 0.9198282410103615, L, 15395386000, -0.6474232809375777, L, 16934924600, -1.8075726650542598, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 0.4254393295434736
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 0.4254393295434736, L, 1539538600, 0.5644886500874999, L, 3079077200, 0.675427719461955, L, 4618615800, 0.6743144888320572, L, 6158154400, 0.6665290259420438, L, 7697693000, 0.617179987468227, L, 9237231600, 0.5214494761641788, L, 10776770200, 0.39425707107665586, L, 12316308800, 0.24737075776346729, L, 13855847400, 0.08754526975428889, L, 15395386000, -0.06063393090056896, L, 16934924600, -0.16719302674604603, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 0.49097729181361616
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 0.49097729181361616, L, 1539538600, 0.649185623621013, L, 3079077200, 0.7747500906022265, L, 4618615800, 0.773484235443087, L, 6158154400, 0.7646297081214348, L, 7697693000, 0.7089459313201668, L, 9237231600, 0.6005317988412063, L, 10776770200, 0.45541684827706913, L, 12316308800, 0.2867287172044258, L, 13855847400, 0.1018931997126156, L, 15395386000, -0.0709099489202205, L, 16934924600, -0.19620568617998058, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftLegRoll" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -8.62464622041825e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -8.62464622041825e-15, L, 1539538600, 1.532849204473775e-15, L, 3079077200, -1.8427522701491643e-15, L, 4618615800, -9.539702567632019e-16, L, 6158154400, 6.41748236729375e-16, L, 7697693000, 1.3071641252703034e-15, L, 9237231600, -1.4878020972240896e-15, L, 10776770200, -9.844969788217115e-16, L, 12316308800, -6.706655340552046e-16, L, 13855847400, 9.496835670012904e-17, L, 15395386000, 1.4372745231970583e-16, L, 16934924600, -4.723184763414792e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -4.1457432510894387e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -4.1457432510894387e-16, L, 1539538600, 8.36759384206185e-16, L, 3079077200, 1.7797122214616858e-16, L, 4618615800, 9.044365669759238e-16, L, 6158154400, 4.765518356837523e-18, L, 7697693000, -5.4980748309508307e-17, L, 9237231600, 2.1109740685468643e-16, L, 10776770200, -1.397578632527904e-15, L, 12316308800, 5.041536135837141e-16, L, 13855847400, -2.1169655967382715e-17, L, 15395386000, 1.3180330299692928e-16, L, 16934924600, 7.078806656573977e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -5.674739982103364e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -5.674739982103364e-16, L, 1539538600, -5.105545641857065e-16, L, 3079077200, 1.0115799095952552e-15, L, 4618615800, 9.573548464421819e-16, L, 6158154400, -2.160655030642146e-15, L, 7697693000, 3.915316258354912e-16, L, 9237231600, 1.354883833867507e-16, L, 10776770200, -7.396376370159541e-16, L, 12316308800, 9.42763713066683e-16, L, 13855847400, 2.5305492270850164e-15, L, 15395386000, -7.877326519895926e-16, L, 16934924600, 2.4451936175868204e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftFoot" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 12.256511108005476
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 12.256511108005476, L, 1539538600, 13.927809531205856, L, 3079077200, 15.23284735866929, L, 4618615800, 14.509341973952418, L, 6158154400, 13.165330132760367, L, 7697693000, 11.672065729131754, L, 9237231600, 10.233897489590056, L, 10776770200, 9.265675056274295, L, 12316308800, 8.56258157407824, L, 13855847400, 8.131869915657159, L, 15395386000, 7.756112756279179, L, 16934924600, 7.199848705831598, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -13.574764263525733
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -13.574764263525733, L, 1539538600, -13.984322058923201, L, 3079077200, -14.290622272892781, L, 4618615800, -13.843848927413788, L, 6158154400, -13.16053055897529, L, 7697693000, -12.661847491917614, L, 9237231600, -12.41860307794976, L, 10776770200, -12.534237434287473, L, 12316308800, -12.816419144161431, L, 13855847400, -13.3569336128745, L, 15395386000, -13.978422031596185, L, 16934924600, -14.49943103152163, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -7.609369898112214
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -7.609369898112214, L, 1539538600, -8.228169964987, L, 3079077200, -8.718581414973029, L, 4618615800, -8.311820840363609, L, 6158154400, -7.6451393649111274, L, 7697693000, -7.056998110942651, L, 9237231600, -6.595027002834464, L, 10776770200, -6.399670544092786, L, 12316308800, -6.375961036005816, L, 13855847400, -6.517014835346381, L, 15395386000, -6.667218185153338, L, 16934924600, -6.7363942131807155, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftToeBase" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -1.5895124538063413e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.5895124538063413e-15, L, 1539538600, 5.691011272558227e-15, L, 3079077200, 2.02280427421084e-15, L, 4618615800, 4.585228758067896e-16, L, 6158154400, 2.008861817731328e-15, L, 7697693000, -2.2434128821311426e-15, L, 9237231600, -4.068804651364008e-15, L, 10776770200, -3.4683098658704033e-15, L, 12316308800, -1.223862050164251e-15, L, 13855847400, -1.0581346856335017e-15, L, 15395386000, 1.1472431671009487e-15, L, 16934924600, 2.0181428630007352e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -6.5124054108913376e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -6.5124054108913376e-15, L, 1539538600, -5.8538461724532716e-15, L, 3079077200, -6.975019539474354e-15, L, 4618615800, -5.580996689815751e-16, L, 6158154400, -3.4995771783658136e-15, L, 7697693000, 1.5819262067155935e-15, L, 9237231600, -3.590922520007619e-15, L, 10776770200, -7.310725962855192e-15, L, 12316308800, 2.266097708300413e-15, L, 13855847400, 7.906291879004737e-15, L, 15395386000, -2.6276204412810164e-15, L, 16934924600, 3.547801528457385e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -1.9742295879520883e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.9742295879520883e-16, L, 1539538600, 5.390914230258087e-16, L, 3079077200, 1.3630144137890477e-15, L, 4618615800, 3.810702851377144e-15, L, 6158154400, 1.6430276086549308e-17, L, 7697693000, 1.8772474866373592e-15, L, 9237231600, -2.0029558916928893e-15, L, 10776770200, -4.092471969673621e-15, L, 12316308800, -8.2659076685796075e-16, L, 13855847400, 5.421029279273689e-15, L, 15395386000, -3.4282914947254907e-15, L, 16934924600, 4.596521306014055e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RHipJoint" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -9.71911164786267e-17
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -9.71911164786267e-17, L, 1539538600, 4.957339232326357e-16, L, 3079077200, 1.3437114343054108e-17, L, 4618615800, 2.5049079839697573e-16, L, 6158154400, 1.3820703531834528e-16, L, 7697693000, -1.776523192165886e-17, L, 9237231600, -1.0922793496592802e-16, L, 10776770200, -5.453220982619513e-17, L, 12316308800, 9.278672742007397e-17, L, 13855847400, -1.5434074553264736e-16, L, 15395386000, 5.964211775373759e-17, L, 16934924600, -2.932992198030234e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -9.999035945655756e-19
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -9.999035945655756e-19, L, 1539538600, 1.5644950847469892e-17, L, 3079077200, -2.779923015041879e-16, L, 4618615800, 3.696624400014867e-16, L, 6158154400, -1.3104570770944643e-16, L, 7697693000, -2.8415249886891584e-16, L, 9237231600, 9.271361550641725e-16, L, 10776770200, -8.400927089355951e-16, L, 12316308800, 9.73653289679163e-16, L, 13855847400, 4.960819703779778e-16, L, 15395386000, 2.2916722503399926e-16, L, 16934924600, 7.295664848759464e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -1.0033269694158491e-17
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.0033269694158491e-17, L, 1539538600, 4.458372504369201e-17, L, 3079077200, 2.2634680711080045e-17, L, 4618615800, 1.2822147864777276e-17, L, 6158154400, -5.146516028250264e-18, L, 7697693000, 2.2554643098339922e-17, L, 9237231600, -2.0668809620826258e-18, L, 10776770200, 1.0944152768484252e-17, L, 12316308800, -1.8389971209878643e-17, L, 13855847400, 2.1572894817559182e-16, L, 15395386000, 4.636934732550048e-17, L, 16934924600, -1.0877195377181518e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightUpLeg" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 11.038882305990958
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 11.038882305990958, L, 1539538600, 10.781942772367692, L, 3079077200, 9.715370207965583, L, 4618615800, 6.336007306571779, L, 6158154400, 1.823782931870323, L, 7697693000, -2.8361941457141877, L, 9237231600, -7.4628517657530296, L, 10776770200, -11.528266070528813, L, 12316308800, -15.22915091148848, L, 13855847400, -18.584212567759515, L, 15395386000, -21.24933784662392, L, 16934924600, -22.836634499817045, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -2.8934602127171782
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -2.8934602127171782, L, 1539538600, -1.5108277872671945, L, 3079077200, -0.4345123318631932, L, 4618615800, -1.9684709943995864, L, 6158154400, -4.455310299280447, L, 7697693000, -6.101710928697236, L, 9237231600, -7.6585106472084465, L, 10776770200, -9.362218001353336, L, 12316308800, -10.731608811928236, L, 13855847400, -11.603938925650773, L, 15395386000, -11.672476610724074, L, 16934924600, -10.559448826509161, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 4.4313611435624
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 4.4313611435624, L, 1539538600, 4.73607650317845, L, 3079077200, 4.968700426921302, L, 4618615800, 3.904111418832083, L, 6158154400, 2.51371233539129, L, 7697693000, 2.000103015463009, L, 9237231600, 1.9683553520477424, L, 10776770200, 2.8462788127633694, L, 12316308800, 4.407834689569403, L, 13855847400, 6.255279958183078, L, 15395386000, 8.082523718453913, L, 16934924600, 9.53042335883877, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightUpLegRoll" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.714154817756454e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.714154817756454e-15, L, 1539538600, 4.6321026392251406e-15, L, 3079077200, -1.2892406965570922e-15, L, 4618615800, 1.4358573471700346e-16, L, 6158154400, 5.190853354906665e-16, L, 7697693000, 1.6472913069221171e-16, L, 9237231600, -7.992923076970244e-16, L, 10776770200, 2.0509649764182256e-15, L, 12316308800, 7.998340534916234e-16, L, 13855847400, -1.0346509380156922e-15, L, 15395386000, 1.1244487890336495e-15, L, 16934924600, -1.2471353995620797e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -7.494994726182564e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -7.494994726182564e-16, L, 1539538600, 1.5545165743533514e-16, L, 3079077200, -2.7609860599845183e-16, L, 4618615800, -1.3265253344143675e-15, L, 6158154400, -9.814934575312894e-16, L, 7697693000, -2.1035003836453534e-15, L, 9237231600, -2.1149074084861485e-16, L, 10776770200, -2.3537283732509415e-15, L, 12316308800, 1.5531937320555538e-15, L, 13855847400, 4.4507560333439424e-15, L, 15395386000, 1.3143888395628816e-15, L, 16934924600, 8.852826224740575e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 3.590461848381898e-17
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 3.590461848381898e-17, L, 1539538600, 6.238186208476238e-16, L, 3079077200, -1.0861538503090485e-15, L, 4618615800, 9.77976615962032e-16, L, 6158154400, -6.738419118191878e-16, L, 7697693000, -2.4290585985519323e-16, L, 9237231600, -1.1364868210640741e-16, L, 10776770200, -2.202397203219332e-16, L, 12316308800, -5.634701122757207e-16, L, 13855847400, -1.228128401700152e-15, L, 15395386000, -1.1645075925783604e-15, L, 16934924600, -1.0775439447983126e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightLeg" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 8.946503327468312
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 8.946503327468312, L, 1539538600, 13.059517134446347, L, 3079077200, 19.11946078751561, L, 4618615800, 26.70337637217384, L, 6158154400, 34.68835350512259, L, 7697693000, 41.95602593958468, L, 9237231600, 48.04777552475328, L, 10776770200, 52.355152051602325, L, 12316308800, 54.220924198617816, L, 13855847400, 53.360723651280566, L, 15395386000, 50.35815922610815, L, 16934924600, 44.707107344989424, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -0.7626128329622828
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.7626128329622828, L, 1539538600, -1.0555796952301073, L, 3079077200, -1.4181339069622532, L, 4618615800, -1.7511678965609947, L, 6158154400, -1.949897767099108, L, 7697693000, -1.9916457669343515, L, 9237231600, -1.924071233050477, L, 10776770200, -1.8200459023685511, L, 12316308800, -1.7606370534565112, L, 13855847400, -1.7884486336467196, L, 15395386000, -1.8724171519022426, L, 16934924600, -1.9707535304532036, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -1.0451976520616828
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.0451976520616828, L, 1539538600, -1.5620032431325954, L, 3079077200, -2.3581084632561087, L, 4618615800, -3.400618838003995, L, 6158154400, -4.535024684824534, L, 7697693000, -5.582449271211102, L, 9237231600, -6.458568606089079, L, 10776770200, -7.070535951511113, L, 12316308800, -7.33256584020899, L, 13855847400, -7.212005424950709, L, 15395386000, -6.787287493655795, L, 16934924600, -5.977440560499387, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightLegRoll" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 2.87307515514823e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.87307515514823e-15, L, 1539538600, 6.237775183035999e-15, L, 3079077200, 4.595289019810383e-15, L, 4618615800, 4.429927145799377e-15, L, 6158154400, -3.862221874372871e-16, L, 7697693000, 3.4871100216030284e-15, L, 9237231600, 4.4198747985431945e-15, L, 10776770200, -5.499695989474057e-15, L, 12316308800, 4.3928959516010595e-15, L, 13855847400, 1.8751723723681084e-15, L, 15395386000, 1.2652016643158403e-15, L, 16934924600, 8.167086952088013e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -1.637055882273589e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.637055882273589e-15, L, 1539538600, 2.260802353195961e-16, L, 3079077200, -1.1055203179993255e-15, L, 4618615800, -1.926051871393368e-15, L, 6158154400, -1.1965456816112155e-15, L, 7697693000, -1.2156641538002273e-15, L, 9237231600, 1.8055981232744503e-15, L, 10776770200, -4.521959692315343e-15, L, 12316308800, -4.71361796760808e-15, L, 13855847400, 4.925208868773756e-15, L, 15395386000, -3.695331276555299e-15, L, 16934924600, -1.5218811300470977e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -3.732565778533851e-18
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -3.732565778533851e-18, L, 1539538600, 1.000418757731683e-15, L, 3079077200, -5.244757257389947e-16, L, 4618615800, 1.8128244267501606e-15, L, 6158154400, 4.732802797732128e-16, L, 7697693000, 2.2573307909954425e-15, L, 9237231600, 3.15538335142824e-16, L, 10776770200, -7.546523600391779e-16, L, 12316308800, 1.783512628093706e-15, L, 13855847400, -6.999932936856584e-15, L, 15395386000, 3.642408711395141e-15, L, 16934924600, -1.4191531228857668e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightFoot" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 5.178014076456068
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 5.178014076456068, L, 1539538600, 7.366626418526812, L, 3079077200, 11.79966424893531, L, 4618615800, 20.517858101522062, L, 6158154400, 29.767403014061916, L, 7697693000, 36.89558244909836, L, 9237231600, 40.11149387038856, L, 10776770200, 34.477608238561594, L, 12316308800, 26.83857111912885, L, 13855847400, 23.223377823196362, L, 15395386000, 20.68880970493844, L, 16934924600, 18.729356607282156, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 26.591854830930505
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 26.591854830930505, L, 1539538600, 24.626493124696964, L, 3079077200, 22.960737334647547, L, 4618615800, 22.731393417081836, L, 6158154400, 21.99890248155755, L, 7697693000, 19.606002318228782, L, 9237231600, 16.79478006258738, L, 10776770200, 14.770639268414866, L, 12316308800, 13.58246038393202, L, 13855847400, 13.70268168904047, L, 15395386000, 13.868806802392884, L, 16934924600, 14.988877706591493, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 11.005003102318728
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 11.005003102318728, L, 1539538600, 11.029792392335805, L, 3079077200, 11.80559671729954, L, 4618615800, 14.76984821928187, L, 6158154400, 17.8630465244648, L, 7697693000, 18.99816585049424, L, 9237231600, 18.130610933322664, L, 10776770200, 14.67474281685573, L, 12316308800, 11.512878795917171, L, 13855847400, 10.515449719090554, L, 15395386000, 9.967776994565865, L, 16934924600, 10.032073335324542, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightToeBase" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 2.1522655609926767e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.1522655609926767e-15, L, 1539538600, 3.906169668457082e-15, L, 3079077200, 8.8400027335374e-15, L, 4618615800, 4.570197165968848e-15, L, 6158154400, -3.2023764433110118e-15, L, 7697693000, 1.04530034877153e-14, L, 9237231600, -7.425809378549404e-16, L, 10776770200, 2.823656101770711e-15, L, 12316308800, 3.1689097951164853e-15, L, 13855847400, 7.407728703855263e-15, L, 15395386000, -2.5543012274510653e-15, L, 16934924600, 5.328322499045445e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 5.239860080408921e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 5.239860080408921e-16, L, 1539538600, 9.537124408888967e-15, L, 3079077200, 8.191622017835674e-16, L, 4618615800, 4.369474949613834e-15, L, 6158154400, -5.354384896595367e-15, L, 7697693000, -6.470216223116032e-15, L, 9237231600, -4.498211619525848e-15, L, 10776770200, 3.2583532347662577e-15, L, 12316308800, -4.39104327185309e-15, L, 13855847400, -2.253866637843871e-16, L, 15395386000, 3.0903432939634583e-15, L, 16934924600, -4.000800100516362e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -6.806295318690774e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -6.806295318690774e-16, L, 1539538600, -2.000727050216418e-15, L, 3079077200, -1.0915515538016417e-14, L, 4618615800, 6.425475172191859e-17, L, 6158154400, 3.716210919133982e-15, L, 7697693000, -5.6397323173435506e-15, L, 9237231600, -3.3711463407490067e-15, L, 10776770200, -4.043020067907986e-15, L, 12316308800, 2.3629750129946877e-15, L, 13855847400, -1.0776900324024376e-14, L, 15395386000, -1.0377622281833732e-15, L, 16934924600, -2.0506251883351777e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Spine" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -90.11220743029902
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -90.11220743029902, L, 1539538600, -90.13937502537382, L, 3079077200, -90.17356431709888, L, 4618615800, -90.20873988916907, L, 6158154400, -90.22912556915531, L, 7697693000, -90.17196754832263, L, 9237231600, -90.06904801368199, L, 10776770200, -89.94354478303653, L, 12316308800, -89.86309251522945, L, 13855847400, -89.86260196379148, L, 15395386000, -89.86277003639593, L, 16934924600, -89.87237950627576, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -0.22829923884573244
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.22829923884573244, L, 1539538600, -0.22195998615420345, L, 3079077200, -0.2170173068031614, L, 4618615800, -0.2802990403268863, L, 6158154400, -0.37180580729681806, L, 7697693000, -0.4215536234312374, L, 9237231600, -0.44305398739351437, L, 10776770200, -0.38518964963257474, L, 12316308800, -0.27857559023038037, L, 13855847400, -0.16426489505189795, L, 15395386000, -0.05116141193497221, L, 16934924600, 0.04009122755488564, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -0.3422684361765307
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.3422684361765307, L, 1539538600, -0.30520241718454877, L, 3079077200, -0.27637538333270906, L, 4618615800, -0.3634424121632659, L, 6158154400, -0.4503745753241547, L, 7697693000, -0.444013814559953, L, 9237231600, -0.4005815401090856, L, 10776770200, -0.2662038354790208, L, 12316308800, -0.08000014074682042, L, 13855847400, 0.12254403850995876, L, 15395386000, 0.3107388971226099, L, 16934924600, 0.4330856610265926, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Spine1" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.11220743029901206
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.11220743029901206, L, 1539538600, -0.1393750253738195, L, 3079077200, -0.1735643170988796, L, 4618615800, -0.20873988916906477, L, 6158154400, -0.22912556915531007, L, 7697693000, -0.17196754832262715, L, 9237231600, -0.0690480136819929, L, 10776770200, 0.05645521696346923, L, 12316308800, 0.13690748477054565, L, 13855847400, 0.13739803620852478, L, 15395386000, 0.13722996360406486, L, 16934924600, 0.1276204937242467, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 0.34226843617653097
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 0.34226843617653097, L, 1539538600, 0.30520241718454877, L, 3079077200, 0.27637538333270906, L, 4618615800, 0.36344241216326617, L, 6158154400, 0.4503745753241553, L, 7697693000, 0.4440138145599525, L, 9237231600, 0.40058154010908514, L, 10776770200, 0.2662038354790208, L, 12316308800, 0.0800001407468209, L, 13855847400, -0.12254403850995854, L, 15395386000, -0.3107388971226086, L, 16934924600, -0.43308566102659196, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -0.22829923884573247
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.22829923884573247, L, 1539538600, -0.2219599861542036, L, 3079077200, -0.21701730680316134, L, 4618615800, -0.2802990403268863, L, 6158154400, -0.371805807296818, L, 7697693000, -0.42155362343123737, L, 9237231600, -0.4430539873935143, L, 10776770200, -0.38518964963257457, L, 12316308800, -0.27857559023038014, L, 13855847400, -0.16426489505189787, L, 15395386000, -0.05116141193497225, L, 16934924600, 0.04009122755488565, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Spine2" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.1135712366182339
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.1135712366182339, L, 1539538600, -0.14055736718241618, L, 3079077200, -0.17461114050606671, L, 4618615800, -0.2105179175018656, L, 6158154400, -0.23204819552488437, L, 7697693000, -0.1752344153072168, L, 9237231600, -0.07214563052241287, L, 10776770200, 0.05466557506694934, L, 12316308800, 0.13651852046474522, L, 13855847400, 0.13774936551958533, L, 15395386000, 0.13750743595218826, L, 16934924600, 0.1273174475801449, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 0.34226571907974657
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 0.34226571907974657, L, 1539538600, 0.30520012702546623, L, 3079077200, 0.27637340082134354, L, 4618615800, 0.3634380629718108, L, 6158154400, 0.4503650924854583, L, 7697693000, 0.4440017965209348, L, 9237231600, 0.40056956349978456, L, 10776770200, 0.2661978197293664, L, 12316308800, 0.07999919516081633, L, 13855847400, -0.12254353488549835, L, 15395386000, -0.3107387732402022, L, 16934924600, -0.43308555500226975, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -0.2283033123180079
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.2283033123180079, L, 1539538600, -0.2219631351795463, L, 3079077200, -0.21701983155025897, L, 4618615800, -0.28030467953229976, L, 6158154400, -0.3718172937944605, L, 7697693000, -0.42156628144969516, L, 9237231600, -0.44306481555651805, L, 10776770200, -0.3851938070036063, L, 12316308800, -0.2785758617760045, L, 13855847400, -0.16426527076152672, L, 15395386000, -0.05116216436062313, L, 16934924600, 0.04009237288822024, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Spine3" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.11357123661823448
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.11357123661823448, L, 1539538600, -0.14055736718241588, L, 3079077200, -0.17461114050606655, L, 4618615800, -0.21051791750186571, L, 6158154400, -0.2320481955248844, L, 7697693000, -0.17523441530721667, L, 9237231600, -0.07214563052241289, L, 10776770200, 0.05466557506694922, L, 12316308800, 0.13651852046474514, L, 13855847400, 0.13774936551958492, L, 15395386000, 0.13750743595218837, L, 16934924600, 0.12731744758014513, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 0.34226571907974696
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 0.34226571907974696, L, 1539538600, 0.3052001270254662, L, 3079077200, 0.27637340082134343, L, 4618615800, 0.3634380629718113, L, 6158154400, 0.45036509248545853, L, 7697693000, 0.4440017965209345, L, 9237231600, 0.4005695634997843, L, 10776770200, 0.26619781972936757, L, 12316308800, 0.07999919516081525, L, 13855847400, -0.12254353488549817, L, 15395386000, -0.31073877324020244, L, 16934924600, -0.4330855550022699, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -0.228303312318008
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.228303312318008, L, 1539538600, -0.22196313517954638, L, 3079077200, -0.21701983155025875, L, 4618615800, -0.28030467953229976, L, 6158154400, -0.37181729379446044, L, 7697693000, -0.42156628144969494, L, 9237231600, -0.44306481555651794, L, 10776770200, -0.38519380700360656, L, 12316308800, -0.27857586177600463, L, 13855847400, -0.1642652707615268, L, 15395386000, -0.05116216436062283, L, 16934924600, 0.040092372888220436, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Spine4" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -0.11357123661823477
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.11357123661823477, L, 1539538600, -0.1405573671824162, L, 3079077200, -0.1746111405060665, L, 4618615800, -0.21051791750186594, L, 6158154400, -0.2320481955248845, L, 7697693000, -0.17523441530721678, L, 9237231600, -0.07214563052241295, L, 10776770200, 0.054665575066949364, L, 12316308800, 0.13651852046474533, L, 13855847400, 0.13774936551958497, L, 15395386000, 0.13750743595218812, L, 16934924600, 0.12731744758014488, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 0.3422657190797474
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 0.3422657190797474, L, 1539538600, 0.30520012702546623, L, 3079077200, 0.2763734008213433, L, 4618615800, 0.3634380629718118, L, 6158154400, 0.45036509248545853, L, 7697693000, 0.4440017965209353, L, 9237231600, 0.4005695634997838, L, 10776770200, 0.2661978197293676, L, 12316308800, 0.07999919516081447, L, 13855847400, -0.12254353488549857, L, 15395386000, -0.3107387732402022, L, 16934924600, -0.43308555500226875, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -0.22830331231800816
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.22830331231800816, L, 1539538600, -0.22196313517954636, L, 3079077200, -0.21701983155025872, L, 4618615800, -0.2803046795323001, L, 6158154400, -0.3718172937944605, L, 7697693000, -0.42156628144969455, L, 9237231600, -0.44306481555651755, L, 10776770200, -0.3851938070036067, L, 12316308800, -0.27857586177600435, L, 13855847400, -0.16426527076152722, L, 15395386000, -0.05116216436062303, L, 16934924600, 0.040092372888220464, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Neck" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 3.9747509152971174
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 3.9747509152971174, L, 1539538600, 4.122660286653662, L, 3079077200, 4.281116656673675, L, 4618615800, 4.347429512665002, L, 6158154400, 4.364888637533284, L, 7697693000, 4.193127960216363, L, 9237231600, 3.92444593326711, L, 10776770200, 3.708611311184686, L, 12316308800, 3.5899364892138728, L, 13855847400, 3.6147576795493004, L, 15395386000, 3.639268562425248, L, 16934924600, 3.602912540686978, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -0.799478267490958
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.799478267490958, L, 1539538600, -0.8196808322878194, L, 3079077200, -0.8381137072299424, L, 4618615800, -0.841588194923574, L, 6158154400, -0.8420854998278812, L, 7697693000, -0.8018218734588781, L, 9237231600, -0.7362754608832431, L, 10776770200, -0.6793087939737276, L, 12316308800, -0.637763171279651, L, 13855847400, -0.625866262431545, L, 15395386000, -0.624158695167519, L, 16934924600, -0.6345114211887907, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 2.03206535574929
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.03206535574929, L, 1539538600, 2.0749706674187873, L, 3079077200, 2.112464088311794, L, 4618615800, 2.1179189624311636, L, 6158154400, 2.1186976251669214, L, 7697693000, 2.026342726978491, L, 9237231600, 1.8736084103781327, L, 10776770200, 1.739011620225664, L, 12316308800, 1.6365632775290255, L, 13855847400, 1.603794895521096, L, 15395386000, 1.599116615864821, L, 16934924600, 1.6284172421599241, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Neck1" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.872790058109755e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.872790058109755e-15, L, 1539538600, -4.223896943201462e-16, L, 3079077200, -2.977125087821408e-15, L, 4618615800, 2.4555853658642955e-15, L, 6158154400, 2.1316175524322126e-15, L, 7697693000, 4.8140368306380664e-15, L, 9237231600, 1.0105471123806074e-15, L, 10776770200, -1.3105586627017395e-15, L, 12316308800, 1.110227695028235e-15, L, 13855847400, -5.3468006064255915e-15, L, 15395386000, -7.093311057791314e-16, L, 16934924600, -3.646501370342929e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 1.0759773857456838e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.0759773857456838e-15, L, 1539538600, 6.71043067383594e-17, L, 3079077200, -1.4187055469389623e-16, L, 4618615800, 8.5771399153659145e-16, L, 6158154400, 1.0750405651770686e-16, L, 7697693000, -2.7715525478455555e-16, L, 9237231600, 9.857008485016509e-16, L, 10776770200, -1.679384490551947e-15, L, 12316308800, -1.1388010117396893e-15, L, 13855847400, 2.267220693263251e-15, L, 15395386000, 2.43721295039086e-15, L, 16934924600, 3.955811903699165e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 2.000284816129484e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.000284816129484e-16, L, 1539538600, -7.835133682652339e-16, L, 3079077200, 2.27189508654925e-16, L, 4618615800, 9.693700047512394e-16, L, 6158154400, 7.739493835222352e-16, L, 7697693000, -3.067571160495383e-16, L, 9237231600, -1.0885207393856896e-15, L, 10776770200, 8.460953294637665e-16, L, 12316308800, -3.329233226461109e-16, L, 13855847400, 5.784803086810125e-16, L, 15395386000, -1.595235872373202e-15, L, 16934924600, -3.669919374381825e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Neck2" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.872790058109755e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.872790058109755e-15, L, 1539538600, -4.223896943201462e-16, L, 3079077200, -2.977125087821408e-15, L, 4618615800, 2.4555853658642955e-15, L, 6158154400, 2.1316175524322126e-15, L, 7697693000, 4.8140368306380664e-15, L, 9237231600, 1.0105471123806074e-15, L, 10776770200, -1.3105586627017395e-15, L, 12316308800, 1.110227695028235e-15, L, 13855847400, -5.3468006064255915e-15, L, 15395386000, -7.093311057791314e-16, L, 16934924600, -3.646501370342929e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 1.0759773857456838e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.0759773857456838e-15, L, 1539538600, 6.71043067383594e-17, L, 3079077200, -1.4187055469389623e-16, L, 4618615800, 8.5771399153659145e-16, L, 6158154400, 1.0750405651770686e-16, L, 7697693000, -2.7715525478455555e-16, L, 9237231600, 9.857008485016509e-16, L, 10776770200, -1.679384490551947e-15, L, 12316308800, -1.1388010117396893e-15, L, 13855847400, 2.267220693263251e-15, L, 15395386000, 2.43721295039086e-15, L, 16934924600, 3.955811903699165e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 2.000284816129484e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.000284816129484e-16, L, 1539538600, -7.835133682652339e-16, L, 3079077200, 2.27189508654925e-16, L, 4618615800, 9.693700047512394e-16, L, 6158154400, 7.739493835222352e-16, L, 7697693000, -3.067571160495383e-16, L, 9237231600, -1.0885207393856896e-15, L, 10776770200, 8.460953294637665e-16, L, 12316308800, -3.329233226461109e-16, L, 13855847400, 5.784803086810125e-16, L, 15395386000, -1.595235872373202e-15, L, 16934924600, -3.669919374381825e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::Head" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.872790058109755e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.872790058109755e-15, L, 1539538600, -4.223896943201462e-16, L, 3079077200, -2.977125087821408e-15, L, 4618615800, 2.4555853658642955e-15, L, 6158154400, 2.1316175524322126e-15, L, 7697693000, 4.8140368306380664e-15, L, 9237231600, 1.0105471123806074e-15, L, 10776770200, -1.3105586627017395e-15, L, 12316308800, 1.110227695028235e-15, L, 13855847400, -5.3468006064255915e-15, L, 15395386000, -7.093311057791314e-16, L, 16934924600, -3.646501370342929e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 1.0759773857456838e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.0759773857456838e-15, L, 1539538600, 6.71043067383594e-17, L, 3079077200, -1.4187055469389623e-16, L, 4618615800, 8.5771399153659145e-16, L, 6158154400, 1.0750405651770686e-16, L, 7697693000, -2.7715525478455555e-16, L, 9237231600, 9.857008485016509e-16, L, 10776770200, -1.679384490551947e-15, L, 12316308800, -1.1388010117396893e-15, L, 13855847400, 2.267220693263251e-15, L, 15395386000, 2.43721295039086e-15, L, 16934924600, 3.955811903699165e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 2.000284816129484e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.000284816129484e-16, L, 1539538600, -7.835133682652339e-16, L, 3079077200, 2.27189508654925e-16, L, 4618615800, 9.693700047512394e-16, L, 6158154400, 7.739493835222352e-16, L, 7697693000, -3.067571160495383e-16, L, 9237231600, -1.0885207393856896e-15, L, 10776770200, 8.460953294637665e-16, L, 12316308800, -3.329233226461109e-16, L, 13855847400, 5.784803086810125e-16, L, 15395386000, -1.595235872373202e-15, L, 16934924600, -3.669919374381825e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftShoulder" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 0.24354225824925946
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 0.24354225824925946, L, 1539538600, 0.2896860064552706, L, 3079077200, 0.3330664428107435, L, 4618615800, 0.34647405609727344, L, 6158154400, 0.3551834521780911, L, 7697693000, 0.3605942699071715, L, 9237231600, 0.36662140781028546, L, 10776770200, 0.3712437900462449, L, 12316308800, 0.37838217716750305, L, 13855847400, 0.3972172197661605, L, 15395386000, 0.4167982851519727, L, 16934924600, 0.43080624018196617, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 2.341651381685463
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.341651381685463, L, 1539538600, 2.596288450650406, L, 3079077200, 2.793975526219776, L, 4618615800, 2.786042770360601, L, 6158154400, 2.7671703940879193, L, 7697693000, 2.745815667920612, L, 9237231600, 2.703578663665654, L, 10776770200, 2.6086069421276017, L, 12316308800, 2.5096150642148536, L, 13855847400, 2.4512459393596777, L, 15395386000, 2.4136316075862156, L, 16934924600, 2.3972310355913775, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -2.260177984893539
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -2.260177984893539, L, 1539538600, -2.1847604593805094, L, 3079077200, -2.0699162601494905, L, 4618615800, -1.9162187455008906, L, 6158154400, -1.753785317528824, L, 7697693000, -1.638817055872511, L, 9237231600, -1.4957312212578855, L, 10776770200, -1.2512419227330691, L, 12316308800, -0.9547243370130709, L, 13855847400, -0.6036833082123502, L, 15395386000, -0.2803819533007674, L, 16934924600, -0.06754758096229, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftShoulderTwist" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -5.740335401212491e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -5.740335401212491e-16, L, 1539538600, -1.2243617413641412e-16, L, 3079077200, -4.0981935705228435e-16, L, 4618615800, -2.848286563644232e-16, L, 6158154400, -1.757267257650624e-16, L, 7697693000, 2.2324660479642217e-16, L, 9237231600, -1.4117761636729572e-16, L, 10776770200, -1.6545934598298515e-16, L, 12316308800, 2.966943361482173e-16, L, 13855847400, -7.78425856803973e-16, L, 15395386000, -4.1162049687744713e-16, L, 16934924600, -1.2173441845178326e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 4.758364480079605e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 4.758364480079605e-15, L, 1539538600, -4.482260843170894e-16, L, 3079077200, -3.31505546677694e-15, L, 4618615800, 4.965565008442256e-15, L, 6158154400, 1.4682572086860473e-15, L, 7697693000, 5.017519089373016e-16, L, 9237231600, -2.9744782717604394e-16, L, 10776770200, -1.3526510391223198e-16, L, 12316308800, -1.3928478208600443e-15, L, 13855847400, 4.330144658840102e-17, L, 15395386000, -4.778569250018283e-16, L, 16934924600, 3.8931161446866827e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -1.7060479619143883e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.7060479619143883e-15, L, 1539538600, -2.6897926438877787e-16, L, 3079077200, 1.2667637518181907e-15, L, 4618615800, -2.2270006550078334e-15, L, 6158154400, -5.393617882591199e-16, L, 7697693000, 3.4150123893330215e-15, L, 9237231600, 1.0837278315128044e-15, L, 10776770200, -2.1156555213312905e-15, L, 12316308800, 7.276335055076521e-16, L, 13855847400, -7.329520884165335e-16, L, 15395386000, 1.500573688198421e-16, L, 16934924600, 5.498682373145393e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftArm" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.2925447194495152
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.2925447194495152, L, 1539538600, 1.8094375083595728, L, 3079077200, 2.377457408743562, L, 4618615800, 2.6643735345057085, L, 6158154400, 2.7683089807681456, L, 7697693000, 2.642794070086699, L, 9237231600, 2.3090529579853545, L, 10776770200, 1.8059605053285177, L, 12316308800, 1.1585898503074539, L, 13855847400, 0.4047043122136689, L, 15395386000, -0.46829454962978057, L, 16934924600, -1.4922067112206463, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 4.335702411505858
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 4.335702411505858, L, 1539538600, 6.1038897640864835, L, 3079077200, 8.024629532398837, L, 4618615800, 8.9429333962578, L, 6158154400, 9.246755237509051, L, 7697693000, 8.678226379984167, L, 9237231600, 7.406165649166229, L, 10776770200, 5.706892108726797, L, 12316308800, 3.6042499701231856, L, 13855847400, 1.2126357533727647, L, 15395386000, -1.4607674130046253, L, 16934924600, -4.44848989997245, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -1.7726358132166522
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.7726358132166522, L, 1539538600, -1.9197384083141382, L, 3079077200, -2.0013740535208253, L, 4618615800, -1.9540744443002724, L, 6158154400, -1.8944263685736056, L, 7697693000, -1.6380033397722362, L, 9237231600, -1.2829941610381688, L, 10776770200, -1.0312932996660427, L, 12316308800, -0.7659887550213029, L, 13855847400, -0.45890135997685333, L, 15395386000, -0.047886164494690645, L, 16934924600, 0.5568768463134394, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftArmRoll" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -3.395814108159363e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -3.395814108159363e-15, L, 1539538600, 4.2026085065798873e-16, L, 3079077200, 1.5525717145483604e-16, L, 4618615800, -2.626048594207237e-15, L, 6158154400, 1.9044550075090178e-15, L, 7697693000, 3.98526875983644e-15, L, 9237231600, 2.043558725605998e-15, L, 10776770200, -3.503560700538778e-15, L, 12316308800, 8.592075073442734e-16, L, 13855847400, -8.060488751469965e-16, L, 15395386000, -4.490966759546323e-16, L, 16934924600, -1.2318007369831757e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 8.707987819487126e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 8.707987819487126e-15, L, 1539538600, -5.178697543661986e-15, L, 3079077200, -8.649931823660622e-15, L, 4618615800, 7.815743840036432e-15, L, 6158154400, 4.924786150597907e-15, L, 7697693000, 3.739427530715338e-15, L, 9237231600, -1.7719460953769594e-15, L, 10776770200, 6.710977680138832e-16, L, 12316308800, -1.7901224496576185e-15, L, 13855847400, -1.5024292022838205e-15, L, 15395386000, -6.08619770058085e-16, L, 16934924600, 3.758172117551304e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -1.577374686285594e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.577374686285594e-14, L, 1539538600, 6.517267727262885e-15, L, 3079077200, 3.1294772436329796e-15, L, 4618615800, -6.446526593562718e-15, L, 6158154400, 3.7773487719241106e-15, L, 7697693000, 1.931949113323669e-14, L, 9237231600, 9.853286170676734e-15, L, 10776770200, -2.7253085866506254e-14, L, 12316308800, 5.140642639162335e-15, L, 13855847400, -2.4733491321624777e-14, L, 15395386000, 2.3378060064491022e-14, L, 16934924600, 1.0650577255673798e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftForeArm" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 34.05977578345867
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 34.05977578345867, L, 1539538600, 34.059775783458676, L, 3079077200, 34.059775783458676, L, 4618615800, 34.059775783458676, L, 6158154400, 34.05977578345868, L, 7697693000, 34.05977578345868, L, 9237231600, 34.059775783458676, L, 10776770200, 34.059775783458676, L, 12316308800, 34.05977578345868, L, 13855847400, 34.059775783458676, L, 15395386000, 34.05977578345867, L, 16934924600, 34.059775783458676, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 27.65925861142639
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 27.65925861142639, L, 1539538600, 27.659258611426353, L, 3079077200, 27.659258611426356, L, 4618615800, 27.659258611426395, L, 6158154400, 27.659258611426374, L, 7697693000, 27.659258611426385, L, 9237231600, 27.659258611426367, L, 10776770200, 27.65925861142636, L, 12316308800, 27.659258611426377, L, 13855847400, 27.65925861142636, L, 15395386000, 27.659258611426367, L, 16934924600, 27.65925861142637, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 5.667630351535456
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 5.667630351535456, L, 1539538600, 5.667630351535472, L, 3079077200, 5.667630351535475, L, 4618615800, 5.66763035153546, L, 6158154400, 5.6676303515354745, L, 7697693000, 5.667630351535483, L, 9237231600, 5.6676303515354745, L, 10776770200, 5.667630351535448, L, 12316308800, 5.667630351535476, L, 13855847400, 5.66763035153545, L, 15395386000, 5.667630351535486, L, 16934924600, 5.667630351535481, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftForeArmRoll" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.2315700047528282e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.2315700047528282e-14, L, 1539538600, 4.445024059103221e-15, L, 3079077200, -4.673675654762973e-15, L, 4618615800, 3.609479357832717e-15, L, 6158154400, 1.1484219047797423e-14, L, 7697693000, 2.1861670536037224e-14, L, 9237231600, 6.039209900699896e-15, L, 10776770200, -8.817010491595387e-15, L, 12316308800, 6.259639901951045e-15, L, 13855847400, -1.4164859583629168e-14, L, 15395386000, 1.4259994982368806e-14, L, 16934924600, -1.324421056383143e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 2.7435294193265368e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.7435294193265368e-14, L, 1539538600, -4.988085891728224e-15, L, 3079077200, -1.5879295660166817e-14, L, 4618615800, 7.709548182753278e-15, L, 6158154400, 4.862014903274535e-15, L, 7697693000, 1.1729285931642076e-14, L, 9237231600, -5.199873923253557e-16, L, 10776770200, -8.259193359762087e-15, L, 12316308800, -1.4521603973939055e-16, L, 13855847400, -7.063391064592144e-15, L, 15395386000, -6.244494228670046e-17, L, 16934924600, -1.3296413755954588e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -2.7196254389540956e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -2.7196254389540956e-14, L, 1539538600, 8.008081125582692e-15, L, 3079077200, 1.3358901461207157e-14, L, 4618615800, -2.0770417398600302e-14, L, 6158154400, -1.6397095989398783e-15, L, 7697693000, 1.0972839540313878e-14, L, 9237231600, 4.7350054861707986e-15, L, 10776770200, -2.104307593106939e-14, L, 12316308800, 1.6316762217367357e-15, L, 13855847400, -1.9176468085834382e-14, L, 15395386000, 1.316191003149037e-14, L, 16934924600, 1.694905344575383e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftHand" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.2315700047528282e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.2315700047528282e-14, L, 1539538600, 4.445024059103221e-15, L, 3079077200, -4.673675654762973e-15, L, 4618615800, 3.609479357832717e-15, L, 6158154400, 1.1484219047797423e-14, L, 7697693000, 2.1861670536037224e-14, L, 9237231600, 6.039209900699896e-15, L, 10776770200, -8.817010491595387e-15, L, 12316308800, 6.259639901951045e-15, L, 13855847400, -1.4164859583629168e-14, L, 15395386000, 1.4259994982368806e-14, L, 16934924600, -1.324421056383143e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 2.7435294193265368e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.7435294193265368e-14, L, 1539538600, -4.988085891728224e-15, L, 3079077200, -1.5879295660166817e-14, L, 4618615800, 7.709548182753278e-15, L, 6158154400, 4.862014903274535e-15, L, 7697693000, 1.1729285931642076e-14, L, 9237231600, -5.199873923253557e-16, L, 10776770200, -8.259193359762087e-15, L, 12316308800, -1.4521603973939055e-16, L, 13855847400, -7.063391064592144e-15, L, 15395386000, -6.244494228670046e-17, L, 16934924600, -1.3296413755954588e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -2.7196254389540956e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -2.7196254389540956e-14, L, 1539538600, 8.008081125582692e-15, L, 3079077200, 1.3358901461207157e-14, L, 4618615800, -2.0770417398600302e-14, L, 6158154400, -1.6397095989398783e-15, L, 7697693000, 1.0972839540313878e-14, L, 9237231600, 4.7350054861707986e-15, L, 10776770200, -2.104307593106939e-14, L, 12316308800, 1.6316762217367357e-15, L, 13855847400, -1.9176468085834382e-14, L, 15395386000, 1.316191003149037e-14, L, 16934924600, 1.694905344575383e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::LeftHandThumb1" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.2315700047528282e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.2315700047528282e-14, L, 1539538600, 4.445024059103221e-15, L, 3079077200, -4.673675654762973e-15, L, 4618615800, 3.609479357832717e-15, L, 6158154400, 1.1484219047797423e-14, L, 7697693000, 2.1861670536037224e-14, L, 9237231600, 6.039209900699896e-15, L, 10776770200, -8.817010491595387e-15, L, 12316308800, 6.259639901951045e-15, L, 13855847400, -1.4164859583629168e-14, L, 15395386000, 1.4259994982368806e-14, L, 16934924600, -1.324421056383143e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 2.7435294193265368e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.7435294193265368e-14, L, 1539538600, -4.988085891728224e-15, L, 3079077200, -1.5879295660166817e-14, L, 4618615800, 7.709548182753278e-15, L, 6158154400, 4.862014903274535e-15, L, 7697693000, 1.1729285931642076e-14, L, 9237231600, -5.199873923253557e-16, L, 10776770200, -8.259193359762087e-15, L, 12316308800, -1.4521603973939055e-16, L, 13855847400, -7.063391064592144e-15, L, 15395386000, -6.244494228670046e-17, L, 16934924600, -1.3296413755954588e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -2.7196254389540956e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -2.7196254389540956e-14, L, 1539538600, 8.008081125582692e-15, L, 3079077200, 1.3358901461207157e-14, L, 4618615800, -2.0770417398600302e-14, L, 6158154400, -1.6397095989398783e-15, L, 7697693000, 1.0972839540313878e-14, L, 9237231600, 4.7350054861707986e-15, L, 10776770200, -2.104307593106939e-14, L, 12316308800, 1.6316762217367357e-15, L, 13855847400, -1.9176468085834382e-14, L, 15395386000, 1.316191003149037e-14, L, 16934924600, 1.694905344575383e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightShoulder" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 0.46275621845211745
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 0.46275621845211745, L, 1539538600, 0.4974510140935942, L, 3079077200, 0.5239748648943802, L, 4618615800, 0.5258714598571304, L, 6158154400, 0.5256938878770536, L, 7697693000, 0.5170556214011621, L, 9237231600, 0.502467761992742, L, 10776770200, 0.48288535943350275, L, 12316308800, 0.46167270028122703, L, 13855847400, 0.44393550734271015, L, 15395386000, 0.42544552033871663, L, 16934924600, 0.40170636666537335, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -2.319757036076838
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -2.319757036076838, L, 1539538600, -2.57367645078591, L, 3079077200, -2.771232303961323, L, 4618615800, -2.759670413486665, L, 6158154400, -2.737584100612012, L, 7697693000, -2.721603679475893, L, 9237231600, -2.68766184576581, L, 10776770200, -2.6011717877689446, L, 12316308800, -2.509751235667177, L, 13855847400, -2.455440235099301, L, 15395386000, -2.42031219192295, L, 16934924600, -2.4054061053888947, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -0.488463226057967
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -0.488463226057967, L, 1539538600, -0.3365918059996279, L, 3079077200, -0.21855438421353043, L, 4618615800, -0.265069207489722, L, 6158154400, -0.31148634383890517, L, 7697693000, -0.24562217598253736, L, 9237231600, -0.14747367954784815, L, 10776770200, -0.10495062080416753, L, 12316308800, -0.0525082863884746, L, 13855847400, 0.04267018180316083, L, 15395386000, 0.19100043464785824, L, 16934924600, 0.448539381253892, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightShoulderTwist" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -2.116686871012152e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -2.116686871012152e-16, L, 1539538600, -1.3084380135957793e-16, L, 3079077200, -4.068648088347932e-16, L, 4618615800, -1.5894752057797714e-16, L, 6158154400, -4.0914761402749856e-17, L, 7697693000, 1.5873870320542218e-16, L, 9237231600, -2.50192809392115e-16, L, 10776770200, -2.4613881739489563e-16, L, 12316308800, 2.331510621069587e-16, L, 13855847400, -1.7028706943321916e-15, L, 15395386000, -2.14997273182562e-16, L, 16934924600, -9.544550691511618e-16, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -6.499720065205909e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -6.499720065205909e-16, L, 1539538600, 5.318202520423051e-16, L, 3079077200, 1.2100909409140722e-15, L, 4618615800, -2.059957324032035e-15, L, 6158154400, -1.1940498576860542e-15, L, 7697693000, -7.666419066591088e-16, L, 9237231600, 2.101036604742022e-15, L, 10776770200, -2.5598848439070648e-15, L, 12316308800, 1.3708925314293387e-15, L, 13855847400, 2.9554117682697868e-15, L, 15395386000, 4.950762799108502e-15, L, 16934924600, 6.864302457468272e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -9.093981293400519e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -9.093981293400519e-16, L, 1539538600, 1.270401344113208e-16, L, 3079077200, 8.35930859628008e-16, L, 4618615800, -8.394208559834682e-16, L, 6158154400, 2.29402657049134e-16, L, 7697693000, 9.29903517384585e-16, L, 9237231600, 2.7459525848337667e-17, L, 10776770200, -1.0256778826732852e-15, L, 12316308800, 3.2192517904937667e-16, L, 13855847400, -3.6559553899109027e-16, L, 15395386000, -3.5602126050198147e-16, L, 16934924600, 1.0481739988624974e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightArm" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: -6.3818792180995105
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -6.3818792180995105, L, 1539538600, -5.959818386517874, L, 3079077200, -5.3061710104719175, L, 4618615800, -4.185630386974741, L, 6158154400, -3.1035820727193735, L, 7697693000, -2.6996079616396536, L, 9237231600, -2.628816901775143, L, 10776770200, -2.664397916366823, L, 12316308800, -2.700027702313131, L, 13855847400, -2.6037191687619368, L, 15395386000, -2.4190338950840924, L, 16934924600, -2.2269530050037214, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 6.594903939347807
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 6.594903939347807, L, 1539538600, 5.7334090803493645, L, 3079077200, 4.599700915050414, L, 4618615800, 3.513858752481713, L, 6158154400, 2.650551867383439, L, 7697693000, 2.2969189066256863, L, 9237231600, 2.2396123704259803, L, 10776770200, 2.2665569007525863, L, 12316308800, 2.29343781657542, L, 13855847400, 2.202019336937455, L, 15395386000, 2.028735881567594, L, 16934924600, 1.8518771769925686, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 36.58996423540413
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 36.58996423540413, L, 1539538600, 36.07668787226078, L, 3079077200, 35.49650739393647, L, 4618615800, 35.16072312199074, L, 6158154400, 34.923469367442436, L, 7697693000, 34.679719738408906, L, 9237231600, 34.54906117536982, L, 10776770200, 34.65146130089864, L, 12316308800, 34.85228711430828, L, 13855847400, 35.085300916975115, L, 15395386000, 35.32853946140521, L, 16934924600, 35.51928513740128, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightArmRoll" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 2.2972317793420234e-16
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 2.2972317793420234e-16, L, 1539538600, -9.181887581844976e-16, L, 3079077200, -1.1241496748441666e-15, L, 4618615800, -7.063080605376226e-16, L, 6158154400, -5.716470609259822e-16, L, 7697693000, -2.5536261893676317e-15, L, 9237231600, -3.948104712431945e-16, L, 10776770200, 3.522544587298081e-17, L, 12316308800, -5.678657636041497e-16, L, 13855847400, 1.965370005633189e-15, L, 15395386000, 1.2952558536841936e-15, L, 16934924600, 1.4880364097972104e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: 7.568087822350356e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 7.568087822350356e-15, L, 1539538600, -1.6025594134085071e-15, L, 3079077200, -1.9360293079797353e-15, L, 4618615800, 2.8248006824465917e-15, L, 6158154400, 1.754093422353825e-15, L, 7697693000, -4.338332880197518e-16, L, 9237231600, 1.5101509977391743e-15, L, 10776770200, -1.424643657720346e-15, L, 12316308800, 7.036575108453549e-16, L, 13855847400, -5.198934437969701e-16, L, 15395386000, 1.4411974489789325e-15, L, 16934924600, 1.5387432038653601e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 6.3694980762520755e-15
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 6.3694980762520755e-15, L, 1539538600, -9.176862339896072e-15, L, 3079077200, -1.4737929609463995e-14, L, 4618615800, 2.7660118974018793e-14, L, 6158154400, 1.7938294161017777e-14, L, 7697693000, -2.284116954202632e-14, L, 9237231600, -1.5323531353429075e-14, L, 10776770200, 2.912991018311967e-14, L, 12316308800, -3.221747654283755e-14, L, 13855847400, 9.173005882608274e-15, L, 15395386000, -3.413020477530834e-14, L, 16934924600, -1.1629950491688727e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightForeArm" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 31.529152862504432
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 31.529152862504432, L, 1539538600, 32.94414460042356, L, 3079077200, 34.059775783458676, L, 4618615800, 34.059775783458676, L, 6158154400, 34.059775783458676, L, 7697693000, 34.059775783458676, L, 9237231600, 34.059775783458676, L, 10776770200, 34.059775783458676, L, 12316308800, 34.05977578345867, L, 13855847400, 34.059775783458676, L, 15395386000, 34.059775783458676, L, 16934924600, 34.059775783458676, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -25.984400570888944
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -25.984400570888944, L, 1539538600, -26.931170043041856, L, 3079077200, -27.659258611426377, L, 4618615800, -27.65925861142639, L, 6158154400, -27.659258611426377, L, 7697693000, -27.65925861142638, L, 9237231600, -27.659258611426367, L, 10776770200, -27.659258611426363, L, 12316308800, -27.659258611426374, L, 13855847400, -27.65925861142635, L, 15395386000, -27.659258611426363, L, 16934924600, -27.659258611426356, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: -4.708561587807177
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -4.708561587807177, L, 1539538600, -5.236083225071205, L, 3079077200, -5.6676303515354824, L, 4618615800, -5.667630351535443, L, 6158154400, -5.66763035153545, L, 7697693000, -5.667630351535487, L, 9237231600, -5.667630351535481, L, 10776770200, -5.667630351535446, L, 12316308800, -5.667630351535493, L, 13855847400, -5.667630351535461, L, 15395386000, -5.667630351535494, L, 16934924600, -5.66763035153548, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightForeArmRoll" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.9886684545808195e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.9886684545808195e-14, L, 1539538600, -1.0653826420235274e-14, L, 3079077200, 1.1873831837832785e-15, L, 4618615800, 1.283564238186286e-14, L, 6158154400, 1.318335821425118e-14, L, 7697693000, 1.9004218077578474e-14, L, 9237231600, 1.5561316538715096e-14, L, 10776770200, -1.2545545225859111e-14, L, 12316308800, 1.188213084638547e-14, L, 13855847400, -1.725610835693583e-14, L, 15395386000, 1.2359996592034383e-14, L, 16934924600, -5.850287621672058e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -1.7094893969385295e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.7094893969385295e-14, L, 1539538600, -1.7219669327335782e-15, L, 3079077200, -2.1698725763271893e-15, L, 4618615800, -8.411160085432106e-15, L, 6158154400, -8.629518687604645e-16, L, 7697693000, -1.4202901657227672e-14, L, 9237231600, -5.047380077516509e-15, L, 10776770200, 3.855984507494743e-15, L, 12316308800, -4.622848171175155e-15, L, 13855847400, 2.0506653868288822e-14, L, 15395386000, 4.6816955978836695e-15, L, 16934924600, 1.7925224564278514e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 1.3173754218867432e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.3173754218867432e-14, L, 1539538600, -1.681654277564028e-14, L, 3079077200, -7.999166697609885e-15, L, 4618615800, 3.4878313015867463e-14, L, 6158154400, 2.6402545985070043e-14, L, 7697693000, -7.760730406181027e-15, L, 9237231600, -9.999605843049146e-15, L, 10776770200, 2.4650853449801207e-14, L, 12316308800, -2.4873401800571566e-14, L, 13855847400, -5.692493232915419e-15, L, 15395386000, -3.149052367611156e-14, L, 16934924600, -2.1433628100847388e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+		Model: "Model::RightHand" {
+			Version: 1.1
+			Channel: "Transform" {
+				Channel: "R" {
+					Channel: "X" {
+						Default: 1.9886684545808195e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.9886684545808195e-14, L, 1539538600, -1.0653826420235274e-14, L, 3079077200, 1.1873831837832785e-15, L, 4618615800, 1.283564238186286e-14, L, 6158154400, 1.318335821425118e-14, L, 7697693000, 1.9004218077578474e-14, L, 9237231600, 1.5561316538715096e-14, L, 10776770200, -1.2545545225859111e-14, L, 12316308800, 1.188213084638547e-14, L, 13855847400, -1.725610835693583e-14, L, 15395386000, 1.2359996592034383e-14, L, 16934924600, -5.850287621672058e-15, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Y" {
+						Default: -1.7094893969385295e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, -1.7094893969385295e-14, L, 1539538600, -1.7219669327335782e-15, L, 3079077200, -2.1698725763271893e-15, L, 4618615800, -8.411160085432106e-15, L, 6158154400, -8.629518687604645e-16, L, 7697693000, -1.4202901657227672e-14, L, 9237231600, -5.047380077516509e-15, L, 10776770200, 3.855984507494743e-15, L, 12316308800, -4.622848171175155e-15, L, 13855847400, 2.0506653868288822e-14, L, 15395386000, 4.6816955978836695e-15, L, 16934924600, 1.7925224564278514e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+					Channel: "Z" {
+						Default: 1.3173754218867432e-14
+						KeyVer: 4005
+						KeyCount: 12
+						Key: 0, 1.3173754218867432e-14, L, 1539538600, -1.681654277564028e-14, L, 3079077200, -7.999166697609885e-15, L, 4618615800, 3.4878313015867463e-14, L, 6158154400, 2.6402545985070043e-14, L, 7697693000, -7.760730406181027e-15, L, 9237231600, -9.999605843049146e-15, L, 10776770200, 2.4650853449801207e-14, L, 12316308800, -2.4873401800571566e-14, L, 13855847400, -5.692493232915419e-15, L, 15395386000, -3.149052367611156e-14, L, 16934924600, -2.1433628100847388e-14, L
+						Color: 1.0, 1.0, 1.0
+					}
+				}
+				LayerType: 1
+			}
+		}
+	}
+}

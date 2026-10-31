@@ -12,7 +12,7 @@ use std::path::PathBuf;
 use ac_core::Skeleton;
 use ac_core::quat::Vec3;
 use ac_core::retarget;
-use ac_io::fbx::{binary, import_bytes, scene};
+use ac_io::fbx::{binary, import_bytes, read, scene};
 use serde_json::Value;
 
 fn repo() -> PathBuf {
@@ -330,6 +330,59 @@ fn corrupt_truncated_and_non_humanoid_files_are_refused_with_a_reason() {
     let got = import_bytes(&good, &sk, "j", &j).unwrap();
     assert_eq!(got.report["joints"]["l_toe"], "LeftToe_End");
     assert_eq!(got.report["given"], serde_json::json!(["l_toe"]));
+}
+
+#[test]
+fn text_and_fbx_6_files_give_the_joints_of_the_binary_7_file() {
+    // the same walk: these hold its first 12 frames, written from the same numbers
+    let want = scene::motion(&binary::parse(&bytes("walk-yup-75.fbx")).unwrap()).unwrap();
+    for (file, version) in [
+        ("walk-text-74.fbx", 7400),
+        ("walk-text-61.fbx", 6100),
+        ("walk-binary-61.fbx", 6100),
+    ] {
+        let m = scene::motion(&read(&bytes(file)).unwrap()).unwrap();
+        assert_eq!((m.version, m.frames, m.fps), (version, 12, 30.0), "{file}");
+        assert_eq!(
+            (m.up_axis.as_str(), m.front_axis.as_str()),
+            ("+Y", "+Z"),
+            "{file}"
+        );
+        assert_eq!(m.names, want.names, "{file}");
+        assert_eq!(m.parents, want.parents, "{file}");
+        let mut worst = 0.0f64;
+        for (row, wrow) in m.positions.iter().zip(&want.positions) {
+            for (a, b) in row.iter().zip(wrow) {
+                worst = worst.max(dist(*a, *b));
+            }
+        }
+        // the binary 7 file holds f32 values in centimetres
+        assert!(worst < 1e-4, "{file}: joints off by up to {worst} m");
+    }
+}
+
+#[test]
+fn text_and_fbx_6_files_import_onto_the_rig() {
+    let sk = skeleton();
+    let none = BTreeMap::new();
+    for file in ["walk-text-74.fbx", "walk-text-61.fbx", "walk-binary-61.fbx"] {
+        let got = import_bytes(&bytes(file), &sk, "w", &none).unwrap();
+        assert_eq!(got.clip.length(), 12, "{file}");
+        assert_eq!(got.report["joints"]["l_knee"], "LeftLeg", "{file}");
+    }
+}
+
+#[test]
+fn a_broken_text_file_is_refused_with_a_reason() {
+    let sk = skeleton();
+    let none = BTreeMap::new();
+    let good = bytes("walk-text-74.fbx");
+    let e = import_bytes(&good[..good.len() / 2], &sk, "t", &none).unwrap_err();
+    assert!(e.contains("truncated"), "{e}");
+    let e = import_bytes(b"; FBX 7.4.0 project file\n", &sk, "t", &none).unwrap_err();
+    assert!(e.contains("GlobalSettings"), "{e}");
+    let e = import_bytes(b"; FBX 6.1.0 project file\nObjects: {\n}\n", &sk, "t", &none).unwrap_err();
+    assert!(e.contains("no GlobalSettings"), "{e}");
 }
 
 #[test]

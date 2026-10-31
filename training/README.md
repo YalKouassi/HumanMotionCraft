@@ -25,7 +25,7 @@ clips. Nothing here runs at app time.
 | `ac_train.export` | writes `assets/models/<tag>/` (the weights the app loads) and the `ac-ai` goldens |
 | `ac_train.library` | cuts 3-second clips from the retargeted sets into a library folder |
 | `ac_train.infer` | the reference fill (PyTorch) that the goldens pin the Rust port to |
-| `ac_train.fbxwrite` | a small binary FBX writer: the test files of the app's FBX import (`fixtures/data/*.fbx`) and the retarget golden the Rust port is pinned to (`crates/ac-core/tests/golden/retarget-walk.json`); it never reads FBX (the app's reader is the one importer) |
+| `ac_train.fbxwrite` | a small FBX writer, binary and text: the test files of the app's FBX import (`fixtures/data/*.fbx`) and the retarget golden the Rust port is pinned to (`crates/ac-core/tests/golden/retarget-walk.json`); it never reads FBX (the app's reader is the one importer) |
 | `ac_train.glbwrite` | a small glTF binary writer: the test character of the app's export onto a character (`fixtures/data/tall-character.glb`: other bone names, an A-pose, a bone roll on every joint, a scaled armature, a skinned box mesh); it never reads glTF (the app's reader is the one) |
 
 Everything under `training/data/` is gitignored: the downloads, the retargeted sets, the PyTorch

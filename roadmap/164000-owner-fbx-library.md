@@ -1,6 +1,6 @@
 # Port the owner's FBX animations into a private clip library
 
-- **Status:** in progress: the `.meta` step is built, the pilot is next; acceptance agreed by the owner (2026-10-31)
+- **Status:** in progress: reader work built, pilot next; acceptance agreed by the owner (2026-10-31)
 - **Requires:** 152000
 - **Source:** owner request (2026-10-31)
 
@@ -90,7 +90,7 @@ The owner agrees the acceptance above, with these terms:
 
 ## Result
 **First step built (2026-10-31): the `.meta` bone map and clip ranges.** This is the Decision's first
-step only. The pilot, the bulk port, text FBX and FBX 6.1 are not started, so the item stays open.
+step only. The pilot and the bulk port are not started, so the item stays open.
 - `ac_io::fbx::unity_meta` reads `<file>.fbx.meta`. Its humanoid bone map says which joint is which.
   A `joints` correction outranks the map, and the map outranks the guess from names.
 - A landmark the map leaves out (toes and neck are optional there) is guessed from names, and the
@@ -112,3 +112,45 @@ step only. The pilot, the bulk port, text FBX and FBX 6.1 are not started, so th
 - A clip's `takeName` must equal the take read (the first). A stale or normalised name is refused.
 - A clip with one frame is refused, as a whole short take is. Single-pose clips may need another answer.
 - Fractional ranges are rounded to whole frames, with a note.
+
+**Reader work built (2026-10-31), generated files only.** No real file was read, and this worktree
+built nothing: the numbers below are worked by hand or come from the generator, and the integration
+worktree runs the tests.
+- **Text FBX imports** (`ac_io::fbx::text`): the same records as binary, the same caps plus a total of
+  values, and a refusal that names the line.
+- **FBX 6.1 imports, text or binary** (`ac_io::fbx::legacy`): its named objects, `Properties60`,
+  `Connect` and `Takes` become a 7.x scene for the one scene reader. `GlobalSettings` is looked for in
+  `Objects`, where FBX 6 keeps it, which may explain the 11 refusals. A file without it is still refused
+  with a reason: axes and units are never assumed. Two models of one name are refused, since FBX 6
+  connects by name.
+- **Scale inheritance changes the pose, and is fixed.** All three `InheritType`s are computed. The old
+  code's plain matrix product was type 1, while it named type 0 the default it read everything as.
+  Types 0 and 1 differ under a non-uniform parent scale, and type 2 differs under any parent scale.
+  With no scale above a node all three agree, so unscaled skeletons don't change. A type 0 or 2 node
+  below a shear (a type 1 child of a non-uniform scale) is refused, as is a type outside the three.
+- **Later animation layers change the pose, and such takes are refused.** Layers blend, and this reader
+  doesn't. Refused: a later layer that moves anything, a soloed one, an animated weight, a first layer
+  muted or under full weight. Passed over with a note: muted, weight 0, or additive with zero offsets.
+  The first layer is now the first connected, as the format orders them, not the first in the file.
+- **Reading the first take doesn't change the pose.** A take is a separate animation, not a blend, so
+  the result stands and the existing note says what wasn't read. A `.meta` clip of another take is
+  still refused. The pilot should show whether reading further takes is worth building.
+- **`ImageData`'s property type `c`** is passed over and not inflated.
+- **152000's low leftovers, all done:** an unreadable folder is listed in `failed`; an animated scale is
+  inherited like any scale; key times that aren't whole ticks are refused in those words; `TimeMode` left
+  at default has a note.
+- **Found on the way:** cubic curves were read as straight lines with no word when their keys sat on
+  frames. A cubic curve with keys more than a frame apart now gets a note. The curve is still straight.
+- Generated fixtures: `walk-text-74.fbx`, `walk-text-61.fbx`, `walk-binary-61.fbx`, `walk-text-cut.fbx`.
+  Fixture `fbx-text-and-6`; tests in `crates/ac-io/tests/fbx.rs` and the `text`, `legacy`, `scene` and
+  `binary` modules.
+
+**For the pilot to check on real files:**
+- The generated FBX 6 files come from our own writer, so they prove only our reading of the layout.
+  Least sure: the binary form of `Key` (a `C` byte for the kind), the cubic `Key` grammar, and the
+  `InheritType` formulas (the format as remembered, with no outside check yet). A cubic form this reader
+  doesn't know is refused, and `KeyCount` must match.
+- How many files the layer refusal stops (7 of the 24 had a second layer or take). If many, blending is
+  the next build.
+- How many cubic notes appear, and whether those clips look wrong.
+- A text file with a record over 1,048,576 values (a large old-style mesh) is refused whole.
