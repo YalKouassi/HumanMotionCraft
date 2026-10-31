@@ -196,3 +196,54 @@ integration worktree runs the tests.
   Feet alone can't tell it from standing. A body standing on a prop over 0.2 m up counts as `hanging`.
 - The library panel lists one level of groups (`crates/ac-io/src/library.rs`), so it doesn't yet show
   `clips/<pack>/<action>/`. The Library acceptance line is still open, as are the Private tests.
+
+## Library
+Built 2026-10-31 for browsing several thousand private clips and deleting bad ones. This worktree built
+and ran nothing: no number below was measured, and the integration worktree runs the tests.
+
+**Opening a folder:** `humanmotioncraft --library <dir>` for one run, or Settings > Library folder from
+the next launch. Clips must be `<dir>/animations/<group>/<name>.clip.json`, one group level; a clip one
+folder deeper isn't listed, so the port's "pack and action" must fit in one folder name. A folder with
+clips in any other layout is left untouched and the status line says what to move. `library.sync` copies
+the built-ins into the folder: marked, protected, hidden by the Mine filter.
+
+**Delete:** the cross on the row under the pointer or the selected one, the Delete key, the preview's
+Delete, or the right-click menu. In a library other than the app's own it goes at once: `clip.delete`, the
+next row selected, the status line says the file is removed. It asks first in the app's own library (the
+existing convention), and anywhere when the open animation has unsaved changes. Built-ins stay. No
+`library.list` runs: the window's list is mended in place, and the clip's two thumbnails are removed.
+
+**Decided:** a delete without a question is permanent. Undo only brings back an animation that was open,
+which the old status line claimed for every clip; it now says so only when true.
+
+**Open, for the bulk port:** re-running the port would bring a deleted clip back, because the manifest
+marks it finished only by its file. The port should record what the owner deleted.
+
+**Thousands of clips, what stalled and what changed:**
+- Every `library.list` opened and parsed every file. Now `<library>/.index/<kind>.json` keeps each file's
+  result against its size and time, so only new or changed files are read, on up to 8 threads. `items()`
+  still reads everything and writes nothing, so a listing of `assets/library` leaves no file there.
+- Every frame cloned the whole list, searched it, looked up each row's `builtin` by a scan of the list and
+  checked `order_keys` by a scan: quadratic. The filtered list is now worked out only when its inputs
+  change, rows off screen only take their room, and a right-click menu's data is read only when it opens.
+- Search sorted with an allocating comparison; the sort key is now worked out once per item.
+- Thumbnails: a budget of 8 ms a frame instead of 2 a frame, at least one each frame. In memory at most 512
+  thumbnails (about 110 KB each) and 32 previews (about 3.7 MB each), oldest out; with the list no longer
+  refreshed on delete, nothing else would have freed them.
+- The 1.5 s library watch opened every file for its size and time on the UI thread. It now reads the
+  folder's own record.
+
+**To check at build, with the full set:**
+- A first listing reads every file once, before the window opens. Running
+  `ac --library <dir> run library.list` once warms it. How long it takes is not known.
+- A clip's first thumbnail and first preview parse it and draw on the UI thread, so one long clip can
+  still take longer than a frame. The budget can't split that. If it shows, parsing moves off the thread.
+- Starring still runs a whole `library.list` and drops the thumbnails, which come back from disk.
+- `LibraryPoses` (anchors in a long AI fill) still parses every clip of the open library, in memory, on
+  the first such fill.
+- Off-screen rows no longer report a `library.item.<id>` to `ui_layout`, so an agent must scroll to them.
+- Windows' folder record of a file's size and time is taken to be current once the file is closed.
+
+Tests: `crates/ac-io/tests/library.rs` (the index, threads, opening a folder, the layout note) and the tests
+in `crates/ac-app/src/app/library.rs` and `library/menu.rs` (6,000 rows, rows on screen, the cap, the next
+row, when it asks, the status line). All expected numbers are worked by hand in the tests' comments.

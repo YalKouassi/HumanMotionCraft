@@ -162,7 +162,15 @@ impl SessionBuilder {
         if let Some(lib) = &self.library {
             let from = self.assets.join("library");
             let from = json!({ "from": from.to_string_lossy() });
-            if self.install && !lib.join("animations").is_dir() {
+            let stray = crate::library::clips_outside_layout(lib);
+            if stray > 0 {
+                // nothing is put among someone's own files, and an empty list isn't left unexplained
+                soft(format!(
+                    "{} holds {stray} clips the library can't list: it reads <folder>/animations/<group>/<name>.clip.json. Move the group folders into {}, or use Import library > From a folder",
+                    lib.display(),
+                    lib.join("animations").display()
+                ))?;
+            } else if self.install && !lib.join("animations").is_dir() {
                 match session.run("library.install", &from) {
                     Ok(v) => installed = Some(v["copied"].as_u64().unwrap_or_default()),
                     Err(e) => soft(format!("couldn't install the built-in library: {e}"))?,

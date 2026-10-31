@@ -8,9 +8,14 @@
 //! (`preview.rs`); a double-click or Enter opens it (an animation) or applies it (a pose).
 //! Filters and the order are in `filter.rs`; rows, headers and dragging to a group in `row.rs`.
 //!
-//! Thumbnails are drawn on a headless renderer a few per frame, for the rows on screen, and kept
-//! in `<library>/.thumbs/` (redrawn when the item's file is newer); an animation's plays while
-//! hovered (`hover.rs`). Right-click menus, the keys and the small dialogs are in `menu.rs`.
+//! Thumbnails are drawn on a headless renderer within a few milliseconds a frame, for the rows on
+//! screen, and kept in `<library>/.thumbs/` (redrawn when the item's file is newer); an animation's
+//! plays while hovered (`hover.rs`). Right-click menus, the keys and the small dialogs are in
+//! `menu.rs`.
+//!
+//! A library can hold thousands of items, so a frame's work doesn't grow with them: the filtered
+//! list is worked out when something it depends on changes ([`Listing`]), only the rows on screen
+//! are drawn ([`visible_rows`]), and only so many pictures are kept ([`insert_capped`]).
 
 pub mod filter;
 pub(in crate::app) mod hover;
@@ -18,13 +23,15 @@ pub mod menu;
 pub mod preview;
 mod row;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::path::PathBuf;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use serde_json::{Value, json};
 
 use super::App;
-use super::save::{Confirm, Switch};
+use super::save::Switch;
 use super::ui_ids::Tag;
 use filter::Order;
 use row::Drop;
@@ -45,6 +52,9 @@ pub struct View {
     pub preview: preview::Preview,
     /// The library folder and its key in the preferences (worked out once).
     key: Option<(PathBuf, String)>,
+    /// Goes up whenever the window's list of items changes.
+    pub(super) generation: u64,
+    listing: Option<Arc<Listing>>,
 }
 
 /// Recent items shown at the top, and poses remembered.
@@ -61,6 +71,142 @@ struct Section {
     title: String,
     drop: Drop,
     rows: Vec<usize>,
+    /// Not folded away (a search or a filter opens every section).
+    open: bool,
+}
+
+/// All a [`Listing`] depends on.
+#[derive(PartialEq)]
+struct ListKey {
+    generation: u64,
+    anims: bool,
+    query: ac_io::find::Query,
+    /// The Changed chip is on (animations).
+    changed: bool,
+    /// With it on: the open animation, while it has unsaved changes.
+    unsaved_open: Option<String>,
+    order: Order,
+    recent: Vec<String>,
+    folded: Vec<String>,
+}
+
+/// The list as filtered, sorted and sectioned.
+struct Listing {
+    key: ListKey,
+    items: Vec<Value>,
+    sections: Vec<Section>,
+    /// The rows that can be reached, in order, each once: what the keys walk.
+    order: Vec<(bool, String)>,
+    /// Where each id is first drawn: (section, position in it).
+    first: HashMap<String, (usize, usize)>,
+}
+
+fn build_listing(all: &[Value], key: ListKey) -> Listing {
+    let mut items = ac_io::find::find(all, &key.query);
+    if key.changed {
+        items.retain(|it| {
+            it["edited"].as_bool() == Some(true)
+                || (key.unsaved_open.is_some() && it["id"].as_str() == key.unsaved_open.as_deref())
+        });
+    }
+    if key.order == Order::Recent {
+        items.sort_by_key(|it| {
+            it["id"]
+                .as_str()
+                .and_then(|i| key.recent.iter().position(|r| r == i))
+                .unwrap_or(usize::MAX)
+        });
+    }
+    let narrowed = key.query.narrows() || key.changed;
+    let kind = if key.anims { "animations" } else { "poses" };
+    let mut sections = sections(&items, key.order, key.query.favourites, &key.recent);
+    let mut order = Vec::new();
+    let mut first = HashMap::new();
+    for (si, s) in sections.iter_mut().enumerate() {
+        s.open = narrowed || !key.folded.contains(&format!("{kind}/{}", s.key));
+        if !s.open {
+            continue;
+        }
+        for (pos, i) in s.rows.iter().enumerate() {
+            let id = items
+                .get(*i)
+                .and_then(|it| it["id"].as_str())
+                .unwrap_or_default();
+            if !first.contains_key(id) {
+                first.insert(id.to_string(), (si, pos));
+                order.push((key.anims, id.to_string()));
+            }
+        }
+    }
+    Listing {
+        key,
+        items,
+        sections,
+        order,
+        first,
+    }
+}
+
+/// The rows of a run of `n`, starting at `top` and `step` apart, that touch `clip_top..clip_bottom`.
+fn visible_rows(top: f32, n: usize, step: f32, clip_top: f32, clip_bottom: f32) -> std::ops::Range<usize> {
+    if step <= 0.0 {
+        return 0..n;
+    }
+    let row = |y: f32| ((y - top) / step).clamp(0.0, n as f32);
+    let start = (row(clip_top).floor() as usize).min(n);
+    let end = (row(clip_bottom).ceil() as usize).clamp(start, n);
+    start..end
+}
+
+/// Keep `value`, and let the oldest go past `max`: pictures of thousands of items don't all stay
+/// in memory. One let go that is wanted again is read back from its file.
+pub(super) fn insert_capped<T>(
+    cache: &mut HashMap<String, T>,
+    order: &mut VecDeque<String>,
+    key: String,
+    value: T,
+    max: usize,
+) {
+    order.retain(|k| *k != key);
+    order.push_back(key.clone());
+    cache.insert(key, value);
+    while cache.len() > max {
+        let Some(old) = order.pop_front() else { break };
+        cache.remove(&old);
+    }
+}
+
+/// Take a deleted item out of the window's `library.list` result, and its group when that was the
+/// group's last item in either kind (`Library::delete` removes an empty folder).
+pub(super) fn forget_item(library: &mut Value, kind: &str, id: &str) {
+    let mut group = None;
+    if let Some(items) = library[kind].as_array_mut() {
+        items.retain(|it| {
+            let this = it["id"].as_str() == Some(id);
+            if this {
+                group = it["group"].as_str().map(str::to_string);
+            }
+            !this
+        });
+    }
+    let Some(group) = group else { return };
+    let same_kind_left = library[kind]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .any(|it| it["group"].as_str() == Some(group.as_str()));
+    if same_kind_left {
+        return;
+    }
+    let other = if kind == "animations" { "poses" } else { "animations" };
+    let other_left = library[other]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .any(|it| it["group"].as_str() == Some(group.as_str()));
+    if !other_left && let Some(groups) = library["groups"].as_array_mut() {
+        groups.retain(|g| g.as_str() != Some(group.as_str()));
+    }
 }
 
 /// The list's sections: by name, Starred (unless only starred ones are shown) and Recent, then
@@ -72,6 +218,7 @@ fn sections(items: &[Value], order: Order, stars_only: bool, recent: &[String]) 
             title: String::new(),
             drop: Drop::Nothing,
             rows: (0..items.len()).collect(),
+            open: true,
         }];
     }
     let id = |i: &usize| items.get(*i).and_then(|it| it["id"].as_str());
@@ -90,6 +237,7 @@ fn sections(items: &[Value], order: Order, stars_only: bool, recent: &[String]) 
                 title: "Starred".into(),
                 drop: Drop::Star,
                 rows,
+                open: true,
             });
         }
     }
@@ -104,22 +252,26 @@ fn sections(items: &[Value], order: Order, stars_only: bool, recent: &[String]) 
             title: "Recent".into(),
             drop: Drop::Nothing,
             rows,
+            open: true,
         });
     }
-    for (g, _) in ac_io::find::group_counts(items) {
-        let rows = (0..items.len())
-            .filter(|i| {
-                items
-                    .get(*i)
-                    .is_some_and(|it| it["group"].as_str() == Some(g.as_str()))
-            })
-            .collect();
-        out.push(Section {
-            key: g.clone(),
-            title: g.clone(),
-            drop: Drop::Group(g),
-            rows,
+    // the groups in the order they first appear
+    let mut at: HashMap<&str, usize> = HashMap::new();
+    for (i, it) in items.iter().enumerate() {
+        let g = it["group"].as_str().unwrap_or_default();
+        let s = *at.entry(g).or_insert_with(|| {
+            out.push(Section {
+                key: g.to_string(),
+                title: g.to_string(),
+                drop: Drop::Group(g.to_string()),
+                rows: Vec::new(),
+                open: true,
+            });
+            out.len() - 1
         });
+        if let Some(s) = out.get_mut(s) {
+            s.rows.push(i);
+        }
     }
     out
 }
@@ -127,8 +279,10 @@ fn sections(items: &[Value], order: Order, stars_only: bool, recent: &[String]) 
 /// Thumbnail cells (points) and how many frames an animation's shows.
 const CELL: (u32, u32) = (36, 48);
 const ANIM_FRAMES: usize = 4;
-/// Thumbnails drawn per frame at most (each is a few milliseconds).
-const PER_FRAME: usize = 2;
+/// Time a frame spends on thumbnails (at least one is done each frame).
+const THUMB_BUDGET: Duration = Duration::from_millis(8);
+/// Thumbnails kept in memory: far more than fit on screen, and about 110 KB each.
+const MAX_THUMBS: usize = 512;
 
 pub enum Thumb {
     Ready(egui::TextureHandle),
@@ -138,6 +292,8 @@ pub enum Thumb {
 #[derive(Default)]
 pub struct Thumbs {
     pub cache: HashMap<String, Thumb>,
+    /// The cache's keys, oldest first.
+    kept: VecDeque<String>,
     /// Asked for this frame, not drawn yet.
     wanted: Vec<(String, bool, String)>,
     /// Some were still waiting at the last draw.
@@ -204,6 +360,42 @@ impl App {
             self.lib_reveal(Tab::Animations);
             self.refresh_library();
         }
+    }
+
+    /// The list for the filters as they are now: the last one, unless something it depends on
+    /// changed.
+    fn lib_listing(&mut self, kind: &str, anims: bool) -> Arc<Listing> {
+        let recent: Vec<String> = if anims {
+            self.files.state.recent.clone()
+        } else {
+            let key = self.lib_key();
+            key.and_then(|k| self.shell.prefs.get().library_panel.recent_poses.get(&k).cloned())
+                .unwrap_or_default()
+        };
+        let folded = self.lib_folded();
+        let doc = &self.session.document;
+        let f = &self.lib_view.filters;
+        let changed = anims && f.changed;
+        let key = ListKey {
+            generation: self.lib_view.generation,
+            anims,
+            query: f.query(&self.lib_filter, anims),
+            changed,
+            unsaved_open: doc.clip_id.clone().filter(|_| changed && doc.unsaved()),
+            order: f.order,
+            recent,
+            folded,
+        };
+        if let Some(l) = &self.lib_view.listing
+            && l.key == key
+        {
+            return l.clone();
+        }
+        let all = self.library[kind].as_array().map(Vec::as_slice).unwrap_or_default();
+        let listing = Arc::new(build_listing(all, key));
+        self.files.nav.order = listing.order.clone();
+        self.lib_view.listing = Some(listing.clone());
+        listing
     }
 
     /// The library folder's key in the preferences.
@@ -334,16 +526,21 @@ impl App {
         {
             self.open_save_pose();
         }
-        let all: Vec<Value> = self.library[kind].as_array().cloned().unwrap_or_default();
-        let mut parts: Vec<String> = all
-            .iter()
-            .filter_map(|it| it["part"].as_str().map(str::to_string))
-            .collect();
-        parts.sort();
-        parts.dedup();
+        let parts: Vec<String> = if anims {
+            Vec::new()
+        } else {
+            let mut parts: Vec<String> = self.library[kind]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(|it| it["part"].as_str().map(str::to_string))
+                .collect();
+            parts.sort();
+            parts.dedup();
+            parts
+        };
         self.library_filters(ui, anims, &parts);
-        let f = &self.lib_view.filters;
-        if anims && f.source == ac_io::find::Source::Builtin {
+        if anims && self.lib_view.filters.source == ac_io::find::Source::Builtin {
             ui.label(
                 egui::RichText::new(
                     "For watching and learning. To change one, open it and use Save as: the copy is yours.",
@@ -352,36 +549,11 @@ impl App {
                 .weak(),
             );
         }
-        let q = f.query(&self.lib_filter, anims);
-        let mut items = ac_io::find::find(&all, &q);
-        let unsaved = self.session.document.unsaved();
-        let open_id = self.session.document.clip_id.clone();
-        if anims && f.changed {
-            items.retain(|it| {
-                it["edited"].as_bool() == Some(true)
-                    || (unsaved && it["id"].as_str().is_some_and(|i| open_id.as_deref() == Some(i)))
-            });
-        }
-        let order = f.order;
-        let narrowed = q.narrows() || (anims && f.changed);
-        let stars_only = f.stars;
-        let everything = !narrowed && f.source == ac_io::find::Source::All;
-        let recent: Vec<String> = if anims {
-            self.files.state.recent.clone()
-        } else {
-            let key = self.lib_key();
-            key.and_then(|k| self.shell.prefs.get().library_panel.recent_poses.get(&k).cloned())
-                .unwrap_or_default()
-        };
-        if order == Order::Recent {
-            items.sort_by_key(|it| {
-                it["id"]
-                    .as_str()
-                    .and_then(|i| recent.iter().position(|r| r == i))
-                    .unwrap_or(usize::MAX)
-            });
-        }
-        let sections = sections(&items, order, stars_only, &recent);
+        let listing = self.lib_listing(kind, anims);
+        let items = &listing.items;
+        let sections = &listing.sections;
+        let narrowed = listing.key.query.narrows() || listing.key.changed;
+        let everything = !narrowed && self.lib_view.filters.source == ac_io::find::Source::All;
         ui.separator();
         if items.is_empty() {
             let empty = match (everything, anims) {
@@ -393,7 +565,7 @@ impl App {
             };
             ui.horizontal_wrapped(|ui| {
                 ui.label(egui::RichText::new(empty).weak());
-                if !all.is_empty()
+                if self.library[kind].as_array().is_some_and(|a| !a.is_empty())
                     && ui
                         .small_button("Show everything")
                         .on_hover_text("Clear the search and every filter")
@@ -435,41 +607,63 @@ impl App {
         if let Some(g) = self.lib_view.jump.clone() {
             self.lib_fold(&format!("{kind}/{g}"), false);
         }
-        let folded = self.lib_folded();
         let scroll = std::mem::take(&mut self.files.nav.scroll);
-        let mut order_keys: Vec<(bool, String)> = Vec::new();
         let mut anchored = false;
         let mut fold: Option<(String, bool)> = None;
         egui::ScrollArea::vertical()
             .auto_shrink([false, false])
             .show(ui, |ui| {
                 let clip = ui.clip_rect();
-                for s in &sections {
+                let gap = ui.spacing().item_spacing.y;
+                let step = row::ROW_H + gap;
+                for (si, s) in sections.iter().enumerate() {
                     let what = format!("{kind}/{}", s.key);
-                    let open = narrowed || !folded.contains(&what);
                     if !s.title.is_empty() {
                         let tag = format!("library.group.{}", s.key);
-                        let r = self.lib_header(ui, &tag, &s.title, s.rows.len(), open, s.drop.clone());
+                        let r = self.lib_header(ui, &tag, &s.title, s.rows.len(), s.open, s.drop.clone());
                         if r.clicked() && !narrowed {
-                            fold = Some((what.clone(), open));
+                            fold = Some((what.clone(), s.open));
                         }
                         if self.lib_view.jump.as_deref() == Some(s.key.as_str()) {
                             r.scroll_to_me(Some(egui::Align::TOP));
                             self.lib_view.jump = None;
                         }
                     }
-                    if !open {
+                    if !s.open {
                         continue;
                     }
-                    for &i in &s.rows {
-                        let Some(item) = items.get(i) else { continue };
-                        let id = item["id"].as_str().unwrap_or_default().to_string();
-                        let key = (anims, id.clone());
-                        let first = !order_keys.contains(&key);
-                        if first {
-                            order_keys.push(key.clone());
+                    let (left, top, width) = (ui.cursor().left(), ui.cursor().top(), ui.available_width());
+                    let seen = visible_rows(top, s.rows.len(), step, clip.top(), clip.bottom());
+                    // the rows off screen only take their room
+                    let room = |ui: &mut egui::Ui, n: usize| {
+                        if n > 0 {
+                            ui.allocate_space(egui::vec2(width, n as f32 * step - gap));
                         }
-                        let picked = self.files.nav.sel.as_ref() == Some(&key);
+                    };
+                    // the selection off screen is still scrolled to
+                    let sel = self.files.nav.sel.as_ref().filter(|x| x.0 == anims).map(|x| x.1.as_str());
+                    if scroll
+                        && let Some(&(ss, pos)) = sel.and_then(|id| listing.first.get(id))
+                        && ss == si
+                        && !seen.contains(&pos)
+                    {
+                        let at = egui::pos2(left, top + pos as f32 * step);
+                        let rect = egui::Rect::from_min_size(at, egui::vec2(width, row::ROW_H));
+                        ui.scroll_to_rect(rect, Some(egui::Align::Center));
+                    }
+                    room(ui, seen.start);
+                    for pos in seen.clone() {
+                        let Some(item) = s.rows.get(pos).and_then(|i| items.get(*i)) else {
+                            continue;
+                        };
+                        let id = item["id"].as_str().unwrap_or_default().to_string();
+                        let first = listing.first.get(&id) == Some(&(si, pos));
+                        let picked = self
+                            .files
+                            .nav
+                            .sel
+                            .as_ref()
+                            .is_some_and(|x| x.0 == anims && x.1 == id);
                         let r = self.lib_row(ui, item, anims, picked, &s.key);
                         if picked && first {
                             if scroll {
@@ -480,7 +674,8 @@ impl App {
                                 anchored = true;
                             }
                         }
-                        self.item_menu(&r, anims, &id);
+                        let builtin = item["builtin"].as_bool() == Some(true);
+                        self.item_menu(&r, anims, &id, builtin);
                         if r.double_clicked() {
                             self.lib_select(anims, &id);
                             self.lib_activate(anims, &id);
@@ -488,6 +683,7 @@ impl App {
                             self.lib_select(anims, &id);
                         }
                     }
+                    room(ui, s.rows.len() - seen.end);
                 }
             });
         if !anchored {
@@ -496,10 +692,9 @@ impl App {
         if let Some((what, f)) = fold {
             self.lib_fold(&what, f);
         }
-        self.files.nav.order = order_keys;
         let ctx = ui.ctx().clone();
         self.lib_drag_ghost(&ctx);
-        self.lib_preview(&ctx, panel, &items);
+        self.lib_preview(&ctx, panel, items);
         self.draw_thumbs(&ctx);
     }
 
@@ -534,7 +729,7 @@ impl App {
                 .clicked()
                 && let Some(id) = mine
             {
-                self.confirm = Some(Confirm::Delete(id));
+                self.lib_delete(true, &id);
             }
             ui.menu_button("Import library", |ui| {
                 if ui
@@ -575,8 +770,16 @@ impl App {
         if wanted.is_empty() {
             return;
         }
-        for (id, anims, kind) in wanted.into_iter().take(PER_FRAME) {
+        let began = Instant::now();
+        for (id, anims, kind) in wanted {
             let key = format!("{kind}/{id}");
+            // a row in two sections asks twice
+            if self.thumbs.cache.contains_key(&key) {
+                continue;
+            }
+            if began.elapsed() >= THUMB_BUDGET {
+                break;
+            }
             let thumb = match self
                 .thumb_png(&kind, &id, anims, ANIM_FRAMES, CELL, "")
                 .and_then(|png| ac_render::offscreen::unpng(&png))
@@ -588,7 +791,8 @@ impl App {
                 )),
                 Err(e) => Thumb::Failed(e),
             };
-            self.thumbs.cache.insert(key, thumb);
+            let t = &mut self.thumbs;
+            insert_capped(&mut t.cache, &mut t.kept, key, thumb, MAX_THUMBS);
         }
         ctx.request_repaint();
     }
@@ -677,5 +881,127 @@ impl App {
             &sk.heads,
             false,
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used)]
+    use super::*;
+
+    /// 6,000 clips in two groups of 3,000: "Clip 0".."Clip 2999" in A, the rest in B.
+    fn many() -> Vec<Value> {
+        (0..6000)
+            .map(|i| {
+                let group = if i < 3000 { "A" } else { "B" };
+                let name = format!("Clip {i}");
+                json!({ "id": format!("{group}/{name}"), "name": name, "group": group })
+            })
+            .collect()
+    }
+
+    fn key() -> ListKey {
+        ListKey {
+            generation: 0,
+            anims: true,
+            query: ac_io::find::Query::default(),
+            changed: false,
+            unsaved_open: None,
+            order: Order::Name,
+            recent: Vec::new(),
+            folded: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn a_listing_of_6000_has_every_row_once_and_a_fold_takes_a_group_out() {
+        let all = many();
+        let l = build_listing(&all, key());
+        assert_eq!(l.sections.len(), 2);
+        assert_eq!(l.order.len(), 6000);
+        assert_eq!(l.first.get("B/Clip 3000"), Some(&(1, 0)));
+        // natural order: Clip 2 before Clip 10
+        assert_eq!(l.order[2].1, "A/Clip 2");
+        assert_eq!(l.order[10].1, "A/Clip 10");
+        let folded = ListKey {
+            folded: vec!["animations/A".into()],
+            ..key()
+        };
+        let l = build_listing(&all, folded);
+        assert_eq!(l.order.len(), 3000);
+        assert!(!l.sections[0].open);
+        assert!(!l.first.contains_key("A/Clip 0"));
+    }
+
+    #[test]
+    fn a_search_opens_a_folded_group_and_recent_rows_count_once() {
+        let all = many();
+        let k = ListKey {
+            query: ac_io::find::Query {
+                words: "5999".into(),
+                ..Default::default()
+            },
+            folded: vec!["animations/B".into()],
+            ..key()
+        };
+        let l = build_listing(&all, k);
+        assert_eq!(l.order, [(true, "B/Clip 5999".to_string())]);
+        let k = ListKey {
+            recent: vec!["B/Clip 7".into(), "A/Clip 7".into()],
+            ..key()
+        };
+        // B/Clip 7 doesn't exist, A/Clip 7 does: Recent has one row, and the list stays 6,000
+        let l = build_listing(&all, k);
+        assert_eq!(l.sections[0].key, RECENT);
+        assert_eq!(l.sections[0].rows.len(), 1);
+        assert_eq!(l.order.len(), 6000);
+        assert_eq!(l.first.get("A/Clip 7"), Some(&(0, 0)));
+    }
+
+    #[test]
+    fn only_the_rows_on_screen_are_drawn() {
+        // rows 60 apart from y 100; on screen 400..1000: (400-100)/60 = 5, (1000-100)/60 = 15
+        assert_eq!(visible_rows(100.0, 6000, 60.0, 400.0, 1000.0), 5..15);
+        // part of a row counts: (410-100)/60 = 5.17 down to 5, (1010-100)/60 = 15.17 up to 16
+        assert_eq!(visible_rows(100.0, 6000, 60.0, 410.0, 1010.0), 5..16);
+        // the run is below the screen, above it, and ends on it
+        assert_eq!(visible_rows(2000.0, 6000, 60.0, 400.0, 1000.0), 0..0);
+        assert_eq!(visible_rows(-1000.0, 10, 60.0, 400.0, 1000.0), 10..10);
+        assert_eq!(visible_rows(100.0, 8, 60.0, 400.0, 1000.0), 5..8);
+    }
+
+    #[test]
+    fn the_oldest_pictures_go_past_the_cap() {
+        let (mut cache, mut kept) = (HashMap::new(), VecDeque::new());
+        for (i, k) in ["a", "b", "c", "a", "d"].iter().enumerate() {
+            insert_capped(&mut cache, &mut kept, k.to_string(), i, 3);
+        }
+        // a was kept again after c, so b is the oldest when d comes
+        assert_eq!(cache.len(), 3);
+        assert!(!cache.contains_key("b"));
+        assert_eq!(cache["a"], 3);
+    }
+
+    #[test]
+    fn a_deleted_item_leaves_the_list_and_its_group_only_with_the_last_one() {
+        let mut lib = json!({
+            "animations": [
+                {"id": "A/1", "group": "A"}, {"id": "A/2", "group": "A"}, {"id": "B/1", "group": "B"},
+                {"id": "C/1", "group": "C"}
+            ],
+            "poses": [{"id": "C/p", "group": "C"}],
+            "groups": ["A", "B", "C"]
+        });
+        forget_item(&mut lib, "animations", "A/1");
+        assert_eq!(lib["groups"], json!(["A", "B", "C"]));
+        assert_eq!(lib["animations"].as_array().unwrap().len(), 3);
+        forget_item(&mut lib, "animations", "A/2");
+        assert_eq!(lib["groups"], json!(["B", "C"]));
+        // C still has a pose: its folder stays in the list
+        forget_item(&mut lib, "animations", "C/1");
+        assert_eq!(lib["groups"], json!(["B", "C"]));
+        // not in the list: nothing changes
+        forget_item(&mut lib, "animations", "No/such");
+        assert_eq!(lib["animations"].as_array().unwrap().len(), 1);
     }
 }

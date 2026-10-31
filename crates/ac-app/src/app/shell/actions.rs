@@ -259,7 +259,7 @@ pub static ACTIONS: &[Action] = &[
         &["Library: Delete"],
     )
     .sub("Library")
-    .doc("asks first; built-ins stay"),
+    .doc("in a library folder of your own, at once and the next item is selected; asks first in the app's library or over unsaved changes; built-ins stay"),
     a("app.tool_drag", "Drag tool", "View", &["Q"])
         .radio()
         .doc("drag a joint to pose it"),

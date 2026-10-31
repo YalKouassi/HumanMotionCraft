@@ -4,7 +4,8 @@
 //! A click selects it (and shows its preview), a double-click or Enter opens an animation or
 //! applies a pose, and your own items can be dragged onto a group's header to move them there,
 //! or onto Starred to star them. A header folds its group away and says how many are in it. The
-//! star, lock and fold arrow are drawn here, in code.
+//! star, lock, fold arrow and delete cross are drawn here, in code. Your own item's cross shows
+//! on the row under the pointer and the selected one.
 
 use std::f32::consts::{FRAC_PI_2, PI, TAU};
 
@@ -18,7 +19,7 @@ use super::{ANIM_FRAMES, CELL, Thumb, hover};
 /// A row's height and a header's (points).
 pub const ROW_H: f32 = CELL.1 as f32 + 6.0;
 const HEADER_H: f32 = 20.0;
-/// Room kept at a row's right for its star.
+/// Room kept at a row's right for its star, and as much again for its delete cross.
 const STAR_W: f32 = 22.0;
 
 /// What a dragged row carries.
@@ -177,7 +178,7 @@ impl App {
         if let Some(bg) = bg {
             ui.painter().rect_filled(rect, 3.0, bg);
         }
-        let inner = Rect::from_min_max(rect.min + vec2(2.0, 3.0), rect.max - vec2(STAR_W, 3.0));
+        let inner = Rect::from_min_max(rect.min + vec2(2.0, 3.0), rect.max - vec2(STAR_W * 2.0, 3.0));
         let mut child = ui.new_child(
             egui::UiBuilder::new()
                 .max_rect(inner)
@@ -280,6 +281,31 @@ impl App {
         }
         if sr.clicked() {
             self.lib_star(anims, &id, !starred);
+        }
+        // the delete cross: one click on the clip in front of you
+        if !builtin {
+            let dc = pos2(sc.x - STAR_W, rect.center().y);
+            let dr = ui
+                .interact(
+                    Rect::from_center_size(dc, vec2(18.0, 18.0)),
+                    ui.scope_id().with(("library.delete", section, &id)),
+                    Sense::click(),
+                )
+                .on_hover_text("Delete it (Delete key): its file is removed")
+                .tag(format!("library.delete.{id}"), "Delete");
+            if r.hovered() || sr.hovered() || dr.hovered() || picked {
+                let ink = if dr.hovered() {
+                    vis.error_fg_color
+                } else {
+                    vis.weak_text_color()
+                };
+                let (s, stroke) = (4.0, Stroke::new(1.5, ink));
+                ui.painter().line_segment([dc - vec2(s, s), dc + vec2(s, s)], stroke);
+                ui.painter().line_segment([dc - vec2(s, -s), dc + vec2(s, -s)], stroke);
+            }
+            if dr.clicked() {
+                self.lib_delete(anims, &id);
+            }
         }
         r
     }

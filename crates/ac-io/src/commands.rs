@@ -224,10 +224,24 @@ pub(crate) fn builtin(doc: &Document, kind: Kind, id: &str) -> Option<bool> {
     )
 }
 
-fn mark_builtin(doc: &Document, kind: Kind, it: &mut Value) {
+/// The ids the app ships (lower case), so a library's thousands of other files aren't each looked
+/// for among them.
+fn shipped_ids(doc: &Document, kind: Kind) -> BTreeSet<String> {
+    let Some(assets) = doc.assets.as_ref() else {
+        return BTreeSet::new();
+    };
+    Library::new(&assets.join("library"), kind)
+        .ids()
+        .into_iter()
+        .map(|id| id.to_lowercase())
+        .collect()
+}
+
+fn mark_builtin(doc: &Document, kind: Kind, shipped: &BTreeSet<String>, it: &mut Value) {
     let b = it
         .get("id")
         .and_then(Value::as_str)
+        .filter(|id| shipped.contains(&id.to_lowercase()))
         .and_then(|id| builtin(doc, kind, id));
     it["builtin"] = json!(b.is_some());
     it["edited"] = json!(b == Some(true));
@@ -295,8 +309,9 @@ pub(crate) fn library_list(doc: &mut Document, _: &P) -> Out {
     let mut groups: BTreeSet<String> = a.groups().into_iter().collect();
     groups.extend(p.groups());
     let sk = doc.skeleton.clone();
+    let shipped = shipped_ids(doc, Kind::Poses);
     let mut poses: Vec<Value> = p
-        .items()
+        .listed()
         .into_iter()
         .map(|mut it| {
             let only: Option<Vec<usize>> = it.get("only").and_then(Value::as_array).map(|o| {
@@ -305,17 +320,18 @@ pub(crate) fn library_list(doc: &mut Document, _: &P) -> Out {
                     .collect()
             });
             it["part"] = json!(parts::label(&sk, &doc.custom_parts, only.as_deref()));
-            mark_builtin(doc, Kind::Poses, &mut it);
+            mark_builtin(doc, Kind::Poses, &shipped, &mut it);
             it
         })
         .collect();
-    let items = a.items();
+    let items = a.listed();
+    let shipped = shipped_ids(doc, Kind::Animations);
     let current = doc.clip_id.clone();
     let mut animations: Vec<Value> = items
         .into_iter()
         .map(|mut it| {
             it["current"] = json!(it.get("id").and_then(Value::as_str) == current.as_deref());
-            mark_builtin(doc, Kind::Animations, &mut it);
+            mark_builtin(doc, Kind::Animations, &shipped, &mut it);
             it
         })
         .collect();
@@ -409,7 +425,7 @@ fn clip_open(doc: &mut Document, p: &P) -> Out {
     let id = if lib.exists(&id) {
         id
     } else {
-        lib.items()
+        lib.listed()
             .into_iter()
             .find(|i| i.get("name").and_then(Value::as_str) == Some(id.as_str()))
             .and_then(|i| i.get("id").and_then(Value::as_str).map(str::to_string))

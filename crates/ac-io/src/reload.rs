@@ -58,8 +58,8 @@ fn reload_library(doc: &mut Document) -> Out {
         doc.go_to(doc.frame)?;
     }
     Ok(json!({
-        "animations": lib.items().len(),
-        "poses": poses(doc)?.items().len(),
+        "animations": lib.listed().len(),
+        "poses": poses(doc)?.listed().len(),
         "part_sets": doc.custom_parts.len(),
     }))
 }

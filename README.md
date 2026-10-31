@@ -66,6 +66,12 @@ humanmotioncraft [--assets <dir>] [--library <dir>] [--open <id>] [--frame <n>]
                [--prefs <dir>|memory] [--ui <name>=<value> ...]
 ```
 
+`--library <dir>` opens a folder as the library, for this run; Settings > Library folder keeps one
+for the next launches. Its clips must be `<dir>/animations/<group>/<name>.clip.json`: a folder with
+clips laid out any other way is left as it is and the status line says so. The built-ins are added
+beside your clips (marked and protected; the Mine filter hides them). In a folder of your own,
+Delete in the library removes a clip's file at once and selects the next.
+
 ### Run the Headless CLI (`ac`)
 ```bash
 # List every registered command, its typed inputs, and whether it is undoable
