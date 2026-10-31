@@ -319,6 +319,7 @@ class Scene:
         self.static: dict[str, tuple] = {}  # name -> (t, r, s, pre, order), the rest transform
         self.curves: dict[str, dict[str, np.ndarray]] = {}  # name -> {"T"/"R": (F, 3)}
         self.frames = 0
+        self.more_takes: list[tuple[str, dict[str, dict[str, np.ndarray]]]] = []  # (name, curves)
 
     def joint(self, name: str, parent: str | None, t, r, kind: str = "LimbNode", pre=None, order="XYZ"):
         self.joints.append((name, kind, parent))
@@ -358,34 +359,39 @@ class Scene:
                              children=[Node("TypeFlags", S("Skeleton" if kind == "LimbNode" else "Null"))]))
             connections.add(Node("C", S("OO"), ("L", nid), ("L", ids[name])))
             connections.add(Node("C", S("OO"), ("L", ids[name]), ("L", ids[parent] if parent else 0)))
-        nid += 1
-        stack = nid
-        objects.add(Node("AnimationStack", ("L", stack), S(b"Take 001\x00\x01AnimStack"), S(""), children=[
-            Node("Properties70", children=[
-                P("LocalStart", "KTime", "Time", "", ("L", 0)), P("LocalStop", "KTime", "Time", "", ("L", stop)),
-                P("ReferenceStart", "KTime", "Time", "", ("L", 0)), P("ReferenceStop", "KTime", "Time", "", ("L", stop))])]))
-        nid += 1
-        layer = nid
-        objects.add(Node("AnimationLayer", ("L", layer), S(b"BaseLayer\x00\x01AnimLayer"), S("")))
-        connections.add(Node("C", S("OO"), ("L", layer), ("L", stack)))
-        times = np.arange(self.frames, dtype=np.int64) * ticks
-        for name, channels in self.curves.items():
-            for ch, values in channels.items():
-                nid += 1
-                cn = nid
-                objects.add(Node("AnimationCurveNode", ("L", cn), S(f"{ch}\x00\x01AnimCurveNode".encode()), S(""), children=[
-                    Node("Properties70", children=[P(f"d|{ax}", "Number", "", "A", ("D", float(values[0, k])))
-                                                   for k, ax in enumerate("XYZ")])]))
-                connections.add(Node("C", S("OO"), ("L", cn), ("L", layer)))
-                connections.add(Node("C", S("OP"), ("L", cn), ("L", ids[name]),
-                                     S("Lcl Translation" if ch == "T" else "Lcl Rotation")))
-                for k, ax in enumerate("XYZ"):
+        take_nodes = []
+        for take, curves in [("Take 001", self.curves), *self.more_takes]:
+            frames = max((len(v) for channels in curves.values() for v in channels.values()), default=0)
+            stop = (max(frames, 1) - 1) * ticks
+            nid += 1
+            stack = nid
+            objects.add(Node("AnimationStack", ("L", stack), S(take.encode() + b"\x00\x01AnimStack"), S(""), children=[
+                Node("Properties70", children=[
+                    P("LocalStart", "KTime", "Time", "", ("L", 0)), P("LocalStop", "KTime", "Time", "", ("L", stop)),
+                    P("ReferenceStart", "KTime", "Time", "", ("L", 0)), P("ReferenceStop", "KTime", "Time", "", ("L", stop))])]))
+            nid += 1
+            layer = nid
+            objects.add(Node("AnimationLayer", ("L", layer), S(b"BaseLayer\x00\x01AnimLayer"), S("")))
+            connections.add(Node("C", S("OO"), ("L", layer), ("L", stack)))
+            times = np.arange(frames, dtype=np.int64) * ticks
+            for name, channels in curves.items():
+                for ch, values in channels.items():
                     nid += 1
-                    objects.add(_curve(nid, times, values[:, k]))
-                    connections.add(Node("C", S("OP"), ("L", nid), ("L", cn), S(f"d|{ax}")))
-        takes = Node("Takes", children=[Node("Current", S("Take 001")), Node("Take", S("Take 001"), children=[
-            Node("FileName", S("Take_001.tak")), Node("LocalTime", ("L", 0), ("L", stop)),
-            Node("ReferenceTime", ("L", 0), ("L", stop))])])
+                    cn = nid
+                    objects.add(Node("AnimationCurveNode", ("L", cn), S(f"{ch}\x00\x01AnimCurveNode".encode()), S(""), children=[
+                        Node("Properties70", children=[P(f"d|{ax}", "Number", "", "A", ("D", float(values[0, k])))
+                                                       for k, ax in enumerate("XYZ")])]))
+                    connections.add(Node("C", S("OO"), ("L", cn), ("L", layer)))
+                    connections.add(Node("C", S("OP"), ("L", cn), ("L", ids[name]),
+                                         S("Lcl Translation" if ch == "T" else "Lcl Rotation")))
+                    for k, ax in enumerate("XYZ"):
+                        nid += 1
+                        objects.add(_curve(nid, times, values[:, k]))
+                        connections.add(Node("C", S("OP"), ("L", nid), ("L", cn), S(f"d|{ax}")))
+            take_nodes.append(Node("Take", S(take), children=[
+                Node("FileName", S(take.replace(" ", "_") + ".tak")), Node("LocalTime", ("L", 0), ("L", stop)),
+                Node("ReferenceTime", ("L", 0), ("L", stop))]))
+        takes = Node("Takes", children=[Node("Current", S("Take 001")), *take_nodes])
         definitions = Node("Definitions", children=[Node("Version", ("I", 100)), Node("Count", ("I", len(objects.children)))])
         return [header, settings, definitions, objects, connections, takes]
 
@@ -462,9 +468,15 @@ def landmarks_of(skel: Skeleton, positions: np.ndarray) -> dict[str, np.ndarray]
 
 
 def walk_scene(skel: Skeleton, up: str = "y", units: float = 1.0, reference: bool = False, fps: float = 30.0,
-               clip_path=WALK, frames: int = WALK_FRAMES) -> Scene:
-    """A built-in clip as a humanoid FBX scene (see :class:`Scene` for ``up``, ``units``, ``reference``)."""
+               clip_path=WALK, frames: int = WALK_FRAMES, turn: float = 0.0, lift: float = 0.0) -> Scene:
+    """A built-in clip as a humanoid FBX scene (see :class:`Scene` for ``up``, ``units``, ``reference``),
+    turned ``turn`` degrees about the rig's Z and raised ``lift`` metres."""
     R, P_, _ = walk_motion(skel, clip_path, frames)
+    if turn:
+        Z = _axis(2, np.radians(turn))
+        R, P_ = Z[None, None] @ R, P_ @ Z.T
+    if lift:
+        P_ = P_ + np.array([0.0, 0.0, lift])
     F = len(R)
     A = RIG_TO_YUP if up == "y" else np.eye(3)
     to_units = 100.0 / units  # metres -> the file's unit
@@ -551,16 +563,42 @@ def unnamed_scene(scene: Scene) -> tuple[Scene, dict[str, str]]:
     out.joints = [(names[n], kind, names.get(parent)) for n, kind, parent in scene.joints]
     out.static = {names[n]: v for n, v in scene.static.items()}
     out.curves = {names[n]: v for n, v in scene.curves.items()}
+    out.more_takes = [(t, {names[n]: v for n, v in c.items()}) for t, c in scene.more_takes]
     out.frames = scene.frames
     return out, names
 
 
-def meta_text(names: dict[str, str], clips: list[tuple[str, int, int, int]]) -> str:
-    """A model's ``.meta``: the bone map and ``clips`` of (name, first, last, loops)."""
+def split_takes(scene: Scene, at: int, name: str = "Take 002") -> Scene:
+    """``scene`` with its frames from ``at`` on moved to a second take, each take starting at time 0."""
+    out = Scene(scene.fps, scene.up, scene.units, scene.reference, scene.creator)
+    out.joints, out.static = scene.joints, scene.static
+    out.curves = {n: {c: v[:at] for c, v in ch.items()} for n, ch in scene.curves.items()}
+    out.more_takes = [(name, {n: {c: v[at:] for c, v in ch.items()} for n, ch in scene.curves.items()})]
+    out.frames = at
+    return out
+
+
+def swapped_scene(scene: Scene) -> Scene:
+    """``scene`` with Left and Right swapped in its joint names: a file whose sides are mislabelled."""
+    def swap(name):
+        if name is None:
+            return None
+        return name.replace("Left", "\0").replace("Right", "Left").replace("\0", "Right") \
+            .replace("LHip", "\0").replace("RHip", "LHip").replace("\0", "RHip")
+    out = Scene(scene.fps, scene.up, scene.units, scene.reference, scene.creator)
+    out.joints = [(swap(n), kind, swap(parent)) for n, kind, parent in scene.joints]
+    out.static = {swap(n): v for n, v in scene.static.items()}
+    out.curves = {swap(n): v for n, v in scene.curves.items()}
+    out.frames = scene.frames
+    return out
+
+
+def meta_text(names: dict[str, str], clips: list[tuple]) -> str:
+    """A model's ``.meta``: the bone map and ``clips`` of (name, first, last, loops[, take])."""
     out = ["fileFormatVersion: 2", "guid: 00000000000000000000000000000164", "ModelImporter:",
            "  serializedVersion: 19", "  animations:", "    legacyGenerateAnimations: 4", "    clipAnimations:"]
-    for name, first, last, loops in clips:
-        out += ["    - serializedVersion: 16", f"      name: {name}", "      takeName: Take 001",
+    for name, first, last, loops, *take in clips:
+        out += ["    - serializedVersion: 16", f"      name: {name}", f"      takeName: {take[0] if take else 'Take 001'}",
                 f"      firstFrame: {first}", f"      lastFrame: {last}", "      loop: 0", f"      loopTime: {loops}",
                 "      curves: []", "      transformMask:", "      - path: ", "        weight: 1"]
     out += ["    isReadable: 0", "  humanDescription:", "    serializedVersion: 2", "    human:"]
@@ -593,6 +631,44 @@ def write_old_and_text_fixtures(fixtures=FIXTURES, skel=None) -> list[pathlib.Pa
     return [text74, text61, binary61, cut]
 
 
+def write_port_fixtures(fixtures=FIXTURES, skel=None) -> list[pathlib.Path]:
+    """A generated source tree for ``clip.port``, under ``port/``: a list and one file per outcome.
+    The folder names are made up, as is every name here."""
+    skel = skel or Skeleton.load()
+    root = fixtures / "port"
+    short = {"frames": OLD_TEXT_FRAMES}
+    out = []
+
+    def fbx(rel, scene):
+        path = root / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        write_fbx(path, scene.nodes(), version=7400)
+        out.append(path)
+        return path
+
+    fbx("PackA/Walks/walk.fbx", walk_scene(skel, **short))
+    fbx("PackB/Walks/walk.fbx", walk_scene(skel, **short))  # the same bytes: a duplicate
+    scene, names = unnamed_scene(split_takes(walk_scene(skel), 20))
+    takes = fbx("PackA/Walks/takes.fbx", scene)
+    meta = takes.with_name("takes.fbx.meta")
+    meta.write_bytes(meta_text(names, [("First", 0, 9, 1), ("Second start", 0, 9, 0, "Take 002"),
+                                       ("Second end", 10, 19, 0, "Take 002")]).encode("utf-8"))
+    out.append(meta)
+    fbx("PackA/Turns/turned.fbx", walk_scene(skel, turn=90.0, **short))  # starts facing +X
+    fbx("PackA/Hangs/hang.fbx", walk_scene(skel, lift=0.5, **short))  # the feet never come near the floor
+    fbx("PackA/Bad/sunk.fbx", walk_scene(skel, lift=-0.5, **short))  # the feet stay below it
+    fbx("PackA/Bad/swapped.fbx", swapped_scene(walk_scene(skel, **short)))
+    fbx("PackA/Bad/not-humanoid.fbx", not_humanoid_scene())
+    # one line names a file that isn't there, as when the source drive is away
+    lines = ["PackA/Walks/walk.fbx", "PackB/Walks/walk.fbx", "PackA/Walks/takes.fbx", "PackA/Turns/turned.fbx",
+             "PackA/Hangs/hang.fbx", "PackA/Bad/sunk.fbx", "PackA/Bad/swapped.fbx", "PackA/Bad/not-humanoid.fbx",
+             "PackA/Bad/missing.fbx"]
+    listed = root / "list.txt"
+    listed.write_bytes(("\n".join(lines) + "\n").encode("utf-8"))
+    out.append(listed)
+    return out
+
+
 def write_fixtures(fixtures=FIXTURES, golden_path=GOLDEN) -> list[pathlib.Path]:
     skel = Skeleton.load()
     fixtures.mkdir(parents=True, exist_ok=True)
@@ -617,6 +693,7 @@ def write_fixtures(fixtures=FIXTURES, golden_path=GOLDEN) -> list[pathlib.Path]:
     write_fbx(out[-1], sc.nodes(), version=7500)
     out += write_cut_fixture(fixtures, skel)
     out += write_old_and_text_fixtures(fixtures, skel)
+    out += write_port_fixtures(fixtures, skel)
     golden_path.parent.mkdir(parents=True, exist_ok=True)
     golden_path.write_text(json.dumps(golden(skel), separators=(",", ":")) + "\n", encoding="utf-8")
     out.append(golden_path)

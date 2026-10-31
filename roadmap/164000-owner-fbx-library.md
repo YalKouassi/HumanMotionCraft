@@ -1,6 +1,6 @@
 # Port the owner's FBX animations into a private clip library
 
-- **Status:** in progress: pilot run; multi-take clips to fix; the owner's review of the reel next
+- **Status:** built, bulk run next
 - **Requires:** 152000
 - **Source:** owner request (2026-10-31)
 
@@ -70,9 +70,8 @@ that store packs stay out of `training/` unless their publisher has consented in
 - **Automatic checks on every clip:** values are finite, the first frame faces -Y within 15°, the
   feet aren't swapped, bone lengths are the rig's, and the feet rest on z = 0 where the source's rest
   on its floor. Failures are listed in the manifest and left out of the library until fixed.
-- **Owner's eye:** clips are screened and grouped, with one short numbered clip per group beside its
-  source (physics off). The owner answers with the numbers to reject, and the reject list is fixed or
-  refused before the item is done.
+- **Owner's decision (2026-10-31):** no review group by group. Everything is ported, and the owner
+  deletes bad clips as they go. A deleted clip stays deleted when the port runs again.
 - **Private:** `git status` shows no clip, manifest, pack name or path. A test shows these clips
   can't be uploaded to the community library. A test shows `ac_train` reads none of them unless a
   clip was chosen by name.
@@ -87,6 +86,10 @@ The owner agrees the acceptance above, with these terms:
   that pack's licence is checked first, and 152000's rule on the publisher's written consent still applies.
 - **152000's low leftovers** (an unreadable folder passed over, animated scale inheritance, the `KeyTime`
   wording, a default `TimeMode` note) are handled here, where real files show which matter.
+
+## Decision (2026-10-31, later)
+The owner will not review group by group: port everything and delete bad clips as they go. This
+replaces the screened groups and numbered reel in the acceptance.
 
 ## Result
 **First step built (2026-10-31): the `.meta` bone map and clip ranges.** This is the Decision's first
@@ -157,3 +160,39 @@ worktree runs the tests.
 
 ## Pilot (2026-10-31)
 Three varied packs, run in integration, clips and manifests outside the repo. Small climbing pack: 7 files listed, 4 clips imported, 34 refused, almost all named `.meta` clips whose take name isn't the file's first take, so multi-take files lose clips: to fix before the bulk port. Mocap conversations: 57 of 57. Weapon pack: 50 clips, 1 file with no animation; 10 clips note a hip jump in the first frames. Owner's review reel is outside the repo. Nothing here proves the poses right until the owner has reviewed it.
+
+## Several takes and the bulk port (2026-10-31)
+Built from generated files only: no real file was read, and this worktree built nothing, so the
+integration worktree runs the tests.
+- **Several takes.** A `.meta` clip's `takeName` now picks that take of the file. A name the file
+  doesn't have refuses that clip and lists the takes. The other clips still import, and a take that
+  can't be read refuses only its own clips. A first take no clip names isn't read, so it can't stop
+  the file. A file with no clips still reads its first take as one clip, with the note.
+- **`clip.port {list, root, to, limit?}`.** The list is a text file, one path a line. The output
+  folder holds `port-manifest.jsonl` and `clips/<pack>/<action>/`. The pack is the first folder under
+  `root`, the action the file's own folder. It refuses an output folder inside a repository, and a root
+  the paths don't lie under.
+- **One outcome each.** `imported` with its clips and those left out; `duplicate` with `of`; `refused`
+  with the reason. A duplicate has the same FBX bytes and the same bone map and clips in its `.meta`,
+  so a copy cut differently is kept. A file that can't be read now (the drive away) gets no line, is
+  listed in `unreachable` and is tried next run.
+- **Re-run.** A finished source is never looked at again, and with nothing to do no file is written.
+  A line is added once a source is finished; a last line cut off by a stop is dropped and done again.
+- **Facing.** The checks alone would leave out most clips cut from the middle of a take, and this item
+  says every clip starts facing -Y. So a clip more than 15° off is turned about the vertical through
+  its first root, and the angle is recorded. One within 15° stays as it is, because hip sway on the
+  first frame would otherwise send a straight walk off at an angle. The check then runs on the result.
+  A hip line near upright from above (a body on its side) can't be read: left as it was, with a note.
+- **Other checks.** Values finite. Feet swapped from 50% of the importer's checks. Floor: a floor more
+  than 0.03 m below z = 0 fails. A floor over 0.2 m up is `hanging` and stays where it is. A clip moved
+  down more than 0.05 m with no foot still for 3 frames (under 0.25 m/s) is `hanging` and the move is
+  taken back. Failures are listed in `left_out` and write no clip; a file with none kept is `refused`.
+  Bone lengths are the rig's by construction. Clips also record `in_place` (root within 0.5 m).
+- Generated fixtures: `fixtures/data/port/`. Fixture `fbx-port`, tests `crates/ac-io/tests/fbx_port.rs`
+  and the unit tests in `fbx/port.rs`.
+
+**For the bulk run to show:**
+- A hanging clip whose feet hold still and that the import moved down up to 0.2 m is still pushed down.
+  Feet alone can't tell it from standing. A body standing on a prop over 0.2 m up counts as `hanging`.
+- The library panel lists one level of groups (`crates/ac-io/src/library.rs`), so it doesn't yet show
+  `clips/<pack>/<action>/`. The Library acceptance line is still open, as are the Private tests.

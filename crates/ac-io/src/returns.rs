@@ -93,6 +93,26 @@ pub const CLIP_IMPORT: &[ParamSpec] = &[
     ParamSpec::new("source", K::Text, "an .fbx: {version, up_axis, front_axis, unit_scale, fps_from, take, joints, frames, dropped}").json(),
 ];
 
+pub const CLIP_PORT: &[ParamSpec] = &[
+    ParamSpec::new("manifest", K::Text, "the manifest file, one JSON value a line").required(),
+    ParamSpec::new("sources", K::Number, "the different paths in the list").required(),
+    ParamSpec::new("new", K::Number, "sources given their outcome by this run").required(),
+    ParamSpec::new("skipped", K::Number, "sources already finished, left as they were").required(),
+    ParamSpec::new("imported", K::Number, "sources with at least one clip kept").required(),
+    ParamSpec::new("duplicate", K::Number, "sources with the same content as an earlier one").required(),
+    ParamSpec::new("refused", K::Number, "sources with no clip kept, each with its reason").required(),
+    ParamSpec::new("pending", K::Number, "sources with no outcome yet: couldn't be read now, or past limit").required(),
+    ParamSpec::new("unreachable", K::TextList, "the sources that couldn't be read now: no outcome is recorded, so a later run tries them").required(),
+    ParamSpec::new("clips", K::Number, "clips kept").required(),
+    ParamSpec::new("left_out", K::Number, "clips left out, by a refusal or a failed check").required(),
+    ParamSpec::new("hanging", K::Number, "clips kept with no floor under the feet").required(),
+    ParamSpec::new("in_place", K::Number, "clips kept whose root stays near where it starts").required(),
+    ParamSpec::new("turned", K::Number, "clips kept that were turned to start facing -Y").required(),
+    ParamSpec::new("checks", K::Text, "{check: clips failing it}").json().required(),
+    ParamSpec::new("reasons", K::Text, "{reason with its names and numbers blanked: how many}, sources refused and clips left out").json().required(),
+    ParamSpec::new("torn", K::Bool, "a last manifest line cut off by a stopped run was dropped, and its source done again").required(),
+];
+
 pub const CLIP_IMPORT_BATCH: &[ParamSpec] = &[
     ParamSpec::new("folder", K::Text, "the folder the clips went in").required(),
     ParamSpec::new("files", K::Text, "[{file, path, frames, fps, notes}] written; a file a .meta cuts into named clips gives one each, with clip and loop")

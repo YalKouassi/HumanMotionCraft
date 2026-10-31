@@ -121,7 +121,7 @@ fn find(from: &Path) -> Found {
 
 /// A clip's name as part of a file name: what a file name can't hold (a `.meta` is input, and a
 /// slash must not walk out of the folder) becomes `_`.
-fn file_part(name: &str) -> String {
+pub(super) fn file_part(name: &str) -> String {
     let out: String = name
         .chars()
         .map(|c| {
