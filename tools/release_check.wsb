@@ -1,0 +1,35 @@
+<!-- Windows Sandbox: the release zip checked on a truly clean Windows (roadmap 124000).
+
+     Double-click this file (Windows Sandbox must be turned on in "Windows features"). The sandbox
+     is a fresh Windows with nothing installed and no network; it maps the folder with the zip and
+     the tools folder read-only, runs tools/release_check.ps1 at logon and leaves the window open
+     to read the PASS and FAIL lines. The log and the pictures are copied to target\release-check
+     on the host, which must exist before the sandbox starts (mkdir target\release-check).
+
+     Before the first run, point the three HostFolder lines at your checkout if it is not
+     D:\CreativeFusion\AnimationCraft, and put the one zip to check in its dist\ folder (a manual
+     run of .github/workflows/release.yml uploads it as an artifact; nothing is built here). -->
+<Configuration>
+  <vGPU>Enable</vGPU>
+  <Networking>Disable</Networking>
+  <MappedFolders>
+    <MappedFolder>
+      <HostFolder>D:\CreativeFusion\AnimationCraft\dist</HostFolder>
+      <SandboxFolder>C:\Users\WDAGUtilityAccount\Desktop\release</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>D:\CreativeFusion\AnimationCraft\tools</HostFolder>
+      <SandboxFolder>C:\Users\WDAGUtilityAccount\Desktop\tools</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <MappedFolder>
+      <HostFolder>D:\CreativeFusion\AnimationCraft\target\release-check</HostFolder>
+      <SandboxFolder>C:\Users\WDAGUtilityAccount\Desktop\report</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>powershell.exe -NoExit -ExecutionPolicy Bypass -File C:\Users\WDAGUtilityAccount\Desktop\tools\release_check.ps1 -Zip C:\Users\WDAGUtilityAccount\Desktop\release -Scratch C:\Users\WDAGUtilityAccount\Desktop\scratch -Report C:\Users\WDAGUtilityAccount\Desktop\report</Command>
+  </LogonCommand>
+</Configuration>
