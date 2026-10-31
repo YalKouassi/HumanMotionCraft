@@ -1,6 +1,6 @@
 # Long fills keep regular steps
 
-- **Status:** in progress: step 1 built; the measure's rule corrected without a build, its baseline to run again; the fix is on hold
+- **Status:** in progress: step 1 done, the measure corrected and baselined; steps 2 and 3 wait for the owner's word to train
 - **Requires:** none
 - **Source:** the owner's review of the long-fill video (2026-10-31); measured in 167000
 
@@ -57,3 +57,6 @@ Found by reading the code, written without a build; no number here has been run 
 - **Turning: unchanged.** The way of travel is the chord between two neighbouring contacts, which follows a gentle curve. The baseline now writes `recording_lengths_m` and `recording_alternate`, to show whether turns still fail.
 
 By hand on `ai-fill-long-gap`: R 0.015 (the replant joined), L -0.42, R -0.92, L -0.90, R -1.35, L -1.99; steps 0.43, 0.50, -0.01, 0.45, 0.64; median 0.45; step 2 alone is short, so it still fails. 0.10, 0.10 and 0.4 are judgement until the baseline runs: recordings should mostly pass.
+
+## Baseline after correcting the measure (2026-10-31)
+One contact rule on both sides, a replant in place is one contact, steps with under 0.10 m of root travel aren't judged, walking at 0.4 m/s or more. 200 long walks: fills fail 139 of 177 (79 %), 23 too few steps; recordings fail 26 of 199 (13 %), 1 too few. The rule now separates them, so the half step is common in long fills, about 6 times the rate of real walking. It replaces the earlier baseline above.
