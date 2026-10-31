@@ -1,6 +1,6 @@
 # Long fills keep regular steps
 
-- **Status:** in progress: step 1 built; the baseline shows the measure over-flags recordings, so it needs correcting; the fix is on hold
+- **Status:** in progress: step 1 built; the measure's rule corrected without a build, its baseline to run again; the fix is on hold
 - **Requires:** none
 - **Source:** the owner's review of the long-fill video (2026-10-31); measured in 167000
 
@@ -43,8 +43,17 @@ Step 1, written without a build (2026-10-31); nothing here has been run yet.
 - **Baseline, not run:** `python -m ac_train.evaluate --long-walks 200` fills held-out walks of 90 frames with the
   app's `ai.fill` on the shipped model and writes `target/long-walks/baseline.json`, the recordings' own steps beside
   them. It needs a built `ac` and trains nothing.
-- **Python's contacts differ from the app's:** the recordings and `steps_irregular` use the scan's contact test, the
-  fills the app's `crate::contact`, so compare the two counts with care.
 
 ## Baseline (2026-10-31)
 `python -m ac_train.evaluate --long-walks 200`, shipped `parts-natural`, no training. Of 176 fills with enough steps, 157 fail (89 %); 24 more have too few. **The measure isn't trustworthy yet:** the recordings themselves fail 42 of the 55 with enough steps (76 %), and 145 have too few, so it flags real walks too. On `ai-fill-long-gap` it finds the half step (step 3) and also counts a replant before the first step. Recordings and fills use different contact tests (Python's scan, `crate::contact`). The rule needs correcting against recordings before these rates mean anything.
+
+## The measure corrected (2026-10-31)
+Found by reading the code, written without a build; no number here has been run on recordings. Why real walks failed:
+
+- **Two contact tests.** The scan's test wants ankle and ball both within 2 cm of flat and slow, with no hysteresis, so a rolling foot is flat only briefly. Contacts went missing, which reads as too few steps or as the same foot twice. `evaluate.py` now ports `contact::clip_phases` on the app's foot points (every toe's head and the heel), its constants copied and named, and `steps.rs` calls `clip_phases`, so a clip above the floor lands too.
+- **A replant counted as a step.** The same foot coming down within 0.10 m of its last place, the other foot not landing between, is one contact at the first one's place. A foot down before the span stays out through a replant.
+- **Standing steps were judged.** With the root travelling under 0.10 m between two contacts, its way is noise and a closing step is natural. Such a step is reported but neither judged nor in the median.
+- **Windows that weren't walking.** `--long-walks` now needs every second to average at least 0.4 m/s, on top of 0.7 m/s across the window.
+- **Turning: unchanged.** The way of travel is the chord between two neighbouring contacts, which follows a gentle curve. The baseline now writes `recording_lengths_m` and `recording_alternate`, to show whether turns still fail.
+
+By hand on `ai-fill-long-gap`: R 0.015 (the replant joined), L -0.42, R -0.92, L -0.90, R -1.35, L -1.99; steps 0.43, 0.50, -0.01, 0.45, 0.64; median 0.45; step 2 alone is short, so it still fails. 0.10, 0.10 and 0.4 are judgement until the baseline runs: recordings should mostly pass.
