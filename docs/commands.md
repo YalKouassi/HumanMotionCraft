@@ -541,8 +541,9 @@ Inputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `path` | text | yes |  | an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig) |
+| `path` | text | yes |  | an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig; a Unity .meta beside it gives the bone map and named clips) |
 | `joints` | JSON |  |  | an .fbx: landmark -> joint name, correcting the guess ({"l_knee": "LeftLeg"}); the landmarks are hips, spine, neck, head and per side shoulder, elbow, wrist, hip, knee, ankle, toe |
+| `clip` | text |  |  | an .fbx with named clips in its .meta: which to open (default the first) |
 
 Outputs:
 
@@ -552,6 +553,9 @@ Outputs:
 | `fps` | number |  |  | an .fbx: the file's frame rate |
 | `frames` | integer |  |  | an .fbx: frames read (setup frames dropped) |
 | `joints` | JSON |  |  | an .fbx: {landmark: the file's joint that stood for it} |
+| `bone_map` | text |  |  | an .fbx: what said which joint is which: unity_meta (the .meta beside it) or names (guessed) |
+| `clip` | JSON |  |  | an .fbx with named clips: {name, first, last, loop, take} of the one opened |
+| `clips` | JSON |  |  | an .fbx with named clips: [{name, first, last, loop}] of the file |
 | `given` | list of text |  |  | an .fbx: the landmarks the joints parameter set |
 | `unused` | list of text |  |  | an .fbx: the file's joints with no landmark (fingers, face, props, ends) |
 | `at_rest` | list of text |  |  | an .fbx: rig bone families left at rest ("finger: 30 of 30 at rest") |
@@ -578,8 +582,8 @@ Outputs:
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `folder` | text | yes |  | the folder the clips went in |
-| `files` | JSON | yes |  | [{file, path, frames, fps, notes}] written |
-| `failed` | JSON | yes |  | [{file, error}] not imported |
+| `files` | JSON | yes |  | [{file, path, frames, fps, notes}] written; a file a .meta cuts into named clips gives one each, with clip and loop |
+| `failed` | JSON | yes |  | [{file, error}] not imported; with clip when one named clip of the file was refused |
 | `cut` | text |  |  | set when more files were found than one batch takes |
 
 ### `clip.loop`: Loop

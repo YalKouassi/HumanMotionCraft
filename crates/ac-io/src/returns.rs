@@ -80,6 +80,9 @@ pub const CLIP_IMPORT: &[ParamSpec] = &[
     ParamSpec::new("fps", K::Number, "an .fbx: the file's frame rate"),
     ParamSpec::new("frames", K::Integer, "an .fbx: frames read (setup frames dropped)"),
     ParamSpec::new("joints", K::Text, "an .fbx: {landmark: the file's joint that stood for it}").json(),
+    ParamSpec::new("bone_map", K::Text, "an .fbx: what said which joint is which: unity_meta (the .meta beside it) or names (guessed)"),
+    ParamSpec::new("clip", K::Text, "an .fbx with named clips: {name, first, last, loop, take} of the one opened").json(),
+    ParamSpec::new("clips", K::Text, "an .fbx with named clips: [{name, first, last, loop}] of the file").json(),
     ParamSpec::new("given", K::TextList, "an .fbx: the landmarks the joints parameter set"),
     ParamSpec::new("unused", K::TextList, "an .fbx: the file's joints with no landmark (fingers, face, props, ends)"),
     ParamSpec::new("at_rest", K::TextList, "an .fbx: rig bone families left at rest (\"finger: 30 of 30 at rest\")"),
@@ -92,10 +95,10 @@ pub const CLIP_IMPORT: &[ParamSpec] = &[
 
 pub const CLIP_IMPORT_BATCH: &[ParamSpec] = &[
     ParamSpec::new("folder", K::Text, "the folder the clips went in").required(),
-    ParamSpec::new("files", K::Text, "[{file, path, frames, fps, notes}] written")
+    ParamSpec::new("files", K::Text, "[{file, path, frames, fps, notes}] written; a file a .meta cuts into named clips gives one each, with clip and loop")
         .json()
         .required(),
-    ParamSpec::new("failed", K::Text, "[{file, error}] not imported")
+    ParamSpec::new("failed", K::Text, "[{file, error}] not imported; with clip when one named clip of the file was refused")
         .json()
         .required(),
     ParamSpec::new(

@@ -111,13 +111,14 @@ pub static SPECS: &[CommandSpec] = &[
         .icon("import")
         .undoable()
         .inputs(&[
-            ParamSpec::new("path", K::Text, "an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig)").required(),
+            ParamSpec::new("path", K::Text, "an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig; a Unity .meta beside it gives the bone map and named clips)").required(),
             ParamSpec::new(
                 "joints",
                 K::Text,
                 "an .fbx: landmark -> joint name, correcting the guess ({\"l_knee\": \"LeftLeg\"}); the landmarks are hips, spine, neck, head and per side shoulder, elbow, wrist, hip, knee, ankle, toe",
             )
             .json(),
+            ParamSpec::new("clip", K::Text, "an .fbx with named clips in its .meta: which to open (default the first)"),
         ])
         .outputs(crate::returns::CLIP_IMPORT),
     CommandSpec::new("clip.write", "Write animation file", clip_write)
@@ -528,11 +529,17 @@ fn clip_import(doc: &mut Document, p: &P) -> Out {
     let path = cmd::text(p, "path").unwrap_or_default();
     if path.to_lowercase().ends_with(".fbx") {
         let joints = crate::fbx::commands::joints_param(p)?;
-        let imported = crate::fbx::import_file(Path::new(path), &doc.skeleton, &joints)?;
+        let clip = cmd::text(p, "clip").filter(|c| !c.is_empty());
+        let imported = crate::fbx::import_file(Path::new(path), &doc.skeleton, &joints, clip)?;
         open(doc, imported.clip, None)?;
         let mut out = imported.report;
         out.insert("length".into(), json!(doc.clip.length()));
         return Ok(Value::Object(out));
+    }
+    if cmd::text(p, "clip").is_some_and(|c| !c.is_empty()) {
+        return Err(format!(
+            "{path}: clip names a clip of an .fbx; this file is one clip"
+        ));
     }
     let text = std::fs::read_to_string(path).map_err(|e| format!("can't read {path}: {e}"))?;
     let clip = clipfile::load_clip(&text).map_err(|e| format!("{path}: {e}"))?;
