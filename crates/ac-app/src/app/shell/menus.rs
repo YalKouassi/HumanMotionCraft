@@ -244,12 +244,8 @@ impl App {
                     .on_hover_text(tooltip)
                     .clicked()
                 {
-                    let next = if is_simple {
-                        super::super::prefs::UiMode::Advanced
-                    } else {
-                        super::super::prefs::UiMode::Simple
-                    };
-                    self.set_ui_mode(next, ui.ctx());
+                    // the same action as View > Simple mode, so there is one switch
+                    self.act("app.simple_mode", ui.ctx());
                 }
             });
         });
