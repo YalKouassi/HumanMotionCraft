@@ -536,11 +536,17 @@ impl App {
             sizes.2 = Some(r.response.rect.width());
         }
 
-        egui::CentralPanel::default().show(ui, |ui| {
+        // the viewport alone (`--ui menu=off status=off tools=off`) goes to the window's edges
+        let v = &self.view;
+        let mut central = egui::CentralPanel::default();
+        if v.hide_menu && v.hide_status && v.hide_tools {
+            central = central.frame(egui::Frame::NONE);
+        }
+        central.show(ui, |ui| {
             let mut style = DockStyle::from_ui(ui);
             style.drag_bar_width = 24.0;
             let layout_snapshot = self.shell.dock.layout.clone();
-            let native_ok = self.screenshot.is_none() && self.control.is_none();
+            let native_ok = self.screenshot.is_none() && self.record.is_none() && self.control.is_none();
             let hide = if full { HidePanels::All } else { HidePanels::None };
             let mut adapter = DockAdapter {
                 app: self,

@@ -37,6 +37,11 @@ pub struct ViewAids {
     pub picker: bool,
     /// The coupled range-of-motion panel (docked or floating).
     pub range: bool,
+    /// `--ui menu=off` and the like: the window with less of itself, for a picture of it.
+    pub hide_menu: bool,
+    pub hide_tools: bool,
+    pub hide_status: bool,
+    pub hide_joints: bool,
     /// Finger and face handles too (the rig's `game` profile, not just `body`).
     pub all_handles: bool,
     /// The rotate gizmo turns about the joint's own axes (else the world's).
@@ -63,6 +68,10 @@ impl Default for ViewAids {
             trail_span: 0,
             picker: false,
             range: false,
+            hide_menu: false,
+            hide_tools: false,
+            hide_status: false,
+            hide_joints: false,
             all_handles: false,
             local: false,
             follow: false,

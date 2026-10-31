@@ -1,6 +1,6 @@
 # Command line: video and clean pictures of the app window
 
-- **Status:** not started; acceptance agreed by the owner (2026-10-31); built after 160000, which is smaller (the owner's order)
+- **Status:** done (2026-10-31)
 - **Requires:** 160000
 - **Source:** owner's question, 2026-10-30: can the CLI output images and video with or without the UI panels?
 
@@ -53,3 +53,31 @@ Agreed by the owner 2026-10-31:
   for both `--record` and `--screenshot`.
 - A run without these flags is unchanged: the visual goldens pass with no bless.
 - The owner reviews the MP4s (`ac-review-video` skill).
+
+## Result
+Owner reviewed the MP4s and is happy (2026-10-31). Built 2026-10-31. It requires 160000, which is built and waiting for the owner too.
+
+- **Recording.** `--record <mp4|gif>` with `--from`, `--to` and `--fps` (`crates/ac-app/src/app/record.rs`).
+  Walk gives 33 frames by `ffprobe`, then the window closes and exits 0. It takes about 3 s.
+- **Size.** `--size <w>x<h>` is in the display's pixels, whatever its scale: 1920x1080 came out exactly
+  that, and 1281x721 as an MP4 came out 1280x720. A GIF or a PNG keeps an odd size. A window that won't
+  take the size fails and says so.
+- **Hiding.** `--ui menu=off`, `tools=off`, `status=off` and `joints=off`. With the menu, tool row and
+  status bar all off, the viewport runs to the window's edges. Keep `overlay=off` too, or the physics
+  marks stay.
+- **Failures.** A write that fails says why and exits 1, for `--record` and `--screenshot`; so does no
+  ffmpeg. Beyond the list: with `--record`, an `--open` or `--script` that fails also stops the run, so
+  it can't record the wrong animation (`--screenshot` still carries on and shows it in the status bar).
+- **Tests.** `crates/ac-app/tests/record.rs` opens real windows, so its tests are `#[ignore]` and run by
+  hand: `cargo test -p ac-app --test record -- --ignored --test-threads=1`. All 3 pass here. `cargo xtask
+  check` runs only the argument and cropping unit tests, so **no automatic check opens a window.**
+- **Not proved.** Only run at 100% display scale, on this machine. The scale handling hasn't been seen
+  at 125% or 150%. A minimised window isn't drawn, so a recording would wait until it is restored.
+
+Review files, `target/shots/2026-10-31/window-capture/`:
+
+- `whole-window.mp4`: the whole window. Good is the playhead and the `Frame n` readout going up one at
+  a time, with the body moving in step.
+- `no-panels.mp4`: library, inspector and timeline off; the menu, tool row and status bar stay.
+- `viewport-alone.mp4`, `viewport-alone.png`: nothing but the 3D view, 1280x720.
+- `1920x1080.mp4`: the size option.

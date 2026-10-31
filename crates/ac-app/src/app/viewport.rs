@@ -513,6 +513,9 @@ impl App {
         // pinned ones; the active joint is the largest, joints selected with it are orange
         let doc = &self.session.document;
         for (i, s) in screen.iter().enumerate() {
+            if self.view.hide_joints {
+                break;
+            }
             let Some(s) = s else { continue };
             let Some(name) = doc.skeleton.names.get(i) else {
                 continue;
@@ -566,7 +569,9 @@ impl App {
             self.draw_gizmo(&painter, rect, g, hot);
         }
 
-        self.viewport_toolbar(ui, rect);
+        if !self.view.hide_tools {
+            self.viewport_toolbar(ui, rect);
+        }
         // last: the toolbar may have changed the tool or the selection
         self.viewport_layout(rect, &screen, &handles, gizmo.as_ref(), &onion_frames);
         rect

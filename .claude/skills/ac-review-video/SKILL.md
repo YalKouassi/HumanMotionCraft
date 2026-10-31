@@ -21,6 +21,7 @@ No new code is needed. Pick by what you have:
 | A script of commands, headless | `ac video` (below) |
 | An MCP session | `animation_preview { "mp4": "<absolute path>", "gif": false }`, or `command_run clip.video { "path": ... }` |
 | The running app | the same tools through `ac mcp --live <port>`: the window's own animation |
+| The whole window, panels and all | `humanmotioncraft --open <id> --record <file.mp4>` (`--size`, `--from`, `--to`, `--fps`; `--ui library=off` and the like hide parts of it). It steps through the frames, then closes |
 
 ```
 ac --assets assets video --script <script.json> --view three-quarter --size 1280x720 --out <file.mp4>

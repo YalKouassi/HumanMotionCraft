@@ -305,8 +305,13 @@ impl App {
     /// first, with the same Save / Don't save / Cancel question as switching animations.
     pub(super) fn close_requested(&mut self, ctx: &egui::Context) {
         let asked = ctx.input(|i| i.viewport().close_requested());
-        // a --screenshot run closes itself when the picture is written
-        if asked && self.screenshot.is_none() && !self.shell.quit_ok && self.session.document.unsaved() {
+        // a --screenshot or --record run closes itself when the file is written
+        if asked
+            && self.screenshot.is_none()
+            && self.record.is_none()
+            && !self.shell.quit_ok
+            && self.session.document.unsaved()
+        {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
             if self.confirm.is_none() {
                 self.confirm = Some(super::save::Confirm::Switch(super::save::Switch::Quit));
@@ -369,6 +374,10 @@ impl App {
                 self.shell.prefs.update(|p| p.general.units = u);
             }),
             ("maximise", _) => on().map(|v| self.shell.maximised = v),
+            ("menu", _) => on().map(|v| self.view.hide_menu = !v),
+            ("tools", _) => on().map(|v| self.view.hide_tools = !v),
+            ("status", _) => on().map(|v| self.view.hide_status = !v),
+            ("joints", _) => on().map(|v| self.view.hide_joints = !v),
             ("library" | "inspector" | "timeline", _) => on().map(|v| {
                 self.shell.prefs.update(|p| match name {
                     "library" => p.layout.show_library = v,
@@ -390,7 +399,7 @@ impl App {
     }
 
     /// The names [`App::shell_ui`] takes, for `--ui`'s error message.
-    pub(super) const SHELL_UI: &'static str = "perf, window (palette, settings, history, messages, shortcuts, about, form:<command>), palette (a search), theme, scale, colours, units, maximise, library, inspector, timeline, side";
+    pub(super) const SHELL_UI: &'static str = "perf, window (palette, settings, history, messages, shortcuts, about, form:<command>), palette (a search), theme, scale, colours, units, maximise, library, inspector, timeline, side, menu, tools, status, joints";
 
     fn open_window(&mut self, w: &str) -> Result<(), String> {
         match w {

@@ -13,6 +13,7 @@ mod onion;
 mod panels;
 mod picker;
 pub mod prefs;
+pub mod record;
 mod save;
 mod shell;
 mod theme;
@@ -54,6 +55,11 @@ pub struct App {
     playing: bool,
     status: String,
     screenshot: Option<(PathBuf, Shot)>,
+    /// `--record`, on its way (`app/record.rs`).
+    record: Option<record::Recording>,
+    /// `--size`, in pixels.
+    window_size: Option<(u32, u32)>,
+    size_tries: u32,
     frames_drawn: u32,
     assets: PathBuf,
     /// Requests from the control port (`--control`).
@@ -156,10 +162,11 @@ impl App {
         let renderer = Renderer::new(&rs.device, rs.target_format, &mesh);
 
         // started for a script or a screenshot, or for an agent: fewer prompts (files/mod.rs)
-        let scripted = args.open.is_some() || args.script.is_some() || args.screenshot.is_some();
+        let grabbing = args.screenshot.is_some() || args.record.is_some();
+        let scripted = args.open.is_some() || args.script.is_some() || grabbing;
         let agent = args.control.is_some();
         // preferences first: the library folder is one
-        let automated = args.screenshot.is_some() || args.control.is_some();
+        let automated = grabbing || args.control.is_some();
         let (prefs, prefs_notes) = prefs::open(prefs::location(args.prefs.as_deref(), automated));
         // the app's own library, left under a former name's folder, moves to this name's once
         let default_library = args.library.is_none() && prefs.get().general.library_dir.is_none();
@@ -195,7 +202,7 @@ impl App {
         let mut session = built.session;
         // the community: a screenshot run gets the fixtures' fake server (the same picture every
         // time); otherwise the live one, with this computer's account beside the app's library
-        if args.screenshot.is_some() {
+        if grabbing {
             ac_community::fake::use_fake(&assets.join("rig").join("default_rig.json"));
         } else if let Some(dir) = ac_io::library::app_library_dir().parent() {
             ac_community::http::connect(dir.to_path_buf());
@@ -254,6 +261,10 @@ impl App {
                 }
             }
         }
+        // a recording of the wrong animation is no recording
+        if args.record.is_some() && (status.starts_with("couldn't open") || status.starts_with("script:")) {
+            return Err(status);
+        }
         if let Some(f) = args.frame {
             let _ = session.run("frame.set", &json!({ "frame": f }));
         }
@@ -285,6 +296,9 @@ impl App {
             playing: false,
             status,
             screenshot: args.screenshot.map(|p| (p, Arc::new(AtomicU8::new(0)))),
+            record: args.record.map(record::Recording::new),
+            window_size: args.size,
+            size_tries: 0,
             frames_drawn: 0,
             assets,
             control,
@@ -512,8 +526,12 @@ impl eframe::App for App {
         self.begin_frame(&ctx);
         self.advance_playback(&ctx);
 
-        egui::Panel::top("menu").show(ui, |ui| self.menu_bar(ui));
-        egui::Panel::bottom("status").show(ui, |ui| self.status_bar(ui));
+        if !self.view.hide_menu {
+            egui::Panel::top("menu").show(ui, |ui| self.menu_bar(ui));
+        }
+        if !self.view.hide_status {
+            egui::Panel::bottom("status").show(ui, |ui| self.status_bar(ui));
+        }
         // library, inspector, timeline and the viewport (`app/shell/layout.rs`)
         self.panels(ui, frame);
         self.confirm_dialog(&ctx);
@@ -521,20 +539,21 @@ impl eframe::App for App {
         self.files_windows(&ctx);
 
         // --screenshot: wait for a few settled frames, grab the window, write it, quit
+        let sized = self.screenshot.is_none() || self.window_sized(&ctx);
         if let Some((path, state)) = &self.screenshot {
             self.frames_drawn += 1;
             let busy = self.thumbs.busy || self.community.loading();
             match state.load(Ordering::SeqCst) {
                 // settled: a few frames drawn and the thumbnails and community strips on screen
                 // ready (or a long wait)
-                0 if self.frames_drawn > 5 && (!busy || self.frames_drawn > 600) => {
+                0 if sized && self.frames_drawn > 5 && (!busy || self.frames_drawn > 600) => {
                     state.store(1, Ordering::SeqCst);
                     let (path, state) = (path.clone(), state.clone());
                     ctx.request_screenshot(move |img| {
                         let ok = match save_png(&path, &img) {
                             Ok(()) => true,
                             Err(e) => {
-                                tracing::error!("screenshot: {e}");
+                                crate::failed(format!("--screenshot: {e}"));
                                 false
                             }
                         };
@@ -546,6 +565,7 @@ impl eframe::App for App {
             }
             ctx.request_repaint();
         }
+        self.recording(&ctx);
         self.publish_widgets(&ctx);
         self.finish_input(&ctx);
         self.end_frame(&ctx);
