@@ -1,6 +1,6 @@
 # Feet stay planted on long fills
 
-- **Status:** built, waiting for the owner
+- **Status:** in progress: the owner rejected the video for a half step (2026-10-31); how to fix it waits for the owner
 - **Requires:** none
 - **Source:** the 2026-10-31 review of 121000 (finding 4); the owner's decision
 
@@ -30,3 +30,20 @@ owner's video is still to come.
 
 ## Build check (2026-10-31)
 Measured in integration with the shipped `parts-natural`: `sliding_max_cm` 1.894, under the line. The same code on the previous model measured 2.006, so the line is met narrowly and depends on the model. Video for the owner, physics off: `target/shots/2026-10-31/long-fill/long-fill-feet.mp4` in the main checkout.
+
+## The owner's finding: a half step (2026-10-31)
+The owner watched the video: left full, right full, left half, right full, then full steps. Measured on
+`ai-fill-long-gap` (y of each foot's contact, metres; one 90-frame fill, so one case only):
+
+| Anchors on | Contacts in order | Reading |
+|---|---|---|
+| 30, 60 (today) | L -0.41, R -0.91, L -0.89, R -1.34, L -1.97 | the half step: the second left lands beside the right |
+| 30, 60, no `hold_contacts` | L -0.40, R -0.88, L -0.82, R -1.25, L -1.87 | the same, so the hold didn't cause it |
+| 33, 66 | L -0.22, R -0.81, L -1.19, R -1.27, then L -1.78 | a short step moves later |
+| 22, 44, 66 (every 2 source steps) | L -0.54, R -0.75, L -1.12, R -1.33, L -1.79, R -1.63 | alternates; lengths uneven, last step goes back |
+| about every 11 (every source step) | L -0.53, R -0.84, L -1.17, R -1.46, L -1.74, R -1.99 | regular, 0.25 to 0.33 m a step |
+
+The anchor segment plays at 1.5x, so a step is 11 frames and 30 frames is 2.7 steps: the span has to fit
+a step count that doesn't divide evenly. Anchors on every step give the pattern back, but then most of the
+motion is the library clip's and little is the model's, which sits badly with the rule that AI Fill is AI
+and doesn't go through the Walk loop. None of these trials is in the code.
