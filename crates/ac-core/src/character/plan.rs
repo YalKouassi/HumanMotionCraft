@@ -12,6 +12,8 @@
 //! character's own. A node with no segment to aim (a hand without fingers, the head) takes its
 //! nearest driven ancestor's alignment, so it keeps its rest relation to it.
 
+use std::collections::BTreeMap;
+
 use crate::quat::{self, Mat3, Vec3};
 use crate::rig::Skeleton;
 
@@ -230,6 +232,16 @@ impl Plan {
                     "joints: {lm:?} is not a landmark; the landmarks are {}, and optionally {}",
                     super::REQUIRED.join(", "),
                     super::OPTIONAL.join(", ")
+                ));
+            }
+        }
+        // one node stands for one landmark: two landmarks on a node would leave the second
+        // undriven without a word, and a limb with two of its joints on one node can't be solved
+        let mut by_node: BTreeMap<&str, &str> = BTreeMap::new();
+        for (lm, name) in &m.joints {
+            if let Some(other) = by_node.insert(name.as_str(), lm.as_str()) {
+                return Err(format!(
+                    "joints: {other} and {lm} both name the node {name:?}; a node stands for one landmark (unmap one with \"none\")"
                 ));
             }
         }
