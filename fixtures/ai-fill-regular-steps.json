@@ -1,0 +1,39 @@
+{
+  "$schema": "./schema.json",
+  "name": "ai-fill-regular-steps",
+  "feature": "ai.fill",
+  "description": "Roadmap 153500: the steps of the long fill of ai-fill-long-gap (the same scene, physics off), and today's half step as the known result. This fixture passes while the shipped model fails the measure, so the gate stays usable; when a model passes, regular flips to true and short to []. The rule (crates/ac-core/src/steps.rs, hand-worked in its tests): contacts landing inside the span in order, each step signed along the root's travel, the feet taking turns and no step under half the median. The contacts are the ones measured in roadmap 167000, to two decimals, hence the tolerance 0.01: L -0.41, R -0.91, L -0.89, R -1.34, L -1.97 (y, metres). Steps by y: 0.50, -0.02 (the left lands just behind the right), 0.45, 0.63; in order -0.02, 0.45, 0.50, 0.63, so a median of 0.475 and half of it 0.2375: step 1 alone is short. The lengths themselves are along the root's travel, not exactly y, so they are not checked here.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "ai.settings", "params": { "ai_force": 1, "style": "any" } },
+    { "command": "clip.open", "params": { "id": "Locomotion/Walk" } },
+    { "command": "keys.copy", "params": { "frames": [8] } },
+    { "command": "pose.reset" },
+    { "command": "clip.new", "params": { "name": "Long gap", "group": "Mine" } },
+    { "command": "keys.paste", "params": { "at": 90 } },
+    { "command": "pose.set_root", "params": { "root": [0, -2.2993044, 0.9027198] } },
+    { "command": "key.set" },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 90 },
+      "pinned": "the network's output: the contacts as roadmap 167000 measured them on the shipped model",
+      "expect": {
+        "diagnostics": {
+          "steps": {
+            "contacts": [
+              { "foot": "L", "y": -0.41 },
+              { "foot": "R", "y": -0.91 },
+              { "foot": "L", "y": -0.89 },
+              { "foot": "R", "y": -1.34 },
+              { "foot": "L", "y": -1.97 }
+            ],
+            "alternate": true,
+            "short": [1],
+            "regular": false
+          }
+        }
+      }
+    }
+  ],
+  "expect": { "tolerance": 0.01 }
+}
