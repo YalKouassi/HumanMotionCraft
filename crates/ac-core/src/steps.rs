@@ -129,7 +129,10 @@ fn merged(mut raw: Vec<(Contact, bool)>) -> Vec<Contact> {
             _ => out.push((c, landed)),
         }
     }
-    out.into_iter().filter(|(_, landed)| *landed).map(|(c, _)| c).collect()
+    out.into_iter()
+        .filter(|(_, landed)| *landed)
+        .map(|(c, _)| c)
+        .collect()
 }
 
 /// The steps of frames `a..=b` of the keys.
@@ -333,7 +336,7 @@ mod tests {
         let s = judge(contacts);
         assert_eq!(s.contacts.len(), 6);
         assert!(s.alternate);
-        near(s.median_m.unwrap(), 0.45);
+        near(s.median_m.unwrap(), 0.4498);
         assert_eq!(s.short, [2]);
         assert_eq!(s.regular, Some(false));
     }

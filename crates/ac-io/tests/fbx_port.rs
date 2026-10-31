@@ -175,12 +175,22 @@ fn every_source_gets_one_outcome_and_the_checks_hold() {
     assert_eq!(takes["action"], "Walks");
     assert_eq!(
         takes["clips"][1]["path"],
-        "clips/PackA/Walks/takes - Second start.clip.json"
+        "animations/PackA - Walks/takes - Second start.clip.json"
     );
     assert_eq!(takes["clips"][1]["take"], "Take 002");
-    assert!(to.join("clips/PackA/Walks/walk.clip.json").is_file());
-    assert!(!to.join("clips/PackB").exists(), "a duplicate writes nothing");
-    assert!(!to.join("clips/PackA/Bad").exists(), "what failed writes nothing");
+    assert!(to.join("animations/PackA - Walks/walk.clip.json").is_file());
+    assert!(
+        !to.join("animations").read_dir().unwrap().any(|d| d
+            .unwrap()
+            .file_name()
+            .to_string_lossy()
+            .starts_with("PackB")),
+        "a duplicate writes nothing"
+    );
+    assert!(
+        !to.join("animations/PackA - Bad").exists(),
+        "what failed writes nothing"
+    );
 
     let sk = skeleton();
     let load = |rel: &str| clipfile::load_clip(&std::fs::read_to_string(to.join(rel)).unwrap()).unwrap();
@@ -195,7 +205,7 @@ fn every_source_gets_one_outcome_and_the_checks_hold() {
         (turned["turned"].as_f64().unwrap().abs() - 90.0).abs() < 30.0,
         "{turned}"
     );
-    let yaw = gait::facing(&sk, &first_joints("clips/PackA/Turns/turned.clip.json")).unwrap();
+    let yaw = gait::facing(&sk, &first_joints("animations/PackA - Turns/turned.clip.json")).unwrap();
     assert!(
         gait::wrap(yaw + std::f64::consts::FRAC_PI_2).abs() < 1e-6,
         "{yaw}"
@@ -207,8 +217,8 @@ fn every_source_gets_one_outcome_and_the_checks_hold() {
     let hang = &m["PackA/Hangs/hang.fbx"]["clips"][0];
     assert_eq!(hang["hanging"], true, "{hang}");
     assert_eq!(hang["floor"], 0.0, "{hang}");
-    let up = first_joints("clips/PackA/Hangs/hang.clip.json")[0][2]
-        - first_joints("clips/PackA/Walks/walk.clip.json")[0][2];
+    let up = first_joints("animations/PackA - Hangs/hang.clip.json")[0][2]
+        - first_joints("animations/PackA - Walks/walk.clip.json")[0][2];
     assert!((up - 0.5).abs() < 0.02, "{up}");
     assert_eq!(m["PackA/Walks/walk.fbx"]["clips"][0]["hanging"], false);
     std::fs::remove_dir_all(lib).unwrap();
@@ -221,7 +231,7 @@ fn a_run_again_changes_nothing_and_a_deleted_clip_stays_deleted() {
     s.run("clip.port", &params(&to)).unwrap();
     let manifest = to.join(MANIFEST);
     let before = std::fs::read(&manifest).unwrap();
-    let walk = to.join("clips/PackA/Walks/walk.clip.json");
+    let walk = to.join("animations/PackA - Walks/walk.clip.json");
     let stamp = std::fs::metadata(&manifest).unwrap().modified().unwrap();
     // the owner deletes a bad clip as they go
     std::fs::remove_file(&walk).unwrap();

@@ -1,6 +1,6 @@
 //! `clip.port`: a resumable bulk port of FBX files onto the rig (roadmap 164000), for a collection
 //! too big and too mixed for `clip.import_batch`. The input is a text list of files, one path a
-//! line; the output is a folder outside any repository: `clips/<pack>/<action>/*.clip.json` and a
+//! line; the output is a folder outside any repository: `animations/<pack> - <action>/*.clip.json` (a library the app opens with --library) and a
 //! manifest, one JSON value a line, one line for each source:
 //!
 //! - `imported`, with its clips, and those left out with why;
@@ -44,7 +44,7 @@ type R<T> = Result<T, String>;
 /// The manifest's name in the output folder.
 pub const MANIFEST: &str = "port-manifest.jsonl";
 /// The folder under the output folder the clips go in.
-pub const CLIPS: &str = "clips";
+pub const CLIPS: &str = "animations";
 /// Largest list read.
 pub const MAX_LIST_BYTES: u64 = 64 << 20;
 /// Furthest a clip's first frame may face from -Y and stay as it is, and pass the check.
@@ -553,7 +553,7 @@ fn one(skel: &Skeleton, line: &str, path: &Path, root: &Path, to: &Path, book: &
     for c in source.clips() {
         made.push((Some(c.name.as_str()), source.clip(skel, c)));
     }
-    let folder = format!("{CLIPS}/{pack}/{action}");
+    let folder = format!("{CLIPS}/{pack} - {action}");
     let mut taken = book.taken.clone();
     let (mut clips, mut left_out): (Vec<Value>, Vec<Value>) = (Vec::new(), Vec::new());
     for (name, imported) in made {
@@ -787,12 +787,12 @@ mod tests {
     #[test]
     fn a_clip_path_never_repeats() {
         let mut taken = BTreeSet::new();
-        let first = free_path(&taken, "clips/P/A", "Walk");
-        assert_eq!(first, "clips/P/A/Walk.clip.json");
+        let first = free_path(&taken, "animations/P - A", "Walk");
+        assert_eq!(first, "animations/P - A/Walk.clip.json");
         taken.insert(first.to_lowercase());
         assert_eq!(
-            free_path(&taken, "clips/P/A", "WALK"),
-            "clips/P/A/WALK (2).clip.json"
+            free_path(&taken, "animations/P - A", "WALK"),
+            "animations/P - A/WALK (2).clip.json"
         );
     }
 }

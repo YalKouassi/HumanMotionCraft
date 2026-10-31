@@ -307,7 +307,7 @@
             }
           ]
         },
-        "failed": [{ "file": "not-humanoid.fbx" }, { "file": "walk-text-cut.fbx" }]
+        "failed": [{ "file": "not-humanoid.fbx" }, { "file": "walk-text-cut.fbx" }, { "file": "port/PackA/Bad/not-humanoid.fbx" }, { "file": "port/PackA/Bad/swapped.fbx" }, { "file": "port/PackB/Walks/walk.fbx" }]
       }
     },
     {

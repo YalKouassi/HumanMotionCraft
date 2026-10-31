@@ -128,10 +128,7 @@ fn build_listing(all: &[Value], key: ListKey) -> Listing {
             continue;
         }
         for (pos, i) in s.rows.iter().enumerate() {
-            let id = items
-                .get(*i)
-                .and_then(|it| it["id"].as_str())
-                .unwrap_or_default();
+            let id = items.get(*i).and_then(|it| it["id"].as_str()).unwrap_or_default();
             if !first.contains_key(id) {
                 first.insert(id.to_string(), (si, pos));
                 order.push((key.anims, id.to_string()));
@@ -198,7 +195,11 @@ pub(super) fn forget_item(library: &mut Value, kind: &str, id: &str) {
     if same_kind_left {
         return;
     }
-    let other = if kind == "animations" { "poses" } else { "animations" };
+    let other = if kind == "animations" {
+        "poses"
+    } else {
+        "animations"
+    };
     let other_left = library[other]
         .as_array()
         .into_iter()
@@ -391,7 +392,10 @@ impl App {
         {
             return l.clone();
         }
-        let all = self.library[kind].as_array().map(Vec::as_slice).unwrap_or_default();
+        let all = self.library[kind]
+            .as_array()
+            .map(Vec::as_slice)
+            .unwrap_or_default();
         let listing = Arc::new(build_listing(all, key));
         self.files.nav.order = listing.order.clone();
         self.lib_view.listing = Some(listing.clone());
@@ -641,7 +645,13 @@ impl App {
                         }
                     };
                     // the selection off screen is still scrolled to
-                    let sel = self.files.nav.sel.as_ref().filter(|x| x.0 == anims).map(|x| x.1.as_str());
+                    let sel = self
+                        .files
+                        .nav
+                        .sel
+                        .as_ref()
+                        .filter(|x| x.0 == anims)
+                        .map(|x| x.1.as_str());
                     if scroll
                         && let Some(&(ss, pos)) = sel.and_then(|id| listing.first.get(id))
                         && ss == si

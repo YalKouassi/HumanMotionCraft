@@ -712,6 +712,41 @@ Outputs:
 | `height` | integer | yes |  | pixels down |
 | `note` | text |  |  | how the pictures were made, when it matters (the software adapter) |
 
+### `clip.port`: Port a list of FBX files
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `import`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `list` | text | yes |  | a text file of .fbx paths, one a line (a relative path is from the list's folder) |
+| `root` | text | yes |  | the folder the paths lie under: the first folder below it is the pack |
+| `to` | text | yes |  | the output folder for the clips and the manifest (made if missing; never inside a repository) |
+| `limit` | integer |  |  | finish at most this many new sources, then stop |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `manifest` | text | yes |  | the manifest file, one JSON value a line |
+| `sources` | number | yes |  | the different paths in the list |
+| `new` | number | yes |  | sources given their outcome by this run |
+| `skipped` | number | yes |  | sources already finished, left as they were |
+| `imported` | number | yes |  | sources with at least one clip kept |
+| `duplicate` | number | yes |  | sources with the same content as an earlier one |
+| `refused` | number | yes |  | sources with no clip kept, each with its reason |
+| `pending` | number | yes |  | sources with no outcome yet: couldn't be read now, or past limit |
+| `unreachable` | list of text | yes |  | the sources that couldn't be read now: no outcome is recorded, so a later run tries them |
+| `clips` | number | yes |  | clips kept |
+| `left_out` | number | yes |  | clips left out, by a refusal or a failed check |
+| `hanging` | number | yes |  | clips kept with no floor under the feet |
+| `in_place` | number | yes |  | clips kept whose root stays near where it starts |
+| `turned` | number | yes |  | clips kept that were turned to start facing -Y |
+| `checks` | JSON | yes |  | {check: clips failing it} |
+| `reasons` | JSON | yes |  | {reason with its names and numbers blanked: how many}, sources refused and clips left out |
+| `torn` | bool | yes |  | a last manifest line cut off by a stopped run was dropped, and its source done again |
+
 ### `clip.possible`: Impossible poses
 
 not undoable, icon `graph`.

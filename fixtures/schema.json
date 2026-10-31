@@ -125,6 +125,7 @@
             "clip.new",
             "clip.open",
             "clip.picture",
+            "clip.port",
             "clip.possible",
             "clip.range",
             "clip.rename",
@@ -1815,6 +1816,58 @@
                 },
                 "required": [
                   "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.port"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Port a list of FBX files; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "list": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a text file of .fbx paths, one a line (a relative path is from the list's folder)"
+                  },
+                  "root": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the folder the paths lie under: the first folder below it is the pack"
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the output folder for the clips and the manifest (made if missing; never inside a repository)"
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "description": "finish at most this many new sources, then stop"
+                  }
+                },
+                "required": [
+                  "list",
+                  "root",
+                  "to"
                 ],
                 "additionalProperties": false
               }
@@ -7383,6 +7436,7 @@
             "clip.new",
             "clip.open",
             "clip.picture",
+            "clip.port",
             "clip.possible",
             "clip.range",
             "clip.rename",

@@ -120,11 +120,7 @@ pub fn clips_outside_layout(dir: &Path) -> usize {
     if dir.join(Kind::Animations.folder()).is_dir() {
         return 0;
     }
-    let is_clip = |e: &std::fs::DirEntry| {
-        e.file_name()
-            .to_string_lossy()
-            .ends_with(Kind::Animations.ext())
-    };
+    let is_clip = |e: &std::fs::DirEntry| e.file_name().to_string_lossy().ends_with(Kind::Animations.ext());
     let mut n = 0;
     for e in std::fs::read_dir(dir).into_iter().flatten().flatten() {
         if is_clip(&e) {
@@ -414,7 +410,8 @@ impl Library {
             out.push(item);
         }
         // an empty list leaves no file: a folder that isn't a library yet gets nothing put in it
-        if new.items != old.items && !(new.items.is_empty() && !self.index_path().is_some_and(|p| p.exists())) {
+        if new.items != old.items && !(new.items.is_empty() && !self.index_path().is_some_and(|p| p.exists()))
+        {
             self.save_index(&new);
         }
         out

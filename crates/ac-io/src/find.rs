@@ -195,11 +195,7 @@ pub fn find(items: &[Value], q: &Query) -> Vec<Value> {
     out.sort_by_cached_key(|it| (natural_key(text(it, "group")), natural_key(text(it, "name"))));
     match q.sort {
         Sort::Name => {}
-        Sort::Length => out.sort_by(|a, b| {
-            seconds(a)
-                .partial_cmp(&seconds(b))
-                .unwrap_or(Ordering::Equal)
-        }),
+        Sort::Length => out.sort_by(|a, b| seconds(a).partial_cmp(&seconds(b)).unwrap_or(Ordering::Equal)),
         Sort::Modified => {
             out.sort_by_key(|v| Reverse(v.get("modified").and_then(Value::as_u64).unwrap_or(0)));
         }

@@ -300,8 +300,10 @@ impl App {
                     vis.weak_text_color()
                 };
                 let (s, stroke) = (4.0, Stroke::new(1.5, ink));
-                ui.painter().line_segment([dc - vec2(s, s), dc + vec2(s, s)], stroke);
-                ui.painter().line_segment([dc - vec2(s, -s), dc + vec2(s, -s)], stroke);
+                ui.painter()
+                    .line_segment([dc - vec2(s, s), dc + vec2(s, s)], stroke);
+                ui.painter()
+                    .line_segment([dc - vec2(s, -s), dc + vec2(s, -s)], stroke);
             }
             if dr.clicked() {
                 self.lib_delete(anims, &id);
