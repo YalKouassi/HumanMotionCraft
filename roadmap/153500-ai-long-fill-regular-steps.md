@@ -1,6 +1,6 @@
 # Long fills keep regular steps
 
-- **Status:** not started; step 1 agreed by the owner (2026-10-31); the fix is on hold, no training without the owner's word
+- **Status:** in progress: step 1 built, baseline next; the fix is on hold, no training without the owner's word
 - **Requires:** none
 - **Source:** the owner's review of the long-fill video (2026-10-31); measured in 167000
 
@@ -30,3 +30,18 @@ redone after a base retrain. 154000's prerequisites stay as they are until the o
 - **Fix:** the same fills pass on the new model, with anchors no denser than today's and slide on
   `ai-fill-long-gap` still under 2 cm (167000).
 - **Owner's eye:** side-by-side videos of this fill and a few others, physics off, approved by the owner.
+
+## Result
+Step 1, written without a build (2026-10-31); nothing here has been run yet.
+
+- **Measure:** `crates/ac-core/src/steps.rs`, returned as `diagnostics.steps` by every fill, with `step_report` in
+  `ac_train.evaluate` as the same rule, both tested on the 167000 numbers by hand. A step is signed along the root's
+  travel: the feet stand about 0.2 m apart sideways, so plain distance would hide a foot landing level with the other, and
+  a step back would pass. A foot already down on the span's first frame is not a contact. Not a timeline flag: only a
+  walk should step evenly, and the baseline comes first.
+- **Fixture:** `fixtures/ai-fill-regular-steps.json` pins the half step (`regular` false, `short` [1]).
+- **Baseline, not run:** `python -m ac_train.evaluate --long-walks 200` fills held-out walks of 90 frames with the
+  app's `ai.fill` on the shipped model and writes `target/long-walks/baseline.json`, the recordings' own steps beside
+  them. It needs a built `ac` and trains nothing.
+- **Python's contacts differ from the app's:** the recordings and `steps_irregular` use the scan's contact test, the
+  fills the app's `crate::contact`, so compare the two counts with care.
