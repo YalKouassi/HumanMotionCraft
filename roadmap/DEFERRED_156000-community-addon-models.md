@@ -1,6 +1,6 @@
 # Add-on models in the community library
 
-- **Status:** not started; official models only, with no way for anyone else to share one (owner, 2026-10-30)
+- **Status:** deferred (2026-10-31)
 - **Requires:** 155000, 150000
 - **Source:** owner request (2026-10-30)
 
@@ -38,3 +38,6 @@ this trained on?".
 
 ## Decision (2026-10-31)
 The owner: starts only after a good 154000 result; until then there is nothing to publish.
+
+## Deferred (2026-10-31)
+The owner: put off.
