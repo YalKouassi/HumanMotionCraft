@@ -1,6 +1,6 @@
 # Pose-to-pose motion from MotionBricks
 
-- **Status:** in progress: Python helper built, Rust crate next (2026-10-30)
+- **Status:** built, waiting for the owner (2026-10-31)
 - **Requires:** 113000, 114000
 - **Source:** owner request (2026-10-30), after the licence check. This replaces the decision of
   2026-10-28 to use only Kimodo as a third-party generator.
@@ -391,3 +391,72 @@ fixtures pass unchanged.
   packaging (124000) shipping `tools/posefill` with the rig modules, `cargo xtask check`.
 - Review: MP4s of the six clips above through `clip.video`, and a fill saved to the library and
   reloaded.
+
+## Rust half built (2026-10-31)
+Crate `crates/ac-posefill` on `ac-core` and `ac-helper` (the shared code above): `install`
+(`%LOCALAPPDATA%/<product>/posefill` or `AC_POSEFILL_DIR`, `install.json` v1, the `HOW` hint
+naming `posefill.install` and `setup_posefill.py`, `plan_built` from `trt-cache/*.plan`),
+`setup` (the `Spec`: GPU required, no C++ tools; `LICENCES` for the panel and the command's
+answer; the stand-in for fixtures), `helper` (`info` as the hello, `load`, `fill`; `plan` and
+`gpu` from the replies), `engine` (the `Engine` seam, a 64-entry cache of fills by request so a
+chain's segments are all found), `plan` (the keys of yours from A to B, every key between a step
+of the chain; each gap checked at the animation's rate against 18-58 model frames; the context
+the 4 poses a model frame apart ending on A, those before frame 0 the first repeated and said;
+the targets B and up to 3 model frames after it where a key of yours lies on or past them, on the
+chain's last segment only; a later segment's context the earlier fill's last 4 frames) and the
+three commands:
+- `posefill.helper {action: status|load|stop}`: installed, dir, running, loaded, busy, model,
+  plan, gpu, note.
+- `posefill.install {action: check|start|stop, repair}`: state, step/steps/label/last, seconds,
+  error, requirements, ready, licences, left_out.
+- `posefill.fill {from, to}` (default: the keys around the playhead): from, to, frames, model
+  (`"posefill"`), calls, seconds (the model's own), notes. One undoable command, so one undo step
+  for the whole chain; each segment written through `edits::refill`; non-finite or wrong-shape
+  output refused by `ac_helper::frames::check` and nothing written (the session restores the
+  document).
+- `ac_core::edits::POSE_FILL` beside `GENERATED` (`GENERATED_TAGS`): `is_generated` holds both, the
+  note names the command that made the span (`posefill.fill` or `text.fill`), `ease.rs` leaves
+  both. `ai.fill` and its goldens unchanged.
+- The app: `crates/ac-app/src/app/panels/posefill.rs`, the Pose fill section after Motion from
+  text (also a dock panel): before the install, what it needs, the licences (from the command,
+  as links), what is left out, Install with step progress, Stop, Show log; installed, the model
+  and whether its plan is built, Fill gap (the gap around the playhead), Load and Stop helper; a
+  fill runs on a thread (`posefill_deferred` / `posefill_poll`, as motion from text) with the
+  helper's progress lines; the window runs as before without the install (screenshot).
+- Tests: `crates/ac-posefill/tests/commands.rs` (13, a fake engine), `fixtures/pose-fill.json`
+  (the stand-in: a 1 s fill, the short-context note, one undo step and redo, the tag, a 2-call
+  chain, the key edited beside it left alone, 11 refusals), `crates/ac-core/tests/generated.rs`
+  gains the tag. `docs/commands.md`, `fixtures/schema.json`, `docs/testing.md`, README,
+  `AGENTS.md` (rows for `ac-posefill` and `tools/posefill`, the runtime exception), 124000
+  (packaging ships `tools/posefill`), `ATTRIBUTION.md` and `NOTICE` (the credit line).
+
+Not done here: a real `posefill.install` run from the panel (the install exists on this machine
+and a second one is a 4 GB download on a disk with little room; the setup is the same shared
+code textmotion's install runs through, and its step lines were checked in the Python half) and
+the refusal without an NVIDIA GPU (none here to try; the requirement is marked required, so
+Install is disabled with the reason, and the setup refuses on its own).
+
+## Result
+Measured 2026-10-31 on the NVIDIA GeForce RTX 3080 Ti (12 GB), through the release `ac` and the
+installed helper (`target/shots/2026-10-31/posefill/`, gitignored):
+- `posefill.helper load`: 2.28 s (the helper starts and loads the built plan); the Python half
+  measured the one-time plan build at 55 s.
+- `posefill.fill` 10->40 on Walk 12 (keys 12-38 deleted, 1 s): **126 ms** for the command, the
+  model's own 67 ms (its first fill bakes the CUDA graph); 29 AI keys.
+- `posefill.fill` 10->66 through 40 and 10->40->70 (2 s, two calls each): **93 ms** for the
+  command, the model's own 9.3 ms for both calls (**4.6 ms a call on the GPU**, about 45 ms a
+  call wall through the helper and the retarget); 58 AI keys. In the debug build the same runs
+  are 0.6-0.8 s a command.
+- `walk-1.9s` in one call (10->66, 57 frames, 1.87 s, the most one call makes at 30 fps): 55 AI
+  keys, 81 ms on the model. 10->68 (59 model frames) and 10->70 with no key inside are refused
+  with the limits (`refused-*.err.txt`).
+- Saved to the library (`clip.save_as` "Walk 1 s pose fill" in group "Pose fill") and reopened:
+  61 keys, 29 of them AI with model `posefill` (`walk-1s.out.jsonl`).
+- Review: `walk-1s-side-by-side.mp4`, `walk-1.9s-side-by-side.mp4`,
+  `walk-chain-2s-side-by-side.mp4` (three-quarter, fixed camera; BEFORE is the spline between
+  the same keys, AFTER the fill), the contact sheets `walk-*.sheet.png` (side view, the keys and
+  frames between), and the Python half's six clips as MP4s (`python-half-*.mp4`, through
+  `library.add_file` and `clip.video`). Look at 0.3-1.0 s: the spline slides the feet together,
+  the fill strides and swings the arms; at the keys the body is on them. The panel:
+  `panel-installed.png`, `panel-not-installed.png` (at UI scale 0.6 so the whole inspector
+  shows; the licence list goes on below the fold).

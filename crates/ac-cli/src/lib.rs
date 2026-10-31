@@ -53,6 +53,7 @@ pub fn session(assets: &Path, library: &Path) -> Result<Session, String> {
         .ai(ac_ai::shared(assets))
         .commands(ac_media::SPECS)
         .commands(ac_textmotion::SPECS)
+        .commands(ac_posefill::SPECS)
         .commands(ac_community::SPECS)
         .strict()
         .build()?
@@ -225,9 +226,10 @@ pub fn run_fixture(assets: &Path, fixture: &Value) -> Outcome {
     let feature = fixture["feature"].as_str().unwrap_or_default().to_string();
     let mut failures = Vec::new();
     let tol = fixture["expect"]["tolerance"].as_f64().unwrap_or(1e-6);
-    // fixtures give the same result everywhere: motion from text comes from the stand-in, never
-    // from the optional helper (`ac_textmotion::stand_in`)
+    // fixtures give the same result everywhere: motion from text and pose fills come from the
+    // stand-ins, never from the optional helpers (`ac_textmotion::stand_in`, `ac_posefill::stand_in`)
     ac_textmotion::stand_in::use_stand_in();
+    ac_posefill::stand_in::use_stand_in();
     // and the community from its fake server, never the live one (`ac_community::fake`)
     ac_community::fake::use_fake(&assets.join("rig").join("default_rig.json"));
     let lib = std::env::temp_dir().join(format!(

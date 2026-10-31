@@ -6,13 +6,14 @@
 //! frames each side of such a key, the AI keys are re-curved (a cubic Hermite in each bone's
 //! rotation relative to the key, and in the root) so the motion goes through the key with one
 //! velocity. Your key and the frames past the window stay as they are, and the curve meets them
-//! with their own slope. Text-generated spans are never touched (see [`crate::edits::GENERATED`]).
+//! with their own slope. Spans a helper made are never touched (see [`crate::edits::GENERATED`]
+//! and [`crate::edits::POSE_FILL`]).
 //! An anchor pose inside a long fill ([`crate::anchors`]) is a key the ease goes through, like
 //! yours: the spans on both sides of it were filled on their own and meet there.
 
 use crate::clip::{Clip, Key, KeySource};
 use crate::document::Document;
-use crate::edits::GENERATED;
+use crate::edits::is_generated;
 use crate::quat::{self, Quat, Vec3};
 
 /// Frames each side of the key the ease reaches (the window's last frame keeps its value).
@@ -23,7 +24,7 @@ type R<T> = Result<T, String>;
 fn eased(k: &Key) -> bool {
     k.source == KeySource::Ai
         && k.only.is_none()
-        && !k.model.starts_with(GENERATED)
+        && !is_generated(&k.model)
         && !crate::anchors::is_anchor(&k.model)
 }
 

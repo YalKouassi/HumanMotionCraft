@@ -16,6 +16,7 @@ const LEFT_OUT: &[&str] = &["clip.group", "layer.plan"];
 fn sweep(assets: &std::path::Path, fixture: &Value) -> (Vec<String>, Vec<String>) {
     let name = fixture["name"].as_str().unwrap_or("(unnamed)");
     ac_textmotion::stand_in::use_stand_in();
+    ac_posefill::stand_in::use_stand_in();
     ac_community::fake::use_fake(&assets.join("rig").join("default_rig.json"));
     let lib = std::env::temp_dir().join(format!(
         "{}-undo-{}-{}",

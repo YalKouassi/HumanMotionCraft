@@ -19,6 +19,7 @@ dependencies = [
  "ac-core",
  "ac-io",
  "ac-media",
+ "ac-posefill",
  "ac-render",
  "ac-textmotion",
  "craft-atomic",
@@ -46,6 +47,7 @@ dependencies = [
  "ac-core",
  "ac-io",
  "ac-media",
+ "ac-posefill",
  "ac-render",
  "ac-textmotion",
  "notify",
@@ -111,6 +113,16 @@ dependencies = [
  "ac-core",
  "ac-render",
  "craft-atomic",
+ "serde_json",
+]
+
+[[package]]
+name = "ac-posefill"
+version = "0.1.1"
+dependencies = [
+ "ac-core",
+ "ac-helper",
+ "serde",
  "serde_json",
 ]
 

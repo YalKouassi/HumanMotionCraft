@@ -136,7 +136,9 @@ the model loads, and seconds after that; the window stays usable while it works.
 | `assets/` | Baked 104-bone rig (`default_rig.json`), joint limits (`limits.json`), neutral mannequin (`mannequin.glb`), pose/animation library, and in-betweener weights (`models/MANIFEST.json`). |
 | `fixtures/` | Deterministic JSON command scripts with hand-worked expectations covering every registered command. |
 | `training/` | Python (offline only): retargets motion-capture datasets onto the rig, trains and exports the in-betweener, and cuts the built-in mocap clips. Datasets live in the gitignored `training/data/`. See [How to retrain](training/README.md#how-to-retrain). |
+| `crates/ac-posefill` | Pose fill (`posefill.install`, `posefill.fill`, `posefill.helper`): the gap between two keys filled by an optional pose-to-pose model (NVIDIA GPU). Depends on `ac-core` and `ac-helper`. |
 | `tools/textmotion/` | Python (optional): installs the motion-from-text model and the helper the app talks to, and generates the `kimodo` training set. Never needed to run the app. |
+| `tools/posefill/` | Python (optional): installs the pose-to-pose engine (NVIDIA GPU only) and the helper the app talks to for Pose fill. Never needed to run the app. |
 
 ---
 

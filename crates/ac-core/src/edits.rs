@@ -19,6 +19,12 @@ pub const MAX_FILL: i64 = 45;
 /// cleared or refilled on its own: an edit next to it leaves it as it is and says so, and only an
 /// explicit command (`ai.fill`, `ai.clear`, `ai.toggle`, making it again) replaces it.
 pub const GENERATED: &str = "text";
+/// The model tag of AI keys made from the poses around a gap (the pose-to-pose helper,
+/// `posefill.fill`): held like [`GENERATED`] spans.
+pub const POSE_FILL: &str = "posefill";
+/// Every tag of motion a helper made, which an edit beside it leaves as it is, and the command
+/// that makes it again.
+pub const GENERATED_TAGS: &[(&str, &str)] = &[(GENERATED, "text.fill"), (POSE_FILL, "posefill.fill")];
 pub const TRACKED: &[&str] = &["root", "wrist.L", "wrist.R", "foot.L", "foot.R"];
 const SPINE: &[&str] = &["spine05", "spine04", "spine03", "spine02", "spine01"];
 /// Of a hip bend the lower back takes: people round the back, not only fold at the hip.
@@ -147,24 +153,40 @@ pub fn ai_bands(clip: &Clip) -> Vec<Band> {
     bands
 }
 
-/// Whether an AI key's model tag says it was made from text ([`GENERATED`]).
-pub fn is_generated(model: &str) -> bool {
-    model
-        .strip_prefix(GENERATED)
-        .is_some_and(|rest| rest.is_empty() || rest.starts_with(' '))
+/// The command that made an AI key with this model tag, when a helper did ([`GENERATED_TAGS`]).
+fn generated_by(model: &str) -> Option<&'static str> {
+    GENERATED_TAGS.iter().find_map(|(tag, command)| {
+        model
+            .strip_prefix(tag)
+            .is_some_and(|rest| rest.is_empty() || rest.starts_with(' '))
+            .then_some(*command)
+    })
 }
 
-/// Whether the span between manual keys `a` and `b` holds motion made from text.
+/// Whether an AI key's model tag says a helper made it ([`GENERATED`], [`POSE_FILL`]).
+pub fn is_generated(model: &str) -> bool {
+    generated_by(model).is_some()
+}
+
+/// Whether the span between manual keys `a` and `b` holds motion a helper made.
 pub fn generated_in(clip: &Clip, a: i64, b: i64) -> bool {
     clip.keys()
         .iter()
         .any(|k| k.source == KeySource::Ai && a < k.frame && k.frame < b && is_generated(&k.model))
 }
 
-/// What an edit says when it leaves a span made from text as it was.
-pub fn generated_note(a: i64, b: i64) -> String {
+/// What an edit says when it leaves a span a helper made as it was.
+pub fn generated_note(clip: &Clip, a: i64, b: i64) -> String {
+    let (what, again) = clip
+        .keys()
+        .iter()
+        .find(|k| k.source == KeySource::Ai && a < k.frame && k.frame < b && is_generated(&k.model))
+        .and_then(|k| generated_by(&k.model).map(|c| (k.model.starts_with(POSE_FILL), c)))
+        .map_or(("from text", "text.fill"), |(pose, c)| {
+            (if pose { "from poses" } else { "from text" }, c)
+        });
     format!(
-        "{a}-{b}: the motion made from text was left as it was; make it again (text.fill) to meet the changed key"
+        "{a}-{b}: the motion made {what} was left as it was; make it again ({again}) to meet the changed key"
     )
 }
 
@@ -308,7 +330,10 @@ fn refill_touching(
         })
         .collect();
     let (made, spans): (Vec<_>, Vec<_>) = spans.into_iter().partition(|&(a, b)| generated_in(clip, a, b));
-    let mut notes: Vec<String> = made.into_iter().map(|(a, b)| generated_note(a, b)).collect();
+    let mut notes: Vec<String> = made
+        .into_iter()
+        .map(|(a, b)| generated_note(clip, a, b))
+        .collect();
     let Some(filler) = filler else {
         return Ok(notes);
     };

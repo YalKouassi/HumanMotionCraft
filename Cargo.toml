@@ -16,6 +16,7 @@ ac-io = { path = "crates/ac-io" }
 ac-media = { path = "crates/ac-media" }
 ac-helper = { path = "crates/ac-helper" }
 ac-textmotion = { path = "crates/ac-textmotion" }
+ac-posefill = { path = "crates/ac-posefill" }
 ac-community = { path = "crates/ac-community" }
 ac-render = { path = "crates/ac-render" }
 ac-cli = { path = "crates/ac-cli" }

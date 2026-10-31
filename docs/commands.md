@@ -2406,6 +2406,84 @@ Outputs:
 |---|---|---|---|---|
 | `degrees` | number | yes |  | the lean moved into the back |
 
+## posefill
+
+### `posefill.fill`: Fill gap from poses
+
+undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer |  | 0 to 10000000 | your key before the gap (default: around the playhead) |
+| `to` | integer |  | 0 to 10000000 | your key after the gap; keys of yours between from and to are gone through, one call a gap |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer | yes |  | the fill's first frame (a key of yours) |
+| `to` | integer | yes |  | its last frame (a key of yours) |
+| `frames` | integer | yes |  | AI keys written between them |
+| `model` | text | yes |  | the keys' model tag |
+| `calls` | integer | yes |  | model calls made: one a gap between keys of yours |
+| `seconds` | number | yes |  | the model's own time over those calls, as it reports it |
+| `notes` | list of text | yes |  | what to know about the result |
+
+### `posefill.helper`: Pose fill: helper
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `action` | one of status \| load \| stop |  |  | status (default) says what is installed and running; load starts the helper and loads the model (a few minutes the first time, while it builds its plan for this GPU); stop ends it |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `installed` | bool | yes |  | the helper is installed |
+| `dir` | text | yes |  | where it is (or would be) installed |
+| `running` | bool | yes |  | its process is up |
+| `loaded` | bool | yes |  | the model is in memory |
+| `busy` | bool | yes |  | it is making a fill now |
+| `model` | text | yes |  | the model installed |
+| `plan` | text |  |  | whether the model's plan for this GPU is built (the first load builds it, a few minutes) |
+| `gpu` | text |  |  | the GPU the helper runs on |
+| `note` | text |  |  | what is missing and how to install it |
+
+### `posefill.install`: Pose fill: install
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `action` | one of check \| start \| stop |  |  | check (default) says what the install needs and what it is doing; start runs the setup (about 4 GB downloaded, a few minutes; the window stays usable); stop ends it, and start carries on from there |
+| `repair` | bool |  |  | start even when it is installed: the setup updates or repairs it |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `state` | one of not installed \| installing \| stopping \| installed \| failed \| stopped | yes |  | what the install is doing |
+| `dir` | text | yes |  | where it is (or would be) installed |
+| `log` | text |  |  | the setup's log |
+| `step` | integer |  |  | the setup's step working now (or where it ended), of steps |
+| `steps` | integer |  |  | how many steps the setup has |
+| `label` | text |  |  | what that step does |
+| `last` | text |  |  | the last line the setup printed (a download's progress) |
+| `seconds` | integer |  |  | how long the setup started here has run |
+| `error` | text |  |  | why it failed |
+| `requirements` | JSON |  |  | when it is not installed or running: what it needs, a list of {name, ok, required, note} |
+| `ready` | bool |  |  | everything required is there: start can run |
+| `licences` | JSON |  |  | what installing accepts, a list of {part, licence, url} |
+| `left_out` | text |  |  | what the install never takes from the engine's source |
+
 ## project
 
 ### `project.info`: Project file info

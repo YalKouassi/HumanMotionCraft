@@ -220,6 +220,9 @@
             "pose.set_bone",
             "pose.set_root",
             "pose.spread_bend",
+            "posefill.fill",
+            "posefill.helper",
+            "posefill.install",
             "project.info",
             "project.open",
             "project.save",
@@ -5748,6 +5751,118 @@
           "if": {
             "properties": {
               "command": {
+                "const": "posefill.fill"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Fill gap from poses; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key before the gap (default: around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key after the gap; keys of yours between from and to are gone through, one call a gap"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "posefill.helper"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Pose fill: helper"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "status",
+                      "load",
+                      "stop"
+                    ],
+                    "description": "status (default) says what is installed and running; load starts the helper and loads the model (a few minutes the first time, while it builds its plan for this GPU); stop ends it"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "posefill.install"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Pose fill: install; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "check",
+                      "start",
+                      "stop"
+                    ],
+                    "description": "check (default) says what the install needs and what it is doing; start runs the setup (about 4 GB downloaded, a few minutes; the window stays usable); stop ends it, and start carries on from there"
+                  },
+                  "repair": {
+                    "type": "boolean",
+                    "description": "start even when it is installed: the setup updates or repairs it"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "project.info"
               }
             },
@@ -6751,6 +6866,9 @@
             "pose.set_bone",
             "pose.set_root",
             "pose.spread_bend",
+            "posefill.fill",
+            "posefill.helper",
+            "posefill.install",
             "project.info",
             "project.open",
             "project.save",

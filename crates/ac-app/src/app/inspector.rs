@@ -70,6 +70,9 @@ impl App {
         self.inspector_section(ui, DockPanel::Text, "Motion from text", true, |app, ui| {
             app.text_panel(ui)
         });
+        self.inspector_section(ui, DockPanel::PoseFill, "Pose fill", true, |app, ui| {
+            app.posefill_panel(ui)
+        });
         self.inspector_section(ui, DockPanel::Pins, "Pins", false, |app, ui| app.pins_panel(ui));
     }
 

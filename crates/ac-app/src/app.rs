@@ -188,6 +188,7 @@ impl App {
             .ai(model)
             .commands(ac_media::SPECS)
             .commands(ac_textmotion::SPECS)
+            .commands(ac_posefill::SPECS)
             .commands(ac_community::SPECS)
             .build()?;
         let mut session = built.session;
@@ -410,6 +411,10 @@ impl App {
     fn run(&mut self, id: &str, params: Value) -> Option<Value> {
         // motion from text that would wait for the model is made off the UI thread first
         if self.text_deferred(id, &params) {
+            return None;
+        }
+        // and a pose fill (its model works a moment, and minutes the first time)
+        if self.posefill_deferred(id, &params) {
             return None;
         }
         // and so is anything from the community (it waits on the network)

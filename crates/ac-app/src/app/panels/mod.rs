@@ -1,5 +1,6 @@
 //! The inspector's panels, one file each: the selected joint, layers, physics report, scene boxes,
-//! the AI in-between (with its worker thread) and motion from text (with its own, and its install). Each reads session state and acts through
+//! the AI in-between (with its worker thread), motion from text (with its own, and its install) and
+//! pose fill (likewise). Each reads session state and acts through
 //! `Session::run`; this module only holds the window state they keep between frames.
 
 pub mod ai;
@@ -7,6 +8,7 @@ pub mod ai_worker;
 pub mod joint;
 pub mod layers;
 pub mod physics;
+pub mod posefill;
 pub mod range;
 pub mod review;
 pub mod scene;
@@ -24,6 +26,7 @@ pub struct Panels {
     pub scene: scene::SceneState,
     pub layers: layers::LayersState,
     pub text: text::TextState,
+    pub posefill: posefill::PoseFillState,
 }
 
 impl super::App {

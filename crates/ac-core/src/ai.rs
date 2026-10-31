@@ -752,7 +752,7 @@ impl crate::document::Document {
             if let (Some(a), Some(b)) = (a, b)
                 && crate::edits::generated_in(&self.clip, a, b)
             {
-                notes.push(crate::edits::generated_note(a, b));
+                notes.push(crate::edits::generated_note(&self.clip, a, b));
             }
         }
         let Some(filler) = self.ai_filler() else {
