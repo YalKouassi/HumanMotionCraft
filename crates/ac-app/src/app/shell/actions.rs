@@ -295,6 +295,8 @@ pub static ACTIONS: &[Action] = &[
         .sub("Camera")
         .check(),
     a("app.overlay", "Physics overlay", "View", &[]).check(),
+    a("app.character", "Character preview", "View", &[])
+        .doc("your own character (retarget.load) off, beside or over the mannequin"),
     a("app.ghost", "Ghosts", "View", &[])
         .check()
         .doc("the keyed pose behind the physics pass, the AI preview"),
@@ -562,6 +564,20 @@ impl App {
             "app.welcome" => self.files.welcome = true,
             "app.overlay" => self.show_overlay = !self.show_overlay,
             "app.ghost" => self.show_ghost = !self.show_ghost,
+            "app.character" => {
+                self.character.view = self.character.view.next();
+                self.status = match self.session.document.character.as_ref() {
+                    Some(c) => format!(
+                        "character preview {}: {}",
+                        self.character.view.name(),
+                        c.path.display()
+                    ),
+                    None => format!(
+                        "character preview {}: no character loaded (retarget.load)",
+                        self.character.view.name()
+                    ),
+                };
+            }
             "app.dope" => self.timeline.dope = !self.timeline.dope,
             "app.range" => {
                 let on = self.is_dock_panel_open(super::DockPanel::Range);

@@ -125,6 +125,7 @@ impl Viewer {
         let bodies = [Body {
             joints: &joints,
             tint: BODY,
+            mesh: 0,
         }];
         match self
             .renderer

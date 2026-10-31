@@ -1,6 +1,7 @@
 //! The window: menu bar, library (left), inspector (right), timeline (bottom), 3D viewport.
 
 mod agent;
+mod character;
 mod community;
 mod curves;
 mod files;
@@ -95,6 +96,8 @@ pub struct App {
     shell: shell::Shell,
     /// The inspector panels' own state (joint, layers, physics, scene boxes, AI worker).
     panels: panels::Panels,
+    /// The person's own character beside the mannequin (`character.rs`).
+    character: character::CharacterState,
     /// Last frame's widgets with their stable ids (`ui_ids.rs`), for the control port.
     widgets: Vec<ui_ids::Widget>,
     /// A `click` waiting for a popup to open (`ui_click.rs`).
@@ -306,6 +309,7 @@ impl App {
             files: files::Files::default(),
             shell,
             panels: panels::Panels::default(),
+            character: character::CharacterState::default(),
             widgets: Vec::new(),
             pending_click: None,
         };
@@ -351,6 +355,8 @@ impl App {
             "dope" => self.timeline.dope = on()?,
             "overlay" => self.show_overlay = on()?,
             "ghost" => self.show_ghost = on()?,
+            "character" => self.character.view = character::CharacterView::parse(value)?,
+            "playing" => self.playing = on()?,
             "tool" => self.set_tool(viewport::Tool::parse(value)?),
             "camera" => self.view_preset(value)?,
             "zoom" => {

@@ -417,6 +417,7 @@ impl App {
         self.community_window(ui.ctx());
         self.community_share_window(ui.ctx());
         self.physics_refresh();
+        self.character_refresh();
         self.range_refresh();
         self.fill_marks_drop_stale();
         self.sync_dock_flags();

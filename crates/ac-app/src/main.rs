@@ -8,6 +8,7 @@
 //! ```
 //! `--ui` sets the window's own state (for screenshots): `tab=animations|builtin|poses|community`,
 //! `source=all|mine|builtin`, `sort=name|recent|modified|length`, `search=<text>`, `dope=on|off`, `overlay=on|off|perf`, `ghost=on|off`,
+//! `character=off|beside|over` (your own character, once `retarget.load` put one in the document), `playing=on|off`,
 //! `tool=drag|reach|move|rotate`, `camera=<view>` (front, back, side, left, top, bottom,
 //! three-quarter: looking at the body), `zoom=<metres>`, `ortho=on|off`, `follow=on|off`,
 //! `onion=on|off|keys|frames`, `onion_count=1..5`, `onion_step=<frames>`, `trails=on|off`,
