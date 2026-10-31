@@ -2,12 +2,13 @@
   "$schema": "./schema.json",
   "name": "ai-settings-presets",
   "feature": "ai.settings",
-  "description": "Presets set the AI fill sliders together: 'preserve' sets ai_force 0.5, style_force 0.0, trajectory 0.8, head 0.8; 'natural' sets ai_force 1.0, style_force 1.0, trajectory 0.0, head 0.0; 'follow_style' sets ai_force 1.0, style_force 1.5, trajectory 0.2, head 0.0. An individual slider passed with a preset overrides that preset value.",
+  "description": "Presets set the AI fill sliders together: 'preserve' sets ai_force 0.5, style_force 0.0, trajectory 0.8, head 0.8; 'natural' sets ai_force 1.0, style_force 1.0, trajectory 0.0, head 0.0; 'follow_style' sets ai_force 1.0, style_force 1.5, trajectory 0.2, head 0.0. An individual slider passed with a preset overrides that preset value. A preset sets those four sliders only: the style stays as it was (\"any\" here), and nothing else about the fill changes.",
   "script": [
     {
       "command": "ai.settings",
       "params": { "preset": "preserve" },
       "expect": {
+        "style": "any",
         "ai_force": 0.5,
         "style_force": 0.0,
         "trajectory": 0.8,
@@ -28,6 +29,7 @@
       "command": "ai.settings",
       "params": { "preset": "follow_style" },
       "expect": {
+        "style": "any",
         "ai_force": 1.0,
         "style_force": 1.5,
         "trajectory": 0.2,
