@@ -274,3 +274,6 @@ Built from generated files and the joint lists given to this worktree: it built 
 - The `humanoid_` list given stopped at the left hand, so its legs are taken to follow the same form. A rig with no toe joint is still refused.
 - A clip with no still feet and a floor far below z = 0 is raised, not called hanging. How those look is the owner's to see.
 - The `feet_on_floor` check no longer fails any clip, so the 56 refused for it should import on a retry.
+
+## Refused files fixed (2026-10-31)
+A stale take name on a one-take file, a neck from the head's parent, loose bone names, the B and humanoid name forms, a clip range cut to its take, and a floor below z = 0 raised. After retrying: 6332 imported (7488 clips), 116 duplicates, 41 refused. Clips read from a stale take or a head's parent as neck have only been through the automatic checks; the owner deletes bad ones as they go.
