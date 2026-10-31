@@ -36,7 +36,7 @@ struct Job {
 pub struct PoseFillState {
     job: Option<Job>,
     /// What `posefill.helper` said last (checked when the panel first shows, and after a run).
-    helper: Option<Value>,
+    pub(in crate::app) helper: Option<Value>,
     /// What `posefill.install` said last, and when.
     install: Option<Value>,
     install_at: Option<Instant>,
@@ -59,6 +59,11 @@ fn minutes(v: &Value) -> String {
 fn step(v: &Value) -> Option<String> {
     let (n, of) = (v["step"].as_i64()?, v["steps"].as_i64()?);
     Some(format!("step {n} of {of}: {}", v["label"].as_str().unwrap_or("")))
+}
+
+/// The licence notice, wherever the model is offered.
+pub(in crate::app) fn notice(ui: &mut egui::Ui) {
+    ui.label(egui::RichText::new(ac_posefill::NOTICE).small().weak());
 }
 
 impl super::Panels {
@@ -161,7 +166,26 @@ impl App {
         self.panels.posefill.helper = None; // loaded now (or stopped): ask again
     }
 
-    fn posefill_done(&mut self, label: &str, out: &Value) {
+    pub(in crate::app) fn posefill_done(&mut self, label: &str, out: &Value) {
+        if let Some(filled) = out["filled"].as_array() {
+            let left: Vec<String> = out["skipped"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter(|s| s["reason"] != "filled already")
+                .map(|s| format!("{}–{} {}", s["from"], s["to"], s["reason"].as_str().unwrap_or("")))
+                .collect();
+            self.status = if left.is_empty() {
+                format!("{label}: {} gaps", filled.len())
+            } else {
+                format!(
+                    "{label}: {} gaps; left to the spline: {}",
+                    filled.len(),
+                    left.join(", ")
+                )
+            };
+            return;
+        }
         self.status = match (out["from"].as_i64(), out["to"].as_i64(), out["calls"].as_i64()) {
             (Some(a), Some(b), Some(n)) if n > 1 => format!("{label}: frames {a}–{b} in {n} calls"),
             (Some(a), Some(b), _) => format!("{label}: frames {a}–{b}"),
@@ -191,6 +215,7 @@ impl App {
             }
             return;
         }
+        notice(ui);
         let plan_built = helper["plan"].as_str() == Some("built");
         let state = if helper["loaded"] == true {
             "model loaded"
@@ -397,6 +422,7 @@ impl App {
                 );
             });
         }
+        notice(ui);
         ui.label("Installing means you accept:");
         let licences: Vec<(String, String, String)> = v["licences"]
             .as_array()

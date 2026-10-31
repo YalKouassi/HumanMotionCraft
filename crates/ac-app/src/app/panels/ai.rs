@@ -34,6 +34,8 @@ pub struct AiState {
     last_ms: Option<u128>,
     /// Why the last preview failed, shown under the buttons.
     error: Option<String>,
+    /// Fill with the pose-to-pose model (roadmap 163000), once it's installed; else our own.
+    pub pose_fill: bool,
     /// Footsteps: the left foot steps first (else the right).
     pub steps_left: bool,
     /// Footsteps: how many (0: as many as suit the distance and time).
@@ -271,6 +273,8 @@ impl App {
             return;
         };
         let ctx = ui.ctx().clone();
+        self.fill_with_row(ui);
+        let pose = self.panels.ai.pose_fill;
         let doc = &self.session.document;
         let gap = ac_core::gaps::gap_at(doc, doc.key_frame());
         let all = ac_core::gaps::gaps(doc);
@@ -278,11 +282,16 @@ impl App {
         // why Preview and Fill can't run here (None: they can)
         let refusal: Option<String> = match &gap {
             None => Some("put the playhead between two of your keys".into()),
+            Some(_) if pose => ac_posefill::refusal(doc),
             Some(g) => g.refused.clone(),
         };
         match &gap {
             Some(g) => {
-                let text = format!("Gap {}–{}: {} frames (max {max})", g.from, g.to, g.frames);
+                let text = if pose {
+                    format!("Gap {}–{}: {} frames", g.from, g.to, g.frames)
+                } else {
+                    format!("Gap {}–{}: {} frames (max {max})", g.from, g.to, g.frames)
+                };
                 let text = match g.anchors {
                     Some(n) => format!(
                         "{text}, split by {n} anchor pose{} from the library",
@@ -292,7 +301,7 @@ impl App {
                 };
                 let filled = if g.filled { ", filled by the model" } else { "" };
                 ui.label(
-                    egui::RichText::new(format!("{text}{filled}")).color(if g.refused.is_some() {
+                    egui::RichText::new(format!("{text}{filled}")).color(if refusal.is_some() {
                         self.palette().error
                     } else {
                         ui.visuals().text_color()
@@ -324,7 +333,14 @@ impl App {
                 .tag("panel.ai.preview", "Preview fill")
                 .clicked()
             {
-                self.preview_fill(None, false, &ctx);
+                if pose {
+                    self.ai_previewed = Some(Instant::now());
+                    if let Some(out) = self.run("posefill.preview", json!({})) {
+                        self.posefill_done("Preview fill", &out);
+                    }
+                } else {
+                    self.preview_fill(None, false, &ctx);
+                }
             }
             if ui
                 .add_enabled(can, egui::Button::new("Fill now"))
@@ -332,7 +348,7 @@ impl App {
                 .on_disabled_hover_text(&why)
                 .tag("panel.ai.fill", "Fill now")
                 .clicked()
-                && let Some(r) = self.run("ai.fill", json!({}))
+                && let Some(r) = self.run(if pose { "posefill.fill" } else { "ai.fill" }, json!({}))
             {
                 self.status = format!(
                     "AI filled {}–{} ({})",
@@ -383,10 +399,56 @@ impl App {
         );
     }
 
+    /// Which model fills: shown once the pose-to-pose one is installed; ours is the default, and a
+    /// gap the one chosen can't take says why rather than going to the other.
+    fn fill_with_row(&mut self, ui: &mut egui::Ui) {
+        if self.panels.posefill.helper.is_none() {
+            self.panels.posefill.helper = self.session.run("posefill.helper", &json!({})).ok();
+        }
+        let installed = self
+            .panels
+            .posefill
+            .helper
+            .as_ref()
+            .is_some_and(|h| h["installed"] == true);
+        if !installed {
+            self.panels.ai.pose_fill = false;
+            return;
+        }
+        let st = &mut self.panels.ai;
+        ui.horizontal(|ui| {
+            ui.label("Fill with");
+            ui.radio_value(&mut st.pose_fill, false, "Our model")
+                .tag("panel.ai.engine.ours", "Our model");
+            ui.radio_value(&mut st.pose_fill, true, "Pose fill")
+                .on_hover_text("NVIDIA's pose-to-pose model, on your GPU: gaps of 0.6 to 1.9 s a call")
+                .tag("panel.ai.engine.pose", "Pose fill");
+        });
+        if self.panels.ai.pose_fill {
+            super::posefill::notice(ui);
+        }
+    }
+
     /// "Fill all gaps": every gap the model can take, one undo; the ones it can't are counted.
     fn fill_all_row(&mut self, ui: &mut egui::Ui, all: &[ac_core::gaps::Gap]) {
-        let open = all.iter().filter(|g| g.refused.is_none() && !g.filled).count();
-        let too_long = all.iter().filter(|g| g.refused.is_some() && g.frames > 0).count();
+        let pose = self.panels.ai.pose_fill;
+        let doc = &self.session.document;
+        let open = all
+            .iter()
+            .filter(|g| !g.filled)
+            .filter(|g| {
+                if pose {
+                    ac_posefill::takes(doc, g.from, g.to)
+                } else {
+                    g.refused.is_none()
+                }
+            })
+            .count();
+        let too_long = if pose {
+            0
+        } else {
+            all.iter().filter(|g| g.refused.is_some() && g.frames > 0).count()
+        };
         ui.horizontal_wrapped(|ui| {
             let why = if all.is_empty() {
                 "needs at least two keys of yours".to_string()
@@ -399,7 +461,7 @@ impl App {
                 .on_disabled_hover_text(why)
                 .tag("panel.ai.fill_all", format!("Fill all gaps ({open})"))
                 .clicked()
-                && let Some(r) = self.run("ai.fill_all", json!({}))
+                && let Some(r) = self.run(if pose { "posefill.fill_all" } else { "ai.fill_all" }, json!({}))
             {
                 let n = r["filled"].as_array().map_or(0, Vec::len);
                 let skipped: Vec<String> = r["skipped"]
@@ -523,7 +585,11 @@ impl App {
                     .tag("panel.ai.preview_again", "Preview again")
                     .clicked()
                 {
-                    self.preview_fill(Some((p.from, p.to)), p.plain, ctx);
+                    if p.label == ac_posefill::PREVIEW_LABEL {
+                        self.run("posefill.preview", json!({ "from": p.from, "to": p.to }));
+                    } else {
+                        self.preview_fill(Some((p.from, p.to)), p.plain, ctx);
+                    }
                 }
             });
             return;

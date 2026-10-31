@@ -425,6 +425,8 @@ def main(argv=None) -> None:
     uv_python(root)
     print(f"Installing the pose-to-pose engine into {root}")
     print(f"GPU: {gpu}")
+    print("Check the NVIDIA Open Model Agreement and the TensorRT licence before use.")
+    print("You are responsible for how you use this model and what you make with it.")
     print("Installing means you accept:")
     for part, lic, url in LICENCES:
         print(f"  {part}: {lic}\n    {url}")

@@ -1,0 +1,45 @@
+{
+  "$schema": "./schema.json",
+  "name": "fill-from-poses",
+  "feature": "posefill.fill_all",
+  "description": "The AI panel's choice of the pose model (roadmap 163000), on the stand-in engine. A preview changes nothing until ai.accept keeps it, in one undo step, and ai.discard drops it. fill_all fills the gaps the model can take (18 to 58 model frames) and names the ones it leaves: 0-30 and 30-60 are filled, 60-62 is too short and 62-200 too long.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "posefill.install", "params": {}, "expect": { "state": "installed", "notice": "Check the NVIDIA Open Model Agreement and the TensorRT licence before use. You are responsible for how you use this model and what you make with it." } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.2] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 60 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 62 } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 200 } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 12 } },
+    { "command": "posefill.preview", "params": {}, "expect": { "from": 0, "to": 30, "frames": 29, "model": "posefill" } },
+    { "command": "layers.list", "params": {}, "expect": { "layers": [{ "keys": 5 }] } },
+    { "command": "ai.discard", "params": {}, "expect": { "discarded": true } },
+    { "command": "posefill.preview", "params": {}, "expect": { "from": 0, "to": 30 } },
+    { "command": "ai.accept", "params": {}, "expect": { "from": 0, "to": 30 } },
+    { "command": "layers.list", "params": {}, "expect": { "layers": [{ "keys": 34 }] } },
+    { "command": "edit.undo" },
+    { "command": "layers.list", "params": {}, "expect": { "layers": [{ "keys": 5 }] } },
+    {
+      "command": "posefill.fill_all",
+      "params": {},
+      "expect": { "filled": [[0, 30], [30, 60]], "frames": 58, "model": "posefill" }
+    },
+    { "command": "layers.list", "params": {}, "expect": { "layers": [{ "keys": 63 }] } },
+    { "command": "edit.undo" },
+    { "command": "layers.list", "params": {}, "expect": { "layers": [{ "keys": 5 }] } },
+    { "command": "layer.add", "params": { "mode": "additive" } }
+  ],
+  "errors": [
+    { "command": "posefill.preview", "params": {} },
+    { "command": "posefill.preview", "params": { "from": 0 } },
+    { "command": "posefill.fill_all", "params": {} }
+  ]
+}

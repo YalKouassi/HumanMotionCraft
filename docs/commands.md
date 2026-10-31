@@ -2589,6 +2589,23 @@ Outputs:
 | `seconds` | number | yes |  | the model's own time over those calls, as it reports it |
 | `notes` | list of text | yes |  | what to know about the result |
 
+### `posefill.fill_all`: Fill all gaps from poses
+
+undoable, icon `ai`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `filled` | JSON | yes |  | [[from, to]]: the gaps filled |
+| `skipped` | JSON | yes |  | [{from, to, reason}]: the gaps left, and why |
+| `frames` | integer | yes |  | frames written |
+| `model` | text | yes |  | the keys' tag |
+| `seconds` | number | yes |  | the model's own time |
+| `notes` | list of text | yes |  | what to know about the fills |
+
 ### `posefill.helper`: Pose fill: helper
 
 not undoable, icon `ai`.
@@ -2629,6 +2646,7 @@ Outputs:
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `state` | one of not installed \| installing \| stopping \| installed \| failed \| stopped | yes |  | what the install is doing |
+| `notice` | text | yes |  | what to check before using this model |
 | `dir` | text | yes |  | where it is (or would be) installed |
 | `log` | text |  |  | the setup's log |
 | `step` | integer |  |  | the setup's step working now (or where it ended), of steps |
@@ -2641,6 +2659,29 @@ Outputs:
 | `ready` | bool |  |  | everything required is there: start can run |
 | `licences` | JSON |  |  | what installing accepts, a list of {part, licence, url} |
 | `left_out` | text |  |  | what the install never takes from the engine's source |
+
+### `posefill.preview`: Preview fill from poses
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer |  | 0 to 10000000 | your key before the gap (default: around the playhead) |
+| `to` | integer |  | 0 to 10000000 | your key after the gap; keys of yours between from and to are gone through, one call a gap |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer | yes |  | the fill's first frame (a key of yours) |
+| `to` | integer | yes |  | its last frame (a key of yours) |
+| `frames` | integer | yes |  | AI keys written between them |
+| `model` | text | yes |  | the keys' model tag |
+| `calls` | integer | yes |  | model calls made: one a gap between keys of yours |
+| `seconds` | number | yes |  | the model's own time over those calls, as it reports it |
+| `notes` | list of text | yes |  | what to know about the result |
 
 ## project
 

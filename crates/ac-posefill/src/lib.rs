@@ -59,6 +59,8 @@ pub const CONTEXT: usize = 4;
 pub const MAX_TARGETS: usize = 4;
 /// The keys' model tag.
 pub const TAG: &str = edits::POSE_FILL;
+/// What the person is told wherever this model is offered (the owner's wording, roadmap 163000).
+pub const NOTICE: &str = "Check the NVIDIA Open Model Agreement and the TensorRT licence before use. You are responsible for how you use this model and what you make with it.";
 
 pub static SPECS: &[CommandSpec] = &[
     CommandSpec::new("posefill.helper", "Pose fill: helper", posefill_helper)
@@ -103,6 +105,34 @@ pub static SPECS: &[CommandSpec] = &[
             .range(0.0, 1e7),
         ])
         .outputs(MADE_OUT),
+    CommandSpec::new("posefill.preview", "Preview fill from poses", posefill_preview)
+        .icon("ai")
+        .inputs(&[
+            ParamSpec::new(
+                "from",
+                K::Integer,
+                "your key before the gap (default: around the playhead)",
+            )
+            .range(0.0, 1e7),
+            ParamSpec::new(
+                "to",
+                K::Integer,
+                "your key after the gap; keys of yours between from and to are gone through, one call a gap",
+            )
+            .range(0.0, 1e7),
+        ])
+        .outputs(MADE_OUT),
+    CommandSpec::new("posefill.fill_all", "Fill all gaps from poses", posefill_fill_all)
+        .icon("ai")
+        .undoable()
+        .outputs(&[
+            ParamSpec::new("filled", K::Text, "[[from, to]]: the gaps filled").json().required(),
+            ParamSpec::new("skipped", K::Text, "[{from, to, reason}]: the gaps left, and why").json().required(),
+            ParamSpec::new("frames", K::Integer, "frames written").required(),
+            ParamSpec::new("model", K::Text, "the keys' tag").required(),
+            ParamSpec::new("seconds", K::Number, "the model's own time").required(),
+            ParamSpec::new("notes", K::TextList, "what to know about the fills").required(),
+        ]),
 ];
 
 const HELPER_OUT: &[ParamSpec] = &[
@@ -135,6 +165,7 @@ const INSTALL_OUT: &[ParamSpec] = &[
         "what the install is doing",
     )
     .required(),
+    ParamSpec::new("notice", K::Text, "what to check before using this model").required(),
     ParamSpec::new("dir", K::Text, "where it is (or would be) installed").required(),
     ParamSpec::new("log", K::Text, "the setup's log"),
     ParamSpec::new(
@@ -266,6 +297,7 @@ fn posefill_install(doc: &mut Document, p: &P) -> Out {
         _ => {}
     }
     let mut out = setup::status(&dir);
+    out["notice"] = json!(NOTICE);
     if matches!(
         out["state"].as_str(),
         Some("not installed" | "failed" | "stopped")
@@ -311,10 +343,11 @@ fn helper_json(
 /// its UI thread, then runs the command, which finds them ready.
 pub fn prepare(doc: &Document, command: &str, p: &P) -> Result<(), String> {
     match command {
-        "posefill.fill" => {
+        "posefill.fill" | "posefill.preview" => {
             let plan = plan::plan(doc, p)?;
             plan::run(doc, &plan, engine::make).map(|_| ())
         }
+        "posefill.fill_all" => fill_gaps(&mut doc.clone(), engine::make).map(|_| ()),
         "posefill.helper" | "live.start" => engine::load().map(|_| ()),
         _ => Err(format!("{command} makes no motion")),
     }
@@ -325,7 +358,11 @@ pub fn prepare(doc: &Document, command: &str, p: &P) -> Result<(), String> {
 /// thread first ([`prepare`], or [`engine::load`] for `posefill.helper`'s load).
 pub fn waits(doc: &Document, command: &str, p: &P) -> bool {
     match command {
-        "posefill.fill" => {
+        "posefill.fill_all" => fill_gaps(&mut doc.clone(), |req| {
+            engine::ready(req).ok_or_else(|| "not made yet".to_string())
+        })
+        .is_err(),
+        "posefill.fill" | "posefill.preview" => {
             let Ok(plan) = plan::plan(doc, p) else {
                 return false;
             };
@@ -343,22 +380,41 @@ pub fn waits(doc: &Document, command: &str, p: &P) -> bool {
     }
 }
 
-fn posefill_fill(doc: &mut Document, p: &P) -> Out {
-    let plan = plan::plan(doc, p)?;
-    let fills = plan::run(doc, &plan, engine::make)?;
-    let bones = doc.skeleton.names.len();
+/// Why the gap around the playhead can't be filled from poses (`None`: it can), in words for a panel.
+pub fn refusal(doc: &Document) -> Option<String> {
+    plan::plan(doc, &P::new())
+        .err()
+        .map(|e| e.replace(ac_core::error::HINT, ": "))
+}
+
+/// Whether the model can take the gap between these two keys of yours.
+pub fn takes(doc: &Document, from: i64, to: i64) -> bool {
+    let mut ask = P::new();
+    ask.insert("from".into(), json!(from));
+    ask.insert("to".into(), json!(to));
+    plan::plan(doc, &ask).is_ok()
+}
+
+/// A plan's fills written into `clip`: the frames written, the model's seconds and the notes.
+fn write(
+    clip: &mut ac_core::clip::Clip,
+    links: &dyn ac_core::clip::Links,
+    plan: &plan::Plan,
+    fills: &[std::sync::Arc<Fill>],
+) -> Result<(i64, f64, Vec<String>), String> {
+    let bones = clip.bones.len();
     if fills.iter().any(|f| f.rotations.iter().any(|r| r.len() != bones)) {
         return Err(format!("the helper's fill is not for this rig ({bones} bones)"));
     }
     let mut notes = plan.notes.clone();
     let mut written = 0;
     let mut seconds = 0.0;
-    for ((a, b), fill) in plan.segments().into_iter().zip(&fills) {
+    for ((a, b), fill) in plan.segments().into_iter().zip(fills) {
         let made = plan::Made {
             fill,
             tag: TAG.to_string(),
         };
-        let note = edits::refill(&mut doc.clip, a, b, &made, &doc.links)?;
+        let note = edits::refill(clip, a, b, &made, links)?;
         if !note.is_empty() {
             return Err(note);
         }
@@ -370,10 +426,118 @@ fn posefill_fill(doc: &mut Document, p: &P) -> Out {
             }
         }
     }
+    Ok((written, seconds, notes))
+}
+
+fn posefill_fill(doc: &mut Document, p: &P) -> Out {
+    let plan = plan::plan(doc, p)?;
+    let fills = plan::run(doc, &plan, engine::make)?;
+    let (written, seconds, notes) = write(&mut doc.clip, &doc.links, &plan, &fills)?;
     let shown = doc.frame;
     doc.go_to(shown)?;
     Ok(json!({
         "from": plan.from(), "to": plan.to(), "frames": written, "model": TAG,
         "calls": fills.len(), "seconds": seconds, "notes": notes,
+    }))
+}
+
+/// A fill shown as a ghost and not kept yet: `ai.accept` keeps it and `ai.discard` drops it, as
+/// with `ai.preview`.
+fn posefill_preview(doc: &mut Document, p: &P) -> Out {
+    let plan = plan::plan(doc, p)?;
+    let fills = plan::run(doc, &plan, engine::make)?;
+    let mut clip = doc.clip.clone();
+    let (written, seconds, notes) = write(&mut clip, &doc.links, &plan, &fills)?;
+    doc.ai_preview = Some(std::sync::Arc::new(ac_core::ai::Preview {
+        base: doc.clip.clone(),
+        links: doc.links.clone(),
+        clip,
+        from: plan.from(),
+        to: plan.to(),
+        label: PREVIEW_LABEL.to_string(),
+        plain: false,
+        settings: doc.ai_settings.clone(),
+        notes: notes.clone(),
+    }));
+    Ok(json!({
+        "from": plan.from(), "to": plan.to(), "frames": written, "model": TAG,
+        "calls": fills.len(), "seconds": seconds, "notes": notes,
+    }))
+}
+
+/// What a preview made from poses calls itself.
+pub const PREVIEW_LABEL: &str = "pose fill";
+
+/// What filling every gap did.
+struct Gaps {
+    filled: Vec<[i64; 2]>,
+    skipped: Vec<Value>,
+    frames: i64,
+    seconds: f64,
+    notes: Vec<String>,
+}
+
+/// Fill each empty gap between your keys, in order, each seeing the fills before it. A gap the
+/// model can't take is left, with the reason; an engine failure stops the lot.
+fn fill_gaps(
+    doc: &mut Document,
+    make: impl Fn(&Request) -> Result<std::sync::Arc<Fill>, String>,
+) -> Result<Gaps, String> {
+    plan::whole_layer(&doc.clip)?;
+    let keys = edits::manual_frames(&doc.clip);
+    let mut out = Gaps {
+        filled: Vec::new(),
+        skipped: Vec::new(),
+        frames: 0,
+        seconds: 0.0,
+        notes: Vec::new(),
+    };
+    for w in keys.windows(2) {
+        let &[a, b] = w else { continue };
+        if b - a < 2 {
+            continue;
+        }
+        let filled = doc.clip.layers.get(doc.clip.edit).is_some_and(|l| {
+            l.keys
+                .iter()
+                .any(|k| k.source == ac_core::clip::KeySource::Ai && a < k.frame && k.frame < b)
+        });
+        if filled {
+            out.skipped
+                .push(json!({ "from": a, "to": b, "reason": "filled already" }));
+            continue;
+        }
+        let mut ask = P::new();
+        ask.insert("from".into(), json!(a));
+        ask.insert("to".into(), json!(b));
+        let plan = match plan::plan(doc, &ask) {
+            Ok(plan) => plan,
+            Err(e) => {
+                let reason = e.replace(ac_core::error::HINT, ": ");
+                out.skipped.push(json!({ "from": a, "to": b, "reason": reason }));
+                continue;
+            }
+        };
+        let fills = plan::run(doc, &plan, &make)?;
+        let (written, seconds, notes) = write(&mut doc.clip, &doc.links, &plan, &fills)?;
+        out.filled.push([a, b]);
+        out.frames += written;
+        out.seconds += seconds;
+        for n in notes {
+            if !out.notes.contains(&n) {
+                out.notes.push(n);
+            }
+        }
+    }
+    Ok(out)
+}
+
+fn posefill_fill_all(doc: &mut Document, _: &P) -> Out {
+    let done = fill_gaps(doc, engine::make)?;
+    let shown = doc.frame;
+    doc.go_to(shown)?;
+    Ok(json!({
+        "filled": done.filled, "skipped": done.skipped, "frames": done.frames, "model": TAG,
+        "seconds": done.seconds, "notes": done.notes,
     }))
 }

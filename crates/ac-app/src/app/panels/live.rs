@@ -265,6 +265,7 @@ impl App {
     pub(in crate::app) fn live_panel(&mut self, ui: &mut egui::Ui) {
         ui.separator();
         ui.label(egui::RichText::new("Live motion").strong());
+        super::posefill::notice(ui);
         ui.label(
             egui::RichText::new(
                 "Steer the character and the model makes the motion: W A S D (Shift to run) or a controller, relative to the camera. Everything shown is recorded; afterwards keep the stretch you like.",

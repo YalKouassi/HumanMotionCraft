@@ -227,8 +227,10 @@
             "pose.set_root",
             "pose.spread_bend",
             "posefill.fill",
+            "posefill.fill_all",
             "posefill.helper",
             "posefill.install",
+            "posefill.preview",
             "project.info",
             "project.open",
             "project.save",
@@ -6172,6 +6174,31 @@
           "if": {
             "properties": {
               "command": {
+                "const": "posefill.fill_all"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Fill all gaps from poses; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "posefill.helper"
               }
             },
@@ -6234,6 +6261,44 @@
                   "repair": {
                     "type": "boolean",
                     "description": "start even when it is installed: the setup updates or repairs it"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "posefill.preview"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Preview fill from poses"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key before the gap (default: around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key after the gap; keys of yours between from and to are gone through, one call a gap"
                   }
                 },
                 "required": [],
@@ -7256,8 +7321,10 @@
             "pose.set_root",
             "pose.spread_bend",
             "posefill.fill",
+            "posefill.fill_all",
             "posefill.helper",
             "posefill.install",
+            "posefill.preview",
             "project.info",
             "project.open",
             "project.save",
