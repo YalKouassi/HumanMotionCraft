@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "ai-fill-diagnostics",
   "feature": "ai.fill",
-  "description": "Every fill says why it might look wrong, as numbers measured on the keys it wrote (not a confidence score): foot slide per contact span, the root's distance from the keys' own path, the change of speed (m/s) and of spin (rad/s) across each of its two keys, and the joints bent back inside the possible limits. With ai_force 0 the fill is the plain interpolation, so every number is worked by hand. Physics is off; 30 fps; the rig's hip height is 0.8698308 m, so a root offset is metres / 0.8698308. (1) Keys of yours on 0 and 10, both standing at rest (root z 0.9450101): ai.fill_all fills 0-10, and its one diagnostics entry says both feet are planted on 0-10 and slide 0 cm (the contact runs to both ends of the animation, so no landing or release frames), the root is 0 m from the keys' path, and neither seam could be measured: key 0 has no frame before it and key 10 (the last frame) none after it, so both seams are null and the notes say so. No flags. (2) Keys on 20 (root x 0.40 m = 0.4598595 hip heights) and 30 (x 0.52 m = 0.5978174; the left eye, a bone with no children, so no joint head moves with it, turned 30 degrees about X: quaternion [sin 15, 0, 0, cos 15] = [0.2588190, 0, 0, 0.9659258]). Filling 0-10 again: frame 11 is now a frame of the plain 10-20 segment, where the body moves 0.04 m a frame = 1.2 m/s, so the seam at key 10 goes from 0 to 1.2 m/s, a change of 1.2 m/s for every joint; joints within 1e-6 m/s tie and the first in rig order, root, is named: a pop flag on frame 10, over the 1 m/s line. Spin at 10: 0 (nothing turns). The contact now ends at frame 10 with frames 9-10 as release, so the planted span is 0-8, slide 0 cm. (3) Filling 20-30: the body moves 0.012 m a frame = 0.36 m/s, under the 0.5 m/s a planted point may move, so the feet come down on frame 21 (frame 20's speed, from 19, is 1.2 m/s); frames 21-22 are the landing and 23-30 planted, 7 steps of 1.2 cm = 8.4 cm of slide on each foot: two sliding flags on 23-30, over the 2 cm line. The seam at key 20: speed 1.2 m/s before and 0.36 after, a change of 0.84 m/s for every joint (root named; under the line, no flag); spin 0 before, and the fill's slerp turns the eye 3 degrees a frame after: 3 degrees x 30 = 1.5708 rad/s (under the 3 rad/s line). Key 30 is the last frame: its seam is null, with a note. The root path is the keys' own (0 m, so no frame is named), and no joint was bent back. The tolerance is 1e-3 because planting the still feet solves the legs with IK to the spot they already stand on, which moves the foot points by rounding only.",
+  "description": "Every fill says why it might look wrong, as numbers measured on the keys it wrote (not a confidence score): foot slide per contact span, the root's distance from the keys' own path, the change of speed (m/s) and of spin (rad/s) across each of its two keys, and the joints bent back inside the possible limits. With ai_force 0 the fill is the plain interpolation, so every number is worked by hand. Physics is off; 30 fps; the rig's hip height is 0.8698308 m, so a root offset is metres / 0.8698308. (1) Keys of yours on 0 and 10, both standing at rest (root z 0.9450101): ai.fill_all fills 0-10, and its one diagnostics entry says both feet are planted on 0-10 and slide 0 cm (the contact runs to both ends of the animation, so no landing or release frames), the root is 0 m from the keys' path, and neither seam could be measured: key 0 has no frame before it and key 10 (the last frame) none after it, so both seams are null and the notes say so. No flags. (2) Keys on 20 (root x 0.40 m = 0.4598595 hip heights) and 30 (x 0.52 m = 0.5978174; the left eye, a bone with no children, so no joint head moves with it, turned 30 degrees about X: quaternion [sin 15, 0, 0, cos 15] = [0.2588190, 0, 0, 0.9659258]). Filling 0-10 again: frame 11 is now a frame of the plain 10-20 segment, where the body moves 0.04 m a frame = 1.2 m/s, so the seam at key 10 goes from 0 to 1.2 m/s, a change of 1.2 m/s for every joint; joints within 1e-6 m/s tie and the first in rig order, root, is named: a pop flag on frame 10, over the 1 m/s line. Spin at 10: 0 (nothing turns). The contact now ends at frame 10 with frames 9-10 as release, so the planted span is 0-8, slide 0 cm. (3) Filling 20-30: the body moves 0.012 m a frame = 0.36 m/s, under the 0.5 m/s a planted point may move, so the feet come down on frame 21 (frame 20's speed, from 19, is 1.2 m/s); frames 21-22 are the landing and 23-30 planted, 7 steps of 1.2 cm = 8.4 cm of slide on each foot: two sliding flags on 23-30, over the 2 cm line. The seam at key 20: speed 1.2 m/s before and 0.36 after, a change of 0.84 m/s for every joint (root named; under the line, no flag); spin 0 before, and the fill's slerp turns the eye 3 degrees a frame after: 3 degrees x 30 = 1.5708 rad/s (under the 3 rad/s line). Key 30 is the last frame: its seam is null, with a note. The root path is the keys' own (0 m, so no frame is named), and no joint was bent back. (4) ai.fill_all measures every gap once all of them are filled, because a later fill eases through the key it shares with an earlier one (ease.rs: 4 frames each side re-curved with a cubic Hermite) and a seam measured before that would be stale (it used to be). Filling 0-10 again, 10-20 and 20-30 together: the ease through key 10 (0 m a frame before it, u = 0.04 m after) moves the root on frames 7-9 to -0.09375 u, -0.25 u, -0.28125 u and on 11-13 to 0.71875 u, 1.75 u, 2.90625 u (Hermite with the mean chord slope u / 2 at the key), so the seam at 10 is (0.28125 u + 0.71875 u) x 30 = 13.125 u = 0.525 m/s for every joint riding on the root (root named; the feet are planted again on 0-10 after the ease, so the legs move less), under the 1 m/s line: no pop flag, where the stale number was 1.2 m/s and a flag. The root is 0.28125 u = 0.01125 m off the keys' path on frame 9 (gap 0-10) and frame 11 (gap 10-20). Through key 20 (u1 = 0.04 m a frame before, u2 = 0.012 after) the same curve puts frame 19 at -(0.71875 u1 + 0.28125 u2) and frame 21 at 0.28125 u1 + 0.71875 u2, so the seam at 20 is 13.125 (u1 - u2) = 0.3675 m/s and the eye's spin change 0.4375 x 1.5708 = 0.6872 rad/s; the root is 0.28125 (u1 - u2) = 0.007875 m off the path on frame 21. The foot contacts of that run are not pinned (the ease shifts the landing frames). Undo takes the three fills away at once. The tolerance is 1e-3 because planting the still feet solves the legs with IK to the spot they already stand on, which moves the foot points by rounding only.",
   "script": [
     { "command": "physics.set", "params": { "on": false } },
     { "command": "ai.settings", "params": { "ai_force": 0 }, "expect": { "ai_force": 0 } },
@@ -110,7 +110,46 @@
         }
       }
     },
-    { "command": "edit.undo", "expect": { "label": "AI fill 21–29" } }
+    { "command": "edit.undo", "expect": { "label": "AI fill 21–29" } },
+    {
+      "command": "ai.fill_all",
+      "params": { "refill": true },
+      "expect": {
+        "filled": [[0, 10], [10, 20], [20, 30]],
+        "diagnostics": [
+          {
+            "from": 0,
+            "to": 10,
+            "path": { "max_m": 0.0113, "frame": 9 },
+            "seams": [
+              { "frame": 0, "dv": null, "joint": null },
+              { "frame": 10, "dv": 0.525, "joint": "root" }
+            ],
+            "flags": []
+          },
+          {
+            "from": 10,
+            "to": 20,
+            "path": { "max_m": 0.0113, "frame": 11 },
+            "seams": [
+              { "frame": 10, "dv": 0.525, "joint": "root" },
+              { "frame": 20, "dv": 0.3675, "joint": "root", "dw": 0.6872, "bone": "eye.L" }
+            ],
+            "flags": []
+          },
+          {
+            "from": 20,
+            "to": 30,
+            "path": { "max_m": 0.0079, "frame": 21 },
+            "seams": [
+              { "frame": 20, "dv": 0.3675, "joint": "root", "dw": 0.6872, "bone": "eye.L" },
+              { "frame": 30, "dv": null, "joint": null, "dw": null, "bone": null }
+            ]
+          }
+        ]
+      }
+    },
+    { "command": "edit.undo", "expect": { "label": "AI fill all gaps" } }
   ],
   "expect": { "tolerance": 1e-3 },
   "errors": [
