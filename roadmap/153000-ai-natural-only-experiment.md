@@ -1,6 +1,6 @@
 # Experiment: train on natural motion only
 
-- **Status:** not started; starts only when the owner asks, because it trains; take list final (2026-10-31)
+- **Status:** trained, acceptance not met, waiting for the owner to judge the videos (2026-10-31)
 - **Requires:** 134500
 - **Source:** owner request (2026-10-30)
 
@@ -186,4 +186,40 @@ all             739      114.3             8.5            11.6             8.0  
 
 Jump's held-out set fell from 1.1 to 0.2 minutes, so the natural-subset jump row of the acceptance table
 rests on about 12 s of motion; the full evaluation (step 3 of the overnight script) reads every
-held-out window and doesn't change. Training hasn't run.
+held-out window and doesn't change.
+
+## Result (2026-10-31)
+
+`pwsh -NoProfile -File training/overnight-2026-10-30.ps1` ran 02:48 to 05:51 with no errors, on the
+739 takes. The model is `training/data/models/parts-natural/`; nothing is exported. Log:
+`training/data/models/overnight-2026-10-30.log`.
+
+**The acceptance line is not met.** Natural held-out windows, best checkpoints, model / interpolation:
+
+| | Natural: joint mm | Shipped: joint mm | Natural: slide m/s | Shipped: slide m/s | Windows |
+|---|---|---|---|---|---|
+| idle | 7.85 / 8.52 | 8.17 / 8.52 | 0.0033 / 0.00317 | 0.00322 / 0.00317 | 458 |
+| walk | 14.9 / 34.2 | 16.8 / 34.2 | 0.073 / 0.23 | 0.0911 / 0.23 | 1,642 |
+| run | **51.2** / 70.4 | 28.9 / 70.4 | 0.101 / 0.383 | 0.128 / 0.383 | 417 |
+| jump | 48 / 83.1 | 66.8 / 83.1 | 0.169 / 0.281 | 0.219 / 0.281 | 35 |
+| all | 20 / 36.2 | 17.9 / 36.2 | 0.0296 / 0.076 | 0.0368 / 0.076 | 2,552 |
+
+The natural model wins walk and jump and loses run on joint error; idle's foot slide is a little worse.
+Foot slide is better in every gap bin from 5 frames up. The run row is mostly a sideways run: 45.5 of the
+50.4 held-out seconds are `100style/run_100style_SR_052`, and the only other take is `cmu/run_cmu_113_07`.
+The natural model trained on no sideways run; the shipped one saw 100STYLE's styled ones. So the row may
+overstate the loss on forward running. The jump row is 15 s of 5 takes; on every held-out window jump is
+42 / 65.5 against 44.1 / 65.5 joint with slide 0.169 against 0.152, so the jump gain isn't firm.
+
+**The cost, every held-out window** (natural / shipped joint mm; interpolation in brackets): sit 98.9 / 69.9
+(74.7), ground 87.6 / 57 (58), exercise 35.6 / 17.2 (19.6), combat 46.3 / 40.9 (49), run 47.5 / 34.3 (70.6),
+walk 23.1 / 19.6 (37.2), all 28.6 / 23.2 (41.4). Sit, ground and exercise are worse than plain
+interpolation; ground foot slide is 0.123 against 0.00245 m/s.
+
+The model learned `range-of-motion` as a style, from 11,393 frames of takes with that data tag: the
+filter treats it as no style word, but `labels.of` still makes it a label.
+
+**Review video:** `target/shots/2026-10-31/natural-judge/ALL.mp4` (2.1 min, a chapter a scene; each scene
+is also its own MP4), from `ac_train.judge`: REAL MOTION, SHIPPED and NATURAL side by side, fixed
+three-quarter camera, physics off, once at full speed and once at half. SHIPPED is `parts-lowweights`
+at its best checkpoint. All 14 takes are held out from both models. Waiting for the owner.

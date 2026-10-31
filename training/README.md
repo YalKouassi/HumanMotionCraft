@@ -15,6 +15,7 @@ clips. Nothing here runs at app time.
 | `ac_train.candidates` | one long MP4 per motion type of the takes a filter keeps (a title card and a burnt-in id a take, chapters, an index CSV), for the owner to say which to train on |
 | `ac_train.gaitcheck` | which natural walks look odd, by the words of their description and by how they move (limp, held arms, lean, low hips), tested on 100STYLE's labelled styles; proposes a take list and never changes the owner's |
 | `ac_train.walkgroups` | cuts a type's natural takes down to a short review: too short and styled takes out, the rest one clip a group on one MP4; the owner's rejects by group number go into the take list |
+| `ac_train.judge` | two models filling the same gaps in held-out takes beside the real motion: one three-panel MP4 a scene and `ALL.mp4` |
 | `ac_train.posetargets` | the target poses of live motion control (`assets/posefill-targets/`): for each gait, four frames of a free-set take at the gait's speed in its most typical posture, with where they came from; `--list` shows the candidates |
 | `ac_train.compare` | model cards side by side: joint error and foot slide by gap bin and motion type |
 | `ac_train.coverage` | how many training minutes each evaluation slice has (starts, stops, crouches, flights, turns, the motion types), by set and by what training uses, holds out or leaves out, beside each slice's windows from a card and the windows it can expect; writes `data/coverage.json` (roadmap 134750) |
