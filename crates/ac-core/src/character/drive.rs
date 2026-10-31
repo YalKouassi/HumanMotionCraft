@@ -3,7 +3,8 @@
 //! bone's world turn through its alignment; the rest follow their parents at rest. Then, with a
 //! weight per foot, each leg is solved by two-bone IK so the ankle lands where the rig's ankle is
 //! (scaled), the knee bending the way the rig's knee does, the foot keeping its orientation. A
-//! target out of reach is reached as far as the leg goes and the gap is reported. With
+//! target out of reach is reached as far as the leg goes and the gap is reported; a limb that
+//! can't be solved at all stays where forward kinematics put it and its whole gap is reported. With
 //! `Plan::hands`, the arms are solved the same way onto the wrists.
 
 use crate::quat::{self, Mat3, Vec3};
@@ -198,9 +199,14 @@ pub fn drive(
         let axis = unit(quat::sub3(hc, ha));
         let bend = quat::sub3(hb, ha);
         let pole = quat::sub3(bend, quat::scale3(axis, dot(bend, axis)));
-        if let Some((rs, gap)) = two_bone(&fk, &limb, target, pole) {
-            over.extend(rs);
-            *short = gap * w;
+        match two_bone(&fk, &limb, target, pole) {
+            Some((rs, gap)) => {
+                over.extend(rs);
+                *short = gap * w;
+            }
+            // a limb that can't be solved (a segment with no length, a target on the hip) stays
+            // where forward kinematics put it: the whole gap to the target is reported (Rule 1)
+            None => *short = quat::len3(quat::sub3(target, fk_end)),
         }
     }
     let worlds = if over.is_empty() {
