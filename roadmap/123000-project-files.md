@@ -73,3 +73,24 @@ with a fixture.
 - Not done: no "recent projects" list (the library's Recent menu is for library ids); the
   recovery file of a project document is kept under "untitled" (it is offered back as a new
   animation, not as the project). Both are small follow-ups if the owner wants them.
+
+## Review (2026-10-31)
+Reviewed `crates/ac-io/src/project.rs`, `crates/ac-io/tests/project.rs`, `fixtures/project-files.json` and
+`fixtures/data/project-v0.project.json` against the What, Acceptance and Result (commit 6bf26f4).
+- **Fixed (low, Rule 1):** `migrate` (`crates/ac-io/src/project.rs:192`) moved `playhead` onto `frame` even
+  when a version-0 file already had a `frame`, overwriting it silently. Refused now ("both playhead and
+  frame"). Test `migrate_refuses_a_version_0_file_that_names_the_playhead_twice`.
+- **Test gap, closed:** `a_version_0_file_migrates` checked the frame and the link but not the lock, the
+  pins, the edit layer or the AI defaults the v0 file carries; all asserted now.
+- **Checked and fine:** hostile numbers (`number()` demands finite and bounded: frame 0..=MAX_FRAME, pins
+  ±1e4, AI settings in range; `edit` must name a layer; pin bones and locked parts are checked against the
+  rig in `project.open`; linked clips must share the clip's bones, at most 256; the file size is capped by
+  `MAX_FILE_BYTES`); version 99 is refused before the migration (`load_text`, `:215`); a non-object, a clip
+  file and a rig file are named for what they are; save, open, save is byte-identical by the test's bytes
+  and the fixture's pinned hash; the migration covers the three version-0 differences exactly (links list
+  to map, duplicate ids refused; playhead to frame; no `ai` to defaults).
+- **Not fixed, noted (low):** a version-1 `links` object with one id twice is merged silently by the JSON
+  parser (last wins), as duplicate keys in a clip file are; only a hand-edited file has them. `"version":
+  1.5` is refused as "no version", a misleading wording. `project.save` drops the links the clip no longer
+  reaches without counting them in the result (that drop is the point of the save).
+- The Result's claims hold: the 4 tests (5 now), the fixture, the hash pinned and marked pinned.

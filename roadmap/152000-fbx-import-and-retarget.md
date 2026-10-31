@@ -136,3 +136,45 @@ side (`target/draw_source.py` was a throwaway for the stick figures).
   have one (the review material above is from the generated files).
 - Scale inheritance types other than the default and animation layers beyond the first are not
   blended (said in the result).
+
+## Review (2026-10-31)
+Reviewed `crates/ac-io/src/fbx/{binary,scene,import,commands}.rs`, `crates/ac-core/src/retarget.rs`,
+`crates/ac-io/tests/fbx.rs` and `clip.import` in `crates/ac-io/src/commands.rs` (commits c9d63e2,
+5ed5277).
+- **Fixed (high):** `scene.rs` took `stop - start` (`:659` then), `t - start` (`:676`), the key spacing
+  (`:786`) and a curve's span (`:251`) in i64 from the file's own numbers: a take range of -1..i64::MAX
+  overflowed (a panic in a debug build, a wrapped frame count in release), and `span as usize + 1` could
+  overflow past the saturating cast. All in f64 now, and the count is checked against `MAX_FRAMES` before
+  it becomes one. Test `a_take_range_at_the_ends_of_i64_is_refused_not_overflowed`.
+- **Fixed (high):** the sampled positions are frames x models `Vec3`s with no cap on the product
+  (`scene.rs:731`): 100,000 models (`MAX_MODELS`) over 20,000 frames is 48 GB and 2e9 matrix products.
+  `MAX_SAMPLES` (20,000,000: 1,000 nodes over the full 11 minutes) refuses with the numbers. Test
+  `too_many_joint_positions_are_refused`.
+- **Fixed (medium):** `binary.rs:265` bounded each compressed array by its own stated size (at most 512 MB)
+  but not the file's total: a few hundred kilobytes of zlib could inflate to hundreds of gigabytes across
+  arrays. `MAX_INFLATED` (1 GiB a file) is checked before each inflate. Test
+  `the_compressed_arrays_of_a_file_inflate_to_a_bounded_total`.
+- **Fixed (medium):** two `Model` records with one id (`scene.rs:417`) kept the last for the hierarchy
+  while both stayed in the list; refused as corrupt now, naming both. Test
+  `two_models_with_one_id_are_refused`.
+- **Fixed (medium, Rule 1):** `clip.import_batch` wrote `<stem>.clip.json` per file
+  (`fbx/commands.rs:132`), so `a/walk.fbx` and `b/walk.fbx` landed on one file, the second overwriting
+  the first without a word. The second is listed under `failed` naming the first. Test
+  `a_batch_never_writes_two_files_of_one_name_onto_each_other`.
+- **Checked and fine:** the header and version; record end offsets against the file and against the
+  record's own header; property counts and lengths; blob and array sizes; raw array byte counts; the
+  per-array inflate limit; unknown property types and encodings refused with the byte; nesting depth 64 and
+  4,000,000 records; the file size cap (512 MB) on `import_file`; axes and unit read, never assumed, and
+  left-handed refused; curve times in order and values finite; every sampled position finite; a hierarchy
+  loop refused; the frame rate's source always said (`fps_from`); a second take, extra layers, off-grid
+  keys and a non-default scale inheritance said; the retarget caps frames and demands finite landmarks;
+  `MAX_BATCH` 1,000 and depth 8 on the batch; the batch lists each failure and refuses only when none
+  imported.
+- **Not fixed, noted (low):** `find` passes over a folder it can't read (`fbx/commands.rs:75`) without
+  saying; the scale-inheritance note looks at the static scale only, not an animated one; a `KeyTime`
+  array of floats reads as no times and is refused as a count mismatch (the right outcome, odd wording);
+  `TimeMode` 0 (the format's default) falls to the keys' spacing and says `keys`, which is honest, though
+  a note that the file left the mode at default would help the person.
+- The Result's claims hold (numbers not re-run: no builder in this worktree). "Every count, offset and
+  length is checked" was true of each number alone, not of their products, which is what the three caps
+  above add.
