@@ -1904,6 +1904,111 @@ Outputs:
 | `poses` | JSON | yes |  | the same for poses |
 | `changed` | integer | yes |  | items added, updated, retired or moved |
 
+## live
+
+### `live.clip`: Live motion: keep a range
+
+undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer |  | 0 to 10000000 | the recording's first frame to keep (default 0) |
+| `to` | integer |  | 0 to 10000000 | its last frame to keep (default the last) |
+| `at` | integer |  | 0 to 10000000 | the animation's frame it starts on (default the playhead) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer | yes |  | the animation's first frame written |
+| `to` | integer | yes |  | its last |
+| `frames` | integer | yes |  | AI keys written between them |
+| `model` | text | yes |  | the keys' model tag |
+| `notes` | list of text | yes |  | what to know |
+
+### `live.input`: Live motion: steer
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `heading` | number |  | -3600 to 3600 | degrees: 0 the rig's forward (-Y), positive to its left |
+| `speed` | number |  | 0 to 100 | m/s, 0 to stop (held to the targets' top speed) |
+| `style` | text |  |  | a target of the set to aim at instead of blending by speed |
+| `frames` | integer |  | 0 to 600 | frames at 30 fps to move on (default 1) |
+| `wait` | bool |  |  | wait for each stretch (default); false lets the model work on a thread while the last stretch plays on |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `state` | one of live \| full | yes |  | full: the recording reached its cap and the character stands |
+| `frames` | integer | yes |  | frames recorded so far |
+| `calls` | integer | yes |  | stretches asked of the model so far |
+| `speed` | number | yes |  | the stick smoothed, m/s |
+| `target` | text | yes |  | what the last stretch aimed at |
+| `why` | text | yes |  | why the last stretch was asked for |
+| `root` | [x, y, z] | yes |  | the root offset on show |
+| `notes` | list of text | yes |  | what to know |
+
+### `live.show`: Live motion: look at a recorded frame
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frame` | integer | yes | 0 to 10000000 | the recording's frame to show |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frame` | integer | yes |  | the frame on show |
+| `root` | [x, y, z] | yes |  | its root offset |
+
+### `live.start`: Live motion: start a take
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `max_frames` | integer |  | 2 to 18000 | the most frames to record (default ten minutes at 30 fps) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `session` | integer | yes |  | the take's number |
+| `targets` | list of text | yes |  | the target poses of the set |
+| `max_speed` | number | yes |  | the set's top speed, m/s |
+| `max_frames` | integer | yes |  | the most frames it records |
+
+### `live.stop`: Live motion: stop the take
+
+not undoable, icon `ai`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frames` | integer | yes |  | frames recorded; they stay for live.clip |
+| `calls` | integer | yes |  | stretches asked of the model |
+| `held` | integer | yes |  | frames shown with no motion ready: the last pose held |
+| `late` | integer | yes |  | frames skipped because a stretch came late |
+| `round_trip_ms` | number | yes |  | mean time a stretch took, helper round trip |
+| `round_trip_max_ms` | number | yes |  | the longest |
+| `model_ms` | number | yes |  | mean of the model's own time |
+
 ## marker
 
 ### `marker.add`: Add marker

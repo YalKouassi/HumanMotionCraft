@@ -189,6 +189,7 @@ impl App {
             .commands(ac_media::SPECS)
             .commands(ac_textmotion::SPECS)
             .commands(ac_posefill::SPECS)
+            .commands(ac_posefill::live_commands::SPECS)
             .commands(ac_community::SPECS)
             .build()?;
         let mut session = built.session;

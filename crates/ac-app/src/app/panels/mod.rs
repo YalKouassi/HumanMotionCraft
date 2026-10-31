@@ -5,8 +5,10 @@
 
 pub mod ai;
 pub mod ai_worker;
+pub mod gamepad;
 pub mod joint;
 pub mod layers;
+pub mod live;
 pub mod physics;
 pub mod posefill;
 pub mod range;
@@ -27,6 +29,7 @@ pub struct Panels {
     pub layers: layers::LayersState,
     pub text: text::TextState,
     pub posefill: posefill::PoseFillState,
+    pub live: live::LiveState,
 }
 
 impl super::App {

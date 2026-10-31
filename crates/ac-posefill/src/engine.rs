@@ -12,8 +12,11 @@ use std::sync::Arc;
 use ac_core::quat::{Quat, Vec3};
 use ac_helper::slot::{Cache, Slot};
 use serde::Serialize;
+use serde_json::Value;
 
 pub use ac_helper::Status;
+
+use crate::live::{StepAsk, Stretch};
 
 /// A pose: every bone's rotation and the root offset (hip heights).
 #[derive(Clone, Debug, PartialEq, Serialize)]
@@ -53,12 +56,37 @@ pub struct Info {
     pub gpu: String,
 }
 
+/// A live take to begin: the rig, the target pose set (its file's document) and the pose it
+/// starts from.
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct LiveStart {
+    pub rig: String,
+    pub targets: Value,
+    pub start: Pose,
+}
+
+/// A live take begun: its number, the set's targets and its top speed.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct LiveBegun {
+    pub session: i64,
+    pub targets: Vec<String>,
+    pub max_speed: f64,
+}
+
 /// Something that fills between poses. `say` reports progress while it works.
 pub trait Engine: Send {
     fn status(&self) -> Status;
     fn info(&self) -> Info;
     fn load(&mut self, say: &mut dyn FnMut(&str)) -> Result<(), String>;
     fn fill(&mut self, req: &Request, say: &mut dyn FnMut(&str)) -> Result<Fill, String>;
+    /// Begin a live take (live motion control); an engine without it refuses.
+    fn live_start(&mut self, _: &LiveStart, _: &mut dyn FnMut(&str)) -> Result<LiveBegun, String> {
+        Err("this engine has no live motion".into())
+    }
+    /// The next stretch of the take.
+    fn live_step(&mut self, _: &StepAsk, _: &mut dyn FnMut(&str)) -> Result<Stretch, String> {
+        Err("this engine has no live motion".into())
+    }
 }
 
 /// Fills kept by their request (a chained fill makes one a segment).
@@ -122,6 +150,33 @@ pub fn load() -> Result<Status, String> {
         e.load(say)?;
         Ok(e.status())
     })
+}
+
+/// Begin a live take, starting the helper and loading the model first when needed.
+pub fn live_start(req: &LiveStart) -> Result<LiveBegun, String> {
+    with_engine(|e, say| {
+        e.load(say)?;
+        e.live_start(req, say)
+    })
+}
+
+/// The next stretch of the live take: never kept (a stick is never asked the same twice), and
+/// refused unless its frames are whole and finite and its transition among them.
+pub fn live_step(ask: &StepAsk) -> Result<Stretch, String> {
+    let s = with_engine(|e, say| e.live_step(ask, say))?;
+    let n = s.roots.len();
+    if n < 2 {
+        return Err("the helper made a stretch of fewer than 2 frames".into());
+    }
+    ac_helper::frames::check(&s.rotations, &s.roots, n, None)?;
+    if !(1..n).contains(&s.transition) {
+        return Err(format!(
+            "the helper's transition frame {} is not inside 1 to {}",
+            s.transition,
+            n - 1
+        ));
+    }
+    Ok(s)
 }
 
 /// The fill for `req`: made already, or made now (this blocks while the model works).

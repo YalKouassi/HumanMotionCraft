@@ -1,6 +1,6 @@
 # Live motion control: drive the character, then clip it
 
-- **Status:** in progress: target test approved by the owner (2026-10-31); the `live.*` commands and the window are next
+- **Status:** built, waiting for the owner: the owner plays it with W A S D and a controller. No controller take has been made (2026-10-31)
 - **Requires:** 157000
 - **Source:** owner's idea (2026-10-30)
 
@@ -80,8 +80,36 @@ from what was steered.
 - `cargo xtask check` passes, and the owner plays it and approves.
 
 ## Result
-So far: "Measure first" only. The Rust crate's `live.*` commands, the fixture, the window, recording
-and clipping are not started.
+**Built (2026-10-31):** `live.start`, `live.input`, `live.stop`, `live.show`, `live.clip` in
+`crates/ac-posefill` (`live.rs` the take as a pure state machine, `live_commands.rs` the commands, the
+model asked off the UI thread), the Live motion section under Pose fill, W A S D with Shift to run,
+a controller through gilrs on Windows, keeping a range in this animation or as a new one in one undo
+step. `fixtures/live-motion.json` and `crates/ac-posefill/tests/live.rs` pass on the stand-in and a fake.
+
+**Not tested:** no controller take: this needs a person and a controller, so `panels/gamepad.rs` has
+never read a real stick. No person has steered it: the takes below are keys held by a script through
+the control port, so they say nothing about how it feels. Reload was checked by key count, and the
+reloaded clip wasn't played back in the app.
+
+**A real take in the release app** (RTX 3080 Ti, physics off, W held, Shift, A with it, Shift off, all
+off; clipped as a new animation, saved, reopened with its 477 keys):
+`target/shots/2026-10-31/live-motion/app-take-wasd.mp4` (left following, right from above),
+`app-take/stopped-panel.png`.
+- Three takes: a stretch took 50 to 62 ms on average, 80 to 153 ms at most. The last take went over the
+  100 ms limit once, with the machine shared with another session's work. 4 to 6 frames held, 2 to 11
+  late. All 4 to 6 held frames are at the very start, before the first reply.
+- Speed: about 1.2 m/s for 1.3 walking, about 3.5 for 3.6 running. It takes about 2 to 3 s to reach a
+  run after Shift, and about 1.5 s to stop from a walk after the keys come up, and longer from a run.
+- The largest joint jump is 27 degrees in one frame at about 1.3 s, on one upper arm at a seam while
+  standing. It is twist: the wrist moves 1.6 cm that frame. First reply: the wrists move 4.6 cm.
+
+**Found by the real take, fixed:** the take ran 2.4 times too fast on a high refresh monitor (`stable_dt`
+is a prediction unless the last frame asked for a repaint; a take now uses the time really passed);
+after a take the camera stayed where the run ended, with the body out of view, up to 33 m away; in an
+animation with no keys, stopping left the pose where the take ended. The control port gained
+`modifiers` input, which holds Shift across requests as a person does.
+
+So far before this: "Measure first".
 
 **Owner's judgement (2026-10-31):** happy with everything in `target/shots/2026-10-31/`, which includes
 the video below, so the targets pass and the UI may start. The current set stays. 157000 isn't `DONE_`

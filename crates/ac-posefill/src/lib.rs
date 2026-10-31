@@ -15,6 +15,10 @@
 //! and makes [`MIN_FRAMES`] to [`MAX_FRAMES`] frames at [`MODEL_FPS`]; the animation's own rate
 //! is converted there and back. A longer stretch goes through the keys of yours inside it, one
 //! call a gap ([`plan`]).
+//!
+//! The same model drives live motion control (`live.*`): a person steers, stretches of motion are
+//! made towards target poses placed ahead, everything shown is recorded, and a range becomes keys
+//! ([`live`], [`live_commands`]; registered beside [`SPECS`]).
 #![deny(
     clippy::unwrap_used,
     clippy::expect_used,
@@ -27,6 +31,8 @@
 pub mod engine;
 pub mod helper;
 pub mod install;
+pub mod live;
+pub mod live_commands;
 pub mod plan;
 pub mod setup;
 pub mod stand_in;
@@ -187,7 +193,9 @@ const MADE_OUT: &[ParamSpec] = &[
 
 /// Register this crate's commands; returns the clashes (empty: all registered).
 pub fn register(session: &mut ac_core::Session) -> Vec<ac_core::CoreError> {
-    session.register(SPECS)
+    let mut clashes = session.register(SPECS);
+    clashes.extend(session.register(live_commands::SPECS));
+    clashes
 }
 
 fn posefill_helper(_: &mut Document, p: &P) -> Out {
@@ -307,7 +315,7 @@ pub fn prepare(doc: &Document, command: &str, p: &P) -> Result<(), String> {
             let plan = plan::plan(doc, p)?;
             plan::run(doc, &plan, engine::make).map(|_| ())
         }
-        "posefill.helper" => engine::load().map(|_| ()),
+        "posefill.helper" | "live.start" => engine::load().map(|_| ()),
         _ => Err(format!("{command} makes no motion")),
     }
 }
@@ -330,6 +338,7 @@ pub fn waits(doc: &Document, command: &str, p: &P) -> bool {
             p.get("action").and_then(Value::as_str) == Some("load")
                 && !engine::status().is_some_and(|s| s.loaded)
         }
+        "live.start" => !engine::status().is_some_and(|s| s.loaded),
         _ => false,
     }
 }

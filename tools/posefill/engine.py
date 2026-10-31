@@ -407,9 +407,12 @@ class Engine:
     def live_start(self, rig: str, targets: dict, start, say=print) -> dict:
         """A new live session from the rig pose ``start`` (rotations, root) aiming at ``targets``
         (a target pose set document). One session at a time: starting again ends the last."""
-        from live import Session
+        from live import TOKENS, Session
 
         self.live = Session(self, rig, targets, start)
+        # the first generation bakes the GPU's graph (about 200 ms): done here, not on the take's first frame
+        self.live.step(np.zeros(2), np.array([0.0, -1.0]), None, TOKENS, say=lambda _: None)
+        self.live.segment = None
         self.live_id = getattr(self, "live_id", 0) + 1
         say(f"live session {self.live_id}: targets {', '.join(self.live.targets.names)}")
         return {"session": self.live_id, "targets": self.live.targets.names, "max_speed": self.live.targets.max_speed,

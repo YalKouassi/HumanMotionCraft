@@ -48,8 +48,14 @@ impl Plan {
     }
 }
 
+/// The rig file's whole path: the helper runs in its own folder, so a relative one wouldn't find it.
+pub(crate) fn rig_path(assets: &std::path::Path) -> Result<String, String> {
+    let path = std::path::absolute(assets.join("rig/default_rig.json")).map_err(|e| e.to_string())?;
+    Ok(path.display().to_string())
+}
+
 /// The edited layer takes whole poses.
-fn whole_layer(clip: &Clip) -> Result<(), String> {
+pub(crate) fn whole_layer(clip: &Clip) -> Result<(), String> {
     let l = clip.layers.get(clip.edit).ok_or("no layer to edit")?;
     if l.source != LayerSource::Keys || l.mode == LayerMode::Additive || l.only.is_some() {
         return Err(hinted(
@@ -132,13 +138,11 @@ pub fn plan(doc: &Document, p: &P) -> Result<Plan, String> {
             fits(*a, *b, fps)?;
         }
     }
-    let rig = doc
-        .assets
-        .as_ref()
-        .ok_or("no assets folder is set (start the app with one)")?
-        .join("rig/default_rig.json")
-        .display()
-        .to_string();
+    let rig = rig_path(
+        doc.assets
+            .as_ref()
+            .ok_or("no assets folder is set (start the app with one)")?,
+    )?;
     let mut notes = Vec::new();
     let before = (CONTEXT - 1) as f64 * step(fps);
     if (a as f64) < before {

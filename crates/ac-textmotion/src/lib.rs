@@ -328,7 +328,11 @@ fn request(
         prompt: prompt.to_string(),
         frames: usize::try_from(frames).map_err(|e| e.to_string())?,
         fps: doc.clip.fps,
-        rig: assets.join("rig/default_rig.json").display().to_string(),
+        // whole: the helper runs in its own folder
+        rig: std::path::absolute(assets.join("rig/default_rig.json"))
+            .map_err(|e| e.to_string())?
+            .display()
+            .to_string(),
         seed,
         start,
         end,

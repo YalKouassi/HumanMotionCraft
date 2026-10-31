@@ -1,0 +1,80 @@
+{
+  "$schema": "./schema.json",
+  "name": "live-motion",
+  "feature": "live.input",
+  "description": "A scripted live take with the fixtures' stand-in engine (ac_posefill::stand_in): it holds the start pose and moves the root by the velocity asked, 1/30 a frame, 30 frames a stretch with the transition on frame 19. The body starts at root z 0.9450101 with a key on frame 0. live.start names the shipped set's four targets. Five frames with the stick at rest: the first asks for a stretch (why start), the root stays, and the recording is the start pose and those 5 frames, 6. One frame with the stick at 1.3 m/s: moving from standing asks at once (why started) at 0.6 of the stick, 0.78 m/s along -Y, so the root moves 0.78 / 30 = 0.026 and y = -0.026. Nineteen more frames: stretch frames 2 to 19 play, y = -0.026 x 19 = -0.494, then frame 20 is past the transition and asks again (why transition) at the stick smoothed on from 0.78 over those 19 frames, 1.3 - 0.52 x 0.5^(19/18) = 1.04982 m/s, and that stretch's frame 1 moves it on by 1.04982 / 30 = 0.034994 to y = -0.528994; 26 frames, 3 calls. live.stop keeps the recording: nothing held or late, since a script waits for each stretch. live.clip of recorded frames 6 to 25 at frame 30 writes 20 frames, 30 to 49, its ends keys of yours and the 18 between AI keys tagged posefill; frame 30 is recorded frame 6, y = -0.026, and frame 49 recorded frame 25, y = -0.528994. One undo step takes it all away, leaving the key on frame 0, and redo brings it back. Refused, all leaving the animation as it was: a range of one frame, a range past the recording, a range landing on your key on 49 (at 40), more steering after the stop, and a start with a cap under 2 frames.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": {} },
+    {
+      "command": "live.start",
+      "params": {},
+      "expect": { "targets": ["stand", "walk", "jog", "run"], "max_frames": 18000 }
+    },
+    {
+      "command": "live.input",
+      "params": { "frames": 5 },
+      "expect": {
+        "state": "live",
+        "frames": 6,
+        "calls": 1,
+        "why": "start",
+        "target": "stand-in",
+        "root": [0, 0, 0.9450101],
+        "notes": ["made by the fixtures' stand-in, not the model"]
+      }
+    },
+    {
+      "command": "live.input",
+      "params": { "heading": 0, "speed": 1.3 },
+      "expect": { "frames": 7, "calls": 2, "why": "started", "root": [0, -0.026, 0.9450101] }
+    },
+    {
+      "command": "live.input",
+      "params": { "heading": 0, "speed": 1.3, "frames": 19 },
+      "expect": { "frames": 26, "calls": 3, "why": "transition", "root": [0, -0.528994, 0.9450101] }
+    },
+    {
+      "command": "live.stop",
+      "params": {},
+      "expect": { "frames": 26, "calls": 3, "held": 0, "late": 0 }
+    },
+    {
+      "command": "live.show",
+      "params": { "frame": 6 },
+      "expect": { "frame": 6, "root": [0, -0.026, 0.9450101] }
+    },
+    {
+      "command": "live.clip",
+      "params": { "from": 6, "to": 25, "at": 30 },
+      "expect": { "from": 30, "to": 49, "frames": 18, "model": "posefill", "notes": [] }
+    },
+    {
+      "command": "clip.sample",
+      "params": { "from": 30, "to": 49, "step": 19 },
+      "expect": { "roots": [[0, -0.026, 0.9450101], [0, -0.528994, 0.9450101]] }
+    },
+    { "command": "edit.undo", "params": {} },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "keys": [{ "frame": 0, "source": "manual" }] }
+    },
+    { "command": "edit.redo", "params": {} },
+    {
+      "command": "clip.sample",
+      "params": { "from": 30, "to": 30 },
+      "expect": { "roots": [[0, -0.026, 0.9450101]] }
+    }
+  ],
+  "errors": [
+    { "command": "live.clip", "params": { "from": 20, "to": 20, "at": 60 } },
+    { "command": "live.clip", "params": { "from": 0, "to": 26, "at": 60 } },
+    { "command": "live.clip", "params": { "from": 0, "to": 25, "at": 40 } },
+    { "command": "live.input", "params": { "speed": 1.3 } },
+    { "command": "live.stop", "params": {} },
+    { "command": "live.show", "params": { "frame": 26 } },
+    { "command": "live.start", "params": { "max_frames": 1 } }
+  ]
+}

@@ -32,6 +32,8 @@ HISTORY = 64  # shown poses kept (the context needs 4)
 VELOCITY_SCALE = 0.97
 #: seconds of travel the targets sit ahead of the character
 POSITION_SCALE = 1.0
+#: seconds of travel a stopping target sits ahead of the character, at its actual speed
+STOP_SECONDS = 0.5
 #: frames before the end of a generation at which the next one starts (the target is a guide, so
 #: the character lines up towards it and moves on before it arrives)
 TRANSITION_EARLY = 10
@@ -184,8 +186,8 @@ class Session:
         if speed > 1e-6:
             ahead = self.position() + velocity * VELOCITY_SCALE * POSITION_SCALE
         else:
-            # stopping: the stand pose sits where the character will be in a second at its actual speed
-            ahead = self.position() + self.velocity() * POSITION_SCALE
+            # stopping: the stand pose sits a short way on at its actual speed
+            ahead = self.position() + self.velocity() * STOP_SECONDS
         rots, roots = place(self.skel, rots, roots, speed * VELOCITY_SCALE, ahead, facing)
         t0 = time.perf_counter()
         tgt = np.stack([self.eng.body.from_rig(self.skel, self.table, r, o, self.scale) for r, o in zip(rots, roots)])

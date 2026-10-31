@@ -189,6 +189,11 @@
             "library.list",
             "library.samples",
             "library.sync",
+            "live.clip",
+            "live.input",
+            "live.show",
+            "live.start",
+            "live.stop",
             "marker.add",
             "marker.delete",
             "marker.move",
@@ -4530,6 +4535,197 @@
           "if": {
             "properties": {
               "command": {
+                "const": "live.clip"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: keep a range; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the recording's first frame to keep (default 0)",
+                    "default": 0
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "its last frame to keep (default the last)"
+                  },
+                  "at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the animation's frame it starts on (default the playhead)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "live.input"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: steer"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "heading": {
+                    "type": "number",
+                    "minimum": -3600.0,
+                    "maximum": 3600.0,
+                    "description": "degrees: 0 the rig's forward (-Y), positive to its left"
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 100.0,
+                    "description": "m/s, 0 to stop (held to the targets' top speed)"
+                  },
+                  "style": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a target of the set to aim at instead of blending by speed"
+                  },
+                  "frames": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600,
+                    "description": "frames at 30 fps to move on (default 1)",
+                    "default": 1
+                  },
+                  "wait": {
+                    "type": "boolean",
+                    "description": "wait for each stretch (default); false lets the model work on a thread while the last stretch plays on"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "live.show"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: look at a recorded frame"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the recording's frame to show"
+                  }
+                },
+                "required": [
+                  "frame"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "live.start"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: start a take"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "max_frames": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 18000,
+                    "description": "the most frames to record (default ten minutes at 30 fps)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "live.stop"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: stop the take"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "marker.add"
               }
             },
@@ -6835,6 +7031,11 @@
             "library.list",
             "library.samples",
             "library.sync",
+            "live.clip",
+            "live.input",
+            "live.show",
+            "live.start",
+            "live.stop",
             "marker.add",
             "marker.delete",
             "marker.move",

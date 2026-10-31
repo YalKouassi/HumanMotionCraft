@@ -39,6 +39,10 @@ tracing.workspace = true
 # compiled and decides at run time by the target (`CARGO_CFG_TARGET_OS`). A `cfg(windows)` here
 # is evaluated for the host, so it left Linux and macOS hosts without the crate and the script
 # failed to compile (GitHub issue #1, roadmap 120400).
+[target.'cfg(windows)'.dependencies]
+# a controller for live motion: no system libraries to install on Windows
+gilrs = "0.11"
+
 [build-dependencies]
 winresource = "0.1"
 

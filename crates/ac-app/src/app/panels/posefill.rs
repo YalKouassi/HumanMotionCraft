@@ -61,11 +61,19 @@ fn step(v: &Value) -> Option<String> {
     Some(format!("step {n} of {of}: {}", v["label"].as_str().unwrap_or("")))
 }
 
+impl super::Panels {
+    /// No pose fill run is being made off the UI thread.
+    pub(in crate::app) fn posefill_idle(&self) -> bool {
+        self.posefill.job.is_none()
+    }
+}
+
 impl App {
     /// Whether `run` must make `id`'s fills off the UI thread first; if so it is started.
     pub(in crate::app) fn posefill_deferred(&mut self, id: &str, params: &Value) -> bool {
         let Some(p) = params.as_object() else { return false };
-        if !id.starts_with("posefill.") || !ac_posefill::waits(&self.session.document, id, p) {
+        let ours = id.starts_with("posefill.") || id == "live.start";
+        if !ours || !ac_posefill::waits(&self.session.document, id, p) {
             return false;
         }
         let st = &mut self.panels.posefill;
@@ -263,6 +271,7 @@ impl App {
                 ));
             });
         }
+        self.live_panel(ui);
     }
 
     /// Ask `posefill.install` again (now, or once a second while it runs).
