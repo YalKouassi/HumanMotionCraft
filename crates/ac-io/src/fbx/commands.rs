@@ -104,7 +104,8 @@ fn find(from: &Path) -> Vec<(PathBuf, String)> {
 }
 
 /// Import each file; one that can't be is listed in `failed` with why, and the rest are still
-/// written. Refused only when none could be.
+/// written. Two files of one name in different subfolders would land on one `.clip.json`: the
+/// second is listed in `failed` instead of overwriting the first. Refused only when none could be.
 fn import_batch(doc: &mut Document, p: &P) -> Out {
     let from = PathBuf::from(cmd::text(p, "from").unwrap_or_default());
     if !from.is_dir() {
@@ -122,14 +123,26 @@ fn import_batch(doc: &mut Document, p: &P) -> Out {
     std::fs::create_dir_all(&to).map_err(|e| format!("{}: {e}", to.display()))?;
     let mut files = Vec::new();
     let mut failed = Vec::new();
+    let mut written: BTreeMap<String, &str> = BTreeMap::new(); // output file -> the file it came from
     for (path, rel) in &found {
+        let stem = path
+            .file_stem()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_else(|| "imported".into());
+        let out = to.join(format!("{stem}{}", crate::library::Kind::Animations.ext()));
+        if let Some(first) = written.get(&stem.to_lowercase()) {
+            failed.push(json!({
+                "file": rel,
+                "error": format!(
+                    "a file of the same name, {first}, was already written to {}: rename one of them",
+                    out.display()
+                ),
+            }));
+            continue;
+        }
         match import_file(path, &doc.skeleton, &joints) {
             Ok(imported) => {
-                let stem = path
-                    .file_stem()
-                    .map(|s| s.to_string_lossy().to_string())
-                    .unwrap_or_else(|| "imported".into());
-                let out = to.join(format!("{stem}{}", crate::library::Kind::Animations.ext()));
+                written.insert(stem.to_lowercase(), rel.as_str());
                 match craft_atomic::atomic_write(&out, clipfile::save_clip(&imported.clip).as_bytes()) {
                     Ok(()) => files.push(json!({
                         "file": rel,

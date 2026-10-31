@@ -4,6 +4,8 @@
 //! travelling the right way; broken and non-humanoid files are refused with a reason.
 #![allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
+mod common;
+
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
@@ -346,4 +348,43 @@ fn swapped_sides_are_refused() {
     }
     let e = import_bytes(&bytes("walk-yup.fbx"), &sk, "s", &j).unwrap_err();
     assert!(e.contains("swapped"), "{e}");
+}
+
+#[test]
+fn a_batch_never_writes_two_files_of_one_name_onto_each_other() {
+    let (mut s, lib) = common::session("fbx-batch-names");
+    let from = lib.join("from");
+    let to = lib.join("to");
+    for sub in ["a", "b"] {
+        std::fs::create_dir_all(from.join(sub)).unwrap();
+        std::fs::write(from.join(sub).join("walk.fbx"), bytes("walk-yup.fbx")).unwrap();
+    }
+    std::fs::write(from.join("b").join("Side.fbx"), bytes("sidestep-left.fbx")).unwrap();
+    let r = s
+        .run(
+            "clip.import_batch",
+            &serde_json::json!({ "from": from.to_string_lossy(), "to": to.to_string_lossy() }),
+        )
+        .unwrap();
+    let files = r["files"].as_array().unwrap();
+    let failed = r["failed"].as_array().unwrap();
+    assert_eq!(
+        files
+            .iter()
+            .map(|f| f["file"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        ["a/walk.fbx", "b/Side.fbx"],
+        "{r}"
+    );
+    assert_eq!(failed.len(), 1, "{r}");
+    assert_eq!(failed[0]["file"], "b/walk.fbx");
+    let why = failed[0]["error"].as_str().unwrap();
+    assert!(why.contains("same name") && why.contains("a/walk.fbx"), "{why}");
+    // the clip written is the first file's, untouched by the second
+    let written: Vec<_> = std::fs::read_dir(&to)
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().to_string())
+        .collect();
+    assert_eq!(written.len(), 2, "{written:?}");
+    std::fs::remove_dir_all(lib).unwrap();
 }
