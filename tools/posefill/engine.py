@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """The app's pose-to-pose engine: load the upstream motion model once (a TensorRT plan, built on
 the first run), fill between the app's key poses, and bring the motion back onto the app's rig.
 Runs inside the install's venv (tools/posefill/setup_posefill.py), beside the `ac_rig` package

@@ -1,6 +1,6 @@
 # Engine check of the export
 
-- **Status:** in progress: Blender half built, Unity not installed (2026-10-30)
+- **Status:** done (2026-10-31), by the owner's decision: Blender only; Unity moved to 162000
 - **Requires:** 106000
 - **Source:** old `ROADMAP.md` row 3
 
@@ -98,3 +98,6 @@ argument) and prints one `BLENDER_CHECK {json}` line with the importer's warning
   `app-<clip>-<view>.png`, Y-up import standing on the ground, no mirrored sides, root motion on
   the root bone with Animator "Apply Root Motion" on). Record the result in this file and set the
   status to "built, waiting for the owner".
+
+## Closed
+The owner's decision, 2026-10-31: Unity is left for now and moves to its own item, 162000, with the steps under `## Left`. This item closes on the Blender half.

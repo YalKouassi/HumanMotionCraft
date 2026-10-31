@@ -1,6 +1,6 @@
 # Linux: the app builds from source
 
-- **Status:** built, waiting for the owner (2026-10-30)
+- **Status:** done (2026-10-31), by the owner's decision: the passing build is enough; a run-time problem gets a new issue
 - **Requires:** none
 - **Source:** GitHub issue [#1](https://github.com/YalKouassi/HumanMotionCraft/issues/1) (Fedora, x86_64), reviewed 2026-10-30
 
@@ -117,7 +117,7 @@ Fedora differs only in package names) and is left to the reporter, who is on Fed
 (WARP goldens); `pkg-config` left out of the list with the reason above; the acceptance's
 Fedora container is not run in CI.
 
-## Draft reply to issue #1 (not posted)
+## Reply to issue #1
 Thanks for the clear report, and for finding the file. You are right that `crates/ac-app/build.rs`
 is the cause: it names `winresource` in code that is always compiled, but the crate was declared
 only under `[target.'cfg(windows)'.build-dependencies]`, and that `cfg` on a build dependency is

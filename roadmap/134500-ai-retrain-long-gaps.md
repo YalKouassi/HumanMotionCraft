@@ -1,6 +1,6 @@
 # Win back the long gaps
 
-- **Status:** not started; the acceptance line needs the owner's agreement
+- **Status:** not started; acceptance changed and agreed by the owner (2026-10-31)
 - **Requires:** 134000
 - **Source:** 134000's result (the owner: ship it, then keep improving)
 
@@ -33,10 +33,12 @@ shipped one (owner's decision, 2026-10-30), its extra foot slide included. This 
 long gaps are still far from the target.
 
 ## Acceptance
-On the 126000 held-out windows: gaps 5-10 / 11-20 / 21-30 / 31-45 closer to the previous model's 6.2 /
-11.5 / 17.5 / 23.4 mm than today's 10.3 / 22.2 / 34.0 / 54.2 mm; step and still contexts stay under
-interpolation's 41.4 mm; foot slide no worse than 0.045 m/s; impossible frames on the posed keys under today's 20.0 per 1,000
-(the old model's 17; added 2026-10-31 when 136000 closed unmet); the owner judges side-by-side videos.
+Changed by the owner 2026-10-31. The old line asked for numbers closer to the previous model's 6.2 /
+11.5 / 17.5 / 23.4 mm, which are flattered (134000), and the foot slide the owner's chosen model already
+gave up. Now, against today's shipped `parts-lowweights` on the 126000 held-out windows: gaps 21-30 and
+31-45 clearly below its 32.0 and 51.6 mm; foot slide at or under 0.053 m/s; step and still contexts
+under interpolation's 41.4 mm; impossible frames on the posed keys under 20.0 per 1,000 (from 136000).
+The owner's side-by-side videos decide.
 
 ## Overnight plan (prepared 2026-10-30, not run; changed the same day)
 `training/overnight-2026-10-30.ps1` now runs 153000's night (owner's decision, 2026-10-30: the

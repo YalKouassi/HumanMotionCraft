@@ -13,3 +13,10 @@ and the training rig-maths modules its setup copies (114000), and `tools/posefil
 ## Acceptance
 The zip runs on a clean Windows machine with no Rust, Python or ffmpeg installed (video export
 then explains what is missing).
+
+## Notes
+2026-10-31, preparing 0.2.0: the release zip held the app, `assets/` and the licence files only, so
+`text.install` and `posefill.install` refused on a download ("the source tree was not found").
+`.github/workflows/release.yml` now also ships both setups, the helper scripts, the rig maths they copy
+and `crates/ac-core/src/product.rs`, which the setups read the product's name from, in the source tree's
+layout. The clean-machine check of this item's acceptance is still to do.

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Install the optional pose-to-pose motion engine (NVIDIA's open pose-conditioned motion model,
 run through TensorRT) for the app's `posefill.*` commands. Nothing here is needed to run the app;
 without it, `posefill.*` say how to install it.

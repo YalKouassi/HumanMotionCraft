@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """The target test for live motion control (roadmap 158000, "measure first"): a scripted stick path
 driven through the installed helper with our own target set, the loop the app will run written
 here in plain Python so the owner can judge the targets by eye before any window is built.

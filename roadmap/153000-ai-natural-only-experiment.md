@@ -1,7 +1,7 @@
 # Experiment: train on natural motion only
 
 - **Status:** trained; the owner takes `parts-natural` as the base for 154000; not exported (2026-10-31)
-- **Requires:** 134500
+- **Requires:** none (it was 134500; the owner chose to train this first, and it has trained)
 - **Source:** owner request (2026-10-30)
 
 ## What

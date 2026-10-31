@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """Live motion control, the helper's half (roadmap 158000): a session that keeps the poses shown so
 far in the model's own layout, blends our target set by speed, places the blended target ahead of
 the character along its desired velocity, asks the model for the next stretch, and brings it back

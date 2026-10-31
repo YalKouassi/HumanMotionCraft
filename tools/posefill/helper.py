@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: Apache-2.0
 """The app's pose-to-pose helper: JSON lines on stdin and stdout, one request a line.
 
     {"id": 1, "op": "info"}                                   versions, GPU, whether the plan is built

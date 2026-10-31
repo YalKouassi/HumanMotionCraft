@@ -1,6 +1,6 @@
 # Pose-to-pose motion from MotionBricks
 
-- **Status:** in progress: motion and panel approved by the owner (2026-10-31); training clips and two install checks still open (end of `## Result`)
+- **Status:** in progress: motion, panel and TensorRT's licence terms approved by the owner (2026-10-31); training clips and two install checks still open (end of `## Result`)
 - **Requires:** 113000, 114000
 - **Source:** owner request (2026-10-30), after the licence check. This replaces the decision of
   2026-10-28 to use only Kimodo as a third-party generator.
@@ -470,5 +470,9 @@ Still open before `DONE_`:
 - A real `posefill.install` run from the panel, with Stop and resume, and a check that the folder
   has no `assets/motions/` afterwards.
 - The refusal on a machine without an NVIDIA GPU (none here to try).
-- For the owner's eye, not covered by that approval: TensorRT's licence term (item 11 above), where
-  NVIDIA can end a person's licence with 90 days' notice, and item 10.
+
+**TensorRT's licence, the owner's decision (2026-10-31):** accepted (items 10 and 11). The install is
+optional, people get TensorRT directly from NVIDIA, and we never distribute it. NVIDIA can end a
+person's licence on 90 days' notice, which stops pose fill for that person and nothing else.
+`tools/posefill`'s Python stays under Apache-2.0, now stated in the files (SPDX lines,
+`tools/posefill/LICENSE-APACHE`) and in `ATTRIBUTION.md` and `NOTICE`.

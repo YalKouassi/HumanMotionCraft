@@ -59,4 +59,5 @@ tools/posefill/setup_posefill.py): the pose-to-pose motion engine MotionBricks b
 motion model "Licensed by NVIDIA Corporation under the NVIDIA Open Model Agreement"
 (https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/). The
 install downloads the model, TensorRT, Warp and OpenUSD; no part of them is distributed with
-HumanMotionCraft, and the engine's evaluation-only sample clips are never installed or used.
+HumanMotionCraft, and the engine's evaluation-only sample clips are never installed or used. The
+Python in tools/posefill is under the Apache License, Version 2.0 (tools/posefill/LICENSE-APACHE).

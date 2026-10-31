@@ -1,6 +1,6 @@
 # Command line: render options for clean pictures and video
 
-- **Status:** not started (acceptance proposed, waiting for the owner to agree)
+- **Status:** not started; acceptance agreed by the owner (2026-10-31)
 - **Requires:** none
 - **Source:** owner's question, 2026-10-30: can the CLI output images and video with or without the UI panels?
 
@@ -17,8 +17,8 @@ get them too (everything is a command):
 - **Hide the floor.** `--no-floor`. The floor pipeline is drawn at
   `crates/ac-render/src/renderer.rs:420`.
 - **Background.** `--background <colour>`, or `transparent`. Transparent is PNG only: the H.264 MP4
-  has no alpha, so asking for it there refuses and says so, as does GIF unless its one-bit alpha
-  looks acceptable (decide when building, and show the owner).
+  has no alpha, so asking for it there refuses and says so, and GIF refuses the same way (the
+  owner's decision, 2026-10-31).
 - **Your own camera.** `--camera <azimuth,elevation,distance[,target]>` alongside the named views
   (`VIEWS`, `crates/ac-media/src/shots.rs:14`). The units are radians and metres. Values are
   input-derived, so they get finite checks and caps.
@@ -26,13 +26,13 @@ get them too (everything is a command):
 Defaults stay as they are, so existing renders don't change.
 
 ## Acceptance
-Proposed; needs the owner's agreement before building:
+Agreed by the owner 2026-10-31:
 
 - `ac render --script walk.json --frame 8 --background transparent --no-floor --out a.png` writes a
   PNG with the body opaque and every other pixel at alpha 0 (checked in a test).
 - `ac video --script walk.json --no-floor --background #00ff00 --out a.mp4` writes a video of the
   body on flat green, with no grid.
-- `--background transparent` with an `.mp4` refuses, and the message says PNG is the format to use.
+- `--background transparent` with an `.mp4` or a `.gif` refuses, and the message says PNG is the format to use.
 - `--camera` with the values a named view uses gives the same picture as that view (pixel
   tolerance), and non-finite or out-of-range values refuse with a reason.
 - `clip.video`, `render_preview` and `animation_preview` accept the same options, documented in

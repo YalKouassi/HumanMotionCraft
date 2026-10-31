@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "ac-ai"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "serde_json",
@@ -12,7 +12,7 @@ dependencies = [
 
 [[package]]
 name = "ac-app"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-ai",
  "ac-community",
@@ -41,7 +41,7 @@ dependencies = [
 
 [[package]]
 name = "ac-cli"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-ai",
  "ac-community",
@@ -60,7 +60,7 @@ dependencies = [
 
 [[package]]
 name = "ac-community"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "ac-io",
@@ -74,7 +74,7 @@ dependencies = [
 
 [[package]]
 name = "ac-core"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -84,7 +84,7 @@ dependencies = [
 
 [[package]]
 name = "ac-helper"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "serde",
@@ -94,7 +94,7 @@ dependencies = [
 
 [[package]]
 name = "ac-io"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "craft-atomic",
@@ -109,7 +109,7 @@ dependencies = [
 
 [[package]]
 name = "ac-media"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "ac-render",
@@ -119,7 +119,7 @@ dependencies = [
 
 [[package]]
 name = "ac-posefill"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "ac-helper",
@@ -129,7 +129,7 @@ dependencies = [
 
 [[package]]
 name = "ac-render"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "bytemuck",
  "glam",
@@ -141,7 +141,7 @@ dependencies = [
 
 [[package]]
 name = "ac-review"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "ac-render",
@@ -156,7 +156,7 @@ dependencies = [
 
 [[package]]
 name = "ac-textmotion"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "ac-helper",
@@ -5000,7 +5000,7 @@ checksum = "e450f9b2ed1dff33c94c12589a87338689467b9c4f5d8a5710bd09a847d2c8a7"
 
 [[package]]
 name = "xtask"
-version = "0.1.1"
+version = "0.2.0"
 dependencies = [
  "ac-core",
  "serde_json",

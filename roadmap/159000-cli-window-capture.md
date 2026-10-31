@@ -1,7 +1,7 @@
 # Command line: video and clean pictures of the app window
 
-- **Status:** not started (acceptance proposed, waiting for the owner to agree)
-- **Requires:** none
+- **Status:** not started; acceptance agreed by the owner (2026-10-31); built after 160000, which is smaller (the owner's order)
+- **Requires:** 160000
 - **Source:** owner's question, 2026-10-30: can the CLI output images and video with or without the UI panels?
 
 ## What
@@ -38,7 +38,7 @@ lists them).
 `ac video` already cover machines with no display.
 
 ## Acceptance
-Proposed; needs the owner's agreement before building:
+Agreed by the owner 2026-10-31:
 
 - `humanmotioncraft --open Locomotion/Walk --record walk.mp4` writes an MP4 of the whole window with
   one frame per clip frame (33 for Walk at the clip's fps, checked with `ffprobe`), then closes and
