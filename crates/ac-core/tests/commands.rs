@@ -157,3 +157,20 @@ fn bone_world_reports_rest_heads() {
         .collect();
     common::assert_close("rest", "wrist.L", &pos, &sk.heads[i], 1e-12);
 }
+
+#[test]
+fn a_preset_alias_is_refused_listing_the_three() {
+    let mut s = session();
+    for name in ["preserve", "natural", "follow_style"] {
+        s.run("ai.settings", &json!({ "preset": name })).unwrap();
+    }
+    for alias in ["preservemotion", "natural movement", "style", "Follow-Style"] {
+        let e = s
+            .run("ai.settings", &json!({ "preset": alias }))
+            .unwrap_err()
+            .to_string();
+        for name in ["preserve", "natural", "follow_style"] {
+            assert!(e.contains(name), "{alias}: {e}");
+        }
+    }
+}

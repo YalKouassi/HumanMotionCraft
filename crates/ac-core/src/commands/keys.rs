@@ -647,20 +647,20 @@ fn ai_discard(doc: &mut Document, _: &P) -> Out {
 fn ai_settings(doc: &mut Document, p: &P) -> Out {
     let mut s = doc.ai_settings.clone();
     if let Some(preset) = cmd::text(p, "preset") {
-        match preset.to_ascii_lowercase().replace([' ', '_', '-'], "").as_str() {
-            "preserve" | "preservemotion" | "preservemymotion" => {
+        match preset {
+            "preserve" => {
                 s.ai_force = 0.5;
                 s.style_force = 0.0;
                 s.trajectory = 0.8;
                 s.head = 0.8;
             }
-            "natural" | "naturalmotion" | "naturalmovement" => {
+            "natural" => {
                 s.ai_force = 1.0;
                 s.style_force = 1.0;
                 s.trajectory = 0.0;
                 s.head = 0.0;
             }
-            "followstyle" | "style" => {
+            "follow_style" => {
                 s.ai_force = 1.0;
                 s.style_force = 1.5;
                 s.trajectory = 0.2;

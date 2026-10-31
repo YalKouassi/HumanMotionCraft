@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "ai-settings-presets",
   "feature": "ai.settings",
-  "description": "Presets set the AI fill sliders together: 'preserve' sets ai_force 0.5, style_force 0.0, trajectory 0.8, head 0.8; 'natural' sets ai_force 1.0, style_force 1.0, trajectory 0.0, head 0.0; 'follow_style' sets ai_force 1.0, style_force 1.5, trajectory 0.2, head 0.0. An individual slider passed with a preset overrides that preset value. A preset sets those four sliders only: the style stays as it was (\"any\" here), and nothing else about the fill changes.",
+  "description": "Presets set the AI fill sliders together: 'preserve' sets ai_force 0.5, style_force 0.0, trajectory 0.8, head 0.8; 'natural' sets ai_force 1.0, style_force 1.0, trajectory 0.0, head 0.0; 'follow_style' sets ai_force 1.0, style_force 1.5, trajectory 0.2, head 0.0. An individual slider passed with a preset overrides that preset value. A preset sets those four sliders only: the style stays as it was (\"any\" here), and nothing else about the fill changes. Only those three exact names are presets: an old alias or another spelling is refused (crates/ac-core/tests/commands.rs checks the refusal lists the three).",
   "script": [
     {
       "command": "ai.settings",
@@ -49,6 +49,10 @@
   ],
   "expect": { "tolerance": 1e-6 },
   "errors": [
-    { "command": "ai.settings", "params": { "preset": "no_such_preset" } }
+    { "command": "ai.settings", "params": { "preset": "no_such_preset" } },
+    { "command": "ai.settings", "params": { "preset": "preservemotion" } },
+    { "command": "ai.settings", "params": { "preset": "natural movement" } },
+    { "command": "ai.settings", "params": { "preset": "style" } },
+    { "command": "ai.settings", "params": { "preset": "Follow-Style" } }
   ]
 }
