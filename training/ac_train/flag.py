@@ -82,10 +82,25 @@ def why(t: dict, median: float, gap: int) -> str:
             f"worst {t['worst']:.3f} at frame {t['worst_at']}{top}")
 
 
+def usable(takes: list[dict]) -> tuple[list[dict], list[str]]:
+    """The takes whose losses are finite, and the ids of the rest: a NaN or infinite loss can't be
+    ranked and would write a file no JSON reader (the review app) accepts, so those takes are left
+    out and named instead (they are worth a look themselves)."""
+    good, bad = [], []
+    for t in takes:
+        if math.isfinite(float(t["loss"])) and math.isfinite(float(t["worst"])):
+            good.append(t)
+        else:
+            bad.append(str(t["id"]))
+    return good, bad
+
+
 def record(model: dict, sets: dict, takes: list[dict], gap: int, stride: int, share: float, by: str,
            elapsed_s: float) -> dict:
     """The flags file's content: the worst takes of ``takes`` (every evaluated take's numbers),
-    with the run's settings and each set's digest."""
+    with the run's settings and each set's digest. Takes with a non-finite loss are left out and
+    listed under ``unusable``."""
+    takes, bad = usable(takes)
     losses_ = sorted(float(t["loss"]) for t in takes)
     median = losses_[len(losses_) // 2] if losses_ else 0.0
     flagged = []
@@ -94,7 +109,7 @@ def record(model: dict, sets: dict, takes: list[dict], gap: int, stride: int, sh
     return {
         "format": FORMAT, "version": VERSION, "model": model, "gap": gap, "stride": stride, "share": share, "by": by,
         "sets": sets, "takes": len(takes), "windows": int(sum(int(t["windows"]) for t in takes)),
-        "median_loss": round(median, 6), "elapsed_s": round(elapsed_s, 1), "flagged": flagged,
+        "median_loss": round(median, 6), "elapsed_s": round(elapsed_s, 1), "flagged": flagged, "unusable": bad,
     }
 
 
@@ -247,6 +262,9 @@ def main(argv=None):
     write(pathlib.Path(args.out), rec)
     print(f"{len(rec['flagged'])} of {rec['takes']} takes flagged (median loss {rec['median_loss']:.3f}) into {args.out}, "
           f"{rec['elapsed_s']:.0f} s; nothing decided (review them: ac-review, or review.list {{\"show\": \"model\"}})")
+    if rec["unusable"]:
+        print(f"{len(rec['unusable'])} take(s) got a loss that is not a number (NaN or infinite) from the model and are "
+              f"left out of the ranking; look at them first: {', '.join(rec['unusable'][:20])}")
     for t in rec["flagged"][:20]:
         print(f"  {t['rank']:3} {t['id']:48} {t['why']}")
 

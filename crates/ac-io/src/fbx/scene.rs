@@ -23,6 +23,9 @@ pub const MAX_FRAMES: usize = ac_core::retarget::MAX_FRAMES;
 pub const MAX_MODELS: usize = 100_000;
 /// Most keys one curve may hold.
 pub const MAX_KEYS: usize = 10_000_000;
+/// Most joint positions one import samples (frames times models): the sampled scene is kept in
+/// memory, so a long take of a scene with many nodes is refused rather than swapped to death.
+pub const MAX_SAMPLES: usize = 20_000_000;
 /// Frame rates by the `TimeMode` enum; a rate of 0 means the mode does not fix one.
 const TIME_MODES: [f64; 19] = [
     0.0, 120.0, 100.0, 60.0, 50.0, 48.0, 30.0, 30.0, 29.97, 29.97, 25.0, 24.0, 1000.0, 23.976, 0.0, 96.0,
@@ -248,7 +251,8 @@ impl Curve {
         ) else {
             return Some(vn);
         };
-        let span = (tb - ta) as f64;
+        // key times are the file's: the difference is taken in f64 so no pair can overflow
+        let span = tb as f64 - ta as f64;
         if span <= 0.0 {
             return Some(va);
         }
@@ -413,6 +417,12 @@ pub fn motion(doc: &Document) -> R<Motion> {
         }
         if models.len() >= MAX_MODELS {
             return Err(format!("more than {MAX_MODELS} models"));
+        }
+        if let Some(&other) = by_id.get(&id) {
+            let first = models.get(other).map_or("", |m| m.name.as_str());
+            return Err(format!(
+                "two models share the id {id} ({first:?} and {name:?}): the file is corrupt"
+            ));
         }
         by_id.insert(id, models.len());
         models.push(Model {
@@ -656,14 +666,24 @@ pub fn motion(doc: &Document) -> R<Motion> {
                 (lo, hi)
             }
         };
-    let span = ((stop - start) as f64 / ticks).round();
+    // the range is the file's: taken in f64 so a start and stop at the ends of i64 can't overflow,
+    // and checked against the cap before it becomes a count
+    let span = ((stop as f64 - start as f64) / ticks).round();
     if !span.is_finite() || span < 0.0 {
         return Err("the take's time range is not usable".into());
     }
-    let frames = span as usize + 1;
-    if frames > MAX_FRAMES {
+    if span >= MAX_FRAMES as f64 {
         return Err(format!(
-            "{frames} frames at {fps} fps is more than {MAX_FRAMES}: cut the take into shorter ones"
+            "{:.0} frames at {fps} fps is more than {MAX_FRAMES}: cut the take into shorter ones",
+            span + 1.0
+        ));
+    }
+    let frames = span as usize + 1;
+    let samples = frames.saturating_mul(models.len());
+    if samples > MAX_SAMPLES {
+        return Err(format!(
+            "{frames} frames of {} models is {samples} joint positions, more than {MAX_SAMPLES}: cut the take into shorter ones, or strip the scene's extra models",
+            models.len()
         ));
     }
     let off_grid = models
@@ -671,9 +691,10 @@ pub fn motion(doc: &Document) -> R<Motion> {
         .flat_map(|m| [&m.translation, &m.rotation, &m.scaling])
         .flat_map(|ch| ch.curves.iter().flatten())
         .filter(|c| {
-            c.times
-                .iter()
-                .any(|&t| (((t - start) as f64 / ticks) - ((t - start) as f64 / ticks).round()).abs() > 1e-3)
+            c.times.iter().any(|&t| {
+                let at = (t as f64 - start as f64) / ticks;
+                (at - at.round()).abs() > 1e-3
+            })
         })
         .count();
     if off_grid > 0 {
@@ -783,7 +804,7 @@ fn key_rate(models: &[Model]) -> R<f64> {
     let gaps: Vec<f64> = longest
         .times
         .windows(2)
-        .map(|w| (w[1] - w[0]) as f64)
+        .map(|w| w[1] as f64 - w[0] as f64)
         .filter(|g| *g > 0.0)
         .collect();
     let gap = ac_core::retarget::median(&gaps);
@@ -846,5 +867,176 @@ mod tests {
         let (m, up, front) = axis_matrix(&s).unwrap();
         assert_eq!((up.as_str(), front.as_str()), ("+Z", "-Y"));
         assert_eq!(quat::mat3_vec(&m, [1.0, 2.0, 3.0]), [1.0, 2.0, 3.0]);
+    }
+
+    fn node(name: &str, props: Vec<Prop>, children: Vec<Node>) -> Node {
+        Node {
+            name: name.into(),
+            props,
+            children,
+        }
+    }
+
+    /// A `Properties70` entry: name, type, label, flags, then the value.
+    fn p(name: &str, value: Prop) -> Node {
+        node(
+            "P",
+            vec![
+                Prop::Str(name.into()),
+                Prop::Str(String::new()),
+                Prop::Str(String::new()),
+                Prop::Str(String::new()),
+                value,
+            ],
+            vec![],
+        )
+    }
+
+    fn p70(entries: Vec<Node>) -> Node {
+        node("Properties70", vec![], entries)
+    }
+
+    fn c(kind: &str, child: i64, parent: i64, prop: Option<&str>) -> Node {
+        let mut props = vec![Prop::Str(kind.into()), Prop::I64(child), Prop::I64(parent)];
+        if let Some(pr) = prop {
+            props.push(Prop::Str(pr.into()));
+        }
+        node("C", props, vec![])
+    }
+
+    fn object(name: &str, id: i64, label: &str, class: &str, children: Vec<Node>) -> Node {
+        node(
+            name,
+            vec![
+                Prop::I64(id),
+                Prop::Str(format!("{label}\u{0}\u{1}{name}")),
+                Prop::Str(class.into()),
+            ],
+            children,
+        )
+    }
+
+    /// A Y-up scene at 30 fps of `models` joints (ids 1000..), the first driven by one translation
+    /// curve of two keys, and a take whose range is `start..stop` ticks.
+    fn scene(models: usize, start: i64, stop: i64) -> Document {
+        let settings = node(
+            "GlobalSettings",
+            vec![],
+            vec![p70(vec![
+                p("UpAxis", Prop::I32(1)),
+                p("FrontAxis", Prop::I32(2)),
+                p("CoordAxis", Prop::I32(0)),
+                p("UnitScaleFactor", Prop::F64(1.0)),
+                p("TimeMode", Prop::I32(6)),
+            ])],
+        );
+        let mut objects = Vec::new();
+        for i in 0..models {
+            objects.push(object(
+                "Model",
+                1000 + i as i64,
+                &format!("J{i}"),
+                "LimbNode",
+                vec![],
+            ));
+        }
+        objects.push(object(
+            "AnimationStack",
+            1,
+            "Take",
+            "",
+            vec![p70(vec![
+                p("LocalStart", Prop::I64(start)),
+                p("LocalStop", Prop::I64(stop)),
+            ])],
+        ));
+        objects.push(object("AnimationLayer", 2, "Base", "", vec![]));
+        objects.push(object("AnimationCurveNode", 3, "T", "", vec![]));
+        objects.push(object(
+            "AnimationCurve",
+            4,
+            "",
+            "",
+            vec![
+                node(
+                    "KeyTime",
+                    vec![Prop::I64s(vec![0, TICKS_PER_SECOND as i64])],
+                    vec![],
+                ),
+                node("KeyValueFloat", vec![Prop::F32s(vec![0.0, 1.0])], vec![]),
+            ],
+        ));
+        let connections = node(
+            "Connections",
+            vec![],
+            vec![
+                c("OO", 2, 1, None),
+                c("OO", 3, 2, None),
+                c("OP", 3, 1000, Some("Lcl Translation")),
+                c("OP", 4, 3, Some("d|X")),
+            ],
+        );
+        Document {
+            version: 7400,
+            nodes: vec![settings, node("Objects", vec![], objects), connections],
+        }
+    }
+
+    #[test]
+    fn a_small_scene_samples_its_range() {
+        let ticks = (TICKS_PER_SECOND / 30.0) as i64;
+        let m = motion(&scene(2, 0, 10 * ticks)).unwrap();
+        assert_eq!((m.frames, m.fps, m.fps_from.as_str()), (11, 30.0, "TimeMode"));
+        assert_eq!(m.names, ["J0", "J1"]);
+        // the curve moves J0 one unit along the file's X over the first second (cm -> m)
+        assert!(
+            (m.positions[10][0][0] - 0.01 / 3.0).abs() < 1e-9,
+            "{:?}",
+            m.positions[10][0]
+        );
+    }
+
+    #[test]
+    fn a_take_range_at_the_ends_of_i64_is_refused_not_overflowed() {
+        // stop - start would overflow i64; the range is refused as too long, with no panic
+        let e = motion(&scene(1, -1, i64::MAX)).unwrap_err();
+        assert!(e.contains("more than"), "{e}");
+        let e = motion(&scene(1, i64::MIN, i64::MAX)).unwrap_err();
+        assert!(e.contains("more than"), "{e}");
+        // keys at the ends of i64 on a curve: the spacing is read in f64
+        let mut d = scene(1, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        let curve = d.nodes[1]
+            .children
+            .iter_mut()
+            .find(|n| n.name == "AnimationCurve")
+            .unwrap();
+        curve.children[0].props[0] = Prop::I64s(vec![i64::MIN, i64::MAX]);
+        let m = motion(&d).unwrap();
+        assert_eq!(m.frames, 11);
+    }
+
+    #[test]
+    fn too_many_joint_positions_are_refused() {
+        let ticks = (TICKS_PER_SECOND / 30.0) as i64;
+        // 1001 models over 20,000 frames is more than MAX_SAMPLES; the frame count alone is fine
+        let e = motion(&scene(1001, 0, (MAX_FRAMES as i64 - 1) * ticks)).unwrap_err();
+        assert!(e.contains("joint positions") && e.contains("more than"), "{e}");
+        assert_eq!(
+            motion(&scene(1, 0, (MAX_FRAMES as i64 - 1) * ticks))
+                .unwrap()
+                .frames,
+            MAX_FRAMES
+        );
+    }
+
+    #[test]
+    fn two_models_with_one_id_are_refused() {
+        let mut d = scene(2, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        d.nodes[1].children[1].props[0] = Prop::I64(1000);
+        let e = motion(&d).unwrap_err();
+        assert!(
+            e.contains("share the id 1000") && e.contains("J0") && e.contains("J1"),
+            "{e}"
+        );
     }
 }

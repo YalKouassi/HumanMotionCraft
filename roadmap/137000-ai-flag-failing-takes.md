@@ -96,3 +96,22 @@ their means) first. Nothing was decided: `training/review/decisions.json` is unc
 Proof shot: `target/shots/2026-10-30/137000/review-flip.png` (the window opened on
 `cmu/flip_cmu_88_09` at frame 71: the queue row's `loss 1.028 #1`, the "The model" section, the
 link to the worst window).
+
+## Review (2026-10-31)
+Reviewed `training/ac_train/flag.py`, `crates/ac-review/src/flags.rs`, the review commands
+(`crates/ac-review/src/review.rs`) and `training/tests/test_flag.py` (commit c1beb99).
+- **Acceptance holds:** `flag.py` reads `decisions.json` through `review.load_decisions` (read only,
+  `training/ac_train/review.py:79`) and writes only `--out`; the test asserts `flags.json` is the only file
+  written. `ac-review` filters by the flags (`Show::Model`, `review.rs:55`; rows carry `model`), refuses
+  `show: "model"` with the command that makes the file, and `flags.rs` reads nothing else. The CRC-32
+  digest hashes the same text in both languages.
+- **Fixed (medium, Rule 1):** a take whose loss came back NaN or infinite sorted anywhere in `rank` and
+  `json.dumps` wrote `NaN`, which `serde_json` refuses, so one bad window would have made the review app
+  report "not a flags file" and show no flags at all. Such takes are left out, listed under `unusable` in
+  the file and printed first (they are worth a look themselves). Test
+  `test_a_take_with_a_loss_that_is_not_a_number_is_left_out_and_named` (not run here: `test_flag.py`
+  skips without torch; the function has no torch in it).
+- **Not fixed, noted (low):** `flags.rs::load` reads the whole file before checking `MAX_FLAGS`, with no
+  size cap (a dev-only reader of a file the pipeline writes); two flags with one id keep the last silently;
+  flags of a set not loaded stay, as the doc comment says.
+- The Result's claims hold; the run's numbers are the owner's to read.

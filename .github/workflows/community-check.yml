@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
+  # the upload function sends this when CHECKER_DISPATCH_TOKEN is set on the server; without it
+  # the schedule alone runs the checks
+  repository_dispatch:
+    types: [community-check]
+
+# the checker reads the repo and talks to the community server with its own secret; the GitHub
+# token needs nothing more
+permissions:
+  contents: read
 
 concurrency:
   group: community-check
@@ -19,24 +28,37 @@ jobs:
   check:
     name: check community uploads
     runs-on: windows-latest
-    timeout-minutes: 15
+    # a cold build of ac on Windows takes well over 15 minutes; with the cache a run is minutes
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          cache-on-failure: true
-
-      - name: build ac
-        run: cargo build --release -p ac-cli
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
+      # ask first: a run with nothing pending ends here, before any toolchain or build
+      - name: anything pending?
+        id: pending
+        env:
+          CHECKER_SECRET: ${{ secrets.CHECKER_SECRET }}
+        run: python tools/community_check.py --pending
+
+      - uses: dtolnay/rust-toolchain@stable
+        if: steps.pending.outputs.count != '0'
+
+      - uses: Swatinem/rust-cache@v2
+        if: steps.pending.outputs.count != '0'
+        with:
+          cache-on-failure: true
+
+      - name: build ac
+        if: steps.pending.outputs.count != '0'
+        run: cargo build --release -p ac-cli
+
       - name: check pending clips
+        if: steps.pending.outputs.count != '0'
+        timeout-minutes: 20
         env:
           CHECKER_SECRET: ${{ secrets.CHECKER_SECRET }}
         run: python tools/community_check.py
