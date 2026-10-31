@@ -37,6 +37,8 @@ pub const KIND: &str = "retarget";
 pub const VERSION: u64 = 1;
 /// The file name ending the app's dialogs use.
 pub const EXT: &str = ".retarget.json";
+/// Largest mapping file read (a mapping is a few hundred bytes).
+pub const MAX_MAPPING_BYTES: u64 = 1 << 20;
 
 /// The mapping as a file's text.
 pub fn save_text(loaded: &Loaded) -> R<String> {
@@ -159,6 +161,15 @@ pub struct Target {
 /// with `joints` corrections and the hands switch on top.
 pub fn load(path: &Path, joints: &BTreeMap<String, String>, hands: Option<bool>) -> R<Target> {
     let (character_path, stored, mapping) = if is_mapping_file(path) {
+        let size = std::fs::metadata(path)
+            .map_err(|e| format!("can't read {}: {e}", path.display()))?
+            .len();
+        if size > MAX_MAPPING_BYTES {
+            return Err(format!(
+                "{} is {size} bytes, larger than a mapping file ({MAX_MAPPING_BYTES})",
+                path.display()
+            ));
+        }
         let text =
             std::fs::read_to_string(path).map_err(|e| format!("can't read {}: {e}", path.display()))?;
         let (stored, m) = load_text(&text).map_err(|e| format!("{}: {e}", path.display()))?;
