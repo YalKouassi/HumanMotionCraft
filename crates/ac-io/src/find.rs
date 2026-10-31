@@ -8,7 +8,7 @@
 //! `Library::move_item`), and an item deleted keeps its star in the file, so an undo brings both
 //! back.
 
-use std::cmp::Ordering;
+use std::cmp::{Ordering, Reverse};
 use std::path::Path;
 
 use ac_core::Document;
@@ -16,7 +16,7 @@ use ac_core::command::{self as cmd, CommandSpec, Kind as K, ParamSpec};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value, json};
 
-use crate::library::{Kind, Library, natural_cmp};
+use crate::library::{Kind, Library, natural_key};
 
 type P = Map<String, Value>;
 type Out = Result<Value, String>;
@@ -191,22 +191,18 @@ pub fn matches(it: &Value, q: &Query) -> bool {
 /// The items the query finds, in its order (name: as listed, by group then name).
 pub fn find(items: &[Value], q: &Query) -> Vec<Value> {
     let mut out: Vec<Value> = items.iter().filter(|it| matches(it, q)).cloned().collect();
-    let by_name = |a: &Value, b: &Value| {
-        natural_cmp(text(a, "group"), text(b, "group"))
-            .then_with(|| natural_cmp(text(a, "name"), text(b, "name")))
-    };
+    // by name first; the other orders are stable, so a tie stays by name
+    out.sort_by_cached_key(|it| (natural_key(text(it, "group")), natural_key(text(it, "name"))));
     match q.sort {
-        Sort::Name => out.sort_by(by_name),
+        Sort::Name => {}
         Sort::Length => out.sort_by(|a, b| {
             seconds(a)
                 .partial_cmp(&seconds(b))
                 .unwrap_or(Ordering::Equal)
-                .then_with(|| by_name(a, b))
         }),
-        Sort::Modified => out.sort_by(|a, b| {
-            let m = |v: &Value| v.get("modified").and_then(Value::as_u64).unwrap_or(0);
-            m(b).cmp(&m(a)).then_with(|| by_name(a, b))
-        }),
+        Sort::Modified => {
+            out.sort_by_key(|v| Reverse(v.get("modified").and_then(Value::as_u64).unwrap_or(0)));
+        }
     }
     out
 }

@@ -7,10 +7,16 @@
 //!
 //! The folder is the group: a group exists while a folder does, and moving an item to another
 //! group moves its file. An item's id is `<group>/<name>`.
+//!
+//! A library of thousands of clips is listed from `<root>/.index/<kind>.json` ([`Library::listed`]):
+//! what each file said, kept against its size and time, so only a new or changed file is read.
+//! Deleting that folder only makes the next listing read every file again.
 
 use std::cmp::Ordering;
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 type R<T> = Result<T, String>;
@@ -65,6 +71,75 @@ impl Kind {
 /// Most items listed from one library (a folder with more is listed up to this).
 pub const MAX_ITEMS: usize = 100_000;
 const SAFE: &str = "-_ ()&,.";
+/// The index's folder in a library, and the version of its files (another version is read again).
+pub const INDEX_FOLDER: &str = ".index";
+const INDEX_VERSION: u32 = 1;
+/// Fewest unread files worth starting threads for, and most threads reading them.
+const THREADED_FROM: usize = 32;
+const MAX_READERS: usize = 8;
+
+/// One file found in a library, and its size and time when they could be read.
+struct Found {
+    group: String,
+    name: String,
+    path: PathBuf,
+    stamp: Option<Stamp>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Debug)]
+struct Stamp {
+    len: u64,
+    secs: u64,
+    nanos: u32,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
+struct Indexed {
+    stamp: Stamp,
+    meta: Value,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug, Default)]
+struct Index {
+    version: u32,
+    items: BTreeMap<String, Indexed>,
+}
+
+fn stamp_of(m: &std::fs::Metadata) -> Option<Stamp> {
+    let t = m.modified().ok()?.duration_since(std::time::UNIX_EPOCH).ok()?;
+    Some(Stamp {
+        len: m.len(),
+        secs: t.as_secs(),
+        nanos: t.subsec_nanos(),
+    })
+}
+
+/// Clips directly in `dir` or one visible folder down, when it has no `animations` folder: they
+/// would not be listed, as a library's clips are `<dir>/animations/<group>/<name>.clip.json`.
+pub fn clips_outside_layout(dir: &Path) -> usize {
+    if dir.join(Kind::Animations.folder()).is_dir() {
+        return 0;
+    }
+    let is_clip = |e: &std::fs::DirEntry| {
+        e.file_name()
+            .to_string_lossy()
+            .ends_with(Kind::Animations.ext())
+    };
+    let mut n = 0;
+    for e in std::fs::read_dir(dir).into_iter().flatten().flatten() {
+        if is_clip(&e) {
+            n += 1;
+        } else if e.path().is_dir() && !e.file_name().to_string_lossy().starts_with('.') {
+            n += std::fs::read_dir(e.path())
+                .into_iter()
+                .flatten()
+                .flatten()
+                .filter(|f| is_clip(f))
+                .count();
+        }
+    }
+    n
+}
 
 /// A name made safe for a file name: letters, digits and `-_ ()&,.`; never empty.
 pub fn safe(name: &str) -> R<String> {
@@ -82,23 +157,11 @@ pub fn safe(name: &str) -> R<String> {
 
 /// Case-blind, numbers by value ("Walk" < "Walk 2" < "Walk 10").
 pub fn natural_cmp(a: &str, b: &str) -> Ordering {
-    fn parts(s: &str) -> Vec<(u8, u128, String)> {
-        let mut out = Vec::new();
-        let mut cur = String::new();
-        let mut digits = false;
-        for c in s.to_lowercase().chars() {
-            if c.is_ascii_digit() != digits && !cur.is_empty() {
-                out.push(part(&cur, digits));
-                cur.clear();
-            }
-            digits = c.is_ascii_digit();
-            cur.push(c);
-        }
-        if !cur.is_empty() {
-            out.push(part(&cur, digits));
-        }
-        out
-    }
+    natural_key(a).cmp(&natural_key(b))
+}
+
+/// What [`natural_cmp`] compares, to work out once per item when sorting thousands.
+pub fn natural_key(s: &str) -> Vec<(u8, u128, String)> {
     fn part(s: &str, digits: bool) -> (u8, u128, String) {
         if digits {
             (0, s.parse().unwrap_or(u128::MAX), String::new())
@@ -106,7 +169,21 @@ pub fn natural_cmp(a: &str, b: &str) -> Ordering {
             (1, 0, s.to_string())
         }
     }
-    parts(a).cmp(&parts(b))
+    let mut out = Vec::new();
+    let mut cur = String::new();
+    let mut digits = false;
+    for c in s.to_lowercase().chars() {
+        if c.is_ascii_digit() != digits && !cur.is_empty() {
+            out.push(part(&cur, digits));
+            cur.clear();
+        }
+        digits = c.is_ascii_digit();
+        cur.push(c);
+    }
+    if !cur.is_empty() {
+        out.push(part(&cur, digits));
+    }
+    out
 }
 
 #[derive(Debug, Clone)]
@@ -147,15 +224,12 @@ impl Library {
         self.path(id).is_ok_and(|p| p.is_file())
     }
 
-    /// Every item: `{id, name, group, origin, modified}` (+ `frames`, `fps`, `seconds` and `loop`
-    /// for animations, `only` for part poses; `modified`: the file's time, Unix seconds), sorted
-    /// by group then name. Unreadable files are listed with an `error`, never skipped.
-    pub fn items(&self) -> Vec<Value> {
-        let mut out = Vec::new();
+    /// Every file of this kind, sorted by group then name.
+    fn found(&self) -> Vec<Found> {
+        let mut files = Vec::new();
         let Ok(groups) = std::fs::read_dir(&self.root) else {
-            return out;
+            return files;
         };
-        let mut files: Vec<(String, String, PathBuf)> = Vec::new();
         for g in groups.flatten() {
             let gp = g.path();
             if !gp.is_dir() {
@@ -165,57 +239,199 @@ impl Library {
             for f in std::fs::read_dir(&gp).into_iter().flatten().flatten() {
                 let fname = f.file_name().to_string_lossy().to_string();
                 if let Some(name) = fname.strip_suffix(self.kind.ext()) {
-                    files.push((group.clone(), name.to_string(), f.path()));
+                    // the folder's own record of the file is far cheaper than opening it; a link
+                    // is followed
+                    let path = f.path();
+                    let stamp = f
+                        .metadata()
+                        .ok()
+                        .filter(|m| !m.file_type().is_symlink())
+                        .or_else(|| std::fs::metadata(&path).ok())
+                        .and_then(|m| stamp_of(&m));
+                    files.push(Found {
+                        group: group.clone(),
+                        name: name.to_string(),
+                        path,
+                        stamp,
+                    });
                 }
                 if files.len() >= MAX_ITEMS {
                     break;
                 }
             }
         }
-        files.sort_by(|a, b| natural_cmp(&a.0, &b.0).then_with(|| natural_cmp(&a.1, &b.1)));
-        for (group, name, path) in files {
-            let mut meta = json!({ "id": format!("{group}/{name}"), "name": name, "group": group });
-            if let Some(t) = std::fs::metadata(&path)
-                .and_then(|m| m.modified())
-                .ok()
-                .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
-            {
-                meta["modified"] = json!(t.as_secs());
-            }
-            match std::fs::read_to_string(&path)
-                .map_err(|e| e.to_string())
-                .and_then(|t| serde_json::from_str::<Value>(&t).map_err(|e| e.to_string()))
-            {
-                Ok(d) => {
-                    meta["origin"] = d.get("origin").cloned().unwrap_or(json!(""));
-                    if d.get("evaluation_only").and_then(Value::as_bool) == Some(true) {
-                        meta["evaluation_only"] = json!(true);
-                    }
-                    if self.kind == Kind::Animations {
-                        let last = d
-                            .get("keys")
-                            .and_then(Value::as_array)
-                            .into_iter()
-                            .flatten()
-                            .filter_map(|k| k.get("frame").and_then(Value::as_i64))
-                            .max()
-                            .unwrap_or(-1);
-                        meta["frames"] = json!(last + 1);
-                        let fps = d.get("fps").and_then(Value::as_f64).filter(|f| *f >= 1.0);
-                        if let Some(fps) = fps {
-                            meta["fps"] = json!(fps);
-                            meta["seconds"] = json!((last + 1).max(0) as f64 / fps);
-                        }
-                        meta["loop"] = json!(d.get("loop").and_then(Value::as_bool).unwrap_or(false));
-                    } else if let Some(only) = d.get("only") {
-                        meta["only"] = only.clone();
-                    }
+        files.sort_by_cached_key(|f| (natural_key(&f.group), natural_key(&f.name)));
+        files
+    }
+
+    /// Every id of this kind, without opening a file.
+    pub fn ids(&self) -> Vec<String> {
+        self.found()
+            .iter()
+            .map(|f| format!("{}/{}", f.group, f.name))
+            .collect()
+    }
+
+    /// One file's item, read from the file.
+    fn describe(&self, f: &Found) -> Value {
+        let mut meta = json!({ "id": format!("{}/{}", f.group, f.name), "name": f.name, "group": f.group });
+        if let Some(s) = f.stamp {
+            meta["modified"] = json!(s.secs);
+        }
+        match std::fs::read_to_string(&f.path)
+            .map_err(|e| e.to_string())
+            .and_then(|t| serde_json::from_str::<Value>(&t).map_err(|e| e.to_string()))
+        {
+            Ok(d) => {
+                meta["origin"] = d.get("origin").cloned().unwrap_or(json!(""));
+                if d.get("evaluation_only").and_then(Value::as_bool) == Some(true) {
+                    meta["evaluation_only"] = json!(true);
                 }
-                Err(e) => meta["error"] = json!(format!("can't read: {e}")),
+                if self.kind == Kind::Animations {
+                    let last = d
+                        .get("keys")
+                        .and_then(Value::as_array)
+                        .into_iter()
+                        .flatten()
+                        .filter_map(|k| k.get("frame").and_then(Value::as_i64))
+                        .max()
+                        .unwrap_or(-1);
+                    meta["frames"] = json!(last + 1);
+                    let fps = d.get("fps").and_then(Value::as_f64).filter(|f| *f >= 1.0);
+                    if let Some(fps) = fps {
+                        meta["fps"] = json!(fps);
+                        meta["seconds"] = json!((last + 1).max(0) as f64 / fps);
+                    }
+                    meta["loop"] = json!(d.get("loop").and_then(Value::as_bool).unwrap_or(false));
+                } else if let Some(only) = d.get("only") {
+                    meta["only"] = only.clone();
+                }
             }
-            out.push(meta);
+            Err(e) => meta["error"] = json!(format!("can't read: {e}")),
+        }
+        meta
+    }
+
+    /// Every item: `{id, name, group, origin, modified}` (+ `frames`, `fps`, `seconds` and `loop`
+    /// for animations, `only` for part poses; `modified`: the file's time, Unix seconds), sorted
+    /// by group then name. Unreadable files are listed with an `error`, never skipped. Reads every
+    /// file and writes nothing; [`Library::listed`] is the same list from the index.
+    pub fn items(&self) -> Vec<Value> {
+        self.found().iter().map(|f| self.describe(f)).collect()
+    }
+
+    /// The items of `todo`, in order, on a few threads when there are many.
+    fn describe_all(&self, todo: &[&Found]) -> Vec<Value> {
+        let threads = std::thread::available_parallelism()
+            .map_or(1, |n| n.get())
+            .min(MAX_READERS);
+        if todo.len() < THREADED_FROM || threads < 2 {
+            return todo.iter().map(|f| self.describe(f)).collect();
+        }
+        let chunks: Vec<&[&Found]> = todo.chunks(todo.len().div_ceil(threads)).collect();
+        std::thread::scope(|s| {
+            let readers: Vec<_> = chunks
+                .iter()
+                .map(|c| s.spawn(move || c.iter().map(|f| self.describe(f)).collect::<Vec<Value>>()))
+                .collect();
+            let mut out = Vec::with_capacity(todo.len());
+            for (reader, chunk) in readers.into_iter().zip(&chunks) {
+                match reader.join() {
+                    Ok(items) => out.extend(items),
+                    // read again here: this says what is wrong with the file, if anything is
+                    Err(_) => out.extend(chunk.iter().map(|f| self.describe(f))),
+                }
+            }
+            out
+        })
+    }
+
+    fn index_path(&self) -> Option<PathBuf> {
+        let file = format!("{}.json", self.kind.folder());
+        Some(self.root.parent()?.join(INDEX_FOLDER).join(file))
+    }
+
+    /// The index as saved; one that can't be read is only read again from the files.
+    fn load_index(&self) -> Index {
+        let Some(text) = self.index_path().and_then(|p| std::fs::read_to_string(p).ok()) else {
+            return Index::default();
+        };
+        match serde_json::from_str::<Index>(&text) {
+            Ok(i) if i.version == INDEX_VERSION => i,
+            Ok(_) => Index::default(),
+            Err(e) => {
+                tracing::warn!("the library index can't be read, its files are read again: {e}");
+                Index::default()
+            }
+        }
+    }
+
+    /// [`Library::items`] for a library in use: a file whose size and time are as the index has
+    /// them isn't opened, and the index is brought up to date. An index that can't be written is
+    /// only slower next time (logged). The files themselves are never changed.
+    pub fn listed(&self) -> Vec<Value> {
+        let files = self.found();
+        let old = self.load_index();
+        let id_of = |f: &Found| format!("{}/{}", f.group, f.name);
+        let known = |f: &Found| {
+            let i = old.items.get(&id_of(f))?;
+            (f.stamp? == i.stamp).then_some(i)
+        };
+        let todo: Vec<&Found> = files.iter().filter(|f| known(f).is_none()).collect();
+        let mut read = self.describe_all(&todo).into_iter();
+        let mut new = Index {
+            version: INDEX_VERSION,
+            items: BTreeMap::new(),
+        };
+        let mut out = Vec::with_capacity(files.len());
+        for f in &files {
+            let item = match known(f) {
+                Some(i) => {
+                    let mut meta = i.meta.clone();
+                    // worked out again: a long fraction may not come back from text to the last bit
+                    if let (Some(n), Some(fps)) = (
+                        meta.get("frames").and_then(Value::as_i64),
+                        meta.get("fps").and_then(Value::as_f64),
+                    ) {
+                        meta["seconds"] = json!(n.max(0) as f64 / fps);
+                    }
+                    meta
+                }
+                None => read.next().unwrap_or(Value::Null),
+            };
+            // an unreadable file is tried again next time
+            if let Some(stamp) = f.stamp
+                && item.get("error").is_none()
+            {
+                new.items.insert(
+                    id_of(f),
+                    Indexed {
+                        stamp,
+                        meta: item.clone(),
+                    },
+                );
+            }
+            out.push(item);
+        }
+        if new != old {
+            self.save_index(&new);
         }
         out
+    }
+
+    fn save_index(&self, index: &Index) {
+        let Some(path) = self.index_path() else { return };
+        let saved = serde_json::to_string(index)
+            .map_err(|e| e.to_string())
+            .and_then(|text| {
+                if let Some(dir) = path.parent() {
+                    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
+                }
+                craft_atomic::atomic_write(&path, text.as_bytes()).map_err(|e| e.to_string())
+            });
+        if let Err(e) = saved {
+            tracing::warn!("the library index wasn't saved at {}: {e}", path.display());
+        }
     }
 
     pub fn groups(&self) -> Vec<String> {
@@ -234,7 +450,7 @@ impl Library {
     pub fn free_id(&self, group: &str, name: &str) -> R<String> {
         let base = safe(name)?;
         let taken: Vec<String> = self
-            .items()
+            .listed()
             .iter()
             .filter_map(|i| i.get("name").and_then(Value::as_str).map(str::to_lowercase))
             .collect();

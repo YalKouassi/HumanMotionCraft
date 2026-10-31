@@ -175,3 +175,137 @@ fn a_folder_imports_with_subfolders_as_groups_and_skips_what_wont_read() {
         std::fs::remove_dir_all(d).unwrap();
     }
 }
+
+/// A folder of its own for a test about files, gone first if a last run left it.
+fn scratch(name: &str) -> std::path::PathBuf {
+    let dir = std::env::temp_dir().join(format!(
+        "{}-index-{name}-{}",
+        ac_core::product::ID,
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    dir
+}
+
+/// Ten frames at 30 fps: `frames` 10, `seconds` 1/3, by hand.
+const TEN: &str = r#"{"keys":[{"frame":0},{"frame":9}],"fps":30,"loop":true}"#;
+
+#[test]
+fn the_index_lists_a_file_without_reading_it_until_it_changes() {
+    use ac_io::library::{Kind, Library};
+    let dir = scratch("reads");
+    let file = dir.join("animations/Pack/A.clip.json");
+    std::fs::create_dir_all(file.parent().unwrap()).unwrap();
+    std::fs::write(&file, TEN).unwrap();
+    std::fs::write(dir.join("animations/Pack/Bad.clip.json"), "not json").unwrap();
+    let lib = Library::new(&dir, Kind::Animations);
+    let index = dir.join(".index/animations.json");
+
+    // items() writes nothing; listed() is the same list, and the same again from the index
+    let plain = lib.items();
+    assert!(!index.exists());
+    assert_eq!(lib.listed(), plain);
+    assert_eq!(lib.listed(), plain);
+    assert_eq!(plain[0]["frames"], 10);
+    assert_eq!(plain[0]["seconds"], json!(10.0 / 30.0));
+
+    // a mark put in the index comes back: the file wasn't opened
+    let mut saved: Value = serde_json::from_str(&std::fs::read_to_string(&index).unwrap()).unwrap();
+    assert!(saved["items"]["Pack/A"].is_object());
+    // an unreadable file isn't kept: it is tried again
+    assert!(saved["items"].get("Pack/Bad").is_none());
+    saved["items"]["Pack/A"]["meta"]["frames"] = json!(999);
+    std::fs::write(&index, saved.to_string()).unwrap();
+    assert_eq!(lib.listed()[0]["frames"], 999);
+
+    // a changed size is read again: 21 frames
+    std::fs::write(
+        &file,
+        r#"{"keys":[{"frame":20}],"fps":30,"loop":false,"x":"longer than it was"}"#,
+    )
+    .unwrap();
+    assert_eq!(lib.listed()[0]["frames"], 21);
+
+    // a removed file leaves the list and the index
+    std::fs::remove_file(&file).unwrap();
+    assert_eq!(lib.listed().len(), 1);
+    let saved: Value = serde_json::from_str(&std::fs::read_to_string(&index).unwrap()).unwrap();
+    assert!(saved["items"].get("Pack/A").is_none());
+
+    // an index that makes no sense is only read again
+    std::fs::write(&index, "not json").unwrap();
+    assert_eq!(lib.listed().len(), 1);
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn many_files_read_on_threads_come_back_in_order() {
+    use ac_io::library::{Kind, Library};
+    // above THREADED_FROM (32), and natural order: Clip 2 before Clip 10
+    let dir = scratch("threads");
+    let group = dir.join("animations/Pack");
+    std::fs::create_dir_all(&group).unwrap();
+    for i in 0..100 {
+        let frames = format!(r#"{{"keys":[{{"frame":{i}}}],"fps":30}}"#);
+        std::fs::write(group.join(format!("Clip {i}.clip.json")), frames).unwrap();
+    }
+    let got = Library::new(&dir, Kind::Animations).listed();
+    assert_eq!(got.len(), 100);
+    for (i, item) in got.iter().enumerate() {
+        assert_eq!(item["name"], format!("Clip {i}"));
+        assert_eq!(item["frames"], i + 1);
+    }
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+/// A session on `dir` as the app makes one with `--library <dir>`.
+fn opened(dir: &std::path::Path) -> ac_io::setup::Built {
+    ac_io::setup::SessionBuilder::new(&common::repo().join("assets"))
+        .library(dir)
+        .limits(false)
+        .build()
+        .unwrap()
+}
+
+#[test]
+fn a_folder_with_animations_opens_as_a_library_and_built_ins_stay_marked() {
+    let dir = scratch("opens");
+    let group = dir.join("animations/Pack");
+    std::fs::create_dir_all(&group).unwrap();
+    std::fs::write(group.join("A.clip.json"), TEN).unwrap();
+    let mut built = opened(&dir);
+    assert!(built.notes.iter().all(|n| !n.contains("can't list")));
+    let list = built.session.run("library.list", &json!({})).unwrap();
+    let items = list["animations"].as_array().unwrap();
+    let mine = items.iter().find(|a| a["id"] == "Pack/A").unwrap();
+    assert_eq!(mine["builtin"], false);
+    assert_eq!(mine["frames"], 10);
+    let walk = items.iter().find(|a| a["id"] == "Locomotion/Walk").unwrap();
+    assert_eq!(walk["builtin"], true);
+    // deleted through the command the panel uses: the file goes
+    built
+        .session
+        .run("clip.delete", &json!({ "id": "Pack/A" }))
+        .unwrap();
+    assert!(!group.exists(), "the empty group goes with its last clip");
+    std::fs::remove_dir_all(dir).unwrap();
+}
+
+#[test]
+fn a_folder_of_clips_without_animations_says_so_and_gets_nothing_put_in_it() {
+    let dir = scratch("stray");
+    std::fs::create_dir_all(dir.join("Pack")).unwrap();
+    std::fs::write(dir.join("Pack/A.clip.json"), TEN).unwrap();
+    std::fs::write(dir.join("B.clip.json"), TEN).unwrap();
+    assert_eq!(ac_io::library::clips_outside_layout(&dir), 2);
+    let built = opened(&dir);
+    assert!(built.installed.is_none());
+    assert!(
+        built.notes.iter().any(|n| n.contains("holds 2 clips")),
+        "{:?}",
+        built.notes
+    );
+    assert!(!dir.join("animations").exists());
+    std::fs::remove_dir_all(dir).unwrap();
+}
