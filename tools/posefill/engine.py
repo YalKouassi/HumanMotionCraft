@@ -431,8 +431,7 @@ class Engine:
         live = getattr(self, "live", None)
         if live is None or session != getattr(self, "live_id", 0):
             raise ValueError(f"no live session {session} (start one with live_start)")
-        live.shown(int(shown))
-        return live.step(np.asarray(velocity, dtype=np.float64), np.asarray(facing, dtype=np.float64), style,
+        return live.next(int(shown), np.asarray(velocity, dtype=np.float64), np.asarray(facing, dtype=np.float64), style,
                          tokens or TOKENS, say=say)
 
     def info(self) -> dict:

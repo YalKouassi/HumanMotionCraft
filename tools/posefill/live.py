@@ -107,7 +107,7 @@ def place(skel, rots: np.ndarray, roots: np.ndarray, speed: float, at: np.ndarra
     P = hips(skel, roots)
     rel = P[:, :2] - P[0, :2]
     travel = float(np.linalg.norm(P[-1, :2] - P[0, :2])) * FPS / (POSES - 1)
-    if travel > STILL and speed >= 0.0:
+    if travel > STILL:
         rel = rel * (speed / travel)
     angle = math.atan2(float(facing[1]), float(facing[0])) - math.atan2(-1.0, 0.0)
     c, s = math.cos(angle), math.sin(angle)
@@ -165,6 +165,17 @@ class Session:
         del self.history[:-HISTORY]
 
     # -- the step ---------------------------------------------------------------------------------
+
+    def next(self, shown: int, velocity: np.ndarray, facing: np.ndarray, style: str | None, tokens, say=print) -> dict:
+        """``shown`` frames join the history and the next stretch is made; if that fails the history
+        is as it was, so the same request can be sent again without showing a frame twice."""
+        before = list(self.history)
+        self.shown(shown)
+        try:
+            return self.step(velocity, facing, style, tokens, say=say)
+        except Exception:
+            self.history = before
+            raise
 
     def step(self, velocity: np.ndarray, facing: np.ndarray, style: str | None, tokens, say=print) -> dict:
         t_all = time.perf_counter()

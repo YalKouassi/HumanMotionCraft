@@ -32,6 +32,8 @@ TARGETS = REPO / "assets" / "posefill-targets" / "locomotion.json"
 FPS = 30.0
 HALF_UP, HALF_DOWN, HALF_TURN = 0.6, 0.4, 0.2
 SPEED_FRACTION, MIN_SPEED_FRACTION, TURN_DOT = 0.3, 0.1, 0.92
+#: while moving: a target a second ahead reached in 26 to 34 frames, so the character keeps up with the stick
+MOVING_TOKENS = "8,9,10"
 
 #: the stick path: (seconds, heading degrees (0 forward, +left), speed m/s); each row holds until the next
 PATH = [
@@ -120,7 +122,9 @@ def main() -> None:
     ap.add_argument("--targets", type=pathlib.Path, default=TARGETS)
     ap.add_argument("--name", default="stick-path")
     ap.add_argument("--seconds", type=float, default=PATH[-1][0] + 1.0)
+    ap.add_argument("--tokens", default=MOVING_TOKENS, help="token counts the model may choose from while moving; empty for the helper's")
     args = ap.parse_args()
+    tokens = [int(t) for t in args.tokens.split(",") if t.strip()] or None
     args.out.mkdir(parents=True, exist_ok=True)
     targets = json.loads(args.targets.read_text(encoding="utf-8"))
     bones = json.loads(RIG.read_text(encoding="utf-8"))["names"]
@@ -174,7 +178,8 @@ def main() -> None:
             elif seg_speed > 1e-6 and (direction[0] * seg_dir[0] + direction[1] * seg_dir[1]) < TURN_DOT:
                 why = "turn"
         if why:
-            r = h.ask("live_step", session=session, shown=shown_since, velocity=list(velocity), facing=list(facing))
+            r = h.ask("live_step", session=session, shown=shown_since, velocity=list(velocity), facing=list(facing),
+                      tokens=tokens if desired_speed > 0.0 else None)
             res = r["result"]
             segment = res
             played, shown_since = 1, 0

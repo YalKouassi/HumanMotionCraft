@@ -9,8 +9,12 @@ The pose-to-pose model moves towards target poses, and those decide what the wal
 engine's own demo targets point at evaluation-only clips, so we make our own: for each gait (stand,
 walk, jog, run) four consecutive frames at 30 fps of one take of a registered free set (CMU,
 100STYLE's Neutral style, our Kimodo-generated clips), picked where the hips move at a steady speed
-inside the gait's band, straight ahead and facing the way they go. Every pose records where it came
-from (set, take, frames), so ``ATTRIBUTION.md`` can name the sets.
+inside the gait's band, straight ahead and facing the way they go. Among those nearest the gait's
+speed the posture most typical of the gait wins (the trunk's lean and the hips' height nearest the
+candidates' medians): speed alone chose a run bent 27 degrees forward, and the model runs the way
+its target stands. Moving gaits have the left foot leading, so a blend of two doesn't mix a left
+stride with a right. Every pose records where it came from (set, take, frames), so
+``ATTRIBUTION.md`` can name the sets.
 
 The four poses are turned so the motion goes along the rig's forward (-Y) and moved so the first
 pose's hips stand over the origin: the live loop places them ahead of the character and turns them
@@ -55,6 +59,7 @@ GAITS = (
 FACING_DOT = 0.9  # the hips face the way they move at least this well (no backwards walks)
 TURN_DEG = 10.0  # the heading changes at most this much over the steady window
 SPEED_SPREAD = 0.2  # the speed's standard deviation over the steady window, as a share of its mean
+LEAN_STEP, HEIGHT_STEP = 5.0, 0.03  # degrees and metres that count the same when posture is compared
 
 
 @dataclass
@@ -66,6 +71,8 @@ class Candidate:
     frame: int  # the first of the four poses
     speed: float  # mean hips speed over the steady window, m/s
     score: float  # distance from the gait's speed (lower is better)
+    lean: float  # the trunk's forward lean, degrees (the first pose)
+    height: float  # the hips' height, metres (the first pose)
     rotations: np.ndarray  # (4, B, 4)
     roots: np.ndarray  # (4, 3)
 
@@ -84,6 +91,19 @@ def facing(rotations: np.ndarray) -> np.ndarray:
     f = f[:, :2]
     n = np.linalg.norm(f, axis=-1, keepdims=True)
     return f / np.maximum(n, 1e-9)
+
+
+def path_of(skel: Skeleton, rotations: np.ndarray, roots: np.ndarray, bone: str) -> np.ndarray:
+    """One bone's world position (frames, 3) through the rig's chain to the root."""
+    from .rig import quat_to_mat
+
+    chain = skel.chain(bone)[::-1]  # root first
+    R = quat_to_mat(np.asarray(rotations[:, chain[0]], dtype=np.float64))
+    P = hips_path(skel, roots)
+    for parent, child in zip(chain, chain[1:]):
+        P = P + np.einsum("fij,j->fi", R, skel.heads[child] - skel.heads[parent])
+        R = R @ quat_to_mat(np.asarray(rotations[:, child], dtype=np.float64))
+    return P
 
 
 def yaw_quat(angle: float) -> np.ndarray:
@@ -169,6 +189,7 @@ def candidates(set_name: str, skel: Skeleton, decisions: dict) -> list[Candidate
         v = np.diff(P[:, :2], axis=0) * FPS  # (n-1, 2)
         speed = np.linalg.norm(v, axis=-1)
         face = facing(rots)
+        neck, left, right = (path_of(skel, rots, roots, b) for b in ("neck01", "foot.L", "foot.R"))
         for name, aim, (lo, hi), types in GAITS:
             if kind not in types:
                 continue
@@ -194,19 +215,37 @@ def candidates(set_name: str, skel: Skeleton, decisions: dict) -> list[Candidate
                         continue
                     if float(face[f : f + POSES].mean(0) @ heading) < FACING_DOT:
                         continue
+                    if float((left[f] - right[f])[:2] @ heading) <= 0.0:
+                        continue
                 r4, o4 = normalised(skel, rots[f : f + POSES], roots[f : f + POSES], heading)
-                out.append(Candidate(name, set_name, take, label, f, mean, abs(mean - aim), r4, o4))
+                trunk = neck[f] - P[f]
+                lean = math.degrees(math.asin(min(1.0, max(-1.0, float(trunk[:2] @ heading) / float(np.linalg.norm(trunk))))))
+                out.append(Candidate(name, set_name, take, label, f, mean, abs(mean - aim), lean, float(P[f, 2]), r4, o4))
     return out
 
 
-def best(cands: list[Candidate], sets: tuple[str, ...]) -> dict[str, Candidate]:
-    """The best candidate of each gait: the speed nearest the gait's (to 0.1 m/s), ties by set order, take, frame."""
+def ranked(cands: list[Candidate], sets: tuple[str, ...]) -> list[Candidate]:
+    """One gait's candidates, best first: the speed nearest the gait's (to 0.1 m/s), then the posture
+    nearest the gait's medians, ties by set order, take, frame."""
+    if not cands:
+        return []
+    lean = float(np.median([c.lean for c in cands]))
+    height = float(np.median([c.height for c in cands]))
     order = {s: i for i, s in enumerate(sets)}
+
+    def posture(c: Candidate) -> float:
+        return abs(c.lean - lean) / LEAN_STEP + abs(c.height - height) / HEIGHT_STEP
+
+    return sorted(cands, key=lambda c: (round(c.score, 1), round(posture(c), 1), order[c.set], c.take, c.frame))
+
+
+def best(cands: list[Candidate], sets: tuple[str, ...]) -> dict[str, Candidate]:
+    """The best candidate of each gait (:func:`ranked`)."""
     chosen: dict[str, Candidate] = {}
     for name, *_ in GAITS:
-        of = [c for c in cands if c.gait == name]
+        of = ranked([c for c in cands if c.gait == name], sets)
         if of:
-            chosen[name] = min(of, key=lambda c: (round(c.score, 1), order[c.set], c.take, c.frame))
+            chosen[name] = of[0]
     return chosen
 
 
@@ -251,7 +290,7 @@ def main(argv=None) -> None:
         cands += found
     chosen = best(cands, sets)
     for name, aim, band, _ in GAITS:
-        of = sorted((c for c in cands if c.gait == name), key=lambda c: (round(c.score, 1), sets.index(c.set), c.take, c.frame))
+        of = ranked([c for c in cands if c.gait == name], sets)
         print(f"{name} (aim {aim} m/s, band {band[0]}-{band[1]}): {len(of)} candidates", flush=True)
         shown = of if args.list else of[:5]
         seen: set[str] = set()
@@ -261,7 +300,7 @@ def main(argv=None) -> None:
                 continue
             seen.add(key)
             mark = " <- chosen" if chosen.get(name) is c else ""
-            print(f"    {c.speed:5.2f} m/s  {key} frames {c.frame}-{c.frame + POSES - 1}  ({c.label[:50]}){mark}", flush=True)
+            print(f"    {c.speed:5.2f} m/s  lean {c.lean:5.1f}  hips {c.height:.3f}  {key} frames {c.frame}-{c.frame + POSES - 1}  ({c.label[:50]}){mark}", flush=True)
     missing = [name for name, *_ in GAITS if name not in chosen]
     if missing:
         print(f"no candidate for: {', '.join(missing)}", file=sys.stderr)

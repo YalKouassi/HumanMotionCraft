@@ -43,6 +43,12 @@ def errors(replies: list[dict], rid: int):
     return [r["error"] for r in replies if r.get("id") == rid and "error" in r]
 
 
+def test_the_helper_and_the_app_speak_the_same_protocol():
+    # the app refuses any other number, so a bump here alone breaks pose fill on every install
+    rust = (REPO / "crates" / "ac-posefill" / "src" / "helper.rs").read_text(encoding="utf-8")
+    assert f"pub const PROTOCOL: i64 = {helper.PROTOCOL};" in rust
+
+
 def test_info_before_and_after_a_load():
     replies = ask([{"id": 1, "op": "info"}, {"id": 2, "op": "load"}, {"id": 3, "op": "info"}])
     first = results(replies, 1)[0]["result"]

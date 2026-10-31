@@ -37,7 +37,7 @@ import traceback
 # run isolated (python -I): the install's own folder is the one place modules come from
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-PROTOCOL = 2
+PROTOCOL = 1  # the live ops are additions; a client finds them in `ops`
 OPS = ("info", "load", "fill", "live_start", "live_step")
 
 

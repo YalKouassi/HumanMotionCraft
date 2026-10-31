@@ -13,6 +13,7 @@ clips. Nothing here runs at app time.
 | `ac_train.flag` | after training: fills every window of every take with the model and puts the worst 1 % of the takes (by loss) into the review app's queue (`data/rig/flags.json`); a person decides, never the flag |
 | `ac_train.selection` | which takes a run reads: `--types`, `--styles` (styled takes left out), `--natural` (idle, walk, run, jump with no style word or `natural`), and `--takes <json>` (an explicit include/exclude list by `set/take` id); the minutes that survive by type and set (roadmap 153000) |
 | `ac_train.candidates` | one long MP4 per motion type of the takes a filter keeps (a title card and a burnt-in id a take, chapters, an index CSV), for the owner to say which to train on |
+| `ac_train.posetargets` | the target poses of live motion control (`assets/posefill-targets/`): for each gait, four frames of a free-set take at the gait's speed in its most typical posture, with where they came from; `--list` shows the candidates |
 | `ac_train.compare` | model cards side by side: joint error and foot slide by gap bin and motion type |
 | `ac_train.coverage` | how many training minutes each evaluation slice has (starts, stops, crouches, flights, turns, the motion types), by set and by what training uses, holds out or leaves out, beside each slice's windows from a card and the windows it can expect; writes `data/coverage.json` (roadmap 134750) |
 | `ac_train.split` | which subjects validation holds out (whole subjects, stable however the sets change) |
