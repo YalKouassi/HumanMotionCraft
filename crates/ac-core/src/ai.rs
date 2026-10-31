@@ -240,6 +240,13 @@ impl AiFiller {
     /// kept under [`AiFiller::placed_of`] for the caller to tag, ease and plant around.
     fn fill_long(&self, clip: &Clip, a: i64, b: i64) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
         let max = self.max_gap();
+        // a model card saying it fills no frames: every sub-span would be long too, without end
+        if max < 1 {
+            return Err(format!(
+                "model {} fills no frames at once (max_gap {max}): the gap {a}–{b} cannot be split into spans it takes",
+                self.model.info().tag
+            ));
+        }
         let Some(source) = &self.source else {
             return Err(crate::error::hinted(
                 format!(
@@ -258,6 +265,12 @@ impl AiFiller {
             .filter_map(|n| sk.bone(n))
             .collect();
         let plan = anchors::plan(sk, clip, &self.links, &bones, source.as_ref(), (a, b), max)?;
+        if plan.anchors.is_empty() {
+            return Err(format!(
+                "no anchor frame was found for the gap {a}–{b} ({} frames, the model takes {max})",
+                b - a - 1
+            ));
+        }
         let mut tmp = clip.clone();
         let additive = tmp
             .layers
