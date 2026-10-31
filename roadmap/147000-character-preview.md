@@ -71,3 +71,47 @@ app, `--script load.json --screenshot`, Walk 12 with `fixtures/data/tall-charact
   renderer has one shader).
 - With `over`, a travelling clip drifts the two figures apart along the path (the scaled path);
   `beside` is the view for walks, `over` for poses and in-place motion.
+
+## Review (2026-10-31)
+A code review of the built item (an agent, not the owner). The code checked:
+`crates/ac-app/src/app/character.rs`, the viewport's use of it (`crates/ac-app/src/app/viewport.rs:357`
+to `:399`), `crates/ac-render/src/renderer.rs` (`set_mesh`, `clear_mesh`, `has_mesh`, the slot
+checks in `render`), `crates/ac-render/src/mesh.rs`, `crates/ac-app/src/app/timeline/marks.rs`.
+
+Read through and found right (no change):
+- Timeline marks go through the extension point, source `retarget`
+  (`crates/ac-app/src/app/character.rs:217`), with the four kinds the Result names; they are
+  cleared when the character is unloaded, when the plan can't be made, when the animation has no
+  keys and when the check fails (`:131`, `:149`, `:197`, `:222`), and replaced whenever the clip or
+  its links change (`:186` to `:194`), so no stale mark survives an edit. `TimelineMarks::set` drops
+  marks whose frame is not finite and caps them at `MAX_PER_SOURCE`.
+- The mesh slot: slot 1, set once per loaded character and cleared on unload; a mesh whose skin
+  joint count differs from the skeleton's is refused and the character drawn as bones with the
+  reason in the status line (`:167` to `:181`); an empty or doubly used slot is an error from
+  `Renderer::render` shown in the status line (`renderer.rs:469` to `:471`).
+- The 60 fps claim: the Result's 144 fps is the app's own frame timing with the character beside the
+  mannequin on Walk 12; the drive is one `drive()` call a frame (`:239`) and the whole-clip check runs
+  only when the animation changed, not every frame, so the claim is consistent with the code. The
+  screenshots the acceptance asks for are named under `target/shots/2026-10-30/character-preview/`,
+  which is gitignored: not checkable from this review's worktree.
+- `drive()` runs outside the session here, so a panic in it would be a crash of the window: finding
+  1 of 146000's review (fixed in commit 3f207ef) applied to this preview too.
+
+Findings:
+1. **Low, fixed (commit 4240fc6).** `Mesh::from_glb` took "every primitive skinned to the first skin"
+   but removed only neighbouring repeats of a mesh index (`Vec::dedup` on an unsorted list,
+   `crates/ac-render/src/mesh.rs:51` before the fix), so a character whose one mesh sits on two
+   non-adjacent skinned nodes was drawn twice over itself. The indices are sorted first.
+2. **Low, not changed.** The mesh is re-read from disk and re-uploaded after every `retarget.map`,
+   because the slot is keyed on the `Loaded` pointer and each correction makes a new one
+   (`character.rs:158`). Correct, and cheap for the test character; a large character would pause
+   the window on each correction. Keying the mesh on the character file instead is a small follow-up.
+3. **Low, not changed.** With no weights for the frame (the check failed, or the clip has no keys)
+   the preview drives the feet with full IK (`character.rs:238`, `Weights::FEET`) rather than none;
+   the status line says the check failed, so it is not silent, but the fallback choice is noted.
+4. **Low, not changed.** The whole-clip check runs on the window thread on every edit of the
+   animation (`character.rs:200`); 1.2 ms for 90 frames, so about a second at 100 000 frames
+   (`check::MAX_FRAMES`). Fine for clips; a very long one would make each edit pause.
+5. The Result's claims match the code: the three views and their switches, the View menu action, the
+   skinned and the bones-only drawing, the marks, and the document holding the character outside the
+   project file.
