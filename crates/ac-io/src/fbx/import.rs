@@ -454,33 +454,53 @@ fn open_takes(
 }
 
 /// Where a named clip lies among the samples: its first sample and how many, and a note if its
-/// range had to be rounded to whole frames.
+/// range had to be rounded to whole frames or cut to the take. A range with no frame in the take, or
+/// only one, is refused.
 fn clip_range(motion: &Motion, clip: &MetaClip) -> R<(usize, usize, Option<String>)> {
     let (first, last) = (clip.first.round(), clip.last.round());
     let start = motion.start_frame.round();
-    let (a, b) = (first - start, last - start);
-    if b - a < 1.0 {
+    let end = start + motion.frames as f64 - 1.0;
+    if last - first < 1.0 {
         return Err(format!(
             "its range {} to {} holds fewer than 2 frames",
             clip.first, clip.last
         ));
     }
-    if a < 0.0 || b >= motion.frames as f64 {
+    if last < start || first > end {
         return Err(format!(
-            "its range {} to {} is outside the take's frames {} to {}",
-            clip.first,
-            clip.last,
-            start,
-            start + motion.frames as f64 - 1.0
+            "its range {} to {} is outside the take's frames {start} to {end}",
+            clip.first, clip.last
         ));
     }
-    let note = (first != clip.first || last != clip.last).then(|| {
-        format!(
+    let (from, to) = (first.max(start), last.min(end));
+    if to - from < 1.0 {
+        return Err(format!(
+            "its range {} to {} holds fewer than 2 of the take's frames {start} to {end}",
+            clip.first, clip.last
+        ));
+    }
+    let mut notes = Vec::new();
+    if first != clip.first || last != clip.last {
+        notes.push(format!(
             "its range {} to {} lies between frames: read as {first} to {last}",
             clip.first, clip.last
-        )
-    });
-    Ok((a as usize, (b - a) as usize + 1, note))
+        ));
+    }
+    let mut cut = Vec::new();
+    if first < from {
+        cut.push(format!("{first} to {}", from - 1.0));
+    }
+    if last > to {
+        cut.push(format!("{} to {last}", to + 1.0));
+    }
+    if !cut.is_empty() {
+        notes.push(format!(
+            "its range {first} to {last} runs past the take's frames {start} to {end}: frames {} cut",
+            cut.join(" and ")
+        ));
+    }
+    let note = (!notes.is_empty()).then(|| notes.join("; "));
+    Ok(((from - start) as usize, (to - from) as usize + 1, note))
 }
 
 impl Source {
@@ -815,14 +835,42 @@ mod tests {
     }
 
     #[test]
+    fn a_clip_running_past_its_take_is_cut_to_it_and_says_which_frames() {
+        // worked by hand on a take of frames 0 to 39
+        let m = motion(40, 0.0);
+        let (a, n, note) = clip_range(&m, &range("Take", 30.0, 45.0)).unwrap();
+        assert_eq!((a, n), (30, 10));
+        assert!(note.unwrap().contains("frames 40 to 45 cut"));
+        let (a, n, note) = clip_range(&m, &range("Take", -3.0, 10.0)).unwrap();
+        assert_eq!((a, n), (0, 11));
+        assert!(note.unwrap().contains("frames -3 to -1 cut"));
+        let (a, n, note) = clip_range(&m, &range("Take", -2.0, 41.0)).unwrap();
+        assert_eq!((a, n), (0, 40));
+        assert!(note.unwrap().contains("frames -2 to -1 and 40 to 41 cut"));
+        let (a, n, _) = clip_range(&m, &range("Take", 0.0, 1e300)).unwrap();
+        assert_eq!((a, n), (0, 40));
+        // a take starting at frame 100, frames 100 to 139: samples 38 and 39 are left
+        let (a, n, note) = clip_range(&motion(40, 100.0), &range("Take", 138.0, 150.0)).unwrap();
+        assert_eq!((a, n), (38, 2));
+        assert!(note.unwrap().contains("frames 140 to 150 cut"));
+        // rounded and cut: both said
+        let (a, n, note) = clip_range(&m, &range("Take", 37.5, 40.0)).unwrap();
+        assert_eq!((a, n), (38, 2));
+        let note = note.unwrap();
+        assert!(note.contains("between frames") && note.contains("frames 40 to 40 cut"), "{note}");
+    }
+
+    #[test]
     fn a_clip_outside_its_take_or_too_short_is_refused() {
         let m = motion(40, 0.0);
         for (clip, want) in [
             (range("Take", 10.0, 10.0), "fewer than 2"),
             (range("Take", 10.0, 2.0), "fewer than 2"),
-            (range("Take", 30.0, 40.0), "outside the take"),
-            (range("Take", -1.0, 10.0), "outside the take"),
-            (range("Take", 0.0, 1e300), "outside the take"),
+            (range("Take", 40.0, 50.0), "outside the take"),
+            (range("Take", -5.0, -1.0), "outside the take"),
+            // one frame of the take each
+            (range("Take", 39.0, 45.0), "fewer than 2"),
+            (range("Take", -5.0, 0.0), "fewer than 2"),
         ] {
             let e = clip_range(&m, &clip).unwrap_err();
             assert!(e.contains(want), "{e} should say {want}");

@@ -229,7 +229,8 @@ fn a_stale_take_name_reads_the_files_one_take_with_the_clips_frames() {
     // the range is still checked
     let text = meta_text()
         .replace("takeName: Take 001", "takeName: Another")
-        .replace("lastFrame: 39", "lastFrame: 40");
+        .replace("firstFrame: 20", "firstFrame: 40")
+        .replace("lastFrame: 39", "lastFrame: 45");
     let m = unity_meta::parse(&text).unwrap();
     let s = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap();
     let e = s.clip(&sk, &s.clips()[1]).unwrap_err();
@@ -239,8 +240,21 @@ fn a_stale_take_name_reads_the_files_one_take_with_the_clips_frames() {
 #[test]
 fn clips_outside_the_take_are_refused_by_name() {
     let sk = skeleton();
+    let beyond = unity_meta::parse(
+        &meta_text()
+            .replace("firstFrame: 20", "firstFrame: 40")
+            .replace("lastFrame: 39", "lastFrame: 45"),
+    )
+    .unwrap();
+    let one_left = unity_meta::parse(
+        &meta_text()
+            .replace("firstFrame: 20", "firstFrame: 39")
+            .replace("lastFrame: 39", "lastFrame: 45"),
+    )
+    .unwrap();
     for (m, want) in [
-        (meta_with("lastFrame: 39", "lastFrame: 40"), "outside the take"),
+        (beyond, "outside the take"),
+        (one_left, "fewer than 2"),
         (meta_with("firstFrame: 20", "firstFrame: 39"), "fewer than 2"),
         (meta_with("firstFrame: 20", "firstFrame: 45"), "fewer than 2"),
     ] {
@@ -250,6 +264,22 @@ fn clips_outside_the_take_are_refused_by_name() {
         let e = s.clip(&sk, &s.clips()[1]).unwrap_err();
         assert!(e.contains("Walk end") && e.contains(want), "{e}");
     }
+}
+
+#[test]
+fn a_clip_running_past_the_take_is_cut_to_it_with_a_note() {
+    let sk = skeleton();
+    let plain = open_bytes(&fbx(), "w", &none(), Some(&meta())).unwrap();
+    let want = plain.clip(&sk, &plain.clips()[1]).unwrap();
+    // Walk end, 20 to 39, asked to run to 45 of a take ending at 39: the same 20 frames
+    let m = meta_with("lastFrame: 39", "lastFrame: 45");
+    let s = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap();
+    let got = s.clip(&sk, &s.clips()[1]).unwrap();
+    assert_eq!(got.clip.length(), 20);
+    assert_eq!(got.clip.keys()[0].root, want.clip.keys()[0].root);
+    let notes = got.report["notes"].to_string();
+    assert!(notes.contains("frames 40 to 45 cut"), "{notes}");
+    assert!(!want.report["notes"].to_string().contains("runs past"));
 }
 
 #[test]
@@ -284,6 +314,7 @@ fn a_batch_writes_a_file_per_clip_lists_a_refused_one_and_stays_in_its_folder() 
     std::fs::write(from.join("walk.fbx"), fbx()).unwrap();
     let text = meta_text()
         .replace("name: Walk start", "name: ../../up/and out")
+        .replace("firstFrame: 20", "firstFrame: 300")
         .replace("lastFrame: 39", "lastFrame: 400");
     std::fs::write(from.join("walk.fbx.meta"), text).unwrap();
     // an unreadable .meta refuses its file, and the others still go through
