@@ -1,6 +1,6 @@
 # Experiment: train on natural motion only
 
-- **Status:** trained, acceptance not met, waiting for the owner to judge the videos (2026-10-31)
+- **Status:** trained; the owner takes `parts-natural` as the base for 154000; not exported (2026-10-31)
 - **Requires:** 134500
 - **Source:** owner request (2026-10-30)
 
@@ -223,3 +223,9 @@ filter treats it as no style word, but `labels.of` still makes it a label.
 is also its own MP4), from `ac_train.judge`: REAL MOTION, SHIPPED and NATURAL side by side, fixed
 three-quarter camera, physics off, once at full speed and once at half. SHIPPED is `parts-lowweights`
 at its best checkpoint. All 14 takes are held out from both models. Waiting for the owner.
+
+**Owner's judgement (2026-10-31):** the videos look the same to the owner and the natural model is fine,
+because the plan is a natural base with the styles as add-on models (154000), not this model alone. So
+the style menu and the sit, ground and combat losses above are what the add-ons must win back, and they
+don't count against it as a base. It stays out of `assets/models` until 154000 and 155000 exist: exporting
+it now would take 41 of the 48 styles out of the app with nothing to replace them.
