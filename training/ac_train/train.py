@@ -14,7 +14,10 @@ takes have (:mod:`ac_train.labels`: each take's motion type and style words, wit
 ``type`` and ``tags``) that have at least ``--min-style-minutes`` of motion. What each take gives is
 ``review.py``'s plan: the quality scan's cuts and rejections, with the review's decisions
 (``training/review/decisions.json``) over them; no window touches a cut. Every set must be scanned
-first (``python -m ac_train.quality``), unless ``--unscanned``.
+first (``python -m ac_train.quality``), unless ``--unscanned``. Which takes are read is
+:mod:`ac_train.selection`'s (``--types``, ``--styles``, ``--natural``, ``--takes <json>``); the
+minutes that survive, by type and set, are printed before the first step, and ``--dry-run`` stops
+there.
 
 What a training window looks like, to match what the app sends:
 
@@ -57,7 +60,7 @@ from collections import Counter
 import numpy as np
 import torch
 
-from . import MODELS, context, evaluate, labels, losses, review, split
+from . import MODELS, context, evaluate, labels, losses, review, selection, split
 from .datasets import REGISTRY, RIG
 from .kinematics import Body
 from .model import (
@@ -104,9 +107,11 @@ MULTI = (0.5, 3)
 
 class Sets:
     """All frames of the chosen sets on the device, where a window may start, and each take's
-    labels. :meth:`learn` then gives the takes their style weights over a list of styles."""
+    labels. :meth:`learn` then gives the takes their style weights over a list of styles.
+    ``select`` (:class:`ac_train.selection.Selection`) says which takes are read; :attr:`records`
+    lists every take of the sets, kept or not, with the reason."""
 
-    def __init__(self, names, device, val=False, decisions=None, scanned=True):
+    def __init__(self, names, device, val=False, decisions=None, scanned=True, select=None):
         from .rig import Skeleton
 
         bones = list(Skeleton.load().names)
@@ -121,6 +126,7 @@ class Sets:
         self.plans: list[review.Plan] = []
         #: per set, the groups (subjects, sessions) validation holds out
         self.held: dict[str, list[str]] = {}
+        self.records: list[selection.Record] = []
         offset = 0
         for n in names:
             path = RIG / f"{n}.npz"
@@ -129,27 +135,28 @@ class Sets:
                 continue
             d = np.load(path)
             rot, root, starts, takes = d["rotations"][:, idx].astype(np.float32), d["roots"], d["starts"], d["takes"]
-            own = d["labels"] if "labels" in d.files else takes
-            plan = review.plan_set(n, len(rot), starts, takes, decisions, scanned, npz=d)
+            plan, recs = selection.records(n, d, decisions, select, scanned)
             self.plans.append(plan)
+            self.records += recs
             self.held.update(split.holdout({n: [str(t) for t in takes]}))
-            for s, take, own_label, t in zip(starts, takes, own, plan.takes):
-                held = split.held_out(n, str(take))
+            for s, rec, t in zip(starts, recs, plan.takes):
                 e = s + t.frames
                 fine = review.starts(t, WINDOW)  # none for a take left out or too short
-                if held != val or not len(fine):
+                if rec.held != val or not rec.kept or not len(fine):
                     continue
                 q.append(rot[s:e])
                 r.append(root[s:e])
-                words = labels.of(n, str(take), str(own_label), t.kind, t.tags)
+                words = labels.of(n, rec.take, rec.label, t.kind, t.tags)
                 for w in words:
-                    self.label_frames[w] += t.frames - int(t.bad().sum())
+                    self.label_frames[w] += rec.used
                 tk.append(np.full(e - s, len(self.labels), dtype=np.int64))
                 self.labels.append(words)
-                self.types.append(labels.type_of(str(take), t.kind))
+                self.types.append(rec.type)
                 ok.append(offset + fine)
                 offset += e - s
             self.used.append(n)
+        if select is not None and (select.include or select.exclude):
+            selection.check_listed(select, self.records, self.used)
         if not q:
             raise ValueError("no takes: " + ("nothing is held out for validation" if val else "every take is held out or left out"))
         self.q = torch.tensor(np.concatenate(q), device=device)
@@ -372,6 +379,9 @@ def main(argv=None):
     ap.add_argument("--multi-key", action="store_true",
                     help="train with several known frames in a window, so neighbouring gaps fill in one pass (142000)")
     ap.add_argument("--no-warp", action="store_true", help="no speed change")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="print the sets, the takes read and the minutes that survive by type and set, then stop")
+    selection.add_arguments(ap)
     args = ap.parse_args(argv)
 
     from .rig import Skeleton
@@ -399,18 +409,26 @@ def main(argv=None):
     print(f"sets: {', '.join(names)}" + ("" if args.noncommercial else " (the free-licence sets; --noncommercial adds non-commercial sets you added)"),
           flush=True)
     skel = Skeleton.load()
-    body = Body(skel, device)
     decisions = review.load_decisions(pathlib.Path(args.decisions))
+    select = selection.from_args(args)
+    print(f"takes: {select.describe()}", flush=True)
     if args.unscanned:
         print("--unscanned: no set's scan is read; every frame of every take is used, glitches and all", flush=True)
-    train = Sets(names, device, decisions=decisions, scanned=not args.unscanned)
+    if args.dry_run:
+        recs = selection.plan_sets(names, decisions, select, not args.unscanned, progress=lambda s: print(s, flush=True))
+        print(selection.table(recs, select), flush=True)
+        print("--dry-run: nothing trained", flush=True)
+        return
+    body = Body(skel, device)
+    train = Sets(names, device, decisions=decisions, scanned=not args.unscanned, select=select)
     for plan in train.plans:
         print(plan.summary(), flush=True)
         for note in plan.notes:
             print(f"  {note}", flush=True)
+    print(selection.table(train.records, select), flush=True)
     validated_on = "held-out subjects"
     try:
-        val = Sets(names, device, val=True, decisions=decisions, scanned=not args.unscanned)
+        val = Sets(names, device, val=True, decisions=decisions, scanned=not args.unscanned, select=select)
     except ValueError:
         if args.steps is None:
             raise SystemExit("no validation takes: these sets hold out no subject (ac_train.split). A real run "
@@ -524,7 +542,9 @@ def main(argv=None):
         "commercial": commercial,
         "warning": "" if commercial else "Trained on non-commercial data: do not ship this model or its output in a commercial product.",
         "data": {"scanned": not args.unscanned, "decisions": len(decisions),
-                 "plans": [p.summary() for p in train.plans]},
+                 "plans": [p.summary() for p in train.plans],
+                 "selection": select.describe(), "takes_kept": sum(r.kept for r in train.records),
+                 "minutes": selection.minutes(train.records)},
         "split": "subjects", "holdout": train.held, "validated_on": validated_on,
         "best": best,
         "metrics": {k: {"model_m": r["model"]["joint_m"], "interp_m": r["interp"]["joint_m"]} for k, r in evaluation["bins"].items()},

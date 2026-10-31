@@ -62,7 +62,7 @@ from collections import defaultdict
 import numpy as np
 import torch
 
-from . import MODELS, REPO, context, review
+from . import MODELS, REPO, context, review, selection
 from .kinematics import EXTREMITIES, FOOT_POINTS, POINTS, Body, foot_speed, geodesic
 from .model import BONES, CONTEXT, PART_GROUPS, given_features, layout, smooth_path, unfeatures
 from .quality import FPS, THRESHOLDS
@@ -652,23 +652,37 @@ def main(argv=None):
     ap.add_argument("--sheets", action="store_true", help="also draw contact sheets of fixed hard fills (needs ac)")
     ap.add_argument("--decisions", default=str(review.DECISIONS), help="the review's decisions file")
     ap.add_argument("--no-write", action="store_true", help="print only; leave the card as it is")
+    ap.add_argument("--subset", default=None, metavar="NAME",
+                    help="with a take filter: write the numbers under evaluation[_best]_<NAME> in the card, "
+                         "so the full evaluation stays (e.g. natural, roadmap 153000)")
+    selection.add_arguments(ap)
     args = ap.parse_args(argv)
 
     from . import infer
 
+    select = selection.from_args(args)
+    if select.active() and not args.subset:
+        ap.error("a take filter (--types, --styles, --natural, --takes) needs --subset <name>: the numbers of a restricted "
+                 "evaluation go under their own key in the card, never over the full one")
+    if args.subset and not select.active():
+        ap.error("--subset names a restricted evaluation: give the filter too (--natural, --types, --styles, --takes)")
     net, card = infer.load(args.tag, args.checkpoint)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     net = net.to(device)
     names = [n for n in args.sets.split(",") if n] if args.sets else [n for n in REGISTRY if REGISTRY[n].commercial]
     skel = Skeleton.load()
     body = Body(skel, device)
-    val = Sets(names, device, val=True, decisions=review.load_decisions(pathlib.Path(args.decisions)))
+    print(f"takes: {select.describe()}", flush=True)
+    val = Sets(names, device, val=True, decisions=review.load_decisions(pathlib.Path(args.decisions)), select=select)
+    print(selection.table(val.records, select), flush=True)
     styles = card.get("styles") or ["any"]
     val.learn(styles, val.label_frames)
     ev = run(net, val, body, device, windows=args.windows)
     ev["checkpoint"] = args.checkpoint
     ev["holdout"] = val.held
     ev["sets"] = val.used
+    ev["selection"] = select.describe()
+    ev["takes_kept"] = sum(r.kept and r.held for r in val.records)
     seen = [n for n in val.used if n in {s["name"] for s in card.get("sets", [])}]
     if card.get("split") != "subjects" and seen:
         ev["note"] = (f"this model was trained with a per-take split: it may have seen takes of these held-out subjects "
@@ -680,9 +694,10 @@ def main(argv=None):
     if not args.no_write:
         path = MODELS / args.tag / "model.json"
         card = json.loads(path.read_text(encoding="utf-8"))
-        card["evaluation" if args.checkpoint == "model" else "evaluation_best"] = ev
+        key = ("evaluation" if args.checkpoint == "model" else "evaluation_best") + (f"_{args.subset}" if args.subset else "")
+        card[key] = ev
         path.write_text(json.dumps(card, indent=1), encoding="utf-8")
-        print(f"written into {path}")
+        print(f"written into {path} as {key}")
 
 
 if __name__ == "__main__":

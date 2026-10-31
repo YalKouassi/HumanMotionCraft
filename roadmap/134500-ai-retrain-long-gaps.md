@@ -37,10 +37,13 @@ On the 126000 held-out windows: gaps 5-10 / 11-20 / 21-30 / 31-45 closer to the 
 11.5 / 17.5 / 23.4 mm than today's 10.3 / 22.2 / 34.0 / 54.2 mm; step and still contexts stay under
 interpolation's 41.4 mm; foot slide no worse than 0.045 m/s; the owner judges side-by-side videos.
 
-## Overnight plan (prepared 2026-10-30, not run)
-`training/overnight-2026-10-30.ps1` runs, in order and with one log: the shipped model's missing
-scenario evaluation (134750 found its card has no scenario rows), then 140000's `--context-after 4`
-run and 142000's `--context-after 4 --multi-key` run, each 180 minutes on the shipped recipe
-(`vel=0.1,jerk=0.0005,skate=0.1`) and evaluated with `--checkpoint best`. About 6.5 hours. Nothing
-is exported: the owner compares the cards against this file's acceptance line and judges
-side-by-side videos before any export (`ac_train.export <tag> --checkpoint best --as parts`).
+## Overnight plan (prepared 2026-10-30, not run; changed the same day)
+`training/overnight-2026-10-30.ps1` now runs 153000's night (owner's decision, 2026-10-30: the
+natural-only base model trains next): the shipped model's missing scenario evaluation (134750 found
+its card has no scenario rows; this step stays), then `parts-natural` for 180 minutes on the shipped
+recipe (`vel=0.1,jerk=0.0005,skate=0.1`) with the natural take list, then both models evaluated on
+the natural held-out windows and the comparison tables. About 3.5 hours. The 140000
+(`--context-after 4`) and 142000 (`--context-after 4 --multi-key`) runs this script held before were
+moved out and go in a later night, each 180 minutes on the same recipe and evaluated with
+`--checkpoint best`. Nothing is exported: the owner compares the cards against this file's acceptance
+line and judges side-by-side videos before any export (`ac_train.export <tag> --checkpoint best --as parts`).
