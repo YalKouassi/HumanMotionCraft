@@ -138,14 +138,13 @@ fn every_source_gets_one_outcome_and_the_checks_hold() {
     let to = lib.join("port");
     let r = s.run("clip.port", &params(&to)).unwrap();
     assert_eq!(r["sources"], 9, "{r}");
-    assert_eq!(r["imported"], 4, "{r}");
+    assert_eq!(r["imported"], 5, "{r}");
     assert_eq!(r["duplicate"], 1, "{r}");
-    assert_eq!(r["refused"], 3, "{r}");
+    assert_eq!(r["refused"], 2, "{r}");
     assert_eq!(r["pending"], 1, "{r}");
     assert_eq!(r["unreachable"], json!(["PackA/Bad/missing.fbx"]));
-    // walk 1, takes 3, turned 1, hang 1
-    assert_eq!(r["clips"], 6, "{r}");
-    assert_eq!(r["checks"]["feet_on_floor"], 1, "{r}");
+    // walk 1, takes 3, turned 1, hang 1, sunk 1
+    assert_eq!(r["clips"], 7, "{r}");
 
     let m = lines(&to.join(MANIFEST));
     assert_eq!(m.len(), 8, "the missing file has no line");
@@ -153,8 +152,7 @@ fn every_source_gets_one_outcome_and_the_checks_hold() {
     assert_eq!(dup["outcome"], "duplicate");
     assert_eq!(dup["of"], "PackA/Walks/walk.fbx");
     let sunk = &m["PackA/Bad/sunk.fbx"];
-    assert_eq!(sunk["outcome"], "refused");
-    assert_eq!(sunk["left_out"][0]["checks"], json!(["feet_on_floor"]));
+    assert_eq!(sunk["outcome"], "imported");
     assert!(
         m["PackA/Bad/swapped.fbx"]["reason"]
             .as_str()
@@ -188,7 +186,7 @@ fn every_source_gets_one_outcome_and_the_checks_hold() {
         "a duplicate writes nothing"
     );
     assert!(
-        !to.join("animations/PackA - Bad").exists(),
+        !to.join("animations/PackA - Bad/swapped.clip.json").exists(),
         "what failed writes nothing"
     );
 
@@ -221,6 +219,22 @@ fn every_source_gets_one_outcome_and_the_checks_hold() {
         - first_joints("animations/PackA - Walks/walk.clip.json")[0][2];
     assert!((up - 0.5).abs() < 0.02, "{up}");
     assert_eq!(m["PackA/Walks/walk.fbx"]["clips"][0]["hanging"], false);
+
+    // the sunk file was lowered 0.5 m: moved up by that, so it stands where the walk stands
+    let sunk = &sunk["clips"][0];
+    assert_eq!(sunk["hanging"], false, "{sunk}");
+    assert!((sunk["raised"].as_f64().unwrap() - 0.5).abs() < 0.02, "{sunk}");
+    assert!(sunk["notes"].to_string().contains("moved up"), "{sunk}");
+    assert_eq!(m["PackA/Walks/walk.fbx"]["clips"][0]["raised"], 0.0);
+    assert_eq!(hang["raised"], 0.0, "hanging stays as it is");
+    let c = load("animations/PackA - Bad/sunk.clip.json");
+    let rots: Vec<_> = c.keys().iter().map(|k| k.rotations.clone()).collect();
+    let roots: Vec<_> = c.keys().iter().map(|k| k.root).collect();
+    let floor = ac_core::retarget::floor_offset(&sk, &rots, &roots).unwrap();
+    assert!(floor.abs() < 1e-3, "{floor}");
+    let off = first_joints("animations/PackA - Bad/sunk.clip.json")[0][2]
+        - first_joints("animations/PackA - Walks/walk.clip.json")[0][2];
+    assert!(off.abs() < 0.02, "{off}");
     std::fs::remove_dir_all(lib).unwrap();
 }
 
@@ -240,7 +254,7 @@ fn a_run_again_changes_nothing_and_a_deleted_clip_stays_deleted() {
     assert_eq!(r["new"], 0, "{r}");
     assert_eq!(r["skipped"], 8, "{r}");
     assert_eq!(r["pending"], 1, "{r}");
-    assert_eq!(r["clips"], 6, "{r}");
+    assert_eq!(r["clips"], 7, "{r}");
     assert_eq!(std::fs::read(&manifest).unwrap(), before);
     assert_eq!(std::fs::metadata(&manifest).unwrap().modified().unwrap(), stamp);
     assert!(!walk.exists());
@@ -260,11 +274,11 @@ fn a_retry_that_changes_nothing_writes_nothing_and_a_deleted_clip_stays_deleted(
     let mut p = params(&to);
     p["retry_refused"] = json!(true);
     let r = s.run("clip.port", &p).unwrap();
-    // the 3 refused are refused the same way: 5 finished + 3 unchanged; missing.fbx is still away
+    // the 2 refused are refused the same way: 6 finished + 2 unchanged; missing.fbx is still away
     assert_eq!(r["new"], 0, "{r}");
     assert_eq!(r["skipped"], 8, "{r}");
-    assert_eq!(r["refused"], 3, "{r}");
-    assert_eq!(r["imported"], 4, "{r}");
+    assert_eq!(r["refused"], 2, "{r}");
+    assert_eq!(r["imported"], 5, "{r}");
     assert_eq!(r["duplicate"], 1, "{r}");
     assert_eq!(std::fs::read(&manifest).unwrap(), before);
     assert!(!walk.exists(), "a deleted clip stays deleted");

@@ -18,8 +18,9 @@
 //! the same adds nothing. A refused source wrote no clip, so this can't bring back a deleted one.
 //!
 //! Each clip is turned to start facing -Y when it is more than [`FACING_MOST_DEG`] off, then checked:
-//! its values are finite, it faces -Y, its feet aren't swapped, and its feet are on z = 0 unless it
-//! has no floor. A clip that fails is left out and listed. Bone lengths are the rig's by construction,
+//! its values are finite, it faces -Y, and its feet aren't swapped. A clip that fails is left out and
+//! listed. A floor below z = 0 (a rig with its hips at the origin reads this way) is moved up to it,
+//! with a note; a clip with no floor stays where it is. Bone lengths are the rig's by construction,
 //! since a clip holds only rotations and the root.
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -55,7 +56,7 @@ pub const MAX_LIST_BYTES: u64 = 64 << 20;
 pub const FACING_MOST_DEG: f64 = 15.0;
 /// The share of the importer's side checks from which a clip's feet count as swapped.
 pub const SWAPPED_FAIL: f64 = 0.5;
-/// How far below z = 0 the floor may be.
+/// How far below z = 0 the floor may be and stay where it is.
 pub const BELOW_MOST_M: f64 = 0.03;
 /// A floor moved further down than this, by a clip whose feet never hold still, is a hanging clip's.
 pub const HANG_MOVED_M: f64 = 0.05;
@@ -299,7 +300,7 @@ enum Floor {
     On,
     /// No floor under it; `undo`: the import moved it down, and that move is taken back.
     Hanging { undo: bool },
-    /// The feet stay below z = 0.
+    /// The feet stay below z = 0: moved up to it.
     Below,
 }
 
@@ -444,6 +445,7 @@ fn finish(skel: &Skeleton, imported: &Imported) -> R<Result<Kept, Vec<(&'static 
     let still = feet_still(skel, &rots, &roots, imported.clip.fps)?;
     let verdict = floor_verdict(found, moved, still);
     let hanging = matches!(verdict, Floor::Hanging { .. });
+    let mut raised = 0.0;
     match verdict {
         Floor::Hanging { undo: true } => {
             let back = moved / skel.hip_height;
@@ -454,10 +456,16 @@ fn finish(skel: &Skeleton, imported: &Imported) -> R<Result<Kept, Vec<(&'static 
                 "no foot holds still: taken as hanging, and the {moved:.3} m the floor was moved down is taken back"
             )));
         }
-        Floor::Below => fails.push((
-            "feet_on_floor",
-            format!("the floor is {found:.2} m from z = 0, below it"),
-        )),
+        Floor::Below => {
+            raised = -found;
+            let up = raised / skel.hip_height;
+            for r in &mut roots {
+                r[2] += up;
+            }
+            notes.push(json!(format!(
+                "the floor was {raised:.3} m below z = 0: moved up so the feet rest on it"
+            )));
+        }
         Floor::Hanging { undo: false } | Floor::On => {}
     }
     if !fails.is_empty() {
@@ -483,6 +491,7 @@ fn finish(skel: &Skeleton, imported: &Imported) -> R<Result<Kept, Vec<(&'static 
         "take": imported.report.get("source").and_then(|s| s.get("take")).cloned().unwrap_or(Value::Null),
         "turned": turned,
         "floor": moved,
+        "raised": raised,
         "hanging": hanging,
         "in_place": travel < IN_PLACE_M,
         "notes": notes,
@@ -777,7 +786,7 @@ mod tests {
         // too far up to have been moved
         assert_eq!(floor_verdict(0.5, 0.0, false), Floor::Hanging { undo: false });
         assert_eq!(floor_verdict(0.5, 0.0, true), Floor::Hanging { undo: false });
-        // too far down: a floor the source has, left where it is
+        // too far down: a floor the source has, to move up; within the limit it stays
         assert_eq!(floor_verdict(-0.5, 0.0, true), Floor::Below);
         assert_eq!(floor_verdict(-0.02, 0.0, true), Floor::On);
     }

@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "fbx-port",
   "feature": "clip.port",
-  "description": "A resumable bulk port (roadmap 164000) over the generated tree fixtures/data/port, written by python -m ac_train.fbxwrite. Its list has 9 lines, counted by hand. Imported, 4: PackA/Walks/walk.fbx (1 clip); takes.fbx (3 clips, two of them from its second take, which the pilot's files had refused); turned.fbx (1, turned to face -Y); hang.fbx (1, raised 0.5 m and left there). Duplicate, 1: PackB/Walks/walk.fbx has walk.fbx's bytes. Refused, 3: sunk.fbx (lowered 0.5 m: fails the floor check), swapped.fbx (left and right named the wrong way round), not-humanoid.fbx. Pending, 1: missing.fbx isn't there, so it has no outcome, as when a drive is away. So 6 clips. The second run skips the 8 finished and does nothing. The third, with retry_refused, tries the 3 refused again, they come out the same, and it adds nothing. Refused: a list that isn't there, and an output folder inside the repository.",
+  "description": "A resumable bulk port (roadmap 164000) over the generated tree fixtures/data/port, written by python -m ac_train.fbxwrite. Its list has 9 lines, counted by hand. Imported, 5: PackA/Walks/walk.fbx (1 clip); takes.fbx (3 clips, two of them from its second take, which the pilot's files had refused); turned.fbx (1, turned to face -Y); hang.fbx (1, raised 0.5 m and left there); sunk.fbx (1, lowered 0.5 m and moved back up to z = 0). Duplicate, 1: PackB/Walks/walk.fbx has walk.fbx's bytes. Refused, 2: swapped.fbx (left and right named the wrong way round), not-humanoid.fbx. Pending, 1: missing.fbx isn't there, so it has no outcome, as when a drive is away. So 7 clips. The second run skips the 8 finished and does nothing. The third, with retry_refused, tries the 2 refused again, they come out the same, and it adds nothing. Refused: a list that isn't there, and an output folder inside the repository.",
   "script": [
     {
       "command": "clip.port",
@@ -15,11 +15,11 @@
         "sources": 9,
         "new": 8,
         "skipped": 0,
-        "imported": 4,
+        "imported": 5,
         "duplicate": 1,
-        "refused": 3,
+        "refused": 2,
         "pending": 1,
-        "clips": 6,
+        "clips": 7,
         "hanging": 1,
         "turned": 1
       }
@@ -35,8 +35,8 @@
         "sources": 9,
         "new": 0,
         "skipped": 8,
-        "imported": 4,
-        "clips": 6
+        "imported": 5,
+        "clips": 7
       }
     },
     {
@@ -50,9 +50,9 @@
       "expect": {
         "new": 0,
         "skipped": 8,
-        "imported": 4,
-        "refused": 3,
-        "clips": 6
+        "imported": 5,
+        "refused": 2,
+        "clips": 7
       }
     }
   ],
