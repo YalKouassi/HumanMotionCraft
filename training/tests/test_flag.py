@@ -60,7 +60,16 @@ def test_the_file_names_the_run_and_says_why(tmp_path):
 
 def test_no_takes_flags_nothing():
     rec = flag.record({"tag": "parts", "checkpoint": "model"}, {}, [], 15, 1, 0.01, "loss", 0.0)
-    assert rec["flagged"] == [] and rec["takes"] == 0 and rec["median_loss"] == 0.0
+    assert rec["flagged"] == [] and rec["takes"] == 0 and rec["median_loss"] == 0.0 and rec["unusable"] == []
+
+
+def test_a_take_with_a_loss_that_is_not_a_number_is_left_out_and_named():
+    # a NaN sorts anywhere and json.dumps writes it as NaN, which no JSON reader (the review app) accepts
+    takes = [take("s/a", 0.2), take("s/nan", float("nan")), take("s/inf", 0.1, worst=float("inf")), take("s/b", 0.3)]
+    rec = flag.record({"tag": "parts", "checkpoint": "best"}, {}, takes, 15, 1, 0.01, "loss", 1.0)
+    assert [t["id"] for t in rec["flagged"]] == ["s/b"]
+    assert rec["takes"] == 2 and rec["unusable"] == ["s/nan", "s/inf"]
+    assert "NaN" not in json.dumps(rec) and "Infinity" not in json.dumps(rec)
 
 
 def test_the_digest_matches_the_review_apps():
