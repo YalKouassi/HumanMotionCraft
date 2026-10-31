@@ -634,6 +634,10 @@ impl crate::document::Document {
             crate::ease::ease_through(&mut self.clip, an.frame, crate::ease::EASE_FRAMES)?;
         }
         self.plant_spans(filler, &bounds)?;
+        // planting holds the ankles; a long fill's steps roll over the foot and would still slide
+        if !placed.anchors.is_empty() {
+            self.hold_contacts(a, b)?;
+        }
         let notes = placed.notes.clone();
         Ok((placed, notes))
     }
