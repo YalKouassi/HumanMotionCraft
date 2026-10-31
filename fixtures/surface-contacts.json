@@ -1,0 +1,67 @@
+{
+  "$schema": "./schema.json",
+  "name": "surface-contacts",
+  "feature": "feet.plant",
+  "description": "A foot and a hand held on a box's side (roadmap 161000): one undo step each. The hold is on the document: it survives a save and reload, an AI fill and a key move, and physics keeps the point where it was. Taking the hold out removes it.",
+  "script": [
+    { "command": "clip.new", "params": { "name": "Wall", "group": "Mine" }, "expect": { "id": "Mine/Wall" } },
+    { "command": "surface.add", "params": { "width": 2.0, "depth": 0.5, "top": 2.0 } },
+    { "command": "frame.set", "params": { "frame": 0 } },
+    { "command": "pose.set_root", "params": { "root": [0, -0.6, 1.5] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "pose.set_root", "params": { "root": [0, -0.55, 1.6] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "layers.list", "params": {}, "expect": { "contacts": [] } },
+    { "command": "feet.plant", "params": { "foot": "L", "from": 5, "to": 10 } },
+    { "command": "layers.list", "params": {}, "expect": { "contacts": [{ "bone": "foot.L", "from": 5, "to": 10 }] } },
+    { "command": "edit.undo" },
+    { "command": "layers.list", "params": {}, "expect": { "contacts": [] } },
+    { "command": "edit.redo" },
+    { "command": "layers.list", "params": {}, "expect": { "contacts": [{ "bone": "foot.L", "from": 5, "to": 10 }] } },
+    { "command": "feet.plant", "params": { "hand": "R", "from": 7, "to": 12 } },
+    {
+      "command": "layers.list",
+      "params": {},
+      "expect": { "contacts": [{ "bone": "foot.L", "from": 5, "to": 10 }, { "bone": "wrist.R", "from": 7, "to": 12 }] }
+    },
+    { "command": "edit.undo" },
+    { "command": "layers.list", "params": {}, "expect": { "contacts": [{ "bone": "foot.L", "from": 5, "to": 10 }] } },
+    { "command": "edit.redo" },
+    { "command": "frame.set", "params": { "frame": 5 } },
+    { "command": "bone.world", "params": { "bone": "foot.L" }, "expect": { "position": [0.1766242, -0.5094615, 0.588783] } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "bone.world", "params": { "bone": "foot.L" }, "expect": { "position": [0.1766242, -0.5094615, 0.588783] } },
+    { "command": "clip.save", "params": {}, "expect": { "id": "Mine/Wall" } },
+    { "command": "clip.new", "params": { "name": "Other", "group": "Mine" } },
+    { "command": "layers.list", "params": {}, "expect": { "contacts": [] } },
+    { "command": "clip.open", "params": { "id": "Mine/Wall" } },
+    {
+      "command": "layers.list",
+      "params": {},
+      "expect": { "contacts": [{ "bone": "foot.L", "from": 5, "to": 10 }, { "bone": "wrist.R", "from": 7, "to": 12 }] }
+    },
+    { "command": "key.move", "params": { "from": 20, "to": 24 } },
+    {
+      "command": "layers.list",
+      "params": {},
+      "expect": { "contacts": [{ "bone": "foot.L", "from": 5, "to": 10 }, { "bone": "wrist.R", "from": 7, "to": 12 }] }
+    },
+    { "command": "frame.set", "params": { "frame": 18 } },
+    { "command": "ai.fill", "params": {} },
+    {
+      "command": "layers.list",
+      "params": {},
+      "expect": { "contacts": [{ "bone": "foot.L", "from": 5, "to": 10 }, { "bone": "wrist.R", "from": 7, "to": 12 }] }
+    },
+    { "command": "feet.plant", "params": { "foot": "L", "from": 5, "to": 10, "on": false } },
+    { "command": "layers.list", "params": {}, "expect": { "contacts": [{ "bone": "wrist.R", "from": 7, "to": 12 }] } },
+    { "command": "feet.plant", "params": { "hand": "R", "from": 7, "to": 12, "on": false } },
+    { "command": "layers.list", "params": {}, "expect": { "contacts": [] } }
+  ],
+  "errors": [
+    { "command": "feet.plant", "params": { "from": 5, "to": 10 } },
+    { "command": "feet.plant", "params": { "foot": "L", "hand": "R", "from": 5, "to": 10 } },
+    { "command": "feet.plant", "params": { "hand": "X", "from": 5, "to": 10 } }
+  ]
+}

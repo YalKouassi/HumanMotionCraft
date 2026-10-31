@@ -1289,7 +1289,8 @@ Inputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `foot` | one of L \| R | yes |  | which foot |
+| `foot` | one of L \| R |  |  | which foot (this or hand) |
+| `hand` | one of L \| R |  |  | which hand (this or foot) |
 | `from` | integer | yes | 0 to 10000000 | first frame |
 | `to` | integer | yes | 0 to 10000000 | last frame |
 | `on` | bool |  |  | plant (default) or take the plant's in-between keys out |
@@ -1570,6 +1571,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `layer.bake`: Bake layers down
@@ -1589,6 +1591,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 | `baked` | integer | yes |  | keys written |
 
@@ -1609,6 +1612,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `layer.edit`: Edit layer
@@ -1628,6 +1632,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `layer.move`: Move layer
@@ -1648,6 +1653,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `layer.plan`: Plan travel again
@@ -1667,6 +1673,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `layer.set`: Layer settings
@@ -1701,6 +1708,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `layer.solo`: Solo layer
@@ -1721,6 +1729,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `layer.travel`: Travel between keys
@@ -1744,6 +1753,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 | `i` | integer | yes |  | the travel layer |
 
@@ -1786,6 +1796,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ## library
@@ -2232,6 +2243,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `physics.solve`: Physics pass result
@@ -2959,6 +2971,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `surface.delete`: Delete box
@@ -2978,6 +2991,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ### `surface.set`: Box settings
@@ -3003,6 +3017,7 @@ Outputs:
 | `layers` | JSON | yes |  | [{i, name, source, link, part, mode, weight, offset, speed, loop, muted, keys, edit, start, end, fade, gait, waypoints, moves, steps, missing}] |
 | `edit` | integer | yes |  | the layer keys go on |
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
+| `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
 
 ## text

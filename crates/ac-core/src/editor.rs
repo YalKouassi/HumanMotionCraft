@@ -67,12 +67,13 @@ impl Document {
         }
         let fr: Vec<f64> = (0..n).map(|f| f as f64).collect();
         let (rots, roots) = self.clip.sample_with(&fr, &self.links)?;
-        let report = crate::physics::solve(
+        let report = crate::physics::solve_held(
             &self.skeleton,
             &rots,
             &roots,
             self.clip.fps,
             &self.clip.surfaces,
+            &self.clip.contacts,
             self.limits.as_deref(),
         )?;
         let c = std::sync::Arc::new(crate::document::PhysicsCache {

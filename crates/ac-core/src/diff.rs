@@ -214,6 +214,7 @@ fn setting_changes(b: &Document, a: &Document) -> Vec<&'static str> {
         ("name", cb.name != ca.name),
         ("group", cb.group != ca.group),
         ("surfaces", cb.surfaces != ca.surfaces),
+        ("contacts", cb.contacts != ca.contacts),
         ("pins", b.pins != a.pins),
         ("locked", b.locked != a.locked),
         ("parts", b.custom_parts != a.custom_parts),

@@ -241,7 +241,16 @@ fn layers_list(doc: &mut Document, _: &P) -> Out {
             })
         })
         .collect();
-    Ok(json!({ "layers": list, "edit": doc.clip.edit, "surfaces": surfaces, "physics": doc.clip.physics }))
+    let contacts: Vec<Value> = doc
+        .clip
+        .contacts
+        .iter()
+        .map(|c| json!({ "bone": c.bone, "from": c.from, "to": c.to, "at": c.at }))
+        .collect();
+    Ok(json!({
+        "layers": list, "edit": doc.clip.edit, "surfaces": surfaces, "contacts": contacts,
+        "physics": doc.clip.physics,
+    }))
 }
 
 fn part_names(p: &P) -> Vec<String> {

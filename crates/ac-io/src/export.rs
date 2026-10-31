@@ -507,7 +507,15 @@ pub fn export(
         let fr: Vec<f64> = (0..n).map(|f| f as f64).collect();
         let (mut rots, mut roots) = it.clip.sample_below(&fr, it.clip.layers.len(), it.links)?;
         if it.clip.physics {
-            let r = ac_core::physics::solve(sk, &rots, &roots, it.clip.fps, &it.clip.surfaces, limits)?;
+            let r = ac_core::physics::solve_held(
+                sk,
+                &rots,
+                &roots,
+                it.clip.fps,
+                &it.clip.surfaces,
+                &it.clip.contacts,
+                limits,
+            )?;
             (rots, roots) = (r.rotations, r.roots);
         }
         if root == "in_place" {

@@ -166,6 +166,7 @@ pub fn load_clip(text_in: &str) -> R<Clip> {
         });
     }
     clip.markers = markers_of(d.get("markers"))?;
+    clip.contacts = contacts_of(&names, d.get("contacts"))?;
     if let Some(base) = clip.layers.first_mut() {
         base.keys = keys_of(&names, d.get("keys"))?;
     }
@@ -242,6 +243,32 @@ pub fn load_clip(text_in: &str) -> R<Clip> {
     Ok(clip)
 }
 
+/// The held hands and feet (absent in older files: none).
+fn contacts_of(names: &[String], v: Option<&Value>) -> R<Vec<crate::clip::Contact>> {
+    let mut out = Vec::new();
+    for (i, c) in v.and_then(Value::as_array).into_iter().flatten().enumerate() {
+        let c = c
+            .as_object()
+            .ok_or_else(|| format!("contact {i}: expected an object"))?;
+        let bone = text(c, "bone");
+        if !names.contains(&bone) || crate::physics::held_limb(&bone).is_none() {
+            return Err(format!("contact {i}: {bone:?} is not a hand or foot of the rig"));
+        }
+        let frame = |name: &str| {
+            c.get(name)
+                .and_then(Value::as_i64)
+                .ok_or_else(|| format!("contact {i}: {name}"))
+        };
+        let (from, to) = (frame("from")?, frame("to")?);
+        if to < from {
+            return Err(format!("contact {i}: frames {from}–{to}"));
+        }
+        let at = arr::<3>(c.get("at").unwrap_or(&Value::Null), "contact at")?;
+        out.push(crate::clip::Contact { bone, from, to, at });
+    }
+    Ok(out)
+}
+
 /// The timeline markers (absent in older files: none). A file with two on one frame, or a bad
 /// name, was not written by us and is refused.
 fn markers_of(v: Option<&Value>) -> R<Vec<crate::markers::Marker>> {
@@ -316,6 +343,15 @@ pub fn save_clip(clip: &Clip) -> String {
     }
     if !clip.markers.is_empty() {
         d.insert("markers".into(), crate::markers::json(clip));
+    }
+    if !clip.contacts.is_empty() {
+        d.insert(
+            "contacts".into(),
+            clip.contacts
+                .iter()
+                .map(|c| json!({"bone": c.bone, "from": c.from, "to": c.to, "at": c.at}))
+                .collect(),
+        );
     }
     d.insert("fps".into(), json!(clip.fps));
     d.insert("loop".into(), json!(clip.loop_));

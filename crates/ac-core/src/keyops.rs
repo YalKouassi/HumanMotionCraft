@@ -2,6 +2,7 @@
 //! dope sheet rows), copying and pasting several keys (mirrored or not), and planting one foot
 //! over a span of frames (the foot-contact strip).
 
+use crate::clip::Contact;
 use std::sync::Arc;
 
 use crate::clip::{Interp, Key, KeySource, LayerMode, LayerSource};
@@ -166,10 +167,21 @@ impl Document {
         Ok((pasted, replaced))
     }
 
-    /// Plant one foot (`L` or `R`) through frames `a..=b`: its head held at its mean position
-    /// there, the leg bent to reach it. Frames with a key get the leg's new rotations; frames
-    /// without get an in-between key tagged [`PLANT_TAG`]. Returns the frames changed.
+    /// Plant one foot (`L` or `R`); see [`Document::plant`].
     pub fn plant_foot(&mut self, side: &str, a: i64, b: i64) -> R<usize> {
+        self.plant("leg", "foot", side, a, b)
+    }
+
+    /// Hold one hand (`L` or `R`); see [`Document::plant`].
+    pub fn plant_hand(&mut self, side: &str, a: i64, b: i64) -> R<usize> {
+        self.plant("arm", "wrist", side, a, b)
+    }
+
+    /// Hold a hand or foot through frames `a..=b`, at any height: its head held at its mean
+    /// position there, the limb bent to reach it. Frames with a key get the limb's new rotations;
+    /// frames without get an in-between key tagged [`PLANT_TAG`]. The hold is recorded on the clip
+    /// ([`crate::clip::Contact`]), so the physics pass keeps it. Returns the frames changed.
+    fn plant(&mut self, limb: &str, end: &str, side: &str, a: i64, b: i64) -> R<usize> {
         self.check_plant(side, a, b)?;
         let additive = self
             .clip
@@ -183,9 +195,8 @@ impl Document {
             return Err("the animation has no keys".into());
         }
         let sk = self.skeleton.clone();
-        let foot = sk
-            .bone(&format!("foot.{side}"))
-            .ok_or_else(|| format!("the rig has no foot.{side}"))?;
+        let bone = format!("{end}.{side}");
+        let foot = sk.bone(&bone).ok_or_else(|| format!("the rig has no {bone}"))?;
         let frames: Vec<f64> = (a..=b).map(|f| f as f64).collect();
         let (rots, roots) = self.clip.sample_with(&frames, &self.links)?;
         let mut sum = [0.0; 3];
@@ -197,7 +208,7 @@ impl Document {
         let mut changed = 0;
         for (i, (r, o)) in rots.iter().zip(&roots).enumerate() {
             let f = a + i as i64;
-            let leg = format!("leg.{side}");
+            let leg = format!("{limb}.{side}");
             let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
             let solved = ik::two_bone(&sk, r, *o, &leg, at, pole, None).map_err(|e| e.to_string())?;
             let legs: Vec<usize> = (0..solved.len()).filter(|&j| solved.get(j) != r.get(j)).collect();
@@ -225,13 +236,30 @@ impl Document {
                 self.clip.set_key(k)?;
             }
         }
+        // the new hold replaces any of this limb it overlaps
+        self.clip
+            .contacts
+            .retain(|c| !(c.bone == bone && c.from <= b && a <= c.to));
+        self.clip.contacts.push(Contact {
+            bone,
+            from: a,
+            to: b,
+            at,
+        });
+        self.clip.contacts.sort_by_key(|c| (c.from, c.to));
         self.go_to(self.frame)?;
         Ok(changed)
     }
 
-    /// Take a plant out: the in-between keys a plant (or `feet.lock`) wrote on frames `a..=b`
-    /// go. Keys of yours there keep their planted legs (undo restores them). Returns how many.
+    /// Take a foot's plant out; see [`Document::unplant_limb`].
     pub fn unplant(&mut self, side: &str, a: i64, b: i64) -> R<usize> {
+        self.unplant_limb("foot", side, a, b)
+    }
+
+    /// Take a hold out: the in-between keys a plant (or `feet.lock`) wrote on frames `a..=b` go,
+    /// and this limb's holds that overlap them. Keys of yours there keep their planted limbs
+    /// (undo restores them). Returns how many keys went.
+    pub fn unplant_limb(&mut self, end: &str, side: &str, a: i64, b: i64) -> R<usize> {
         self.check_plant(side, a, b)?;
         let e = self.clip.edit;
         let lay = self.clip.layers.get_mut(e).ok_or("no layer to edit")?;
@@ -239,7 +267,12 @@ impl Document {
         lay.keys
             .retain(|k| !(k.source == KeySource::Ai && k.model == PLANT_TAG && a <= k.frame && k.frame <= b));
         let n = before - lay.keys.len();
-        if n == 0 {
+        let bone = format!("{end}.{side}");
+        let holds = self.clip.contacts.len();
+        self.clip
+            .contacts
+            .retain(|c| !(c.bone == bone && c.from <= b && a <= c.to));
+        if n == 0 && self.clip.contacts.len() == holds {
             return Err(format!("nothing is planted on frames {a}–{b}"));
         }
         self.go_to(self.frame)?;

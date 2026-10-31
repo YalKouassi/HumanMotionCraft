@@ -133,7 +133,8 @@ pub static SPECS: &[CommandSpec] = &[
         .icon("foot")
         .undoable()
         .inputs(&[
-            ParamSpec::new("foot", Kind::Choice(&["L", "R"]), "which foot").required(),
+            ParamSpec::new("foot", Kind::Choice(&["L", "R"]), "which foot (this or hand)"),
+            ParamSpec::new("hand", Kind::Choice(&["L", "R"]), "which hand (this or foot)"),
             FROM,
             TO,
             ParamSpec::new(
@@ -267,13 +268,21 @@ fn keys_paste(doc: &mut Document, p: &P) -> Out {
 }
 
 fn feet_plant(doc: &mut Document, p: &P) -> Out {
-    let foot = cmd::text(p, "foot").unwrap_or_default().to_string();
     let (a, b) = (int(p, "from")?, int(p, "to")?);
+    let (hand, side) = match (cmd::text(p, "foot"), cmd::text(p, "hand")) {
+        (Some(side), None) => (false, side.to_string()),
+        (None, Some(side)) => (true, side.to_string()),
+        _ => return Err("give foot or hand, one of them".into()),
+    };
     if p.get("on").and_then(Value::as_bool).unwrap_or(true) {
-        let n = doc.plant_foot(&foot, a, b)?;
+        let n = if hand {
+            doc.plant_hand(&side, a, b)?
+        } else {
+            doc.plant_foot(&side, a, b)?
+        };
         Ok(json!({ "frames": n, "notes": [] }))
     } else {
-        let n = doc.unplant(&foot, a, b)?;
+        let n = doc.unplant_limb(if hand { "wrist" } else { "foot" }, &side, a, b)?;
         Ok(json!({
             "frames": n,
             "notes": [format!(

@@ -3087,7 +3087,15 @@
                       "L",
                       "R"
                     ],
-                    "description": "which foot"
+                    "description": "which foot (this or hand)"
+                  },
+                  "hand": {
+                    "type": "string",
+                    "enum": [
+                      "L",
+                      "R"
+                    ],
+                    "description": "which hand (this or foot)"
                   },
                   "from": {
                     "type": "integer",
@@ -7143,6 +7151,7 @@
             "clip.move",
             "clip.new",
             "clip.open",
+            "clip.picture",
             "clip.possible",
             "clip.range",
             "clip.rename",
@@ -7151,7 +7160,6 @@
             "clip.save_as",
             "clip.sheet",
             "clip.video",
-            "clip.picture",
             "clip.write",
             "community.account",
             "community.browse",

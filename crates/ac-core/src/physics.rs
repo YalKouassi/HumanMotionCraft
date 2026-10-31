@@ -2,7 +2,9 @@
 //! pass had known bugs); every rule is simple enough to check by hand. In order:
 //!
 //! 1. **Support**: no foot goes below what it stands over (the floor, z = 0, or the top of a box
-//!    under it). A frame whose lowest foot point is below is lifted until it touches.
+//!    under it). A frame whose lowest foot point is below is lifted until it touches. A point that
+//!    came into a box's footprint from the side, below its top, isn't over that box until it leaves
+//!    ([`sides`]): a box's sides don't lift anyone.
 //! 2. **Contact**: a foot point is planted when it is within [`NEAR`] of the ground and moves
 //!    (as keyed) slower than [`PLANT_SPEED`] across it; a swinging foot that skims the floor is not.
 //!    A frame is on the ground when any foot point is within [`NEAR`] (planted or not).
@@ -31,11 +33,18 @@
 //!    by [`ABSORB_TIME`] or the next take-off. Keys whose hips already dip [`KEYED_DIP`] after
 //!    landing compress on their own and aren't doubled.
 //!
+//! A **held contact** (`feet.plant`, [`crate::clip::Contact`]) is a hand or foot held at a point of the world for
+//! a run of frames, at any height. Those frames are on the ground, so flight splits at them, and take
+//! off from the contact's last frame; the fulcrum rule aims the body at the point, and balance and
+//! landings leave those frames alone. Last of all the limb is bent to reach the point, and if it
+//! can't, the body moves until it does: the point doesn't move ([`hold`]).
+//!
 //! Foot points are the heads of the toe joints and a heel under each ankle. The mass model is
 //! de Leva's (1996) segment table. Deterministic, f64.
 
-use crate::clip::Surface;
+use crate::clip::{Contact as Held, Surface};
 use crate::fullbody::{self, Goal, Limits};
+use crate::ik;
 use crate::quat::{self, Mat3, Quat, Vec3};
 use crate::rig::Skeleton;
 
@@ -140,6 +149,83 @@ pub fn ground(surfaces: &[Surface], x: f64, y: f64) -> f64 {
         .fold(0.0, f64::max)
 }
 
+/// Height of what holds a foot point up: as [`ground`], leaving out the boxes in `sides`, a bit for
+/// each of `surfaces` (see [`sides`]).
+fn support(surfaces: &[Surface], x: f64, y: f64, sides: u64) -> f64 {
+    surfaces
+        .iter()
+        .enumerate()
+        .filter(|(i, s)| s.contains(x, y) && (*i >= 64 || sides & (1 << i) == 0))
+        .map(|(_, s)| s.top)
+        .fold(0.0, f64::max)
+}
+
+/// For each frame and foot point, a bit for each box the point is inside having come in through its
+/// side: into the footprint below the top, on a frame after the first. It stays set until the point
+/// leaves the footprint.
+fn sides(pts: &[Vec<Vec3>], surfaces: &[Surface]) -> Vec<Vec<u64>> {
+    let points = pts.first().map_or(0, Vec::len);
+    let mut out = vec![vec![0u64; points]; pts.len()];
+    for k in 0..points {
+        for (i, s) in surfaces.iter().enumerate().take(64) {
+            let (mut was_in, mut side) = (false, false);
+            for (f, ps) in pts.iter().enumerate() {
+                let p = ps[k];
+                let inside = s.contains(p[0], p[1]);
+                side = inside && if was_in { side } else { f > 0 && p[2] < s.top };
+                was_in = inside;
+                if side {
+                    out[f][k] |= 1 << i;
+                }
+            }
+        }
+    }
+    out
+}
+
+/// The limb a held contact's bone ends: `foot.L` is the end of `leg.L`, `wrist.R` of `arm.R`.
+pub fn held_limb(bone: &str) -> Option<String> {
+    let (end, side) = bone.split_once('.')?;
+    let limb = match end {
+        "foot" => "leg",
+        "wrist" => "arm",
+        _ => return None,
+    };
+    matches!(side, "L" | "R").then(|| format!("{limb}.{side}"))
+}
+
+/// Each frame's held contacts: (bone, limb, the point).
+fn held_frames(sk: &Skeleton, contacts: &[Held], n: usize) -> R<Vec<Vec<(usize, String, Vec3)>>> {
+    let mut held = vec![Vec::new(); n];
+    for c in contacts {
+        let limb = held_limb(&c.bone).ok_or_else(|| format!("{:?} can't be held", c.bone))?;
+        let bone = sk
+            .bone(&c.bone)
+            .ok_or_else(|| format!("the rig has no {}", c.bone))?;
+        for f in c.from.max(0)..=c.to.min(n as i64 - 1) {
+            held[f as usize].push((bone, limb.clone(), c.at));
+        }
+    }
+    Ok(held)
+}
+
+/// Put each held point back where it belongs: the limb bent to it, and if it can't reach, the body
+/// moved until it does. Twice, since moving the body for one limb moves another's.
+fn hold(sk: &Skeleton, held: &[(usize, String, Vec3)], rots: &mut Vec<Quat>, root: &mut Vec3) -> R<()> {
+    for _ in 0..2 {
+        for (bone, limb, at) in held {
+            let pole = ik::own_pole(sk, rots, *root, limb).map_err(|e| e.to_string())?;
+            *rots = ik::two_bone(sk, rots, *root, limb, *at, pole, None).map_err(|e| e.to_string())?;
+            let (_, p) = sk.fk(rots, *root).map_err(|e| e.to_string())?;
+            let now = *p.get(*bone).ok_or("no held joint")?;
+            for axis in 0..3 {
+                root[axis] += (at[axis] - now[axis]) / sk.hip_height;
+            }
+        }
+    }
+    Ok(())
+}
+
 /// One foot: its ankle, its toe joints, and the heel's offset from the ankle in the foot's frame.
 struct Foot {
     ankle: usize,
@@ -203,10 +289,15 @@ impl Body {
     /// Whether the body rests on the ground on more than its feet (it sits, kneels, crawls or lies).
     /// The feet then don't hold it up, so the fulcrum and balance rules don't apply.
     pub fn rests(&self, pos: &[Vec3], surfaces: &[Surface]) -> bool {
-        self.resting
-            .iter()
-            .filter_map(|&j| pos.get(j))
-            .any(|p| p[2] - ground(surfaces, p[0], p[1]) < RESTING)
+        // a joint deep inside a box isn't resting on its top: only the floor counts under it
+        self.resting.iter().filter_map(|&j| pos.get(j)).any(|p| {
+            let under = surfaces
+                .iter()
+                .filter(|s| s.contains(p[0], p[1]) && s.top - p[2] < RESTING)
+                .map(|s| s.top)
+                .fold(0.0, f64::max);
+            p[2] - under < RESTING
+        })
     }
 
     /// Foot points (toe heads, then the heel, per foot) from a posed rig.
@@ -628,6 +719,19 @@ pub fn solve(
     surfaces: &[Surface],
     limits: Option<&Limits>,
 ) -> R<Report> {
+    solve_held(sk, rots, roots, fps, surfaces, &[], limits)
+}
+
+/// The physics pass with hands and feet held: see the module's notes on held contacts.
+pub fn solve_held(
+    sk: &Skeleton,
+    rots: &[Vec<Quat>],
+    roots: &[Vec3],
+    fps: f64,
+    surfaces: &[Surface],
+    contacts: &[Held],
+    limits: Option<&Limits>,
+) -> R<Report> {
     let n = rots.len();
     if n != roots.len() {
         return Err("rotations and roots differ in length".into());
@@ -646,8 +750,12 @@ pub fn solve(
     let mut pts: Vec<Vec<Vec3>> = Vec::with_capacity(n);
     let mut coms: Vec<Vec3> = Vec::with_capacity(n);
     let mut rests: Vec<bool> = Vec::with_capacity(n);
-    for (r, o) in rots.iter().zip(roots) {
+    let held = held_frames(sk, contacts, n)?;
+    // where each held joint is keyed, per frame
+    let mut keyed_held: Vec<Vec<Vec3>> = Vec::with_capacity(n);
+    for (f, (r, o)) in rots.iter().zip(roots).enumerate() {
         let (w, p) = sk.fk(r, *o).map_err(|e| e.to_string())?;
+        keyed_held.push(held[f].iter().filter_map(|(b, ..)| p.get(*b).copied()).collect());
         pts.push(body.points(&w, &p));
         coms.push(body.com(&p));
         rests.push(body.rests(&p, surfaces));
@@ -665,12 +773,19 @@ pub fn solve(
         })
         .collect();
     let stands = standing(&pts, &coms, fps);
-    // 1. support
+    let side_of = sides(&pts, surfaces);
+    // 1. support (a held foot is where it was put, not on what is under it)
     let mut lifted_frames = Vec::new();
     for (f, (o, ps)) in out.iter_mut().zip(pts.iter_mut()).enumerate() {
         let low = ps
             .iter()
-            .map(|p| p[2] - ground(surfaces, p[0], p[1]))
+            .enumerate()
+            .filter(|(k, _)| {
+                !held[f]
+                    .iter()
+                    .any(|(b, ..)| *b == body.feet[body.foot_of(*k)].ankle)
+            })
+            .map(|(k, p)| p[2] - support(surfaces, p[0], p[1], side_of[f][k]))
             .fold(f64::INFINITY, f64::min);
         if low < 0.0 {
             o[2] -= low / h;
@@ -698,10 +813,21 @@ pub fn solve(
     for f in 0..n {
         let mut sum = [0.0; 2];
         let mut count = 0.0;
+        // a held point is the fulcrum, wherever the floor is
+        for ((.., at), now) in held[f].iter().zip(&keyed_held[f]) {
+            on[f] = true;
+            sum[0] += at[0] - now[0];
+            sum[1] += at[1] - now[1];
+            count += 1.0;
+        }
         for (k, p) in pts[f].iter().enumerate() {
             let (x, y) = (p[0] + off[0], p[1] + off[1]);
-            let low = p[2] - ground(surfaces, x, y) < NEAR;
+            let low = p[2] - support(surfaces, x, y, side_of[f][k]) < NEAR;
             on[f] |= low || rests[f];
+            if !held[f].is_empty() {
+                anchors[k] = None;
+                continue;
+            }
             let down = phases[body.foot_of(k)][f].down();
             if low && down && !rests[f] && point_speed[f][k] < PLANT_SPEED {
                 let a = *anchors[k].get_or_insert([x, y]);
@@ -727,7 +853,7 @@ pub fn solve(
     // 4. balance, on the ground and standing; each move fades out either side
     let mut balanced = Vec::new();
     let mut moved = vec![[0.0f64; 2]; n];
-    for f in (0..n).filter(|&f| on[f] && stands[f] && !rests[f]) {
+    for f in (0..n).filter(|&f| on[f] && stands[f] && !rests[f] && held[f].is_empty()) {
         if let Some(b) = balance(sk, &body, &out_rots[f], out[f], surfaces)?
             && !b.inside
         {
@@ -737,7 +863,7 @@ pub fn solve(
             balanced.push(f);
         }
     }
-    for f in (0..n).filter(|&f| on[f] && !rests[f]) {
+    for f in (0..n).filter(|&f| on[f] && !rests[f] && held[f].is_empty()) {
         if balanced.binary_search(&f).is_err() {
             let by = faded(&balanced, &moved, f);
             if by[0].hypot(by[1]) > 1e-5 {
@@ -787,7 +913,7 @@ pub fn solve(
         }
         let v = arriving.min(MAX_ABSORB_SPEED);
         for f in (b + 1)..last {
-            if rests[f] {
+            if rests[f] || !held[f].is_empty() {
                 continue;
             }
             let t = (f - b) as f64 / fps;
@@ -796,6 +922,9 @@ pub fn solve(
             let dip = v * t * (-t / ABSORB_TAU).exp() * window;
             lower_hips(sk, &body, (&mut out_rots[f], &mut out[f]), dip, surfaces, limits)?;
         }
+    }
+    for (f, h) in held.iter().enumerate().filter(|(_, h)| !h.is_empty()) {
+        hold(sk, h, &mut out_rots[f], &mut out[f])?;
     }
     Ok(Report {
         rotations: out_rots,

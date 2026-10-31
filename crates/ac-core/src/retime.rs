@@ -84,6 +84,15 @@ pub fn insert(clip: &mut Clip, at: i64, count: i64) -> R<Retimed> {
     for m in clip.markers.iter_mut().filter(|m| m.frame >= at) {
         m.frame += count;
     }
+    // frames put inside a held range are held too
+    for c in &mut clip.contacts {
+        if c.from >= at {
+            c.from += count;
+        }
+        if c.to >= at {
+            c.to += count;
+        }
+    }
     Ok(out)
 }
 
@@ -142,6 +151,25 @@ pub fn delete(clip: &mut Clip, at: i64, count: i64) -> R<Retimed> {
     clip.markers.retain(|m| !inside(m.frame));
     for m in clip.markers.iter_mut().filter(|m| m.frame >= end) {
         m.frame -= count;
+    }
+    // a held range loses the frames that went, and goes when none are left
+    let left = |f: i64| if f >= end { f - count } else { f.min(at) };
+    let held = clip.contacts.len();
+    clip.contacts.retain(|c| !(at <= c.from && c.to < end));
+    if clip.contacts.len() < held {
+        out.notes.push(format!(
+            "{} held contacts removed with the frames",
+            held - clip.contacts.len()
+        ));
+    }
+    for c in &mut clip.contacts {
+        // the last frame kept, when the range ended among those deleted
+        c.to = if c.to >= at && c.to < end {
+            at - 1
+        } else {
+            left(c.to)
+        };
+        c.from = left(c.from);
     }
     if !out.markers_removed.is_empty() {
         out.notes.push(format!(

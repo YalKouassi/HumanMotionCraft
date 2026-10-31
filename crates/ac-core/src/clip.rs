@@ -273,6 +273,19 @@ pub struct Clip {
     pub surfaces: Vec<Surface>,
     /// Named markers on the timeline, by frame (`crate::markers`).
     pub markers: Vec<crate::markers::Marker>,
+    /// Hands and feet held in place (`feet.plant`), for the physics pass.
+    pub contacts: Vec<Contact>,
+}
+
+/// A hand or foot held at one point of the world through frames `from..=to`, at any height: on the
+/// floor, or on the side of a box (`crate::physics`).
+#[derive(Debug, Clone, PartialEq)]
+pub struct Contact {
+    /// `foot.L`, `foot.R`, `wrist.L` or `wrist.R`.
+    pub bone: String,
+    pub from: i64,
+    pub to: i64,
+    pub at: Vec3,
 }
 
 /// Rotations `[frame][bone]` and root offsets `[frame]`.
@@ -308,6 +321,7 @@ impl Clip {
             physics: true,
             surfaces: Vec::new(),
             markers: Vec::new(),
+            contacts: Vec::new(),
         }
     }
 
