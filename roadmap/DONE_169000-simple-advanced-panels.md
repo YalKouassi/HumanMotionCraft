@@ -1,6 +1,6 @@
 # Advanced reopens what Simple closed
 
-- **Status:** built, waiting for the owner
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** the 2026-10-31 review of 119500 (findings 4 and 5); the owner's decision
 
@@ -31,3 +31,6 @@ builds it and takes the screenshots).
 
 ## Build check (2026-10-31)
 Screenshots for the owner: `target/shots/2026-10-31/simple-advanced/` in the main checkout. The switch back was looked at and says "1 panel back".
+
+## Closed
+Accepted by the owner (2026-10-31).

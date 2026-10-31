@@ -1,6 +1,6 @@
 # Export dialog: product names allowed, root mode remembered
 
-- **Status:** built, waiting for the owner
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** the 2026-10-31 review of 122500 (findings 3 and 4); the owner's decision
 
@@ -22,3 +22,6 @@ soon as they are chosen, not only on export, so "choose ground and restart" hold
 the profile moved with it because a preset sets both. Tests: `the_export_root_is_remembered_and_an_older_file_has_none`
 (`files/state.rs`), `the_dialog_opens_on_the_root_chosen_last` (`files/export.rs`). The restart itself
 has not been tried in the window.
+
+## Closed
+Accepted by the owner (2026-10-31).

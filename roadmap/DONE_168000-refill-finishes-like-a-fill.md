@@ -1,6 +1,6 @@
 # A key move or copy finishes its refill like a fill
 
-- **Status:** built, waiting for the owner
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** the 2026-10-31 review of 121000 (finding 5); the owner's decision
 
@@ -24,3 +24,6 @@ Written without a build: neither has been run yet.
 
 ## Build check (2026-10-31)
 A move, and a copy into a long fill, match a fresh fill to 1e-6. A copy beside short fills matches to 2e-3, not exactly: the span before it stays, so its frames next to the shared key are eased a second time (measured at most 0.0015 in a rotation, 0.0002 in the root).
+
+## Closed
+Accepted by the owner (2026-10-31).

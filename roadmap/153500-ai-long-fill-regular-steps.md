@@ -1,6 +1,6 @@
 # Long fills keep regular steps
 
-- **Status:** not started; the acceptance below is proposed and waits for the owner to agree; training waits for the owner's word
+- **Status:** not started; step 1 agreed by the owner (2026-10-31); the fix is on hold, no training without the owner's word
 - **Requires:** none
 - **Source:** the owner's review of the long-fill video (2026-10-31); measured in 167000
 
@@ -22,9 +22,10 @@ model.
 Proposed order: before 154000, because add-ons are tied to their base's exact weights and would have to be
 redone after a base retrain. 154000's prerequisites stay as they are until the owner agrees.
 
-## Acceptance (proposed)
+## Acceptance
 - **Measure:** on a fill, feet alternate and no step is under half the fill's median step length. The fixture
-  fails on the half step above (y values pinned from the shipped model) until a model passes.
+  pins today's half step as the known result, so the gate stays usable, and flips to the pass condition when a
+  model passes.
 - **Baseline:** the result lists how many held-out long walking fills fail on the shipped model.
 - **Fix:** the same fills pass on the new model, with anchors no denser than today's and slide on
   `ai-fill-long-gap` still under 2 cm (167000).

@@ -1,6 +1,6 @@
 # Feet stay planted on long fills
 
-- **Status:** in progress: the owner rejected the video for a half step (2026-10-31); how to fix it waits for the owner
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** the 2026-10-31 review of 121000 (finding 4); the owner's decision
 
@@ -47,3 +47,6 @@ The anchor segment plays at 1.5x, so a step is 11 frames and 30 frames is 2.7 st
 a step count that doesn't divide evenly. Anchors on every step give the pattern back, but then most of the
 motion is the library clip's and little is the model's, which sits badly with the rule that AI Fill is AI
 and doesn't go through the Walk loop. None of these trials is in the code.
+
+## Closed
+Accepted by the owner (2026-10-31), closed on the foot slide: 1.894 cm against the 2 cm line. The half step the owner saw moves to 153500.

@@ -1,6 +1,6 @@
 # Remove the undocumented preset aliases
 
-- **Status:** built, waiting for the owner
+- **Status:** done (2026-10-31)
 - **Requires:** none
 - **Source:** the 2026-10-31 review of 139000 (finding 3); the owner's decision
 
@@ -18,3 +18,6 @@ other separators are all refused. `ai-settings-presets` passes the three and ref
 spellings. Fixtures can't check a message, so `a_preset_alias_is_refused_listing_the_three`
 (`crates/ac-core/tests/commands.rs`) checks that the refusal lists the three. The panel only sends
 the exact names, and `docs/commands.md` and the schema don't change.
+
+## Closed
+Accepted by the owner (2026-10-31).
