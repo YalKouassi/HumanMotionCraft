@@ -4,7 +4,7 @@
 //!
 //! The motion comes from an optional helper process that `tools/textmotion/setup_textmotion.py`
 //! installs outside the repo ([`install`], [`helper`]; the app runs that setup itself through
-//! `text.install`, [`setup`]); without it every command but `text.helper` and `text.install`
+//! `text.install`, [`setup`]; what every such helper shares is `ac-helper`); without it every command but `text.helper` and `text.install`
 //! refuses and says how to install it. The frames it makes are AI keys tagged
 //! `"text <prompt>"` ([`ac_core::edits::GENERATED`]), so an edit next to them leaves them as they
 //! are and says so. [`engine`] is the seam: tests use a fake, and the window makes the motion off
@@ -23,7 +23,6 @@ pub mod helper;
 pub mod install;
 pub mod setup;
 pub mod stand_in;
-mod uv_fetch;
 
 use ac_core::Document;
 use ac_core::clip::{Clip, Interp, Key, KeySource, LayerMode, LayerSource};
@@ -293,7 +292,7 @@ fn whole_layer(clip: &Clip) -> Result<(), String> {
 
 /// `frames` frames (both ends) at `fps` fit in what the model makes at once.
 fn fits(frames: i64, fps: f64) -> Result<(), String> {
-    let n = ((frames - 1) as f64 * MODEL_FPS / fps).round() as i64 + 1;
+    let n = ac_helper::frames::model_frames(frames, fps, MODEL_FPS);
     if frames < 2 || n > MODEL_FRAMES {
         let most = (MODEL_FRAMES - 1) as f64 / MODEL_FPS;
         return Err(format!(

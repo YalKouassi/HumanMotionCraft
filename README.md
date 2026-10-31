@@ -127,6 +127,7 @@ the model loads, and seconds after that; the window stays usable while it works.
 | `crates/ac-io` | Library management, `.glb` animation export (`full` / `game` / `body` profiles), clip/pose serialization, and atomic file writes. |
 | `crates/ac-render` | `wgpu` renderer: GPU-skinned mannequin, joint/bone overlays, floor grid, scene boxes, onion-skin ghosts, and offscreen PNG readback. |
 | `crates/ac-cli` | Headless `ac` binary: command runner, script execution, fixture verification, image/video rendering, and stdio MCP server. |
+| `crates/ac-helper` | What the optional Python helpers share: the install folder, the setup run from the app with its progress, uv fetching, the JSON-lines helper process, the engine slot and cache, and the frame-rate fit. Depends only on `ac-core`. |
 | `crates/ac-textmotion` | Motion from text (`text.install`, `text.generate`, `text.fill`, `text.helper`) through the optional helper process. Depends only on `ac-core`. |
 | `crates/ac-media` | Video and pictures of the animation: `clip.video` (MP4 through ffmpeg, or GIF) and `clip.sheet` (contact sheets). |
 | `crates/ac-review` | The training-data review app (developers only, never shipped). |

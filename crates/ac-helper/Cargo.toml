@@ -1,0 +1,17 @@
+[package]
+name = "ac-helper"
+description = "What the optional Python helpers share: the install folder and install.json, the setup run from the app with its progress, uv fetching, the JSON-lines helper process, the engine slot and cache, and frame-rate fitting (no egui)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+ac-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "0.10"
+
+[lints]
+workspace = true

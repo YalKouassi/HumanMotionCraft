@@ -37,6 +37,7 @@ this file is the single source of agent rules.
 | `assets/` | the baked rig, limits, mannequin, built-in library, models (`MANIFEST.json`) | every file has a row in `ATTRIBUTION.md` |
 | `tests/fixtures/golden` | the earlier prototype's results on fixed inputs (parity) | checked in; the prototype is not public, so they can't be regenerated: never edit them or rewrite them from this repo's own output |
 | `fixtures/` | feature fixtures (JSON scripts of commands with hand-worked expectations) | never deleted to pass a check |
+| `crates/ac-helper` | what the optional Python helpers share: the install folder and `install.json` (`ac_helper::install`), the setup run from the app with its `== [n/N]` progress lines, Stop and resume (`ac_helper::setup`), `uv` fetching, the JSON-lines helper process (`ac_helper::process`), the one engine behind a lock with its cache of results (`ac_helper::slot`), and the frame-rate fit and reply reading (`ac_helper::frames`) | depends on `ac-core` only; threads and child processes (so not in `ac-core`); no UI; each helper crate keeps its own protocol, `Engine` seam and commands |
 | `crates/ac-textmotion` | motion from text: `text.install`, `text.helper`, `text.generate`, `text.fill`, through the optional helper process that `tools/textmotion/` installs; `Engine` is the seam (a fake in the tests) | depends on `ac-core` only; registered through `SessionBuilder::commands`; without the install `text.generate` and `text.fill` refuse and say how to install it |
 | `crates/ac-community` | the community library: `community.browse`, `.fetch`, `.install`, `.rate`, `.report`, `.verify`, `.share`, `.mine`, `.remove`, `.account`, through the server in `services/community/`; `Backend` is the seam (`Http` the live server, `Fake` the fixtures') | depends on `ac-core` and `ac-io`; registered through `SessionBuilder::commands`; with no backend connected (tests) every command refuses; fixture runs and `--screenshot` use the fake, never the network |
 | `training/` | Python: dataset retargeting, training, weight export and library clip cutting (`training/README.md`); data under `training/data/` is gitignored | the only Python in the repo besides `tools/drive_ui.py` and `tools/textmotion/`; never a runtime dependency |
@@ -46,7 +47,8 @@ this file is the single source of agent rules.
 
 Layering: `ac-core` → (`ac-ai`, `ac-io`) → (`ac-cli`, `ac-app`); `ac-render` stands on its own
 (`wgpu`, no egui) and is used by `ac-media`, `ac-cli` and `ac-app`; `ac-media` stands on `ac-core`
-and `ac-render` and is used by `ac-cli` and `ac-app`; `ac-textmotion` stands on `ac-core` and is
+and `ac-render` and is used by `ac-cli` and `ac-app`; `ac-helper` stands on `ac-core` and is
+used by the helper crates; `ac-textmotion` stands on `ac-core` and `ac-helper` and is
 used by `ac-cli` and `ac-app`; `ac-community` stands on `ac-core` and `ac-io` and is used by `ac-cli` and `ac-app`, which don't depend on each other. Only
 `ac-app` and the separate dev app `ac-review` depend on egui, eframe or winit (the owner
 chose a separate review exe, 2026-10-28, so the shipped app has no training buttons). The solver,

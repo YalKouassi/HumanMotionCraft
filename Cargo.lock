@@ -80,6 +80,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ac-helper"
+version = "0.1.1"
+dependencies = [
+ "ac-core",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "ac-io"
 version = "0.1.1"
 dependencies = [
@@ -136,9 +146,9 @@ name = "ac-textmotion"
 version = "0.1.1"
 dependencies = [
  "ac-core",
+ "ac-helper",
  "serde",
  "serde_json",
- "sha2",
 ]
 
 [[package]]

@@ -356,6 +356,18 @@ training/pyproject.toml tools/posefill` is clean.
   all what `ac-posefill` needs with the folder name and the ops changed: move them to a shared
   crate (or `ac-io`) first, in a behaviour-preserving commit, as the item says.
 
+### Shared Rust code moved (2026-10-31)
+The code `ac-textmotion` had that `ac-posefill` needs too now lives in the crate `ac-helper`
+(`crates/ac-helper`, on `ac-core` only): `install` (the folder and `install.json`, described by a
+`Kind`), `setup` (the `== [n/N]` feed, the setup run as a child with Stop and resume, described by
+a `Spec` and held by one `Installer` static per crate), `uv_fetch` (as it was), `process` (the
+JSON-lines helper process with the protocol check), `slot` (the one engine behind a lock, its
+progress line and the cache of results by request) and `frames` (the frame-rate fit and reading a
+reply's rotations and roots, checked finite and of the right shape). It is a crate, not a module
+of `ac-core`, because it spawns processes and threads, which `ac-core` never does. `ac-textmotion`
+keeps its own `Engine` trait, request, protocol ops and commands on top, and its tests and
+fixtures pass unchanged.
+
 ### What the Rust crate still needs (`ac-posefill`)
 - `install.rs`: `%LOCALAPPDATA%/<product>/posefill` or `AC_POSEFILL_DIR`; `install.json` version
   1 with `python`, `helper`, `env`; the `HOW` hint naming `posefill.install` and
