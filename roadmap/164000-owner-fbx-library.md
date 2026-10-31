@@ -1,6 +1,6 @@
 # Port the owner's FBX animations into a private clip library
 
-- **Status:** in progress: reader work built, pilot next; acceptance agreed by the owner (2026-10-31)
+- **Status:** in progress: pilot run; multi-take clips to fix; the owner's review of the reel next
 - **Requires:** 152000
 - **Source:** owner request (2026-10-31)
 
@@ -154,3 +154,6 @@ worktree runs the tests.
   the next build.
 - How many cubic notes appear, and whether those clips look wrong.
 - A text file with a record over 1,048,576 values (a large old-style mesh) is refused whole.
+
+## Pilot (2026-10-31)
+Three varied packs, run in integration, clips and manifests outside the repo. Small climbing pack: 7 files listed, 4 clips imported, 34 refused, almost all named `.meta` clips whose take name isn't the file's first take, so multi-take files lose clips: to fix before the bulk port. Mocap conversations: 57 of 57. Weapon pack: 50 clips, 1 file with no animation; 10 clips note a hip jump in the first frames. Owner's review reel is outside the repo. Nothing here proves the poses right until the owner has reviewed it.

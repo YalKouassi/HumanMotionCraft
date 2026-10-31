@@ -1,6 +1,6 @@
 # Long fills keep regular steps
 
-- **Status:** in progress: step 1 built, baseline next; the fix is on hold, no training without the owner's word
+- **Status:** in progress: step 1 built; the baseline shows the measure over-flags recordings, so it needs correcting; the fix is on hold
 - **Requires:** none
 - **Source:** the owner's review of the long-fill video (2026-10-31); measured in 167000
 
@@ -45,3 +45,6 @@ Step 1, written without a build (2026-10-31); nothing here has been run yet.
   them. It needs a built `ac` and trains nothing.
 - **Python's contacts differ from the app's:** the recordings and `steps_irregular` use the scan's contact test, the
   fills the app's `crate::contact`, so compare the two counts with care.
+
+## Baseline (2026-10-31)
+`python -m ac_train.evaluate --long-walks 200`, shipped `parts-natural`, no training. Of 176 fills with enough steps, 157 fail (89 %); 24 more have too few. **The measure isn't trustworthy yet:** the recordings themselves fail 42 of the 55 with enough steps (76 %), and 145 have too few, so it flags real walks too. On `ai-fill-long-gap` it finds the half step (step 3) and also counts a replant before the first step. Recordings and fills use different contact tests (Python's scan, `crate::contact`). The rule needs correcting against recordings before these rates mean anything.
