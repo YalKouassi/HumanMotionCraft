@@ -183,20 +183,32 @@ pub(crate) fn locate(gltf: &Value, i: usize) -> R<(usize, usize, usize, u64)> {
     {
         return Err("interleaved accessors are not supported".into());
     }
-    let start = view["byteOffset"].as_u64().unwrap_or(0) + acc["byteOffset"].as_u64().unwrap_or(0);
-    Ok((start as usize, acc["count"].as_u64().unwrap_or(0) as usize, w, ct))
+    // every number here comes from the file: added and multiplied without overflow
+    let too_large = || "an accessor's offset or count is too large".to_string();
+    let start = view["byteOffset"]
+        .as_u64()
+        .unwrap_or(0)
+        .checked_add(acc["byteOffset"].as_u64().unwrap_or(0))
+        .and_then(|s| usize::try_from(s).ok())
+        .ok_or_else(too_large)?;
+    let count = usize::try_from(acc["count"].as_u64().unwrap_or(0)).map_err(|_| too_large())?;
+    Ok((start, count, w, ct))
 }
 
 pub(crate) fn read(gltf: &Value, bin: &[u8], i: usize) -> R<Vec<f64>> {
     let (start, count, w, ct) = locate(gltf, i)?;
-    let n = count * w;
     let size = match ct {
         5121 => 1,
         5123 => 2,
         _ => 4,
     };
-    let raw = bin
-        .get(start..start + n * size)
+    let len = count
+        .checked_mul(w)
+        .and_then(|n| n.checked_mul(size))
+        .ok_or("an accessor's count is too large")?;
+    let raw = start
+        .checked_add(len)
+        .and_then(|end| bin.get(start..end))
         .ok_or("an accessor runs past the buffer")?;
     Ok(raw
         .chunks_exact(size)
@@ -211,7 +223,7 @@ pub(crate) fn read(gltf: &Value, bin: &[u8], i: usize) -> R<Vec<f64>> {
 
 fn write_in_place(gltf: &Value, bin: &mut [u8], i: usize, values: &[f64]) -> R<()> {
     let (start, count, w, ct) = locate(gltf, i)?;
-    if values.len() != count * w {
+    if count.checked_mul(w) != Some(values.len()) {
         return Err("accessor size changed".into());
     }
     let mut raw = Vec::new();
@@ -223,7 +235,9 @@ fn write_in_place(gltf: &Value, bin: &mut [u8], i: usize, values: &[f64]) -> R<(
             _ => raw.extend((v as f32).to_le_bytes()),
         }
     }
-    bin.get_mut(start..start + raw.len())
+    start
+        .checked_add(raw.len())
+        .and_then(|end| bin.get_mut(start..end))
         .ok_or("an accessor runs past the buffer")?
         .copy_from_slice(&raw);
     Ok(())

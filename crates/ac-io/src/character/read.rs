@@ -418,5 +418,22 @@ mod tests {
                 .contains("past the buffer")
         );
         assert!(read_bytes(b"not a glb at all").is_err());
+        // a count or offset that would overflow the arithmetic is refused, not computed
+        let huge = json!({"nodes": [{}], "skins": [{"joints": [0], "inverseBindMatrices": 0}],
+            "bufferViews": [{"buffer": 0, "byteOffset": 0, "byteLength": 64}],
+            "accessors": [{"bufferView": 0, "componentType": 5126, "count": 1152921504606846976u64, "type": "MAT4"}]});
+        assert!(
+            read_bytes(&glb(&huge, vec![0; 64]))
+                .unwrap_err()
+                .contains("too large")
+        );
+        let far = json!({"nodes": [{}], "skins": [{"joints": [0], "inverseBindMatrices": 0}],
+            "bufferViews": [{"buffer": 0, "byteOffset": 18446744073709551615u64, "byteLength": 64}],
+            "accessors": [{"bufferView": 0, "byteOffset": 16, "componentType": 5126, "count": 1, "type": "MAT4"}]});
+        assert!(
+            read_bytes(&glb(&far, vec![0; 64]))
+                .unwrap_err()
+                .contains("too large")
+        );
     }
 }
