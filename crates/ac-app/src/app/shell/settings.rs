@@ -143,7 +143,8 @@ impl App {
             self.open_shortcuts();
         }
         if reset_layout {
-            self.reset_layout(ctx);
+            self.reset_layout();
+            ctx.request_repaint();
         }
     }
 

@@ -617,9 +617,13 @@ impl App {
                     crate::app::prefs::UiMode::Simple => crate::app::prefs::UiMode::Advanced,
                     crate::app::prefs::UiMode::Advanced => crate::app::prefs::UiMode::Simple,
                 };
-                self.set_ui_mode(next, ctx);
+                self.set_ui_mode(next);
+                ctx.request_repaint();
             }
-            "app.reset_layout" => self.reset_layout(ctx),
+            "app.reset_layout" => {
+                self.reset_layout();
+                ctx.request_repaint();
+            }
             "app.zoom_in" | "app.zoom_out" => {
                 let up = id == "app.zoom_in";
                 self.shell

@@ -13,7 +13,7 @@ use craft_ui::layout::{SplitAxis, SplitSize};
 use serde::{Deserialize, Serialize};
 
 use super::super::App;
-use super::super::prefs::{Layout, Side};
+use super::super::prefs::{Layout, Side, UiMode};
 use crate::app::ui_ids::Tag;
 
 /// Every panel that `craft_ui::docking` can dock, tab, split or float onto a second monitor.
@@ -195,6 +195,78 @@ pub fn load_dock_workspace(json_str: &str) -> Workspace<DockPanel> {
             ws
         }
         Err(_) => def,
+    }
+}
+
+/// The panels Simple mode closes.
+const SIMPLE_CLOSES: &[DockPanel] = &[
+    DockPanel::Layers,
+    DockPanel::Physics,
+    DockPanel::Review,
+    DockPanel::Scene,
+    DockPanel::Ai,
+    DockPanel::Text,
+    DockPanel::PoseFill,
+    DockPanel::Pins,
+    DockPanel::Range,
+];
+
+/// Close Simple mode's panels. Returns the list to save, `already` closed ones first (going to
+/// Simple twice must not forget them) and only panels that were open, so Advanced doesn't open
+/// what the person never had; and each panel that would not close, said, not passed over (Rule 1).
+pub(super) fn close_for_simple(
+    dock: &mut Workspace<DockPanel>,
+    already: &[String],
+) -> (Vec<String>, Vec<String>) {
+    let mut closed = already.to_vec();
+    let mut kept = Vec::new();
+    for &p in SIMPLE_CLOSES {
+        if !dock.layout.contains(&p) {
+            continue;
+        }
+        match dock.set_visible(p, false, None, dock_permissions) {
+            Ok(()) => {
+                if !closed.iter().any(|c| c == p.id_str()) {
+                    closed.push(p.id_str().to_string());
+                }
+            }
+            Err(e) => kept.push(format!("{} ({e})", p.short_label())),
+        }
+    }
+    (closed, kept)
+}
+
+/// Open again what Simple mode closed, last closed first, each at its recorded place. Returns what
+/// could not be opened: a refusal, or a name in the saved list this app doesn't know.
+pub(super) fn reopen_after_simple(dock: &mut Workspace<DockPanel>, closed: &[String]) -> Vec<String> {
+    let mut failed = Vec::new();
+    for id in closed.iter().rev() {
+        let Some(&p) = DockPanel::TOOL_PANELS.iter().find(|p| p.id_str() == id) else {
+            failed.push(format!("{id} (no such panel)"));
+            continue;
+        };
+        if dock.layout.contains(&p) {
+            continue; // opened by hand while in Simple
+        }
+        if let Err(e) = dock.set_visible(p, true, None, dock_permissions) {
+            failed.push(format!("{} ({e})", p.short_label()));
+        }
+    }
+    failed
+}
+
+/// The status line after switching to Advanced with `back` panels given back.
+pub(super) fn advanced_status(back: usize, failed: &[String]) -> String {
+    if !failed.is_empty() {
+        return format!(
+            "switched to advanced mode; {back} back, could not reopen: {}",
+            failed.join(", ")
+        );
+    }
+    match back {
+        0 => "switched to advanced mode; Simple had closed no panels".to_string(),
+        1 => "switched to advanced mode; 1 panel back".to_string(),
+        n => format!("switched to advanced mode; {n} panels back"),
     }
 }
 
@@ -600,51 +672,49 @@ impl App {
         }
     }
 
-    /// View > Reset layout: default sizes and places, every panel returned to its default home.
-    pub(in crate::app) fn reset_layout(&mut self, ctx: &egui::Context) {
+    /// View > Reset layout: default sizes and places, every panel returned to its default home,
+    /// and Advanced mode (`Layout::default`), with nothing left for it to give back.
+    pub(in crate::app) fn reset_layout(&mut self) {
+        let was_simple = self.shell.prefs.get().layout.ui_mode == UiMode::Simple;
         self.shell.dock = default_dock_workspace();
         self.sync_dock_flags();
         self.shell.prefs.update(|p| p.layout = Layout::default());
         self.shell.maximised = false;
         // new panel ids: egui forgets the sizes it kept for the old ones
         self.shell.layout_gen = self.shell.layout_gen.wrapping_add(1);
-        ctx.request_repaint();
-        self.status = "layout reset".into();
+        self.status = if was_simple {
+            "layout reset; back to advanced mode".into()
+        } else {
+            "layout reset".into()
+        };
     }
 
-    /// Switch between Simple mode (beginner essentials) and Advanced mode (full tool panels).
-    pub(in crate::app) fn set_ui_mode(&mut self, mode: super::super::prefs::UiMode, ctx: &egui::Context) {
-        self.shell.prefs.update(|p| p.layout.ui_mode = mode);
+    /// Switch between Simple mode (beginner essentials) and Advanced mode, which opens again what
+    /// Simple closed.
+    pub(in crate::app) fn set_ui_mode(&mut self, mode: UiMode) {
+        let before = self.shell.prefs.get().layout.simple_closed.clone();
         match mode {
-            super::super::prefs::UiMode::Simple => {
-                // a panel that will not close is said, not passed over (Rule 1)
-                let mut kept: Vec<String> = Vec::new();
-                for &p in &[
-                    DockPanel::Layers,
-                    DockPanel::Physics,
-                    DockPanel::Review,
-                    DockPanel::Scene,
-                    DockPanel::Ai,
-                    DockPanel::Text,
-                    DockPanel::PoseFill,
-                    DockPanel::Pins,
-                    DockPanel::Range,
-                ] {
-                    if let Err(e) = self.shell.dock.set_visible(p, false, None, dock_permissions) {
-                        kept.push(format!("{} ({e})", p.short_label()));
-                    }
-                }
+            UiMode::Simple => {
+                let (closed, kept) = close_for_simple(&mut self.shell.dock, &before);
+                self.shell.prefs.update(|p| {
+                    p.layout.ui_mode = mode;
+                    p.layout.simple_closed = closed;
+                });
                 self.status = if kept.is_empty() {
                     "switched to simple mode".into()
                 } else {
                     format!("switched to simple mode; still open: {}", kept.join(", "))
                 };
             }
-            super::super::prefs::UiMode::Advanced => {
-                self.status = "switched to advanced mode".into();
+            UiMode::Advanced => {
+                let failed = reopen_after_simple(&mut self.shell.dock, &before);
+                self.shell.prefs.update(|p| {
+                    p.layout.ui_mode = mode;
+                    p.layout.simple_closed = Vec::new();
+                });
+                self.status = advanced_status(before.len().saturating_sub(failed.len()), &failed);
             }
         }
         self.sync_dock_flags();
-        ctx.request_repaint();
     }
 }

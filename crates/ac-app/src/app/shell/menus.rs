@@ -228,11 +228,7 @@ impl App {
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 let mode = self.shell.prefs.get().layout.ui_mode;
                 let is_simple = mode == super::super::prefs::UiMode::Simple;
-                let btn_text = if is_simple {
-                    "Mode: Simple"
-                } else {
-                    "Mode: Advanced"
-                };
+                let btn_text = mode_label(mode);
                 let tooltip = if is_simple {
                     "Simple mode (beginners): essential panels only. Click to switch to Advanced mode."
                 } else {
@@ -253,5 +249,13 @@ impl App {
         for c in chosen {
             self.invoke(&c, &ctx);
         }
+    }
+}
+
+/// What the header's mode button says.
+pub(super) fn mode_label(mode: super::super::prefs::UiMode) -> &'static str {
+    match mode {
+        super::super::prefs::UiMode::Simple => "Mode: Simple",
+        super::super::prefs::UiMode::Advanced => "Mode: Advanced",
     }
 }

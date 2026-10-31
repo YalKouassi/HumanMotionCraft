@@ -20,7 +20,7 @@
 //! `dialog=export|preview|block|welcome|tips|recover|none` (`app/files`), and
 //! the shell's: `window=palette|settings|history|messages|shortcuts|about|form:<command>`,
 //! `palette=<search>`, `theme=dark|light`, `scale=<0.5..3>`, `colours=standard|safe`,
-//! `units=frames|seconds|timecode`, `maximise=on|off`, `library|inspector|timeline=on|off`,
+//! `units=frames|seconds|timecode`, `maximise=on|off`, `ui_mode=simple|advanced`, `reset_layout=on`, `library|inspector|timeline=on|off`,
 //! `side=left|right`, `perf=on|off`, `menu|tools|status|joints=on|off` (the menu bar, the viewport's
 //! tool row, the status bar and the joint dots); the inspector panels': `joint=<bone>`, `box=<n>`,
 //! `layer=<n>`, `travel=preview|off`, `prompt=<text>` (motion from text), `export_dir=<folder>` (where Export starts), `range_pair=<pair>`,

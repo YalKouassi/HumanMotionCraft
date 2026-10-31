@@ -376,6 +376,17 @@ impl App {
                 self.shell.prefs.update(|p| p.general.units = u);
             }),
             ("maximise", _) => on().map(|v| self.shell.maximised = v),
+            ("ui_mode", m) => match m {
+                "simple" => Ok(prefs::UiMode::Simple),
+                "advanced" => Ok(prefs::UiMode::Advanced),
+                _ => Err("simple or advanced".to_string()),
+            }
+            .map(|m| self.set_ui_mode(m)),
+            ("reset_layout", _) => on().map(|v| {
+                if v {
+                    self.reset_layout();
+                }
+            }),
             ("menu", _) => on().map(|v| self.view.hide_menu = !v),
             ("tools", _) => on().map(|v| self.view.hide_tools = !v),
             ("status", _) => on().map(|v| self.view.hide_status = !v),
@@ -401,7 +412,7 @@ impl App {
     }
 
     /// The names [`App::shell_ui`] takes, for `--ui`'s error message.
-    pub(super) const SHELL_UI: &'static str = "perf, window (palette, settings, history, messages, shortcuts, about, form:<command>), palette (a search), theme, scale, colours, units, maximise, library, inspector, timeline, side, menu, tools, status, joints";
+    pub(super) const SHELL_UI: &'static str = "perf, window (palette, settings, history, messages, shortcuts, about, form:<command>), palette (a search), theme, scale, colours, units, maximise, ui_mode, reset_layout, library, inspector, timeline, side, menu, tools, status, joints";
 
     fn open_window(&mut self, w: &str) -> Result<(), String> {
         match w {
