@@ -61,6 +61,54 @@ def test_a_fill_that_steps_off_the_planted_feet():
     assert m["impossible_per_1000"] == 0.0
 
 
+def walk(*feet):
+    """(foot, y) contacts walking along -y, the root level with each: a length is its dy."""
+    return [{"foot": f, "at": (0.0, y), "root": (0.0, y)} for f, y in feet]
+
+
+def test_the_half_step_is_short():
+    # the owner's half step (roadmap 167000), the same numbers as crates/ac-core/src/steps.rs: steps
+    # 0.50, a 0.02 step back, 0.45, 0.63; median 0.475, half of it 0.2375
+    r = evaluate.step_report(walk(("L", -0.41), ("R", -0.91), ("L", -0.89), ("R", -1.34), ("L", -1.97)))
+    assert r["lengths_m"][1] == pytest.approx(-0.02)
+    assert r["median_m"] == pytest.approx(0.475)
+    assert r["alternate"] and r["short"] == [1] and r["regular"] is False
+
+
+def test_even_steps_and_the_edges_of_the_rule():
+    # anchors on every source step (167000): 0.31, 0.33, 0.29, 0.28, 0.25
+    even = walk(("L", -0.53), ("R", -0.84), ("L", -1.17), ("R", -1.46), ("L", -1.74), ("R", -1.99))
+    assert evaluate.step_report(even)["regular"] is True
+    # a step back 0.16 m is short, though 0.16 is over half the median 0.21 unsigned
+    back = walk(("L", -0.54), ("R", -0.75), ("L", -1.12), ("R", -1.33), ("L", -1.79), ("R", -1.63))
+    assert evaluate.step_report(back)["short"] == [4]
+    # exactly half the median (0.2 against 0.4) is not under it
+    assert evaluate.step_report(walk(("L", 0.0), ("R", -0.2), ("L", -0.6), ("R", -1.0)))["regular"] is True
+    assert evaluate.step_report(walk(("L", 0.0), ("L", -0.4), ("R", -0.8)))["regular"] is False
+    assert evaluate.step_report(walk(("L", 0.0), ("R", -0.4)))["regular"] is None
+
+
+def test_contacts_land_inside_the_window():
+    T = 20
+    planted = np.zeros((T, 2), bool)
+    planted[0:5, 0] = True  # down from the first frame: not stepped onto
+    planted[6:12, 1] = True
+    planted[13:15, 0] = True  # two frames: passing the floor
+    ankles = np.arange(T * 4, dtype=float).reshape(T, 2, 2)
+    c = evaluate.contacts_of(planted, ankles, np.zeros((T, 2)))
+    assert [(x["foot"], x["from"]) for x in c] == [("R", 6)]
+    assert c[0]["at"].tolist() == ankles[8, 1].tolist()  # the middle of 6..11, rounded down
+
+
+def test_a_short_lift_is_one_contact():
+    T = 20
+    planted = np.zeros((T, 2), bool)
+    planted[2:6, 0] = True
+    planted[9:12, 0] = True  # 3 frames up between them (6, 7, 8): the same contact
+    c = evaluate.contacts_of(planted, np.zeros((T, 2, 2)), np.zeros((T, 2)))
+    assert [x["from"] for x in c] == [2]
+
+
 def test_a_fill_that_sinks():
     skel = rig.Skeleton.load()
     body = Body(skel)

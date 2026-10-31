@@ -48,6 +48,13 @@ to moving, or back), ``crouch``, ``flight`` (both feet off the floor inside the 
 (a turn with a foot planting or lifting), each with its own measures (:func:`scene_measure`) beside
 plain interpolation's, its window count, and ``too_small`` under :data:`MIN_WINDOWS`. Carrying has no
 slice of its own: the rig has no load model, so it is the ``carry`` row of ``by_type``.
+
+**Regular steps** (153500, ``steps_irregular`` in every row): the share of windows whose steps
+fail :func:`step_report`, the rule of ``crates/ac-core/src/steps.rs`` (feet take turns; no step
+under half the median), over windows with at least two steps. ``--long-walks N`` baselines it where
+it matters: N held-out walks of :data:`LONG_FRAMES` frames, their two end frames made keys, filled
+by the app's own ``ai.fill`` (anchors and all; needs ``ac``, trains nothing, writes nothing into a
+card), and each recording's own steps beside them.
 """
 
 from __future__ import annotations
@@ -94,6 +101,19 @@ FLIGHT_FRAMES = 2
 #: a slice with fewer windows than this says so: its numbers aren't to be trusted
 MIN_WINDOWS = 30
 SCENARIOS = ("start", "stop", "crouch", "flight", "turn_step")
+#: a step under this share of the median is short; fewer steps than this say nothing; the root
+#: moving less than this (m) gives no way of travel (``crates/ac-core/src/steps.rs``)
+STEP_SHORT_SHARE = 0.5
+MIN_STEPS = 2
+STEP_STILL_M = 0.01
+#: fewer planted frames than this is passing the floor (``contact::MIN_CONTACT``); a foot lifting
+#: for no more than this many frames is one contact (the scan's test has no hysteresis)
+CONTACT_MIN = 3
+CONTACT_MERGE = 3
+#: the long walks: frames from key to key, as ``ai-fill-long-gap``; a window starts every third of
+#: that; the hips average at least :data:`MOVING_MS` over it
+LONG_FRAMES = 90
+LONG_STRIDE = 30
 
 
 def bin_name(lo: int, hi: int) -> str:
@@ -162,7 +182,60 @@ def measure(pose: Pose, truth: Pose, body: Body, a: int, b: int, free=None, gfre
     bad = body.impossible(pose.world[:, gap])  # (N, g)
     out["impossible_per_1000"] = (bad.float().mean(1) * 1000, one * g)
     out["bones_deg"] = (rot.mean(1), one)  # (N, J): kept apart (a vector per window)
+    out["steps_irregular"] = steps_irregular(pose, body, a, b)
     return out
+
+
+def step_report(contacts: list[dict]) -> dict:
+    """The rule of ``crates/ac-core/src/steps.rs``. ``contacts``, in landing order: each one's
+    ``foot``, its ankle ``at`` and root ``root`` across the floor (m) on its middle frame."""
+    lengths = []
+    for c, d in zip(contacts, contacts[1:]):
+        step, way = np.subtract(d["at"], c["at"]), np.subtract(d["root"], c["root"])
+        travel = float(np.hypot(*way))
+        lengths.append(float(np.hypot(*step)) if travel < STEP_STILL_M else float(step @ way) / travel)
+    alternate = all(c["foot"] != d["foot"] for c, d in zip(contacts, contacts[1:]))
+    median = float(np.median(lengths)) if lengths else None
+    enough = len(lengths) >= MIN_STEPS
+    short = [i for i, x in enumerate(lengths) if x < STEP_SHORT_SHARE * median] if enough else []
+    return {"lengths_m": lengths, "median_m": median, "alternate": alternate, "short": short,
+            "regular": (alternate and not short) if enough else None}
+
+
+def contacts_of(planted, ankles, root) -> list[dict]:
+    """One window's contacts in landing order: (T, 2) planted, (T, 2, 2) ankles, (T, 2) root, as
+    arrays. A foot down on the first frame was not stepped onto: it is left out."""
+    out = []
+    for foot in range(2):
+        runs = []
+        for t in np.flatnonzero(planted[:, foot]).tolist():
+            if runs and t - runs[-1][1] <= CONTACT_MERGE + 1:
+                runs[-1][1] = t
+            else:
+                runs.append([t, t])
+        for s, e in runs:
+            if s == 0 or e - s + 1 < CONTACT_MIN:
+                continue
+            mid = (s + e) // 2
+            out.append({"foot": "LR"[foot], "from": s, "at": ankles[mid, foot], "root": root[mid]})
+    return sorted(out, key=lambda c: c["from"])
+
+
+def window_steps(pose: Pose, body: Body, a: int, b: int) -> list[dict]:
+    """(N) windows -> each one's :func:`step_report` over frames a .. b (a >= 1: frame 0 is never
+    planted, so a foot down from the start would read as landing on frame 1)."""
+    planted = body.planted(pose.points)[:, a : b + 1].cpu().numpy()
+    ankles = pose.points[:, a : b + 1][..., list(FOOT_POINTS[:2]), :2].double().cpu().numpy()
+    root = pose.root[:, a : b + 1, :2].double().cpu().numpy()
+    return [step_report(contacts_of(p, f, r)) for p, f, r in zip(planted, ankles, root)]
+
+
+def steps_irregular(pose: Pose, body: Body, a: int, b: int) -> tuple:
+    """Per window: 1 if its steps fail the rule; weight 0 if it has too few steps to say."""
+    device = pose.points.device
+    regular = [r["regular"] for r in window_steps(pose, body, a, b)]
+    return (torch.tensor([float(r is False) for r in regular], device=device),
+            torch.tensor([float(r is not None) for r in regular], device=device))
 
 
 def jerk(points, a: int, b: int):
@@ -250,7 +323,8 @@ def truth_numbers(truth: Pose, body: Body, a: int, b: int) -> dict:
     one = torch.ones(N, device=truth.points.device)
     low = body.foot_heights(truth.points[:, gap]).min(-1).values
     return {"jerk_ms3": (jerk(truth.points, a, b), one), "floor_m": (torch.relu(-low).mean(1), one * g),
-            "impossible_per_1000": (body.impossible(truth.world[:, gap]).float().mean(1) * 1000, one * g)}
+            "impossible_per_1000": (body.impossible(truth.world[:, gap]).float().mean(1) * 1000, one * g),
+            "steps_irregular": steps_irregular(truth, body, a, b)}
 
 
 def hard(truth: Pose, body: Body, a: int, b: int) -> dict:
@@ -590,6 +664,111 @@ def sheets(model, sets, body: Body, device, out: pathlib.Path, ac: pathlib.Path 
     return files
 
 
+# ---- the long walks (153500) --------------------------------------------------------------------
+
+def long_walk_starts(sets, n: int, seed: int, frames: int = LONG_FRAMES) -> list[int]:
+    """Up to ``n`` first frames of walking windows of ``frames + 1`` frames, seeded: inside one
+    held-out walk's clean frames, the hips averaging at least :data:`MOVING_MS`."""
+    from .model import WINDOW
+    from .rig import Skeleton
+
+    length = frames + 1
+    total = sets.q.shape[0]
+    clean = np.zeros(total + 1, bool)
+    clean[sets.starts.cpu().numpy()] = True
+    # clean frames for ``length``: every WINDOW-long window across it starts clean
+    extra = max(length - WINDOW, 0)
+    bad = np.concatenate([[0], np.cumsum(~clean)])
+    take = sets.take.cpu().numpy()
+    root = sets.root.cpu().numpy()[:, :2] * float(Skeleton.load().hip_height)
+    step = np.hypot(*(root[1:] - root[:-1]).T)
+    out = []
+    for s in sets.starts.cpu().numpy().tolist():
+        if s % LONG_STRIDE or s + length > total or bad[s + extra + 1] - bad[s] or take[s] != take[s + frames]:
+            continue
+        if sets.types[take[s]] == "walk" and step[s : s + frames].sum() * FPS / frames >= MOVING_MS:
+            out.append(s)
+    rng = np.random.default_rng(seed)
+    return sorted(rng.permutation(out)[:n].tolist())
+
+
+def run_long_fill(ac: pathlib.Path, q, root, folder: pathlib.Path, name: str) -> dict:
+    """The app's own fill of one window, its two ends the keys: its ``diagnostics``, or
+    ``{"refused": why}`` when the app refuses it."""
+    from .clip import Clip, Key
+    from .rig import Skeleton
+
+    skel = Skeleton.load()
+    idx = [skel.index[b] for b in BONES]
+    keys = []
+    for f in (0, len(q) - 1):
+        rots = np.tile([0.0, 0.0, 0.0, 1.0], (len(skel.names), 1))
+        rots[idx] = q[f]
+        keys.append(Key(f, rots, root[f], interp="linear"))
+    path = folder / f"{name}.clip.json"
+    Clip(bones=list(skel.names), name=name, keys=keys).save(path)
+    script = folder / f"{name}.script.json"
+    script.write_text(json.dumps([
+        {"command": "clip.import", "params": {"path": str(path)}},
+        {"command": "physics.set", "params": {"on": False}},
+        {"command": "ai.settings", "params": {"ai_force": 1, "style": "any"}},
+        {"command": "ai.fill", "params": {"from": 0, "to": len(q) - 1}},
+    ]), encoding="utf-8")
+    r = subprocess.run([str(ac), "--jsonl", "--assets", str(REPO / "assets"), "script", str(script)],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        return {"refused": r.stderr.strip() or r.stdout.strip()}
+    for line in reversed(r.stdout.splitlines()):
+        step = json.loads(line)
+        if step.get("command") == "ai.fill":
+            return step["result"]["diagnostics"]
+    return {"refused": "ai.fill printed no result"}
+
+
+@torch.no_grad()
+def long_walks(sets, body: Body, n: int, seed: int, folder: pathlib.Path, ac: pathlib.Path | None = None) -> dict:
+    """How many long walks the shipped model's fills step unevenly on, beside the recordings: the
+    app's fill measured by the app (``diagnostics.steps``), the recording by :func:`step_report`.
+    Too few steps to say, and refused fills, are counted apart, never as passes."""
+    from .model import quat_to_mat
+
+    ac = ac or ac_binary()
+    if ac is None:
+        raise SystemExit("no ac binary to fill with: cargo build --release -p ac-cli")
+    folder.mkdir(parents=True, exist_ok=True)
+    starts = long_walk_starts(sets, n, seed)
+    rows = []
+    for k, s in enumerate(starts):
+        q, root = sets.q[s : s + LONG_FRAMES + 1], sets.root[s : s + LONG_FRAMES + 1]
+        truth = pose_of(quat_to_mat(q)[None], root[None].float() * body.hip_height, body)
+        recorded = window_steps(truth, body, 1, LONG_FRAMES)[0]
+        d = run_long_fill(ac, q.double().cpu().numpy(), root.double().cpu().numpy(), folder, f"walk-{k}")
+        fill = d.get("steps") or {}
+        rows.append({"start": s, "take": sets.labels[int(sets.take[s])][:1], "fill_regular": fill.get("regular"),
+                     "fill_alternate": fill.get("alternate"), "fill_short": fill.get("short"),
+                     "fill_lengths_m": fill.get("lengths_m"), "sliding_max_cm": d.get("sliding_max_cm"),
+                     "recording_regular": recorded["regular"], "refused": d.get("refused")})
+        print(f"{k + 1}/{len(starts)} fill {fill.get('regular')} recording {recorded['regular']} "
+              f"{d.get('refused') or ''}", flush=True)
+    count = lambda key, v: sum(r[key] is v for r in rows)  # noqa: E731
+    return {"frames": LONG_FRAMES, "seed": seed, "windows": len(rows), "asked": n,
+            "refused": sum(r["refused"] is not None for r in rows),
+            "fill": {"fail": count("fill_regular", False), "pass": count("fill_regular", True),
+                     "too_few": sum(r["fill_regular"] is None and r["refused"] is None for r in rows)},
+            "recording": {"fail": count("recording_regular", False), "pass": count("recording_regular", True),
+                          "too_few": count("recording_regular", None)},
+            "rows": rows}
+
+
+def pose_of(local, root, body: Body):
+    """A :class:`Pose` from rotation matrices and root positions (m), without features."""
+    p = Pose.__new__(Pose)
+    p.local, p.root = local, root
+    p.world = body.world(local)
+    p.points = body.points(local, root, p.world)
+    return p
+
+
 # ---- the command --------------------------------------------------------------------------------
 
 def report(ev: dict) -> str:
@@ -655,12 +834,30 @@ def main(argv=None):
     ap.add_argument("--subset", default=None, metavar="NAME",
                     help="with a take filter: write the numbers under evaluation[_best]_<NAME> in the card, "
                          "so the full evaluation stays (e.g. natural, roadmap 153000)")
+    ap.add_argument("--long-walks", type=int, default=0, metavar="N",
+                    help="only baseline regular steps (153500): N held-out long walks filled by the app's ai.fill on "
+                         "the shipped model; needs ac, trains nothing, leaves the card; writes --long-out")
+    ap.add_argument("--long-out", default="target/long-walks/baseline.json", help="the result of --long-walks")
     selection.add_arguments(ap)
     args = ap.parse_args(argv)
 
+    select = selection.from_args(args)
+    if args.long_walks:
+        names = [n for n in args.sets.split(",") if n] if args.sets else [n for n in REGISTRY if REGISTRY[n].commercial]
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        val = Sets(names, device, val=True, decisions=review.load_decisions(pathlib.Path(args.decisions)), select=select)
+        out = pathlib.Path(args.long_out)
+        out = out if out.is_absolute() else REPO / out
+        res = long_walks(val, Body(Skeleton.load(), device), args.long_walks, seed=1, folder=out.parent / "fills")
+        out.write_text(json.dumps(res, indent=1), encoding="utf-8")
+        print(f"{res['windows']} long walks: fill fails {res['fill']['fail']}, passes {res['fill']['pass']}, "
+              f"too few steps {res['fill']['too_few']}, refused {res['refused']}; recording fails "
+              f"{res['recording']['fail']}, passes {res['recording']['pass']}, too few {res['recording']['too_few']}")
+        print(f"written {out}")
+        return
+
     from . import infer
 
-    select = selection.from_args(args)
     if select.active() and not args.subset:
         ap.error("a take filter (--types, --styles, --natural, --takes) needs --subset <name>: the numbers of a restricted "
                  "evaluation go under their own key in the card, never over the full one")
