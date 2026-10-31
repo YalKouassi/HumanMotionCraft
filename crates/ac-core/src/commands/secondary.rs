@@ -18,27 +18,45 @@ const DRIFT_NOTE: f64 = 0.01;
 /// A largest turn under this (radians) means the clip gave it nothing to work from.
 const STILL: f64 = 1e-3;
 
-pub static SPECS: &[CommandSpec] = &[CommandSpec::new("layer.secondary", "Secondary motion", secondary_motion)
-    .icon("layer-add")
-    .undoable()
-    .inputs(&[
-        ParamSpec::new("amount", Kind::Number, "how strong, 1 is an ordinary walk (default 1)").range(0.05, 2.0),
-        ParamSpec::new(
-            "parts",
-            Kind::TextList,
-            "which of arms, shoulders, pelvis, spine, head, hands, follow (default: all)",
-        ),
-    ])
-    .outputs(&[
-        ParamSpec::new("i", Kind::Integer, "the layer").required(),
-        ParamSpec::new("name", Kind::Text, "its name").required(),
-        ParamSpec::new("keys", Kind::Integer, "keys on it, one a frame").required(),
-        ParamSpec::new("bones", Kind::Integer, "bones it turns").required(),
-        ParamSpec::new("largest", Kind::Number, "the largest turn of any bone (radians)").required(),
-        ParamSpec::new("foot_drift", Kind::Number, "how far an ankle ends up from its place (m)").required(),
-        ParamSpec::new("replaced", Kind::Bool, "it replaced the layer from an earlier run").required(),
-        ParamSpec::new("notes", Kind::TextList, "what the user should know").required(),
-    ])];
+pub static SPECS: &[CommandSpec] =
+    &[
+        CommandSpec::new("layer.secondary", "Secondary motion", secondary_motion)
+            .icon("layer-add")
+            .undoable()
+            .inputs(&[
+                ParamSpec::new(
+                    "amount",
+                    Kind::Number,
+                    "how strong, 1 is an ordinary walk (default 1)",
+                )
+                .range(0.05, 2.0),
+                ParamSpec::new(
+                    "parts",
+                    Kind::TextList,
+                    "which of arms, shoulders, pelvis, spine, head, hands, follow (default: all)",
+                ),
+            ])
+            .outputs(&[
+                ParamSpec::new("i", Kind::Integer, "the layer").required(),
+                ParamSpec::new("name", Kind::Text, "its name").required(),
+                ParamSpec::new("keys", Kind::Integer, "keys on it, one a frame").required(),
+                ParamSpec::new("bones", Kind::Integer, "bones it turns").required(),
+                ParamSpec::new("largest", Kind::Number, "the largest turn of any bone (radians)").required(),
+                ParamSpec::new(
+                    "foot_drift",
+                    Kind::Number,
+                    "how far an ankle ends up from its place (m)",
+                )
+                .required(),
+                ParamSpec::new(
+                    "replaced",
+                    Kind::Bool,
+                    "it replaced the layer from an earlier run",
+                )
+                .required(),
+                ParamSpec::new("notes", Kind::TextList, "what the user should know").required(),
+            ]),
+    ];
 
 fn secondary_motion(doc: &mut Document, p: &Map<String, Value>) -> Result<Value, String> {
     let amount = p.get("amount").and_then(Value::as_f64).unwrap_or(1.0);

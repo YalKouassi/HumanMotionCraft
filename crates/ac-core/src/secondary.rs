@@ -144,9 +144,7 @@ fn mean(signal: &[f64], half: usize, looping: bool) -> Vec<f64> {
     (0..n)
         .map(|i| {
             let h = reach(half, i, n, looping);
-            let sum: f64 = (0..=2 * h)
-                .filter_map(|k| signal.get((i + n + k - h) % n))
-                .sum();
+            let sum: f64 = (0..=2 * h).filter_map(|k| signal.get((i + n + k - h) % n)).sum();
             sum / (2 * h + 1) as f64
         })
         .collect()
@@ -278,12 +276,8 @@ pub fn motion(sk: &Skeleton, below: &Below, options: &Options) -> R<Motion> {
         joints.push(j);
     }
     let forward = forward_of(&faces, slow, looping);
-    let at = |f: usize, b: usize| -> Vec3 {
-        joints
-            .get(f)
-            .and_then(|j| j.get(b).copied())
-            .unwrap_or_default()
-    };
+    let at =
+        |f: usize, b: usize| -> Vec3 { joints.get(f).and_then(|j| j.get(b).copied()).unwrap_or_default() };
     let way = |f: usize| forward.get(f).copied().unwrap_or([0.0, -1.0, 0.0]);
     let full = FULL_STRIDE * sk.hip_height;
     let settled = |raw: Vec<f64>| -> Vec<f64> {
@@ -361,7 +355,12 @@ pub fn motion(sk: &Skeleton, below: &Below, options: &Options) -> R<Motion> {
         };
         let pelvis_moves = yaw.abs() > NOTHING || roll.abs() > NOTHING;
         if pelvis_moves {
-            turn(sk, &mut rots, 0, quat::mul(axis_turn(fwd, roll), axis_turn(up, yaw)));
+            turn(
+                sk,
+                &mut rots,
+                0,
+                quat::mul(axis_turn(fwd, roll), axis_turn(up, yaw)),
+            );
         }
 
         // the spine undoes the pelvis and turns the shoulders the other way
@@ -410,8 +409,7 @@ pub fn motion(sk: &Skeleton, below: &Below, options: &Options) -> R<Motion> {
                 }
                 if options.has("hands") {
                     // the hand trails: it lags behind whichever way the arm is going
-                    let drag =
-                        WRIST_SHARE * (earlier(&pendulum[s], f, trail, looping) - pendulum[s][f]);
+                    let drag = WRIST_SHARE * (earlier(&pendulum[s], f, trail, looping) - pendulum[s][f]);
                     if drag.abs() > NOTHING {
                         turn(sk, &mut rots, wrist, axis_turn(axis, drag));
                     }

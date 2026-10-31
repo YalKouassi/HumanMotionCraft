@@ -82,7 +82,7 @@ Outputs:
 | `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left, and library animations left out of the anchor poses (empty: none) |
 | `anchors` | JSON | yes |  | a gap over the model's limit: the anchor poses placed inside it, [{frame, id, source_frame}] (the library animation and its frame the pose is); empty: the model took the gap in one |
 | `anchor_segment` | JSON | yes |  | the library segment the anchors came from: {id, from, to, speed, match_deg} (its frames matched to the two keys, library frames per animation frame, and the mean angle between its end poses and the keys); null: the model took the gap in one |
-| `diagnostics` | JSON | yes |  | measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys and at each anchor pose between them (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding\|path\|pop\|spin\|bent, from, to, text}] what is past a line, notes: what could not be measured} |
+| `diagnostics` | JSON | yes |  | measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys and at each anchor pose between them (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, steps: {contacts: [{foot, from, to, x, y}] the feet landing inside the span, lengths_m, median_m, alternate, short: the steps under half the median, regular (null: too few steps)} or null (not measured), flags: [{kind: sliding\|path\|pop\|spin\|bent, from, to, text}] what is past a line, notes: what could not be measured} |
 
 ### `ai.fill_all`: AI fill all gaps
 
@@ -1723,6 +1723,30 @@ Outputs:
 | `surfaces` | JSON | yes |  | [{name, min, max, top}] |
 | `contacts` | JSON | yes |  | [{bone, from, to, at}]: the hands and feet held |
 | `physics` | bool | yes |  | the physics pass plays |
+
+### `layer.secondary`: Secondary motion
+
+undoable, icon `layer-add`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `amount` | number |  | 0.05 to 2 | how strong, 1 is an ordinary walk (default 1) |
+| `parts` | list of text |  |  | which of arms, shoulders, pelvis, spine, head, hands, follow (default: all) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `i` | integer | yes |  | the layer |
+| `name` | text | yes |  | its name |
+| `keys` | integer | yes |  | keys on it, one a frame |
+| `bones` | integer | yes |  | bones it turns |
+| `largest` | number | yes |  | the largest turn of any bone (radians) |
+| `foot_drift` | number | yes |  | how far an ankle ends up from its place (m) |
+| `replaced` | bool | yes |  | it replaced the layer from an earlier run |
+| `notes` | list of text | yes |  | what the user should know |
 
 ### `layer.set`: Layer settings
 

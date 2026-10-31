@@ -22,7 +22,8 @@ fn walk(s: &mut Session) {
     s.run("pose.set_root", &json!({ "root": [0, 0, 0.945] })).unwrap();
     s.run("key.set", &json!({ "interp": "smooth" })).unwrap();
     s.run("frame.set", &json!({ "frame": 80 })).unwrap();
-    s.run("pose.set_root", &json!({ "root": [0, -3.0, 0.945] })).unwrap();
+    s.run("pose.set_root", &json!({ "root": [0, -3.0, 0.945] }))
+        .unwrap();
     s.run("key.set", &json!({ "interp": "smooth" })).unwrap();
     s.run(
         "anim.steps",
@@ -111,7 +112,10 @@ fn the_opposite_arm_swings_and_the_feet_stay() {
             ahead(a).total_cmp(&ahead(b))
         })
         .unwrap();
-    assert!(after[f][wr][1] < before[f][wr][1], "right hand forward on frame {f}");
+    assert!(
+        after[f][wr][1] < before[f][wr][1],
+        "right hand forward on frame {f}"
+    );
     assert!(after[f][wl][1] > before[f][wl][1], "left hand back on frame {f}");
     let mut drift: f64 = 0.0;
     for (a, b) in after.iter().zip(&before) {

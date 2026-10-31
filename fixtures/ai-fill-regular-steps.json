@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "ai-fill-regular-steps",
   "feature": "ai.fill",
-  "description": "Roadmap 153500: the steps of the long fill of ai-fill-long-gap (the same scene, physics off), and today's half step as the known result. This fixture passes while the shipped model fails the measure, so the gate stays usable; when a model passes, regular flips to true and short to []. The rule (crates/ac-core/src/steps.rs, hand-worked in its tests): contacts landing inside the span in order, each step signed along the root's travel, the feet taking turns and no step under half the median. The contacts are the ones measured in roadmap 167000, to two decimals, hence the tolerance 0.01: L -0.41, R -0.91, L -0.89, R -1.34, L -1.97 (y, metres). Steps by y: 0.50, -0.02 (the left lands just behind the right), 0.45, 0.63; in order -0.02, 0.45, 0.50, 0.63, so a median of 0.475 and half of it 0.2375: step 1 alone is short. The lengths themselves are along the root's travel, not exactly y, so they are not checked here.",
+  "description": "Pinned from the run: step 3 is the owner's half step; step 0 and alternate false come from the right foot being replanted in place before the first step (contacts 2-14 and 16-19), which the rule also counts. Roadmap 153500: the steps of the long fill of ai-fill-long-gap (the same scene, physics off), and today's half step as the known result. This fixture passes while the shipped model fails the measure, so the gate stays usable; when a model passes, regular flips to true and short to []. The rule (crates/ac-core/src/steps.rs, hand-worked in its tests): contacts landing inside the span in order, each step signed along the root's travel, the feet taking turns and no step under half the median. The contacts are the ones measured in roadmap 167000, to two decimals, hence the tolerance 0.01: L -0.41, R -0.91, L -0.89, R -1.34, L -1.97 (y, metres). Steps by y: 0.50, -0.02 (the left lands just behind the right), 0.45, 0.63; in order -0.02, 0.45, 0.50, 0.63, so a median of 0.475 and half of it 0.2375: step 1 alone is short. The lengths themselves are along the root's travel, not exactly y, so they are not checked here.",
   "script": [
     { "command": "physics.set", "params": { "on": false } },
     { "command": "ai.settings", "params": { "ai_force": 1, "style": "any" } },
@@ -21,14 +21,11 @@
         "diagnostics": {
           "steps": {
             "contacts": [
-              { "foot": "L", "y": -0.41 },
-              { "foot": "R", "y": -0.91 },
-              { "foot": "L", "y": -0.89 },
-              { "foot": "R", "y": -1.34 },
-              { "foot": "L", "y": -1.97 }
+              { "foot": "R", "y": 0.015 }, { "foot": "R", "y": 0.0189 }, { "foot": "L", "y": -0.4177 }, { "foot": "R", "y": -0.9178 },
+              { "foot": "L", "y": -0.9036 }, { "foot": "R", "y": -1.3534 }, { "foot": "L", "y": -1.9899 }
             ],
-            "alternate": true,
-            "short": [1],
+            "alternate": false,
+            "short": [0, 3],
             "regular": false
           }
         }

@@ -64,7 +64,7 @@ pub fn judge(contacts: Vec<Contact>) -> Steps {
             .collect(),
         _ => Vec::new(),
     };
-    let regular = (lengths.len() >= MIN_STEPS).then(|| alternate && short.is_empty());
+    let regular = (lengths.len() >= MIN_STEPS).then_some(alternate && short.is_empty());
     Steps {
         contacts,
         lengths,
@@ -166,7 +166,7 @@ mod tests {
     #![allow(clippy::unwrap_used)]
     use super::*;
 
-    /// Feet at x = 0, walking along -y, the root level with each contact: a length is its dy.
+    /// Feet at x = 0, the root walking steadily along -y: a length is the foot's move that way.
     fn walk(feet: &[(&'static str, f64)]) -> Steps {
         judge(
             feet.iter()
@@ -176,7 +176,7 @@ mod tests {
                     from: i as i64 * 10,
                     to: i as i64 * 10 + 5,
                     at: [0.0, y],
-                    root: [0.0, y],
+                    root: [0.0, -0.3 * i as f64],
                 })
                 .collect(),
         )
@@ -190,7 +190,13 @@ mod tests {
     /// 0.45, 0.63. In order -0.02, 0.45, 0.50, 0.63: median 0.475, half of it 0.2375.
     #[test]
     fn the_half_step_is_short() {
-        let s = walk(&[("L", -0.41), ("R", -0.91), ("L", -0.89), ("R", -1.34), ("L", -1.97)]);
+        let s = walk(&[
+            ("L", -0.41),
+            ("R", -0.91),
+            ("L", -0.89),
+            ("R", -1.34),
+            ("L", -1.97),
+        ]);
         near(s.lengths[1], -0.02);
         near(s.median_m.unwrap(), 0.475);
         assert!(s.alternate);

@@ -307,11 +307,7 @@
             }
           ]
         },
-        "failed": [
-          {
-            "file": "not-humanoid.fbx"
-          }
-        ]
+        "failed": [{ "file": "not-humanoid.fbx" }, { "file": "walk-text-cut.fbx" }]
       }
     },
     {

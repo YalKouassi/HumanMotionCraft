@@ -179,6 +179,7 @@
             "layer.edit",
             "layer.move",
             "layer.plan",
+            "layer.secondary",
             "layer.set",
             "layer.solo",
             "layer.travel",
@@ -4113,6 +4114,49 @@
           "if": {
             "properties": {
               "command": {
+                "const": "layer.secondary"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Secondary motion; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "minimum": 0.05,
+                    "maximum": 2.0,
+                    "description": "how strong, 1 is an ordinary walk (default 1)",
+                    "default": 1.0
+                  },
+                  "parts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4096
+                    },
+                    "maxItems": 1048576,
+                    "description": "which of arms, shoulders, pelvis, spine, head, hands, follow (default: all)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "layer.set"
               }
             },
@@ -7393,6 +7437,7 @@
             "layer.edit",
             "layer.move",
             "layer.plan",
+            "layer.secondary",
             "layer.set",
             "layer.solo",
             "layer.travel",
