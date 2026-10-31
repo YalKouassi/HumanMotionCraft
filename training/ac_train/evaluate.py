@@ -60,6 +60,7 @@ card), and each recording's own steps beside them.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import pathlib
 import shutil
@@ -106,14 +107,26 @@ SCENARIOS = ("start", "stop", "crouch", "flight", "turn_step")
 STEP_SHORT_SHARE = 0.5
 MIN_STEPS = 2
 STEP_STILL_M = 0.01
-#: fewer planted frames than this is passing the floor (``contact::MIN_CONTACT``); a foot lifting
-#: for no more than this many frames is one contact (the scan's test has no hysteresis)
+#: the same foot coming down nearer than this (m) to its last place has not stepped; the root
+#: travelling less than this (m) between two contacts is not walking that step
+#: (``crates/ac-core/src/steps.rs``)
+STEP_REPLANT_M = 0.10
+STEP_WALKING_M = 0.10
+#: when a foot is down, the numbers of ``crates/ac-core/src/contact.rs`` and ``physics.rs``: comes
+#: down within NEAR (m) slower than PLANT (m/s), leaves past LEAVE (m) or faster than LEAVE (m/s);
+#: fewer frames down is passing the floor; the heel's distance behind the ankle
+CONTACT_NEAR_M = 0.05
+CONTACT_PLANT_MS = 0.5
+CONTACT_LEAVE_M = 0.08
+CONTACT_LEAVE_MS = 0.8
 CONTACT_MIN = 3
-CONTACT_MERGE = 3
+HEEL_BACK_M = 0.05
 #: the long walks: frames from key to key, as ``ai-fill-long-gap``; a window starts every third of
 #: that; the hips average at least :data:`MOVING_MS` over it
 LONG_FRAMES = 90
 LONG_STRIDE = 30
+#: and no second of the window averages under this (m/s): a walk that slows down shortens its steps
+LONG_STEADY_MS = 0.4
 
 
 def bin_name(lo: int, hi: int) -> str:
@@ -189,45 +202,118 @@ def measure(pose: Pose, truth: Pose, body: Body, a: int, b: int, free=None, gfre
 def step_report(contacts: list[dict]) -> dict:
     """The rule of ``crates/ac-core/src/steps.rs``. ``contacts``, in landing order: each one's
     ``foot``, its ankle ``at`` and root ``root`` across the floor (m) on its middle frame."""
-    lengths = []
-    for c, d in zip(contacts, contacts[1:]):
+    lengths, judged = [], []
+    for i, (c, d) in enumerate(zip(contacts, contacts[1:])):
         step, way = np.subtract(d["at"], c["at"]), np.subtract(d["root"], c["root"])
         travel = float(np.hypot(*way))
         lengths.append(float(np.hypot(*step)) if travel < STEP_STILL_M else float(step @ way) / travel)
+        if travel >= STEP_WALKING_M:
+            judged.append(i)
     alternate = all(c["foot"] != d["foot"] for c, d in zip(contacts, contacts[1:]))
-    median = float(np.median(lengths)) if lengths else None
-    enough = len(lengths) >= MIN_STEPS
-    short = [i for i, x in enumerate(lengths) if x < STEP_SHORT_SHARE * median] if enough else []
+    median = float(np.median([lengths[i] for i in judged])) if judged else None
+    enough = len(judged) >= MIN_STEPS
+    short = [i for i in judged if lengths[i] < STEP_SHORT_SHARE * median] if enough else []
     return {"lengths_m": lengths, "median_m": median, "alternate": alternate, "short": short,
             "regular": (alternate and not short) if enough else None}
 
 
-def contacts_of(planted, ankles, root) -> list[dict]:
-    """One window's contacts in landing order: (T, 2) planted, (T, 2, 2) ankles, (T, 2) root, as
-    arrays. A foot down on the first frame was not stepped onto: it is left out."""
-    out = []
+def foot_down(height, speed) -> np.ndarray:
+    """``contact::one_foot``: one foot's (T, K) points' heights over the ground (m) and speeds
+    across it (m/s) -> (T,) the frames it is down."""
+    T = height.shape[0]
+    slowest = lambda t, limit: speed[t][height[t] < limit].min(initial=np.inf)  # noqa: E731
+    down, on = np.zeros(T, bool), False
+    for t in range(T):
+        if on:
+            on = height[t].min() < CONTACT_LEAVE_M and slowest(t, CONTACT_LEAVE_M) < CONTACT_LEAVE_MS
+        else:
+            on = slowest(t, CONTACT_NEAR_M) < CONTACT_PLANT_MS
+        down[t] = on
+    t = 0
+    while t < T:
+        if not down[t]:
+            t += 1
+            continue
+        s = t
+        while t < T and down[t]:
+            t += 1
+        if t - s < min(CONTACT_MIN, T):
+            down[s:t] = False
+    return down
+
+
+def contacts_of(down, ankles, root, a: int, b: int) -> list[dict]:
+    """``steps::measure`` and ``merged``: (T, 2) frames each foot is down, (T, 2, 2) ankles, (T, 2)
+    root, as arrays, and the span's frames a .. b in them -> its contacts in landing order. A foot
+    down on frame a was not stepped onto; a foot replanted in place is one contact, at the first
+    one's place."""
+    raw = []
     for foot in range(2):
-        runs = []
-        for t in np.flatnonzero(planted[:, foot]).tolist():
-            if runs and t - runs[-1][1] <= CONTACT_MERGE + 1:
-                runs[-1][1] = t
-            else:
-                runs.append([t, t])
-        for s, e in runs:
-            if s == 0 or e - s + 1 < CONTACT_MIN:
+        t, T = 0, down.shape[0]
+        while t < T:
+            if not down[t, foot]:
+                t += 1
                 continue
-            mid = (s + e) // 2
-            out.append({"foot": "LR"[foot], "from": s, "at": ankles[mid, foot], "root": root[mid]})
-    return sorted(out, key=lambda c: c["from"])
+            s = t
+            while t < T and down[t, foot]:
+                t += 1
+            if s > b:
+                continue
+            mid = (max(s, a) + min(t - 1, b)) // 2
+            raw.append({"foot": "LR"[foot], "from": s, "to": min(t - 1, b), "at": ankles[mid, foot],
+                        "root": root[mid], "landed": s > a})
+    out: list[dict] = []
+    for c in sorted(raw, key=lambda c: c["from"]):
+        if out and out[-1]["foot"] == c["foot"] and np.hypot(*np.subtract(c["at"], out[-1]["at"])) < STEP_REPLANT_M:
+            out[-1]["to"] = c["to"]
+        else:
+            out.append(c)
+    return [c for c in out if c["landed"]]
+
+
+@functools.lru_cache(maxsize=1)
+def foot_offsets() -> tuple:
+    """Per foot, from its ankle in the rest pose: ``physics::Body``'s foot points, every toe's head
+    then the heel, as (K, 3) arrays; and the rest root's height."""
+    from .rig import Skeleton
+
+    skel = Skeleton.load()
+    out = []
+    for side in "LR":
+        ankle = skel.heads[skel.index[f"foot.{side}"]]
+        toes = np.array([h for n, h in zip(skel.names, skel.heads) if n.startswith("toe") and n.endswith(f".{side}")])
+        heel = [0.0, HEEL_BACK_M, toes[:, 2].min() - ankle[2]]
+        out.append(np.vstack([toes - ankle, heel]))
+    return out[0], out[1], float(skel.heads[0][2])
 
 
 def window_steps(pose: Pose, body: Body, a: int, b: int) -> list[dict]:
-    """(N) windows -> each one's :func:`step_report` over frames a .. b (a >= 1: frame 0 is never
-    planted, so a foot down from the start would read as landing on frame 1)."""
-    planted = body.planted(pose.points)[:, a : b + 1].cpu().numpy()
-    ankles = pose.points[:, a : b + 1][..., list(FOOT_POINTS[:2]), :2].double().cpu().numpy()
-    root = pose.root[:, a : b + 1, :2].double().cpu().numpy()
-    return [step_report(contacts_of(p, f, r)) for p, f, r in zip(planted, ankles, root)]
+    """(N) windows -> each one's :func:`step_report` over frames a .. b, with the app's contact test
+    (``contact::clip_phases``) on the app's foot points, a frame either side as the app samples. The
+    toes aren't solved: they keep their rest pose on the foot."""
+    lo, hi = max(a - 1, 0), min(b + 1, pose.points.shape[1] - 1)
+    left, right, rest_root = foot_offsets()
+    feet = []
+    for side, offset in zip("LR", (left, right)):
+        k = BONES.index(f"foot.{side}")
+        R = pose.world[:, lo : hi + 1, k].double()
+        at = pose.points[:, lo : hi + 1, k, None].double()
+        feet.append((at + (R[:, :, None] @ torch.as_tensor(offset).to(R)[..., None]).squeeze(-1)).cpu().numpy())
+    ankles = pose.points[:, lo : hi + 1][..., list(FOOT_POINTS[:2]), :2].double().cpu().numpy()
+    root = pose.root[:, lo : hi + 1, :2].double().cpu().numpy()
+    out = []
+    for n in range(pose.points.shape[0]):
+        pts = [f[n] for f in feet]
+        # the lowest foot point counts as the ground for a window keyed above the floor
+        lift = max(min((p[..., 2] + rest_root).min() for p in pts), 0.0)
+        down = np.zeros((hi - lo + 1, 2), bool)
+        for side, p in enumerate(pts):
+            v = np.diff(p[..., :2], axis=0)
+            speed = np.hypot(v[..., 0], v[..., 1]) * FPS
+            speed = np.vstack([speed[:1], speed])  # the first frame goes by the next
+            down[:, side] = foot_down(p[..., 2] + rest_root - lift, speed)
+        out.append(step_report(contacts_of(down, ankles[n], root[n], a - lo, b - lo)))
+    return out
 
 
 def steps_irregular(pose: Pose, body: Body, a: int, b: int) -> tuple:
@@ -666,6 +752,13 @@ def sheets(model, sets, body: Body, device, out: pathlib.Path, ac: pathlib.Path 
 
 # ---- the long walks (153500) --------------------------------------------------------------------
 
+def steady(step, s: int, frames: int) -> bool:
+    """(F,) the hips' move each frame (m): no whole second of frames s .. s + frames averages under
+    :data:`LONG_STEADY_MS`."""
+    per = int(FPS)
+    return all(step[t : t + per].sum() * FPS / per >= LONG_STEADY_MS for t in range(s, s + frames - per + 1, per))
+
+
 def long_walk_starts(sets, n: int, seed: int, frames: int = LONG_FRAMES) -> list[int]:
     """Up to ``n`` first frames of walking windows of ``frames + 1`` frames, seeded: inside one
     held-out walk's clean frames, the hips averaging at least :data:`MOVING_MS`."""
@@ -686,7 +779,7 @@ def long_walk_starts(sets, n: int, seed: int, frames: int = LONG_FRAMES) -> list
     for s in sets.starts.cpu().numpy().tolist():
         if s % LONG_STRIDE or s + length > total or bad[s + extra + 1] - bad[s] or take[s] != take[s + frames]:
             continue
-        if sets.types[take[s]] == "walk" and step[s : s + frames].sum() * FPS / frames >= MOVING_MS:
+        if sets.types[take[s]] == "walk" and step[s : s + frames].sum() * FPS / frames >= MOVING_MS and steady(step, s, frames):
             out.append(s)
     rng = np.random.default_rng(seed)
     return sorted(rng.permutation(out)[:n].tolist())
@@ -741,13 +834,14 @@ def long_walks(sets, body: Body, n: int, seed: int, folder: pathlib.Path, ac: pa
     for k, s in enumerate(starts):
         q, root = sets.q[s : s + LONG_FRAMES + 1], sets.root[s : s + LONG_FRAMES + 1]
         truth = pose_of(quat_to_mat(q)[None], root[None].float() * body.hip_height, body)
-        recorded = window_steps(truth, body, 1, LONG_FRAMES)[0]
+        recorded = window_steps(truth, body, 0, LONG_FRAMES)[0]
         d = run_long_fill(ac, q.double().cpu().numpy(), root.double().cpu().numpy(), folder, f"walk-{k}")
         fill = d.get("steps") or {}
         rows.append({"start": s, "take": sets.labels[int(sets.take[s])][:1], "fill_regular": fill.get("regular"),
                      "fill_alternate": fill.get("alternate"), "fill_short": fill.get("short"),
                      "fill_lengths_m": fill.get("lengths_m"), "sliding_max_cm": d.get("sliding_max_cm"),
-                     "recording_regular": recorded["regular"], "refused": d.get("refused")})
+                     "recording_regular": recorded["regular"], "recording_lengths_m": recorded["lengths_m"],
+                     "recording_alternate": recorded["alternate"], "refused": d.get("refused")})
         print(f"{k + 1}/{len(starts)} fill {fill.get('regular')} recording {recorded['regular']} "
               f"{d.get('refused') or ''}", flush=True)
     count = lambda key, v: sum(r[key] is v for r in rows)  # noqa: E731

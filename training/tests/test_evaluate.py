@@ -62,8 +62,8 @@ def test_a_fill_that_steps_off_the_planted_feet():
 
 
 def walk(*feet):
-    """(foot, y) contacts walking along -y, the root level with each: a length is its dy."""
-    return [{"foot": f, "at": (0.0, y), "root": (0.0, y)} for f, y in feet]
+    """(foot, y) contacts, the root walking steadily along -y: a length is the foot's dy."""
+    return [{"foot": f, "at": (0.0, y), "root": (0.0, -0.3 * i)} for i, (f, y) in enumerate(feet)]
 
 
 def test_the_half_step_is_short():
@@ -90,23 +90,75 @@ def test_even_steps_and_the_edges_of_the_rule():
 
 def test_contacts_land_inside_the_window():
     T = 20
-    planted = np.zeros((T, 2), bool)
-    planted[0:5, 0] = True  # down from the first frame: not stepped onto
-    planted[6:12, 1] = True
-    planted[13:15, 0] = True  # two frames: passing the floor
+    down = np.zeros((T, 2), bool)
+    down[0:5, 0] = True  # down from the first frame: not stepped onto
+    down[6:12, 1] = True
     ankles = np.arange(T * 4, dtype=float).reshape(T, 2, 2)
-    c = evaluate.contacts_of(planted, ankles, np.zeros((T, 2)))
+    c = evaluate.contacts_of(down, ankles, np.zeros((T, 2)), 0, T - 1)
     assert [(x["foot"], x["from"]) for x in c] == [("R", 6)]
     assert c[0]["at"].tolist() == ankles[8, 1].tolist()  # the middle of 6..11, rounded down
 
 
-def test_a_short_lift_is_one_contact():
+def test_a_replant_is_one_contact_and_the_half_step_still_fails():
+    # ai-fill-long-gap, as crates/ac-core/src/steps.rs: the right foot 2-14 and 16-19, 0.0039 m on,
+    # one contact. Steps 0.4327, 0.5, -0.0142, 0.45, 0.6365; median 0.45, half 0.225
+    feet = [("R", 2, 14, 0.015), ("R", 16, 19, 0.0189), ("L", 22, 30, -0.4177), ("R", 32, 40, -0.9178),
+            ("L", 42, 50, -0.9036), ("R", 52, 60, -1.3534), ("L", 62, 70, -1.9899)]
+    T = 75
+    down, ankles = np.zeros((T, 2), bool), np.zeros((T, 2, 2))
+    for f, s, e, y in feet:
+        side = "LR".index(f)
+        down[s : e + 1, side] = True
+        ankles[s : e + 1, side, 1] = y
+    root = np.stack([np.zeros(T), -0.03 * np.arange(T)], 1)
+    c = evaluate.contacts_of(down, ankles, root, 0, T - 1)
+    assert [x["foot"] for x in c] == list("RLRLRL") and (c[0]["from"], c[0]["to"]) == (2, 19)
+    r = evaluate.step_report(c)
+    assert r["alternate"] and r["median_m"] == pytest.approx(0.45)
+    assert r["short"] == [2] and r["regular"] is False
+
+
+def test_a_replant_keeps_a_foot_down_from_the_start_out():
     T = 20
-    planted = np.zeros((T, 2), bool)
-    planted[2:6, 0] = True
-    planted[9:12, 0] = True  # 3 frames up between them (6, 7, 8): the same contact
-    c = evaluate.contacts_of(planted, np.zeros((T, 2, 2)), np.zeros((T, 2)))
-    assert [x["from"] for x in c] == [2]
+    down = np.zeros((T, 2), bool)
+    down[0:5, 0] = down[8:12, 0] = True
+    assert evaluate.contacts_of(down, np.zeros((T, 2, 2)), np.zeros((T, 2)), 0, T - 1) == []
+
+
+def test_a_step_while_stopping_is_not_judged():
+    # 0.5, 0.5, 0.5, then 0.1 closing the feet over 0.05 m of the root's travel
+    c = [{"foot": f, "at": (0.0, y), "root": (0.0, r)} for f, y, r in
+         (("L", 0.0, 0.0), ("R", -0.5, -0.5), ("L", -1.0, -1.0), ("R", -1.5, -1.5), ("L", -1.6, -1.55))]
+    r = evaluate.step_report(c)
+    assert r["lengths_m"][3] == pytest.approx(0.1) and r["median_m"] == pytest.approx(0.5)
+    assert r["short"] == [] and r["regular"] is True
+
+
+def test_foot_down_is_the_apps_test():
+    # heights and speeds of one point: comes down at 0.04 m and 0.4 m/s (frame 1); stays through
+    # 0.07 m and 0.7 m/s (frames 2, 3), which wouldn't bring it down; leaves at 0.09 m (frame 4)
+    h = np.array([[0.2], [0.04], [0.07], [0.07], [0.09], [0.2]])
+    v = np.array([[1.0], [0.4], [0.7], [0.7], [0.7], [1.0]])
+    assert evaluate.foot_down(h, v).tolist() == [False, True, True, True, False, False]
+    # two frames down are passing the floor
+    assert not evaluate.foot_down(h[[0, 1, 2, 4, 5]], v[[0, 1, 2, 4, 5]]).any()
+    # a heel off the floor with the toes still: one low slow point is enough
+    h2, v2 = np.tile([[0.03, 0.2]], (4, 1)), np.tile([[0.1, 2.0]], (4, 1))
+    assert evaluate.foot_down(h2, v2).all()
+
+
+def test_a_figure_standing_has_no_landings():
+    # at rest on the floor the feet are down from the first frame
+    skel = rig.Skeleton.load()
+    body = Body(skel)
+    still = evaluate.window_steps(poses(skel, body, dx=(0.0,) * 8, dz=(0.0,) * 8), body, 0, 7)[0]
+    assert still["lengths_m"] == [] and still["regular"] is None
+
+
+def test_steady_walks_only():
+    # 0.03 m a frame is 0.9 m/s; a second at 0.01 m a frame is 0.3 m/s, under 0.4
+    assert evaluate.steady(np.full(90, 0.03), 0, 90)
+    assert not evaluate.steady(np.r_[np.full(60, 0.03), np.full(30, 0.01)], 0, 90)
 
 
 def test_a_fill_that_sinks():

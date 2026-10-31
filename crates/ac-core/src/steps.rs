@@ -2,20 +2,25 @@
 //! the fill's median step. Simple enough to check by hand, and `training/ac_train/evaluate.py`
 //! (`step_report`) is the same rule:
 //!
-//! - A **contact** is a run of frames a foot is down ([`crate::contact`]) that lands inside the
-//!   span; a foot already down on the span's first frame was not stepped onto. Its place is the
-//!   ankle on the contact's middle frame (of the frames inside the span).
+//! - A **contact** is a run of frames a foot is down ([`contact::clip_phases`], so a clip standing
+//!   above the floor still lands) that lands inside the span; a foot already down on the span's
+//!   first frame was not stepped onto. Its place is the ankle on the contact's middle frame (of the
+//!   frames inside the span).
+//! - A foot lifted and **replanted** within [`REPLANT_M`] of its place, the other foot not landing
+//!   in between, has not stepped: the two are one contact, at the first one's place.
 //! - A **step** goes from one contact to the next, in landing order. Its length is signed, along
 //!   the way the root travelled between those two middle frames: the feet stand apart sideways,
 //!   so a foot landing level with the other is a step of about 0, and one landing behind it is
 //!   under 0. With the root still (under [`STILL_M`]) it is the plain distance.
 //!
-//! With fewer than [`MIN_STEPS`] steps there is nothing to compare: `regular` is `None`.
+//! - A step over which the root travelled under [`WALKING_M`] is the walker standing (a last step
+//!   closing the feet, a shuffle): its length is reported, but it is neither judged nor in the median.
+//!
+//! With fewer than [`MIN_STEPS`] judged steps there is nothing to compare: `regular` is `None`.
 
 use crate::contact;
 use crate::document::Document;
 use crate::physics::Body;
-use crate::quat;
 
 /// A step under this share of the median step is short.
 pub const SHORT_SHARE: f64 = 0.5;
@@ -23,6 +28,10 @@ pub const SHORT_SHARE: f64 = 0.5;
 pub const MIN_STEPS: usize = 2;
 /// The root moving less than this (m) between two contacts gives no way of travel.
 pub const STILL_M: f64 = 0.01;
+/// The same foot coming down nearer than this (m) to its last place has not stepped.
+pub const REPLANT_M: f64 = 0.10;
+/// The root travelling less than this (m) between two contacts is not walking that step.
+pub const WALKING_M: f64 = 0.10;
 
 /// One foot landing inside the span.
 #[derive(Debug, Clone, PartialEq)]
@@ -44,9 +53,9 @@ pub struct Steps {
     pub median_m: Option<f64>,
     /// No two contacts in a row are the same foot's.
     pub alternate: bool,
-    /// The steps under [`SHORT_SHARE`] of the median, as indexes into `lengths`.
+    /// The judged steps under [`SHORT_SHARE`] of the median, as indexes into `lengths`.
     pub short: Vec<usize>,
-    /// `None`: too few steps to say.
+    /// `None`: too few judged steps to say.
     pub regular: Option<bool>,
 }
 
@@ -54,17 +63,23 @@ pub struct Steps {
 pub fn judge(contacts: Vec<Contact>) -> Steps {
     let lengths: Vec<f64> = contacts.windows(2).map(|w| length(&w[0], &w[1])).collect();
     let alternate = contacts.windows(2).all(|w| w[0].foot != w[1].foot);
-    let median_m = median(&lengths);
+    let judged: Vec<usize> = contacts
+        .windows(2)
+        .enumerate()
+        .filter(|(_, w)| travel(&w[0], &w[1]) >= WALKING_M)
+        .map(|(i, _)| i)
+        .collect();
+    let median_m = median(&judged.iter().map(|&i| lengths[i]).collect::<Vec<_>>());
+    let enough = judged.len() >= MIN_STEPS;
     let short = match median_m {
-        Some(m) if lengths.len() >= MIN_STEPS => lengths
+        Some(m) if enough => judged
             .iter()
-            .enumerate()
-            .filter(|(_, l)| **l < SHORT_SHARE * m)
-            .map(|(i, _)| i)
+            .copied()
+            .filter(|&i| lengths[i] < SHORT_SHARE * m)
             .collect(),
         _ => Vec::new(),
     };
-    let regular = (lengths.len() >= MIN_STEPS).then_some(alternate && short.is_empty());
+    let regular = enough.then_some(alternate && short.is_empty());
     Steps {
         contacts,
         lengths,
@@ -75,14 +90,18 @@ pub fn judge(contacts: Vec<Contact>) -> Steps {
     }
 }
 
+fn travel(a: &Contact, b: &Contact) -> f64 {
+    (b.root[0] - a.root[0]).hypot(b.root[1] - a.root[1])
+}
+
 fn length(a: &Contact, b: &Contact) -> f64 {
     let (dx, dy) = (b.at[0] - a.at[0], b.at[1] - a.at[1]);
     let (rx, ry) = (b.root[0] - a.root[0], b.root[1] - a.root[1]);
-    let travel = rx.hypot(ry);
-    if travel < STILL_M {
+    let way = travel(a, b);
+    if way < STILL_M {
         dx.hypot(dy)
     } else {
-        (dx * rx + dy * ry) / travel
+        (dx * rx + dy * ry) / way
     }
 }
 
@@ -95,6 +114,22 @@ fn median(values: &[f64]) -> Option<f64> {
         _ if n % 2 == 1 => v.get(n / 2).copied(),
         _ => Some((v.get(n / 2 - 1)? + v.get(n / 2)?) / 2.0),
     }
+}
+
+/// Contacts with whether each landed inside the span -> one contact per place, in landing order: a
+/// replant joins the contact before it, so one that began before the span stays out.
+fn merged(mut raw: Vec<(Contact, bool)>) -> Vec<Contact> {
+    raw.sort_by_key(|(c, _)| c.from);
+    let mut out: Vec<(Contact, bool)> = Vec::with_capacity(raw.len());
+    for (c, landed) in raw {
+        match out.last_mut() {
+            Some((p, _)) if p.foot == c.foot && (c.at[0] - p.at[0]).hypot(c.at[1] - p.at[1]) < REPLANT_M => {
+                p.to = c.to;
+            }
+            _ => out.push((c, landed)),
+        }
+    }
+    out.into_iter().filter(|(_, landed)| *landed).map(|(c, _)| c).collect()
 }
 
 /// The steps of frames `a..=b` of the keys.
@@ -113,21 +148,12 @@ pub fn measure(doc: &Document, a: i64, b: i64) -> Result<Steps, String> {
             .ok_or_else(|| format!("the rig has no {name}"))
     };
     let ankles = [ankle("foot.L")?, ankle("foot.R")?];
-    let mut feet = Vec::with_capacity(rots.len());
     let mut joints = Vec::with_capacity(rots.len());
     for (r, o) in rots.iter().zip(&roots) {
-        let (world, pos) = sk.fk(r, *o).map_err(|e| e.to_string())?;
-        feet.push(
-            body.points(&world, &pos)
-                .into_iter()
-                .enumerate()
-                .map(|(k, q)| (body.foot_of(k), q))
-                .collect::<Vec<(usize, quat::Vec3)>>(),
-        );
-        joints.push(pos);
+        joints.push(sk.fk(r, *o).map_err(|e| e.to_string())?.1);
     }
-    let phases = contact::phases(&feet, doc.clip.fps, &doc.clip.surfaces, 0.0);
-    let mut contacts = Vec::new();
+    let phases = contact::clip_phases(&body, sk, &rots, &roots, doc.clip.fps, &doc.clip.surfaces)?;
+    let mut raw = Vec::new();
     for ((name, phase), ankle) in ["L", "R"].into_iter().zip(&phases).zip(ankles) {
         let mut f = 0;
         while f < phase.len() {
@@ -140,25 +166,27 @@ pub fn measure(doc: &Document, a: i64, b: i64) -> Result<Steps, String> {
                 f += 1;
             }
             let (from, to) = (lo + start as i64, lo + f as i64 - 1);
-            if from <= a || from > b {
+            if from > b {
                 continue;
             }
-            let mid = ((from + to.min(b)) / 2 - lo) as usize;
+            let mid = ((from.max(a) + to.min(b)) / 2 - lo) as usize;
             let pos = joints.get(mid).ok_or("a contact's frame was not sampled")?;
             let (Some(p), Some(r)) = (pos.get(ankle), pos.first()) else {
                 return Err("a contact's joints were not posed".into());
             };
-            contacts.push(Contact {
-                foot: name,
-                from,
-                to: to.min(b),
-                at: [p[0], p[1]],
-                root: [r[0], r[1]],
-            });
+            raw.push((
+                Contact {
+                    foot: name,
+                    from,
+                    to: to.min(b),
+                    at: [p[0], p[1]],
+                    root: [r[0], r[1]],
+                },
+                from > a,
+            ));
         }
     }
-    contacts.sort_by_key(|c| c.from);
-    Ok(judge(contacts))
+    Ok(judge(merged(raw)))
 }
 
 #[cfg(test)]
@@ -249,6 +277,80 @@ mod tests {
         assert!(!s.alternate);
         assert!(s.short.is_empty());
         assert_eq!(s.regular, Some(false));
+    }
+
+    /// 0.5, 0.5, 0.5, then a last step of 0.1 that closes the feet as the root stops (0.05 m of
+    /// travel): reported, not judged, and the median stays 0.5.
+    #[test]
+    fn a_step_while_stopping_is_not_judged() {
+        let c = |foot, y: f64, ry: f64| Contact {
+            foot,
+            from: 0,
+            to: 0,
+            at: [0.0, y],
+            root: [0.0, ry],
+        };
+        let s = judge(vec![
+            c("L", 0.0, 0.0),
+            c("R", -0.5, -0.5),
+            c("L", -1.0, -1.0),
+            c("R", -1.5, -1.5),
+            c("L", -1.6, -1.55),
+        ]);
+        near(s.lengths[3], 0.1);
+        near(s.median_m.unwrap(), 0.5);
+        assert!(s.short.is_empty());
+        assert_eq!(s.regular, Some(true));
+    }
+
+    /// The fill of `ai-fill-long-gap`: the right foot replanted 0.0039 m on before the first step
+    /// joins one contact (frames 2-19, at y 0.015). Steps by y 0.4327, 0.5, -0.0142, 0.45, 0.6365:
+    /// in order -0.0142, 0.4327, 0.45, 0.5, 0.6365, so a median of 0.45, half of it 0.225: the
+    /// owner's half step alone is short, and the feet alternate.
+    #[test]
+    fn a_replant_is_one_contact_and_the_half_step_still_fails() {
+        let c = |foot, from: i64, to: i64, y: f64, ry: f64| {
+            let contact = Contact {
+                foot,
+                from,
+                to,
+                at: [0.0, y],
+                root: [0.0, ry],
+            };
+            (contact, true)
+        };
+        let contacts = merged(vec![
+            c("R", 2, 14, 0.015, 0.0),
+            c("R", 16, 19, 0.0189, -0.1),
+            c("L", 22, 30, -0.4177, -0.4),
+            c("R", 32, 40, -0.9178, -0.7),
+            c("L", 42, 50, -0.9036, -1.0),
+            c("R", 52, 60, -1.3534, -1.3),
+            c("L", 62, 70, -1.9899, -1.6),
+        ]);
+        assert_eq!((contacts[0].from, contacts[0].to), (2, 19));
+        near(contacts[0].at[1], 0.015);
+        let s = judge(contacts);
+        assert_eq!(s.contacts.len(), 6);
+        assert!(s.alternate);
+        near(s.median_m.unwrap(), 0.45);
+        assert_eq!(s.short, [2]);
+        assert_eq!(s.regular, Some(false));
+    }
+
+    /// A foot down from before the span, lifted and put back in place, still was not stepped onto.
+    /// A foot moved 0.1 m or more has stepped: the same foot twice, which doesn't alternate.
+    #[test]
+    fn a_replant_keeps_its_first_contact() {
+        let c = |from: i64, y: f64| Contact {
+            foot: "L",
+            from,
+            to: from + 5,
+            at: [0.0, y],
+            root: [0.0, 0.0],
+        };
+        assert!(merged(vec![(c(0, 0.0), false), (c(8, -0.05), true)]).is_empty());
+        assert_eq!(merged(vec![(c(1, 0.0), true), (c(8, -0.1), true)]).len(), 2);
     }
 
     /// One step, or none, has nothing to compare with.
