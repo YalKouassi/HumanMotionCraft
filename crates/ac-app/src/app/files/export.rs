@@ -178,7 +178,11 @@ impl App {
                     let matches = |prof: &str, rt: &str| !prof.is_empty() && profile == prof && root == rt;
                     let named = ENGINE_PRESETS.iter().any(|(_, _, prof, rt)| matches(prof, rt));
                     for (id, label, prof, rt) in ENGINE_PRESETS {
-                        let selected = if prof.is_empty() { !named } else { matches(prof, rt) };
+                        let selected = if prof.is_empty() {
+                            !named
+                        } else {
+                            matches(prof, rt)
+                        };
                         if ui
                             .selectable_label(selected, *label)
                             .on_hover_text(if prof.is_empty() {

@@ -314,11 +314,10 @@ fn bad_input_is_refused_with_a_reason() {
         .unwrap();
     assert_eq!(r["ready"], false, "{r}");
     assert!(
-        r["notes"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .any(|n| n.as_str().unwrap_or_default().contains("both name the node \"L_Foot\"")),
+        r["notes"].as_array().unwrap().iter().any(|n| n
+            .as_str()
+            .unwrap_or_default()
+            .contains("both name the node \"L_Foot\"")),
         "{r}"
     );
     let r = session
