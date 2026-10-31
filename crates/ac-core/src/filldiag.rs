@@ -10,6 +10,7 @@
 //! | `path` | the root's largest distance (m) from the keys' own path: the clip's interpolation with the span's AI keys taken out | [`PATH_M`] |
 //! | `seams` | at each of the two keys, and at each anchor pose of a long fill ([`crate::anchors`]): the largest change of any joint's speed (m/s, `clip.metrics`'s `keys`) and of any bone's spin (rad/s, [`metrics::spin_change`]) across the key | [`POP_SPEED`], [`SPIN_RAD_S`] |
 //! | `bent` | the joints `keep_possible` bent back inside the possible limits, and how far past they were (degrees) | [`BENT_DEG`] |
+//! | `steps` | the feet landing inside the span: do they take turns, is any step under half the median ([`crate::steps`]; `regular` null: too few steps) | not flagged: only a walk should step evenly, and the baseline (roadmap 153500) comes first |
 //!
 //! `flags` lists what went past a line, each with its frames and the reason in words (the
 //! timeline's marks). `notes` says what could not be measured (a seam on the animation's first or
@@ -23,6 +24,7 @@ use crate::document::Document;
 use crate::metrics::{self, Pop, Slide};
 use crate::possible::Bent;
 use crate::quat::{self, Vec3};
+use crate::steps::{self, Steps};
 
 /// A planted foot sliding more than this (cm) is flagged (`clip.metrics`'s own line).
 pub const SLIDE_CM: f64 = metrics::SLIDE_CM;
@@ -66,6 +68,8 @@ pub struct Diagnostics {
     pub path_frame: Option<i64>,
     pub seams: Vec<Seam>,
     pub bent: Vec<Bent>,
+    /// `None`: not measured (a note says why).
+    pub steps: Option<Steps>,
     pub notes: Vec<String>,
 }
 
@@ -82,6 +86,7 @@ pub fn diagnose(doc: &Document, f: &Filled) -> Diagnostics {
         path_frame: None,
         seams: Vec::new(),
         bent: f.kept.bent.clone(),
+        steps: None,
         notes: Vec::new(),
     };
     let last = (doc.clip.length_with(&doc.links) - 1).max(0);
@@ -145,6 +150,10 @@ pub fn diagnose(doc: &Document, f: &Filled) -> Diagnostics {
         }
         Ok(None) => {}
         Err(e) => d.notes.push(format!("the root's path was not measured: {e}")),
+    }
+    match steps::measure(doc, a, b) {
+        Ok(s) => d.steps = Some(s),
+        Err(e) => d.notes.push(format!("the steps were not measured: {e}")),
     }
     if !f.kept.checked {
         d.notes.push(
@@ -320,6 +329,16 @@ impl Diagnostics {
             "path": { "max_m": r4(self.path_max_m), "frame": self.path_frame },
             "seams": seams,
             "bent": self.bent.iter().map(Bent::json).collect::<Vec<_>>(),
+            "steps": self.steps.as_ref().map(|s| json!({
+                "contacts": s.contacts.iter().map(|c| json!({
+                    "foot": c.foot, "from": c.from, "to": c.to, "x": r4(c.at[0]), "y": r4(c.at[1]),
+                })).collect::<Vec<_>>(),
+                "lengths_m": s.lengths.iter().map(|l| r4(*l)).collect::<Vec<_>>(),
+                "median_m": s.median_m.map(r4),
+                "alternate": s.alternate,
+                "short": s.short,
+                "regular": s.regular,
+            })),
             "flags": self.flags().iter().map(|f| json!({
                 "kind": f.kind, "from": f.from, "to": f.to, "text": f.text,
             })).collect::<Vec<_>>(),
@@ -383,6 +402,7 @@ mod tests {
                 worst_frame: 4,
                 frames: vec![3, 4],
             }],
+            steps: None,
             notes: Vec::new(),
         };
         // in frame order: (from, to, kind)

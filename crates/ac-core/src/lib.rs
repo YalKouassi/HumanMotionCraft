@@ -56,6 +56,7 @@ pub mod retarget;
 pub mod retime;
 pub mod rig;
 pub mod session;
+pub mod steps;
 pub mod suggest;
 pub mod travel;
 pub mod weight;

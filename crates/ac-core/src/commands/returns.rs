@@ -113,7 +113,7 @@ const ANCHORS: ParamSpec = ParamSpec::new(
 const DIAGNOSTICS: ParamSpec = ParamSpec::new(
     "diagnostics",
     Kind::Text,
-    "measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys and at each anchor pose between them (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding|path|pop|spin|bent, from, to, text}] what is past a line, notes: what could not be measured}",
+    "measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys and at each anchor pose between them (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, steps: {contacts: [{foot, from, to, x, y}] the feet landing inside the span, lengths_m, median_m, alternate, short: the steps under half the median, regular (null: too few steps)} or null (not measured), flags: [{kind: sliding|path|pop|spin|bent, from, to, text}] what is past a line, notes: what could not be measured}",
 )
 .json()
 .required();
