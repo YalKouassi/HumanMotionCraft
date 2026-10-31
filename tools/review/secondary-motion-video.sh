@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Side-by-side videos for the owner of roadmap 119800: a hand-keyed walk, physics off, without and
+# Side-by-side videos for the owner of roadmap 119800: a walk with real steps (anim.steps, planted feet), physics off, without and
 # with `layer.secondary`. Run from the built checkout:
 #   tools/review/secondary-motion-video.sh <folder under the main checkout's target/shots>
 set -euo pipefail
@@ -16,7 +16,7 @@ walk='{"command":"physics.set","params":{"on":false}},
 {"command":"frame.set","params":{"frame":80}},
 {"command":"pose.set_root","params":{"root":[0,-3.0,0.945]}},
 {"command":"key.set","params":{"interp":"smooth"}},
-{"command":"anim.steps","params":{"from":0,"to":80,"steps":6,"fill":"none"}},
+{"command":"anim.steps","params":{"from":0,"to":80,"steps":6}},
 {"command":"frame.set","params":{"frame":110}},
 {"command":"key.set","params":{"interp":"smooth"}}'
 echo "[$walk]" > "$work/before.json"

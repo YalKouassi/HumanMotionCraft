@@ -42,3 +42,6 @@ Fill never calls it.
   trunk's sway, not a bob of the whole body.
 - Videos: `tools/review/secondary-motion-video.sh <folder>` makes them (hand-keyed walk, physics off;
   side, front, three-quarter, and the stop at quarter speed).
+
+## Review videos (2026-10-31)
+The first videos used `anim.steps` with `fill: none`, whose feet dragged; the owner saw it. The layer didn't cause it: the sampled feet match with and without the layer. Remade on `anim.steps`' default walk, with planted feet and about 19 cm of lift. That walk's arms already swing, so the layer adds to them; the acceptance's hand-keyed walk is not what these videos show.
