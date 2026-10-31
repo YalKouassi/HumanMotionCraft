@@ -116,11 +116,35 @@ fn fills_match_the_reference() {
             style_force: case["style_force"].as_f64().unwrap(),
             ai_force: case["ai_force"].as_f64().unwrap(),
             trajectory: case["trajectory"].as_f64().unwrap_or(0.0),
-            ..FillSettings::default()
+            head: case["head"].as_f64().unwrap_or(0.0),
         };
-        let (rots, roots) = m
-            .fill(&sk, &clip, &ac_core::clip::NoLinks, a, b, &s, None)
-            .unwrap();
+        // a part layer: the model's bones another layer drives, as `ac_core::ai::AiFiller` lists them
+        let given: Vec<String> = case["given"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|x| x.as_str().unwrap().to_string())
+            .collect();
+        let given = (!given.is_empty()).then_some(given.as_slice());
+        // keys inside the stretch (a model trained with several keys in a window): one pass
+        let inner: Vec<i64> = case["keys"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|x| x.as_i64().unwrap())
+            .collect();
+        let (rots, roots) = if inner.is_empty() {
+            m.fill(&sk, &clip, &ac_core::clip::NoLinks, a, b, &s, given)
+                .unwrap()
+        } else {
+            let mut keys = vec![a];
+            keys.extend(&inner);
+            keys.push(b);
+            let (r, o, _) = m
+                .fill_keys(&sk, &clip, &ac_core::clip::NoLinks, &keys, &s, given)
+                .unwrap();
+            (r, o)
+        };
         let want_r = case["rotations"].as_array().unwrap();
         let want_o = case["roots"].as_array().unwrap();
         assert_eq!(rots.len(), want_r.len());
@@ -157,5 +181,56 @@ fn fills_match_the_reference() {
             "case {a}-{b}: root off by {worst_root} hip heights"
         );
         eprintln!("case {a}-{b}: worst bone {worst_angle:.2e} rad, worst root {worst_root:.2e}");
+        if s.ai_force == 0.0 && s.trajectory == 0.0 && s.head == 0.0 && given.is_none() && inner.is_empty() {
+            plain_interpolation_comes_back(&m, &sk, &clip, a, b, &rots, &roots);
+        }
     }
+}
+
+/// With `ai_force` 0 the network's change is dropped: the solved bones are the slerp between the
+/// keys and the root their lerp, the other bones the keys' own spline. Checked against the
+/// interpolation worked out here, not the reference, so the only slack is the features' float32
+/// round trip (the reference's slerp lerps under 1.8 degrees: under 1e-6 rad from the exact one).
+fn plain_interpolation_comes_back(
+    m: &Model,
+    sk: &Skeleton,
+    clip: &ac_core::clip::Clip,
+    a: i64,
+    b: i64,
+    rots: &[Vec<ac_core::quat::Quat>],
+    roots: &[ac_core::quat::Vec3],
+) {
+    use ac_core::quat;
+    let frames: Vec<f64> = (a..=b).map(|f| f as f64).collect();
+    let (want_r, want_o) = clip.sample(&frames).unwrap();
+    let (sa, sb) = (&want_r[0], &want_r[want_r.len() - 1]);
+    let (oa, ob) = (want_o[0], want_o[want_o.len() - 1]);
+    let solved: Vec<usize> = m.info().bones.iter().map(|n| sk.bone(n).unwrap()).collect();
+    let g = (b - a) as f64;
+    let mut worst = 0.0f64;
+    for (k, (fr, o)) in rots.iter().zip(roots).enumerate() {
+        let t = (k + 1) as f64 / g;
+        for (j, q) in fr.iter().enumerate() {
+            let want = if solved.contains(&j) {
+                quat::slerp(sa[j], sb[j], t)
+            } else {
+                want_r[k + 1][j]
+            };
+            let dot: f64 = (0..4).map(|i| q[i] * want[i]).sum::<f64>().abs().min(1.0);
+            let angle = 2.0 * dot.acos();
+            assert!(
+                angle < 1e-5,
+                "ai_force 0, case {a}-{b} frame {k} bone {}: {angle} rad from the plain interpolation",
+                sk.names[j]
+            );
+            worst = worst.max(angle);
+        }
+        let want = [0, 1, 2].map(|i| oa[i] + (ob[i] - oa[i]) * t);
+        let d = (0..3).map(|i| (o[i] - want[i]).abs()).fold(0.0, f64::max);
+        assert!(
+            d < 1e-6,
+            "ai_force 0, case {a}-{b} frame {k}: root {d} hip heights from the plain lerp"
+        );
+    }
+    eprintln!("case {a}-{b}: ai_force 0 is the plain interpolation within {worst:.2e} rad");
 }

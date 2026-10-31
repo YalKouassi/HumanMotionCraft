@@ -1,6 +1,7 @@
 //! The window: menu bar, library (left), inspector (right), timeline (bottom), 3D viewport.
 
 mod agent;
+mod character;
 mod community;
 mod curves;
 mod files;
@@ -95,6 +96,8 @@ pub struct App {
     shell: shell::Shell,
     /// The inspector panels' own state (joint, layers, physics, scene boxes, AI worker).
     panels: panels::Panels,
+    /// The person's own character beside the mannequin (`character.rs`).
+    character: character::CharacterState,
     /// Last frame's widgets with their stable ids (`ui_ids.rs`), for the control port.
     widgets: Vec<ui_ids::Widget>,
     /// A `click` waiting for a popup to open (`ui_click.rs`).
@@ -185,6 +188,8 @@ impl App {
             .ai(model)
             .commands(ac_media::SPECS)
             .commands(ac_textmotion::SPECS)
+            .commands(ac_posefill::SPECS)
+            .commands(ac_posefill::live_commands::SPECS)
             .commands(ac_community::SPECS)
             .build()?;
         let mut session = built.session;
@@ -224,6 +229,7 @@ impl App {
         {
             status = format!("couldn't open {id}: {e}");
         }
+        let mut fills: Vec<(String, Value)> = Vec::new();
         if let Some(path) = &args.script {
             let steps = std::fs::read_to_string(path)
                 .map_err(|e| e.to_string())
@@ -237,9 +243,14 @@ impl App {
                 .unwrap_or_default();
             for step in steps {
                 let id = step["command"].as_str().unwrap_or_default();
-                if let Err(e) = session.run(id, &step.get("params").cloned().unwrap_or(json!({}))) {
-                    status = format!("script: {id}: {e}");
-                    break;
+                match session.run(id, &step.get("params").cloned().unwrap_or(json!({}))) {
+                    // a fill's diagnostics mark the timeline once the window exists
+                    Ok(v) if id.starts_with("ai.") => fills.push((id.to_string(), v)),
+                    Ok(_) => {}
+                    Err(e) => {
+                        status = format!("script: {id}: {e}");
+                        break;
+                    }
                 }
             }
         }
@@ -300,12 +311,16 @@ impl App {
             files: files::Files::default(),
             shell,
             panels: panels::Panels::default(),
+            character: character::CharacterState::default(),
             widgets: Vec::new(),
             pending_click: None,
         };
         app.refresh_library();
         app.restore_prefs();
         app.files_start(scripted, agent);
+        for (id, v) in &fills {
+            app.fill_marks(id, v);
+        }
         for (k, v) in &args.ui {
             app.set_ui(k, v).map_err(|e| format!("--ui {k}={v}: {e}"))?;
         }
@@ -342,6 +357,8 @@ impl App {
             "dope" => self.timeline.dope = on()?,
             "overlay" => self.show_overlay = on()?,
             "ghost" => self.show_ghost = on()?,
+            "character" => self.character.view = character::CharacterView::parse(value)?,
+            "playing" => self.playing = on()?,
             "tool" => self.set_tool(viewport::Tool::parse(value)?),
             "camera" => self.view_preset(value)?,
             "zoom" => {
@@ -397,6 +414,10 @@ impl App {
         if self.text_deferred(id, &params) {
             return None;
         }
+        // and a pose fill (its model works a moment, and minutes the first time)
+        if self.posefill_deferred(id, &params) {
+            return None;
+        }
         // and so is anything from the community (it waits on the network)
         if self.community_deferred(id, &params) {
             return None;
@@ -410,7 +431,10 @@ impl App {
         };
         self.announce(id, "ui", &told);
         match out {
-            Ok(v) => Some(v),
+            Ok(v) => {
+                self.fill_marks(id, &v);
+                Some(v)
+            }
             Err(e) => {
                 self.refused(id, &e);
                 None

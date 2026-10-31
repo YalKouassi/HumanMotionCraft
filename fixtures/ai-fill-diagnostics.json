@@ -1,0 +1,121 @@
+{
+  "$schema": "./schema.json",
+  "name": "ai-fill-diagnostics",
+  "feature": "ai.fill",
+  "description": "Every fill says why it might look wrong, as numbers measured on the keys it wrote (not a confidence score): foot slide per contact span, the root's distance from the keys' own path, the change of speed (m/s) and of spin (rad/s) across each of its two keys, and the joints bent back inside the possible limits. With ai_force 0 the fill is the plain interpolation, so every number is worked by hand. Physics is off; 30 fps; the rig's hip height is 0.8698308 m, so a root offset is metres / 0.8698308. (1) Keys of yours on 0 and 10, both standing at rest (root z 0.9450101): ai.fill_all fills 0-10, and its one diagnostics entry says both feet are planted on 0-10 and slide 0 cm (the contact runs to both ends of the animation, so no landing or release frames), the root is 0 m from the keys' path, and neither seam could be measured: key 0 has no frame before it and key 10 (the last frame) none after it, so both seams are null and the notes say so. No flags. (2) Keys on 20 (root x 0.40 m = 0.4598595 hip heights) and 30 (x 0.52 m = 0.5978174; the left eye, a bone with no children, so no joint head moves with it, turned 30 degrees about X: quaternion [sin 15, 0, 0, cos 15] = [0.2588190, 0, 0, 0.9659258]). Filling 0-10 again: frame 11 is now a frame of the plain 10-20 segment, where the body moves 0.04 m a frame = 1.2 m/s, so the seam at key 10 goes from 0 to 1.2 m/s, a change of 1.2 m/s for every joint; joints within 1e-6 m/s tie and the first in rig order, root, is named: a pop flag on frame 10, over the 1 m/s line. Spin at 10: 0 (nothing turns). The contact now ends at frame 10 with frames 9-10 as release, so the planted span is 0-8, slide 0 cm. (3) Filling 20-30: the body moves 0.012 m a frame = 0.36 m/s, under the 0.5 m/s a planted point may move, so the feet come down on frame 21 (frame 20's speed, from 19, is 1.2 m/s); frames 21-22 are the landing and 23-30 planted, 7 steps of 1.2 cm = 8.4 cm of slide on each foot: two sliding flags on 23-30, over the 2 cm line. The seam at key 20: speed 1.2 m/s before and 0.36 after, a change of 0.84 m/s for every joint (root named; under the line, no flag); spin 0 before, and the fill's slerp turns the eye 3 degrees a frame after: 3 degrees x 30 = 1.5708 rad/s (under the 3 rad/s line). Key 30 is the last frame: its seam is null, with a note. The root path is the keys' own (0 m, so no frame is named), and no joint was bent back. The tolerance is 1e-3 because planting the still feet solves the legs with IK to the spot they already stand on, which moves the foot points by rounding only.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "ai.settings", "params": { "ai_force": 0 }, "expect": { "ai_force": 0 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "ai.fill_all",
+      "expect": {
+        "filled": [[0, 10]],
+        "diagnostics": [
+          {
+            "from": 0,
+            "to": 10,
+            "sliding": [
+              { "foot": "L", "from": 0, "to": 10, "slide_cm": 0 },
+              { "foot": "R", "from": 0, "to": 10, "slide_cm": 0 }
+            ],
+            "sliding_max_cm": 0,
+            "path": { "max_m": 0, "frame": null },
+            "seams": [
+              { "frame": 0, "dv": null, "joint": null, "dw": null, "bone": null },
+              { "frame": 10, "dv": null, "joint": null, "dw": null, "bone": null }
+            ],
+            "bent": [],
+            "flags": [],
+            "notes": [
+              "key 0 is the animation's first frame: the seam there has no frame before it to measure",
+              "key 10 is the animation's last frame: the seam there has no frame after it to measure"
+            ]
+          }
+        ]
+      }
+    },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "pose.set_root", "params": { "root": [0.4598595, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "pose.set_root", "params": { "root": [0.5978174, 0, 0.9450101] } },
+    { "command": "pose.set_bone", "params": { "bone": "eye.L", "rotation": [0.2588190, 0, 0, 0.9659258] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 10 },
+      "expect": {
+        "from": 0,
+        "to": 10,
+        "diagnostics": {
+          "sliding": [
+            { "foot": "L", "from": 0, "to": 8, "slide_cm": 0 },
+            { "foot": "R", "from": 0, "to": 8, "slide_cm": 0 }
+          ],
+          "path": { "max_m": 0, "frame": null },
+          "seams": [
+            { "frame": 0, "dv": null, "joint": null, "dw": null, "bone": null },
+            { "frame": 10, "dv": 1.2, "joint": "root", "dw": 0 }
+          ],
+          "bent": [],
+          "flags": [
+            {
+              "kind": "pop",
+              "from": 10,
+              "to": 10,
+              "text": "root changes speed by 1.20 m/s across the key on frame 10 (over 1 m/s): the fill meets the key with a jump."
+            }
+          ],
+          "notes": ["key 0 is the animation's first frame: the seam there has no frame before it to measure"]
+        }
+      }
+    },
+    {
+      "command": "ai.fill",
+      "params": { "from": 20, "to": 30 },
+      "expect": {
+        "from": 20,
+        "to": 30,
+        "diagnostics": {
+          "sliding": [
+            { "foot": "L", "from": 23, "to": 30, "slide_cm": 8.4 },
+            { "foot": "R", "from": 23, "to": 30, "slide_cm": 8.4 }
+          ],
+          "sliding_max_cm": 8.4,
+          "path": { "max_m": 0, "frame": null },
+          "seams": [
+            { "frame": 20, "dv": 0.84, "joint": "root", "dw": 1.5708, "bone": "eye.L" },
+            { "frame": 30, "dv": null, "joint": null, "dw": null, "bone": null }
+          ],
+          "bent": [],
+          "flags": [
+            {
+              "kind": "sliding",
+              "from": 23,
+              "to": 30,
+              "text": "The left foot slides 8.4 cm while it is planted on frames 23–30 (over 2 cm)."
+            },
+            {
+              "kind": "sliding",
+              "from": 23,
+              "to": 30,
+              "text": "The right foot slides 8.4 cm while it is planted on frames 23–30 (over 2 cm)."
+            }
+          ],
+          "notes": ["key 30 is the animation's last frame: the seam there has no frame after it to measure"]
+        }
+      }
+    },
+    { "command": "edit.undo", "expect": { "label": "AI fill 21–29" } }
+  ],
+  "expect": { "tolerance": 1e-3 },
+  "errors": [
+    { "command": "ai.fill", "params": { "from": 0, "to": 30 } },
+    { "command": "ai.fill", "params": { "from": 10 } }
+  ],
+  "views": ["side"]
+}

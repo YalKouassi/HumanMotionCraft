@@ -1,5 +1,7 @@
 //! Offscreen rendering of the floor and up to [`MAX_BODIES`] skinned bodies (the pose shown and
-//! its ghosts). The target is a texture the UI shows as an image and screenshots read back.
+//! its ghosts), plus up to [`MAX_MESHES`] other skinned meshes (a character of the person's own,
+//! `Renderer::set_mesh`), each drawn once a frame by a [`Body`] naming its slot. The target is a
+//! texture the UI shows as an image and screenshots read back.
 
 use glam::{Mat4, Vec3};
 use wgpu::util::DeviceExt;
@@ -8,6 +10,8 @@ use crate::mesh::{Mesh, Vertex};
 
 /// The pose shown plus its ghosts (keyed, AI preview, and up to five onion-skin ghosts a side).
 pub const MAX_BODIES: usize = 16;
+/// Other skinned meshes a renderer holds, in slots 1 to `MAX_MESHES` (slot 0 is the mannequin).
+pub const MAX_MESHES: usize = 2;
 pub const DEPTH: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
 /// How far behind a ghost is drawn (a few centimetres at the usual distance).
 const GHOST_BIAS: wgpu::DepthBiasState = wgpu::DepthBiasState {
@@ -28,9 +32,22 @@ struct FrameUniform {
 }
 
 /// One body to draw: skinning matrices (one per skin joint) and its colour (alpha < 1: a ghost).
+/// `mesh` is 0 for the mannequin, else a slot set with [`Renderer::set_mesh`] (one body a frame
+/// per slot).
 pub struct Body<'a> {
     pub joints: &'a [Mat4],
     pub tint: [f32; 4],
+    pub mesh: usize,
+}
+
+/// A mesh in a slot: its buffers and the one body's joints and bind group.
+struct Extra {
+    vertices: wgpu::Buffer,
+    indices: wgpu::Buffer,
+    index_count: u32,
+    joint_count: usize,
+    joints: wgpu::Buffer,
+    bind_group: wgpu::BindGroup,
 }
 
 /// An orbit camera around a target, Z up.
@@ -121,6 +138,7 @@ struct Target {
 
 pub struct Renderer {
     format: wgpu::TextureFormat,
+    layout: wgpu::BindGroupLayout,
     body: wgpu::RenderPipeline,
     ghost: wgpu::RenderPipeline,
     floor: wgpu::RenderPipeline,
@@ -131,6 +149,8 @@ pub struct Renderer {
     uniforms: wgpu::Buffer,
     joint_buffers: Vec<wgpu::Buffer>,
     bind_groups: Vec<wgpu::BindGroup>,
+    /// Slots 1..=MAX_MESHES, each with its uniform slot after the bodies'.
+    extras: Vec<Option<Extra>>,
     target: Option<Target>,
 }
 
@@ -257,7 +277,7 @@ impl Renderer {
         let slot = std::mem::size_of::<FrameUniform>() as u64;
         let uniforms = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("frame uniforms"),
-            size: slot * MAX_BODIES as u64,
+            size: slot * (MAX_BODIES + MAX_MESHES) as u64,
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
@@ -293,6 +313,7 @@ impl Renderer {
         }
         Renderer {
             format,
+            layout,
             body,
             ghost,
             floor,
@@ -303,8 +324,75 @@ impl Renderer {
             uniforms,
             joint_buffers,
             bind_groups,
+            extras: (0..MAX_MESHES).map(|_| None).collect(),
             target: None,
         }
+    }
+
+    /// Put `mesh` in `slot` (1 to [`MAX_MESHES`]); a body with that `mesh` then draws it.
+    pub fn set_mesh(&mut self, device: &wgpu::Device, slot: usize, mesh: &Mesh) -> Result<(), String> {
+        if slot == 0 || slot > MAX_MESHES {
+            return Err(format!("mesh slot {slot} is not 1 to {MAX_MESHES}"));
+        }
+        let vertices = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("extra vertices"),
+            contents: bytemuck::cast_slice(&mesh.vertices),
+            usage: wgpu::BufferUsages::VERTEX,
+        });
+        let indices = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("extra indices"),
+            contents: bytemuck::cast_slice(&mesh.indices),
+            usage: wgpu::BufferUsages::INDEX,
+        });
+        let joint_count = mesh.joints.len().max(1);
+        let joints = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("extra joints"),
+            size: (joint_count * 64) as u64,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+        let uslot = std::mem::size_of::<FrameUniform>() as u64;
+        let bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("extra frame"),
+            layout: &self.layout,
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
+                        buffer: &self.uniforms,
+                        offset: uslot * (MAX_BODIES + slot - 1) as u64,
+                        size: wgpu::BufferSize::new(uslot),
+                    }),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: joints.as_entire_binding(),
+                },
+            ],
+        });
+        if let Some(e) = self.extras.get_mut(slot - 1) {
+            *e = Some(Extra {
+                vertices,
+                indices,
+                index_count: mesh.indices.len() as u32,
+                joint_count,
+                joints,
+                bind_group,
+            });
+        }
+        Ok(())
+    }
+
+    /// Empty `slot` (nothing is drawn for bodies naming it; they are reported).
+    pub fn clear_mesh(&mut self, slot: usize) {
+        if let Some(e) = self.extras.get_mut(slot.wrapping_sub(1)) {
+            *e = None;
+        }
+    }
+
+    /// Whether `slot` holds a mesh.
+    pub fn has_mesh(&self, slot: usize) -> bool {
+        self.extras.get(slot.wrapping_sub(1)).is_some_and(Option::is_some)
     }
 
     fn ensure_target(&mut self, device: &wgpu::Device, w: u32, h: u32) {
@@ -348,7 +436,9 @@ impl Renderer {
         }
     }
 
-    /// Draw the floor and the bodies (the first is the pose shown; later ones are ghosts).
+    /// Draw the floor and the bodies (the first mannequin body is the pose shown; later ones
+    /// are ghosts); bodies naming a mesh slot draw that mesh. A slot that is empty, or named by
+    /// two bodies, is an error (nothing of it is drawn).
     pub fn render(
         &mut self,
         device: &wgpu::Device,
@@ -358,26 +448,54 @@ impl Renderer {
         camera: &Camera,
         bodies: &[Body],
     ) -> Result<&wgpu::TextureView, String> {
-        let bodies = &bodies[..bodies.len().min(MAX_BODIES)];
+        let mut extra_bodies: Vec<&Body> = Vec::new();
+        let mut problem: Option<String> = None;
+        for b in bodies.iter().filter(|b| b.mesh != 0) {
+            if !self.has_mesh(b.mesh) {
+                problem = Some(format!("mesh slot {} is empty", b.mesh));
+            } else if extra_bodies.iter().any(|e| e.mesh == b.mesh) {
+                problem = Some(format!("mesh slot {} is drawn twice", b.mesh));
+            } else {
+                extra_bodies.push(b);
+            }
+        }
+        let main: Vec<&Body> = bodies.iter().filter(|b| b.mesh == 0).take(MAX_BODIES).collect();
+        let bodies = main;
         let aspect = w.max(1) as f32 / h.max(1) as f32;
         let vp = camera.view_proj(aspect).to_cols_array_2d();
         let eye = camera.eye();
         let slot = std::mem::size_of::<FrameUniform>() as u64;
+        let uniform = |tint: [f32; 4]| FrameUniform {
+            view_proj: vp,
+            eye: [eye.x, eye.y, eye.z, 1.0],
+            tint,
+            _pad: [0.0; 40],
+        };
         // slot 0 also serves the floor
         let count = bodies.len().max(1);
         for i in 0..count {
             let tint = bodies.get(i).map_or([0.7, 0.7, 0.72, 1.0], |b| b.tint);
-            let u = FrameUniform {
-                view_proj: vp,
-                eye: [eye.x, eye.y, eye.z, 1.0],
-                tint,
-                _pad: [0.0; 40],
-            };
-            queue.write_buffer(&self.uniforms, slot * i as u64, bytemuck::bytes_of(&u));
+            queue.write_buffer(
+                &self.uniforms,
+                slot * i as u64,
+                bytemuck::bytes_of(&uniform(tint)),
+            );
             if let (Some(b), Some(jb)) = (bodies.get(i), self.joint_buffers.get(i)) {
                 let mut mats: Vec<[[f32; 4]; 4]> = b.joints.iter().map(|m| m.to_cols_array_2d()).collect();
                 mats.resize(self.joint_count, Mat4::IDENTITY.to_cols_array_2d());
                 queue.write_buffer(jb, 0, bytemuck::cast_slice(&mats));
+            }
+        }
+        for b in &extra_bodies {
+            if let Some(Some(e)) = self.extras.get(b.mesh - 1) {
+                queue.write_buffer(
+                    &self.uniforms,
+                    slot * (MAX_BODIES + b.mesh - 1) as u64,
+                    bytemuck::bytes_of(&uniform(b.tint)),
+                );
+                let mut mats: Vec<[[f32; 4]; 4]> = b.joints.iter().map(|m| m.to_cols_array_2d()).collect();
+                mats.resize(e.joint_count, Mat4::IDENTITY.to_cols_array_2d());
+                queue.write_buffer(&e.joints, 0, bytemuck::cast_slice(&mats));
             }
         }
         self.ensure_target(device, w, h);
@@ -433,8 +551,20 @@ impl Renderer {
                 pass.set_bind_group(0, bg, &[]);
                 pass.draw_indexed(0..self.index_count, 0, 0..1);
             }
+            for b in &extra_bodies {
+                if let Some(Some(e)) = self.extras.get(b.mesh - 1) {
+                    pass.set_pipeline(if b.tint[3] >= 1.0 { &self.body } else { &self.ghost });
+                    pass.set_vertex_buffer(0, e.vertices.slice(..));
+                    pass.set_index_buffer(e.indices.slice(..), wgpu::IndexFormat::Uint32);
+                    pass.set_bind_group(0, &e.bind_group, &[]);
+                    pass.draw_indexed(0..e.index_count, 0, 0..1);
+                }
+            }
         }
         queue.submit([enc.finish()]);
+        if let Some(p) = problem {
+            return Err(p);
+        }
         Ok(&t.color_view)
     }
 

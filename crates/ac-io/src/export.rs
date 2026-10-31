@@ -21,7 +21,7 @@ use ac_core::rig::Skeleton;
 use serde_json::{Value, json};
 
 type R<T> = Result<T, String>;
-type M4 = [[f64; 4]; 4];
+pub(crate) type M4 = [[f64; 4]; 4];
 
 const GLTF: u32 = 0x4654_6C67;
 const JSON_CHUNK: u32 = 0x4E4F_534A;
@@ -29,26 +29,26 @@ const BIN_CHUNK: u32 = 0x004E_4942;
 /// Most frames one export samples (all clips together).
 pub const MAX_FRAMES: usize = 200_000;
 
-const C4: M4 = [
+pub(crate) const C4: M4 = [
     [1.0, 0.0, 0.0, 0.0],
     [0.0, 0.0, 1.0, 0.0],
     [0.0, -1.0, 0.0, 0.0],
     [0.0, 0.0, 0.0, 1.0],
 ];
-const C4T: M4 = [
+pub(crate) const C4T: M4 = [
     [1.0, 0.0, 0.0, 0.0],
     [0.0, 0.0, -1.0, 0.0],
     [0.0, 1.0, 0.0, 0.0],
     [0.0, 0.0, 0.0, 1.0],
 ];
-const I4: M4 = [
+pub(crate) const I4: M4 = [
     [1.0, 0.0, 0.0, 0.0],
     [0.0, 1.0, 0.0, 0.0],
     [0.0, 0.0, 1.0, 0.0],
     [0.0, 0.0, 0.0, 1.0],
 ];
 
-fn mul(a: &M4, b: &M4) -> M4 {
+pub(crate) fn mul(a: &M4, b: &M4) -> M4 {
     let mut m = [[0.0; 4]; 4];
     for (i, row) in m.iter_mut().enumerate() {
         for (j, x) in row.iter_mut().enumerate() {
@@ -60,7 +60,7 @@ fn mul(a: &M4, b: &M4) -> M4 {
 
 /// Inverse of an affine matrix (last row 0 0 0 1).
 #[allow(clippy::needless_range_loop)]
-fn inverse(m: &M4) -> R<M4> {
+pub(crate) fn inverse(m: &M4) -> R<M4> {
     let a = |i: usize, j: usize| m[i][j];
     let det = a(0, 0) * (a(1, 1) * a(2, 2) - a(1, 2) * a(2, 1))
         - a(0, 1) * (a(1, 0) * a(2, 2) - a(1, 2) * a(2, 0))
@@ -82,7 +82,7 @@ fn inverse(m: &M4) -> R<M4> {
     Ok(r)
 }
 
-fn rot3(m: &M4) -> Mat3 {
+pub(crate) fn rot3(m: &M4) -> Mat3 {
     [
         [m[0][0], m[0][1], m[0][2]],
         [m[1][0], m[1][1], m[1][2]],
@@ -165,7 +165,7 @@ fn width(kind: &str) -> R<usize> {
 }
 
 /// (byte start, count, width, component type) of an accessor; refuses interleaved views.
-fn locate(gltf: &Value, i: usize) -> R<(usize, usize, usize, u64)> {
+pub(crate) fn locate(gltf: &Value, i: usize) -> R<(usize, usize, usize, u64)> {
     let acc = &gltf["accessors"][i];
     let view = &gltf["bufferViews"][acc["bufferView"].as_u64().ok_or("accessor without a view")? as usize];
     let ct = acc["componentType"]
@@ -187,7 +187,7 @@ fn locate(gltf: &Value, i: usize) -> R<(usize, usize, usize, u64)> {
     Ok((start as usize, acc["count"].as_u64().unwrap_or(0) as usize, w, ct))
 }
 
-fn read(gltf: &Value, bin: &[u8], i: usize) -> R<Vec<f64>> {
+pub(crate) fn read(gltf: &Value, bin: &[u8], i: usize) -> R<Vec<f64>> {
     let (start, count, w, ct) = locate(gltf, i)?;
     let n = count * w;
     let size = match ct {
@@ -229,7 +229,13 @@ fn write_in_place(gltf: &Value, bin: &mut [u8], i: usize, values: &[f64]) -> R<(
     Ok(())
 }
 
-fn append(gltf: &mut Value, bin: &mut Vec<u8>, values: &[f64], kind: &str, minmax: bool) -> R<usize> {
+pub(crate) fn append(
+    gltf: &mut Value,
+    bin: &mut Vec<u8>,
+    values: &[f64],
+    kind: &str,
+    minmax: bool,
+) -> R<usize> {
     while !bin.len().is_multiple_of(4) {
         bin.push(0);
     }
@@ -667,9 +673,17 @@ pub static SPECS: &[CommandSpec] = &[CommandSpec::new("clip.export", "Export .gl
             K::Choice(&["hips", "ground", "in_place"]),
             "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)",
         ),
+        TARGET,
     ])
     .writes()
     .outputs(crate::returns::CLIP_EXPORT)];
+
+/// The `target` of an export onto a character of the person's own.
+pub const TARGET: ParamSpec = ParamSpec::new(
+    "target",
+    K::Text,
+    "export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes",
+);
 
 pub(crate) fn clip_export(doc: &mut Document, p: &Map<String, Value>) -> R<Value> {
     let path = std::path::PathBuf::from(cmd::text(p, "path").unwrap_or_default());
@@ -714,14 +728,18 @@ pub(crate) fn clip_export(doc: &mut Document, p: &Map<String, Value>) -> R<Value
         });
     }
     let root = cmd::text(p, "root").unwrap_or("hips");
-    let (bytes, mut summary) = export(
-        &sk,
-        &mannequin(&assets)?,
-        &items,
-        &keep,
-        doc.limits.as_deref(),
-        root,
-    )?;
+    let target = crate::character::commands::target_param(p)?;
+    let (bytes, mut summary) = match &target {
+        Some(t) => crate::character::export::export(&sk, t, &items, doc.limits.as_deref(), root)?,
+        None => export(
+            &sk,
+            &mannequin(&assets)?,
+            &items,
+            &keep,
+            doc.limits.as_deref(),
+            root,
+        )?,
+    };
     if let Some(dir) = path.parent().filter(|d| !d.as_os_str().is_empty()) {
         std::fs::create_dir_all(dir).map_err(|e| format!("can't create {}: {e}", dir.display()))?;
     }

@@ -19,6 +19,8 @@ pub struct Injected {
     reply: Option<Sender<Value>>,
     /// Modifiers held for the event being played.
     modifiers: Modifiers,
+    /// Modifiers an event of kind `modifiers` holds between events.
+    held: Modifiers,
     /// Frames the owed reply has waited for the window to settle.
     waited: u32,
     /// The widget id a `click` pressed (said in the reply).
@@ -69,7 +71,9 @@ fn button(v: &Value) -> Result<PointerButton, String> {
 }
 
 /// One request event as egui events, a frame each. A `click` is a move, a press and a release in
-/// one frame, so it counts as a click however long frames take; a key is a press and a release.
+/// one frame, so it counts as a click however long frames take; a key is a press and a release,
+/// or with `state` `down` or `up` only that. `modifiers` holds its modifiers across requests, as a
+/// person holds Shift, until the next `modifiers`.
 fn events(v: &Value) -> Result<Vec<(Vec<Event>, Modifiers)>, String> {
     let m = modifiers(v);
     let at = || -> Result<Pos2, String> {
@@ -121,11 +125,17 @@ fn events(v: &Value) -> Result<Vec<(Vec<Event>, Modifiers)>, String> {
                 repeat: false,
                 modifiers: m,
             };
-            vec![(vec![k(true)], m), (vec![k(false)], m)]
+            match v["state"].as_str() {
+                // held across requests, as a person holds a key
+                Some("down") => vec![(vec![k(true)], m)],
+                Some("up") => vec![(vec![k(false)], m)],
+                _ => vec![(vec![k(true)], m), (vec![k(false)], m)],
+            }
         }
+        "modifiers" => vec![(vec![Event::ModifiersChanged(m)], m)],
         other => {
             return Err(format!(
-                "event kind {other:?}: move, down, up, click, scroll or key"
+                "event kind {other:?}: move, down, up, click, scroll, key or modifiers"
             ));
         }
     })
@@ -156,6 +166,11 @@ impl App {
 
     /// Feed one queued event into this frame's input.
     pub(super) fn play_input(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
+        self.play_queued(ctx, raw);
+        self.live_keys(raw);
+    }
+
+    fn play_queued(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
         if raw.events.iter().any(|e| matches!(e, Event::WindowFocused(_))) {
             self.injected.window = false;
         }
@@ -165,14 +180,20 @@ impl App {
                 self.injected.modifiers = m;
                 raw.events.push(Event::ModifiersChanged(m));
             }
+            if let Some(held) = e.iter().find_map(|e| match e {
+                Event::ModifiersChanged(held) => Some(*held),
+                _ => None,
+            }) {
+                self.injected.held = held;
+            }
             raw.events.extend(e);
             if reply.is_some() {
                 self.injected.reply = reply;
             }
             ctx.request_repaint();
-        } else if self.injected.modifiers != Modifiers::NONE {
-            self.injected.modifiers = Modifiers::NONE;
-            raw.events.push(Event::ModifiersChanged(Modifiers::NONE));
+        } else if self.injected.modifiers != self.injected.held {
+            self.injected.modifiers = self.injected.held;
+            raw.events.push(Event::ModifiersChanged(self.injected.held));
         }
         if self.injected.window {
             raw.focused = true;

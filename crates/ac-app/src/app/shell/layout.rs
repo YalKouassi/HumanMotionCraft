@@ -30,6 +30,7 @@ pub enum DockPanel {
     Scene,
     Ai,
     Text,
+    PoseFill,
     Pins,
 }
 
@@ -45,6 +46,7 @@ impl DockPanel {
         DockPanel::Scene,
         DockPanel::Ai,
         DockPanel::Text,
+        DockPanel::PoseFill,
         DockPanel::Pins,
     ];
 
@@ -60,6 +62,7 @@ impl DockPanel {
             DockPanel::Scene => "scene",
             DockPanel::Ai => "ai",
             DockPanel::Text => "text",
+            DockPanel::PoseFill => "posefill",
             DockPanel::Pins => "pins",
         }
     }
@@ -76,6 +79,7 @@ impl DockPanel {
             DockPanel::Scene => "Scene boxes",
             DockPanel::Ai => "AI in-between",
             DockPanel::Text => "Motion from text",
+            DockPanel::PoseFill => "Pose fill",
             DockPanel::Pins => "Pins",
         }
     }
@@ -117,6 +121,7 @@ impl DockPanel {
             }
             DockPanel::Ai => "AI in-between".into(),
             DockPanel::Text => "Motion from text".into(),
+            DockPanel::PoseFill => "Pose fill".into(),
             DockPanel::Pins => "Pins".into(),
         }
     }
@@ -154,6 +159,7 @@ pub fn default_dock_workspace() -> Workspace<DockPanel> {
                         DockPanel::Scene,
                         DockPanel::Ai,
                         DockPanel::Text,
+                        DockPanel::PoseFill,
                         DockPanel::Pins,
                     ],
                     0,
@@ -259,6 +265,12 @@ impl DockContent<DockPanel> for DockAdapter<'_> {
                     .id_salt("dock-text")
                     .auto_shrink([false, false])
                     .show(ui, |ui| self.app.text_panel(ui));
+            }
+            DockPanel::PoseFill => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-posefill")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.posefill_panel(ui));
             }
             DockPanel::Pins => {
                 egui::ScrollArea::vertical()
@@ -413,11 +425,15 @@ impl App {
         // Background panel work runs every frame whether the Inspector or a dock panel is open.
         self.ai_poll();
         self.text_poll(ui.ctx());
+        self.posefill_poll(ui.ctx());
+        self.live_frame(ui.ctx());
         self.community_poll(ui.ctx());
         self.community_window(ui.ctx());
         self.community_share_window(ui.ctx());
         self.physics_refresh();
+        self.character_refresh();
         self.range_refresh();
+        self.fill_marks_drop_stale();
         self.sync_dock_flags();
 
         let l = self.shell.prefs.get().layout.clone();
@@ -602,6 +618,7 @@ impl App {
                     DockPanel::Scene,
                     DockPanel::Ai,
                     DockPanel::Text,
+                    DockPanel::PoseFill,
                     DockPanel::Pins,
                     DockPanel::Range,
                 ] {

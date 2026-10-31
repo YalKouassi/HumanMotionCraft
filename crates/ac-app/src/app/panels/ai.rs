@@ -3,13 +3,23 @@
 //! preview worked out off the UI thread (spinner, time taken, cancel; superseded while sliders
 //! move), keep / compare / styles, and Shift+A to switch the span between AI and plain.
 
+use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 
-use serde_json::json;
+use serde_json::{Value, json};
 
 use super::ai_worker::{self, Worker};
 use crate::app::App;
+use crate::app::timeline::marks::Mark;
 use crate::app::ui_ids::Tag;
+
+/// What the last fill said might look wrong (its `diagnostics`, one entry per span filled),
+/// kept while the animation is as the fill left it: the panel lists it and the timeline marks
+/// each flag (source `"ai-fill"`). A new fill replaces it; any other change drops it.
+pub struct FillReport {
+    pub spans: Vec<Value>,
+    made_for: (ac_core::clip::Clip, BTreeMap<String, ac_core::clip::Clip>),
+}
 
 /// A changed AI setting asks for a new preview at most this often while a slider is dragged
 /// (each request copies the document; the worker drops the ones it has not started).
@@ -30,9 +40,142 @@ pub struct AiState {
     pub steps: u32,
     /// Footsteps: step keys the model fills (else the built-in Walk loop, a key every 2 frames).
     pub steps_ai: bool,
+    /// The last fill's diagnostics, while the animation is as it left it.
+    pub report: Option<FillReport>,
 }
 
 impl App {
+    /// A fill's result (`ai.fill`, `ai.fill_all`, or `ai.toggle` to the model): keep what it
+    /// measured and mark every flagged frame on the timeline, with the reason as the mark's text.
+    /// Any other command's result is left alone.
+    pub(in crate::app) fn fill_marks(&mut self, id: &str, r: &Value) {
+        let spans: Vec<Value> = match id {
+            "ai.fill" => vec![r["diagnostics"].clone()],
+            "ai.toggle" if r["mode"] == "ai" => vec![r["diagnostics"].clone()],
+            "ai.fill_all" => r["diagnostics"].as_array().cloned().unwrap_or_default(),
+            _ => return,
+        };
+        let pal = self.palette();
+        let marks: Vec<Mark> = spans
+            .iter()
+            .flat_map(|d| d["flags"].as_array().into_iter().flatten())
+            .map(|f| {
+                let kind = f["kind"].as_str().unwrap_or_default();
+                let family = match kind {
+                    "sliding" => "sliding",
+                    "bent" => "penetration",
+                    "path" => "unbalanced",
+                    _ => "other",
+                };
+                let from = f["from"].as_f64().unwrap_or(0.0);
+                let to = f["to"].as_f64().unwrap_or(from);
+                let m = Mark::new(
+                    from,
+                    &format!("ai-fill-{kind}"),
+                    super::physics::colour(pal, family),
+                    f["text"].as_str().unwrap_or_default(),
+                );
+                if to > from { m.until(to) } else { m }
+            })
+            .collect();
+        self.timeline.marks.set("ai-fill", marks);
+        let doc = &self.session.document;
+        self.panels.ai.report = Some(FillReport {
+            spans,
+            made_for: (doc.clip.clone(), doc.links.clone()),
+        });
+    }
+
+    /// Forget a fill's diagnostics once the animation has moved on from it (not mid-drag): they
+    /// measured the keys as the fill left them.
+    pub(in crate::app) fn fill_marks_drop_stale(&mut self) {
+        let doc = &self.session.document;
+        let stale = self
+            .panels
+            .ai
+            .report
+            .as_ref()
+            .is_some_and(|r| r.made_for.0 != doc.clip || r.made_for.1 != doc.links);
+        if stale && !self.session.in_gesture() {
+            self.panels.ai.report = None;
+            self.timeline.marks.clear("ai-fill");
+        }
+    }
+
+    /// What the last fill measured, per span: the numbers in one line, each flag (a click goes
+    /// to its frame), and what could not be measured.
+    fn fill_report(&mut self, ui: &mut egui::Ui) {
+        let Some(rep) = self.panels.ai.report.as_ref() else {
+            return;
+        };
+        let spans = rep.spans.clone();
+        let pal = self.palette();
+        for (n, d) in spans.iter().enumerate() {
+            let (a, b) = (d["from"].as_i64().unwrap_or(0), d["to"].as_i64().unwrap_or(0));
+            let flags = d["flags"].as_array().cloned().unwrap_or_default();
+            let seams: Vec<String> = d["seams"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .map(|s| match (s["dv"].as_f64(), s["dw"].as_f64()) {
+                    (Some(dv), Some(dw)) => format!("key {}: {dv:.2} m/s, {dw:.2} rad/s", s["frame"]),
+                    (Some(dv), None) => format!("key {}: {dv:.2} m/s", s["frame"]),
+                    _ => format!("key {}: not measurable", s["frame"]),
+                })
+                .collect();
+            ui.label(
+                egui::RichText::new(format!(
+                    "Fill {}–{}: {}. Slide {:.1} cm, root {:.2} m off the keys' path, {}, {} joint{} bent back.",
+                    a + 1,
+                    b - 1,
+                    match flags.len() {
+                        0 => "nothing past a line".to_string(),
+                        1 => "1 thing to look at".to_string(),
+                        k => format!("{k} things to look at"),
+                    },
+                    d["sliding_max_cm"].as_f64().unwrap_or(0.0),
+                    d["path"]["max_m"].as_f64().unwrap_or(0.0),
+                    seams.join(", "),
+                    d["bent"].as_array().map_or(0, Vec::len),
+                    if d["bent"].as_array().map_or(0, Vec::len) == 1 { "" } else { "s" },
+                ))
+                .small(),
+            );
+            for (i, f) in flags.iter().enumerate() {
+                let kind = f["kind"].as_str().unwrap_or_default();
+                let family = match kind {
+                    "sliding" => "sliding",
+                    "bent" => "penetration",
+                    "path" => "unbalanced",
+                    _ => "other",
+                };
+                let text = f["text"].as_str().unwrap_or_default();
+                let frame = f["from"].as_i64().unwrap_or(0);
+                if ui
+                    .add(
+                        egui::Label::new(
+                            egui::RichText::new(text)
+                                .small()
+                                .color(super::physics::colour(pal, family)),
+                        )
+                        .sense(egui::Sense::click()),
+                    )
+                    .on_hover_text(format!("Go to frame {frame}"))
+                    .tag(format!("panel.ai.flag.{n}.{i}"), text)
+                    .clicked()
+                {
+                    self.run("frame.set", json!({ "frame": frame }));
+                }
+            }
+            for note in d["notes"].as_array().into_iter().flatten() {
+                ui.label(
+                    egui::RichText::new(note.as_str().unwrap_or_default())
+                        .small()
+                        .weak(),
+                );
+            }
+        }
+    }
     /// Collect a finished preview and show it (runs every frame, panel open or not).
     pub(in crate::app) fn ai_poll(&mut self) {
         let Some(Ok(w)) = self.panels.ai.worker.as_mut() else {
@@ -140,6 +283,13 @@ impl App {
         match &gap {
             Some(g) => {
                 let text = format!("Gap {}–{}: {} frames (max {max})", g.from, g.to, g.frames);
+                let text = match g.anchors {
+                    Some(n) => format!(
+                        "{text}, split by {n} anchor pose{} from the library",
+                        if n == 1 { "" } else { "s" }
+                    ),
+                    None => text,
+                };
                 let filled = if g.filled { ", filled by the model" } else { "" };
                 ui.label(
                     egui::RichText::new(format!("{text}{filled}")).color(if g.refused.is_some() {
@@ -193,6 +343,7 @@ impl App {
             }
         });
         self.fill_all_row(ui, &all);
+        self.fill_report(ui);
         self.steps_row(ui, gap.as_ref().map(|g| (g.from, g.to)));
         if let Some(p) = pending {
             ui.horizontal_wrapped(|ui| {

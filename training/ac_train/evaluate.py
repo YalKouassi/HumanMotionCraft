@@ -62,9 +62,9 @@ from collections import defaultdict
 import numpy as np
 import torch
 
-from . import MODELS, REPO, context, review
+from . import MODELS, REPO, context, review, selection
 from .kinematics import EXTREMITIES, FOOT_POINTS, POINTS, Body, foot_speed, geodesic
-from .model import BONES, CONTEXT, PART_GROUPS, given_features, smooth_path, unfeatures
+from .model import BONES, CONTEXT, PART_GROUPS, given_features, layout, smooth_path, unfeatures
 from .quality import FPS, THRESHOLDS
 
 #: gap bins (frames between the keys, both ends included)
@@ -218,13 +218,14 @@ def ground(poses, body: Body, device) -> tuple[np.ndarray, np.ndarray]:
     return rots, out
 
 
-def posed_windows(poses, n: int, gap: int, rng: np.random.Generator):
+def posed_windows(poses, n: int, gap: int, rng: np.random.Generator, after: int = 0):
     """``n`` windows between two hand-made poses: (n, T, J, 4) rotations and (n, T, 3) root
-    offsets; key A held from the first frame, key B on the last (the frames between are filled)."""
+    offsets; key A held from the first frame, key B from the frame after the gap to the last
+    (``after`` context frames after B hold it too: the clip's last key)."""
     from . import quat
 
     rots, roots = poses
-    T = CONTEXT + gap + 1
+    a, _, T = layout(gap, after)
     ia, ib = rng.integers(len(rots), size=n), rng.integers(len(rots), size=n)
     yaw = np.radians(rng.uniform(-POSED_TURN_DEG, POSED_TURN_DEG, n))
     turn = np.stack([np.zeros(n), np.zeros(n), np.sin(yaw / 2), np.cos(yaw / 2)], -1)
@@ -237,8 +238,8 @@ def posed_windows(poses, n: int, gap: int, rng: np.random.Generator):
     rb = roots[ib].copy()
     rb[:, 0] = roots[ia][:, 0] + step * np.cos(heading)
     rb[:, 1] = roots[ia][:, 1] + step * np.sin(heading)
-    q[:, CONTEXT:] = qb[:, None]
-    r[:, CONTEXT:] = rb[:, None]
+    q[:, a + 1 :] = qb[:, None]
+    r[:, a + 1 :] = rb[:, None]
     return torch.tensor(q, dtype=torch.float32), torch.tensor(r, dtype=torch.float32)
 
 
@@ -378,6 +379,12 @@ class Row:
 
 # ---- the run ------------------------------------------------------------------------------------
 
+def window_of(model) -> dict:
+    """How ``model`` lays out its windows, for :func:`ac_train.train.prepare`: ``after`` context
+    frames after key B (140000) and ``multi_key`` (142000); both off for a model without them."""
+    return {"after": int(getattr(model, "context_after", 0)), "multi_key": bool(getattr(model, "multi_key", False))}
+
+
 def _forward(model, truth_f, interp, mask, ttg, style, gmask=None, path=None):
     """The fill as the app keeps it: the network's gap frames, the known frames as they are.
     ``path``: the root path on the gap frames (a model that takes one)."""
@@ -404,7 +411,8 @@ def run(model, sets, body: Body, device, windows: int = 512, inputs=context.MODE
     by_scene = {k: Row() for k in SCENARIOS}
     by_part = {p: Row() for p in PART_GROUPS} if parts else {}
     traj = {"blend": Row(), **({"given": Row()} if getattr(model, "path", False) else {})} if trajectory else {}
-    a = CONTEXT - 1
+    win = window_of(model)
+    a = CONTEXT - win["after"] - 1
     for lo, hi in BINS:
         name = bin_name(lo, hi)
         gaps = range(lo, hi + 1)
@@ -415,8 +423,8 @@ def run(model, sets, body: Body, device, windows: int = 512, inputs=context.MODE
             q, root, style, take = sets.batch(per, g, gen)
             for mode in inputs:
                 cgen = torch.Generator(device=device).manual_seed(seed * 1000 + g + 100 * (1 + context.MODES.index(mode)))
-                mq, mr = context.rebuild(q, root, a, mode, cgen)
-                truth_f, interp, mask, ttg, _, _ = prepare(mq, mr, g, body, device)
+                mq, mr = context.rebuild(q, root, a, mode, cgen, b=b)
+                truth_f, interp, mask, ttg, _, _ = prepare(mq, mr, g, body, device, **win)
                 pred = _forward(model, truth_f, interp, mask, ttg, style)
                 tp, pp, ip = Pose(truth_f, body), Pose(pred, body), Pose(interp, body)
                 mm, mi = measure(pp, tp, body, a, b), measure(ip, tp, body, a, b)
@@ -468,11 +476,11 @@ def run(model, sets, body: Body, device, windows: int = 512, inputs=context.MODE
         gaps = range(lo, hi + 1)
         for g in gaps:
             b = a + g + 1
-            q, root = posed_windows(poses, max(1, posed // len(gaps)), g, np.random.default_rng(seed * 1000 + g))
+            q, root = posed_windows(poses, max(1, posed // len(gaps)), g, np.random.default_rng(seed * 1000 + g), win["after"])
             q, root = q.to(device), root.to(device)
             style = torch.zeros(q.shape[0], sets.style.shape[1], device=device)
             style[:, 0] = 1.0  # "any"
-            truth_f, interp, mask, ttg, _, _ = prepare(q, root, g, body, device)
+            truth_f, interp, mask, ttg, _, _ = prepare(q, root, g, body, device, **win)
             pred = _forward(model, truth_f, interp, mask, ttg, style)
             mm, mi = measure_posed(Pose(pred, body), body, a, b), measure_posed(Pose(interp, body), body, a, b)
             posed_rows["all"].add(mm, mi)
@@ -543,11 +551,12 @@ def sheets(model, sets, body: Body, device, out: pathlib.Path, ac: pathlib.Path 
         raise SystemExit("no ac binary to draw the sheets with: cargo build --release -p ac-cli")
     skel = Skeleton.load()
     idx = [skel.index[n] for n in BONES]
-    a, g = CONTEXT - 1, SHEET_GAP
-    b = a + g + 1
+    win = window_of(model)
+    g = SHEET_GAP
+    a, b, _ = layout(g, win["after"])
     gen = torch.Generator(device=device).manual_seed(seed)
     q, root, style, _ = sets.batch(64, g, gen)
-    truth_f, interp, mask, ttg, _, _ = prepare(q, root, g, body, device)
+    truth_f, interp, mask, ttg, _, _ = prepare(q, root, g, body, device, **win)
     tp = Pose(truth_f, body)
     order = hard(tp, body, a, b)["either"].float().argsort(descending=True, stable=True)[:SHEET_FILLS]
     pred = _forward(model, truth_f, interp, mask, ttg, style)
@@ -643,23 +652,37 @@ def main(argv=None):
     ap.add_argument("--sheets", action="store_true", help="also draw contact sheets of fixed hard fills (needs ac)")
     ap.add_argument("--decisions", default=str(review.DECISIONS), help="the review's decisions file")
     ap.add_argument("--no-write", action="store_true", help="print only; leave the card as it is")
+    ap.add_argument("--subset", default=None, metavar="NAME",
+                    help="with a take filter: write the numbers under evaluation[_best]_<NAME> in the card, "
+                         "so the full evaluation stays (e.g. natural, roadmap 153000)")
+    selection.add_arguments(ap)
     args = ap.parse_args(argv)
 
     from . import infer
 
+    select = selection.from_args(args)
+    if select.active() and not args.subset:
+        ap.error("a take filter (--types, --styles, --natural, --takes) needs --subset <name>: the numbers of a restricted "
+                 "evaluation go under their own key in the card, never over the full one")
+    if args.subset and not select.active():
+        ap.error("--subset names a restricted evaluation: give the filter too (--natural, --types, --styles, --takes)")
     net, card = infer.load(args.tag, args.checkpoint)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     net = net.to(device)
     names = [n for n in args.sets.split(",") if n] if args.sets else [n for n in REGISTRY if REGISTRY[n].commercial]
     skel = Skeleton.load()
     body = Body(skel, device)
-    val = Sets(names, device, val=True, decisions=review.load_decisions(pathlib.Path(args.decisions)))
+    print(f"takes: {select.describe()}", flush=True)
+    val = Sets(names, device, val=True, decisions=review.load_decisions(pathlib.Path(args.decisions)), select=select)
+    print(selection.table(val.records, select), flush=True)
     styles = card.get("styles") or ["any"]
     val.learn(styles, val.label_frames)
     ev = run(net, val, body, device, windows=args.windows)
     ev["checkpoint"] = args.checkpoint
     ev["holdout"] = val.held
     ev["sets"] = val.used
+    ev["selection"] = select.describe()
+    ev["takes_kept"] = sum(r.kept and r.held for r in val.records)
     seen = [n for n in val.used if n in {s["name"] for s in card.get("sets", [])}]
     if card.get("split") != "subjects" and seen:
         ev["note"] = (f"this model was trained with a per-take split: it may have seen takes of these held-out subjects "
@@ -671,9 +694,10 @@ def main(argv=None):
     if not args.no_write:
         path = MODELS / args.tag / "model.json"
         card = json.loads(path.read_text(encoding="utf-8"))
-        card["evaluation" if args.checkpoint == "model" else "evaluation_best"] = ev
+        key = ("evaluation" if args.checkpoint == "model" else "evaluation_best") + (f"_{args.subset}" if args.subset else "")
+        card[key] = ev
         path.write_text(json.dumps(card, indent=1), encoding="utf-8")
-        print(f"written into {path}")
+        print(f"written into {path} as {key}")
 
 
 if __name__ == "__main__":

@@ -102,6 +102,10 @@ impl SessionBuilder {
         let mut doc = Document::new(Skeleton::from_json(&rig).map_err(|e| e.to_string())?);
         doc.library = self.library.clone();
         doc.assets = Some(self.assets.clone());
+        // the library's clips, for features that borrow a pose (anchors inside a long AI fill)
+        doc.pose_source = self.library.as_deref().map(|l| {
+            Arc::new(crate::anchorlib::LibraryPoses::new(l)) as Arc<dyn ac_core::posesource::PoseSource>
+        });
         if self.limits {
             let path = self.assets.join("rig/limits.json");
             let limits = std::fs::read_to_string(&path)

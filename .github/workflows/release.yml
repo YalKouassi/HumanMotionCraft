@@ -7,7 +7,9 @@
 #
 # The release attaches:
 #   humanmotioncraft-<version>-windows-x64-portable.zip  (one folder: the app, `ac.exe`, assets/,
-#                                                        the licence files)
+#                                                        the licence files, and what the optional
+#                                                        helpers' installs read, in the source
+#                                                        tree's layout)
 #   craft-app.json, its icon (assets/icon/), SHA256SUMS.txt
 # It is created as a draft, uploaded, then published as the latest release, so an interrupted run
 # never leaves a half-uploaded public one. Data releases (training/ac_train/publish.py) are
@@ -85,6 +87,14 @@ jobs:
           cp "target/release/$id.exe" target/release/ac.exe "target/package/$stem/"
           cp -r assets "target/package/$stem/assets"
           cp LICENSE NOTICE ATTRIBUTION.md README.md "target/package/$stem/"
+          # text.install and posefill.install run these from next to assets/ (ac_helper::setup);
+          # the setups read the product's name from product.rs and copy the rig maths
+          pkg="target/package/$stem"
+          mkdir -p "$pkg/tools/textmotion" "$pkg/tools/posefill" "$pkg/training/ac_train" "$pkg/crates/ac-core/src"
+          cp tools/textmotion/{setup_textmotion,helper,generate,engine}.py "$pkg/tools/textmotion/"
+          cp tools/posefill/{setup_posefill,helper,engine,live}.py tools/posefill/LICENSE-APACHE "$pkg/tools/posefill/"
+          cp training/ac_train/{rig,quat,retarget}.py "$pkg/training/ac_train/"
+          cp crates/ac-core/src/product.rs "$pkg/crates/ac-core/src/"
           # Python's zipfile writes `/` separators (Compress-Archive may write `\`, which the
           # launcher refuses; Git Bash's tar can't write zips).
           (cd target/package && python -I -m zipfile -c "../../dist/$stem.zip" "$stem")

@@ -345,13 +345,25 @@ impl App {
         {
             bodies.push((m, self.palette().ghost_preview));
         }
-        let drawn: Vec<Body> = bodies
+        let mut drawn: Vec<Body> = bodies
             .iter()
             .map(|(m, tint)| Body {
                 joints: m,
                 tint: *tint,
+                mesh: 0,
             })
             .collect();
+        // the person's own character, driven live through its mapping (`character.rs`)
+        let character = self.character_frame(&pose);
+        if let Some(c) = &character
+            && let Some(skinned) = &c.skin
+        {
+            drawn.push(Body {
+                joints: skinned,
+                tint: super::character::TINT,
+                mesh: super::character::MESH_SLOT,
+            });
+        }
         let rs = &self.render_state;
         match self
             .renderer
@@ -383,6 +395,9 @@ impl App {
             );
         }
         let painter = ui.painter_at(rect);
+        if let Some(c) = &character {
+            self.draw_character(&painter, c, &|p| project(&self.camera, p));
+        }
 
         // the physics overlay
         if self.show_overlay

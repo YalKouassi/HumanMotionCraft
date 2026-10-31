@@ -60,6 +60,32 @@ fn the_tag_is_text_and_a_prompt() {
 }
 
 #[test]
+fn the_pose_fill_tag_is_held_too_and_its_note_names_its_command() {
+    assert!(edits::is_generated(edits::POSE_FILL));
+    assert!(edits::is_generated("posefill"));
+    assert!(!edits::is_generated("posefills"));
+    let mut s = with_generated();
+    for k in &mut s.document.clip.layers[0].keys {
+        if k.source == KeySource::Ai {
+            k.model = edits::POSE_FILL.into();
+        }
+    }
+    let before = generated(&s);
+    assert_eq!(before.len(), 29);
+    s.run("frame.set", &json!({ "frame": 30 })).unwrap();
+    s.run("pose.drag", &json!({ "bone": "wrist.L", "by": [0.0, -0.1, 0.1] }))
+        .unwrap();
+    let out = s.run("key.set", &json!({})).unwrap();
+    assert_eq!(generated(&s), before);
+    let n = notes(&out);
+    assert!(
+        n.iter()
+            .any(|t| t.starts_with("0-30:") && t.contains("from poses") && t.contains("posefill.fill")),
+        "{n:?}"
+    );
+}
+
+#[test]
 fn setting_a_key_beside_it_leaves_it_and_says_so() {
     let mut s = with_generated();
     let before = generated(&s);

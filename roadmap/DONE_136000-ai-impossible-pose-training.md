@@ -1,0 +1,36 @@
+# Train the model away from impossible poses
+
+- **Status:** done (2026-10-31), by the owner's decision: the line is not met
+- **Requires:** 120000, 126000
+- **Source:** commit `bd70d5b`, 115000
+
+## What
+Every fill now runs `keep_possible` (`crates/ac-core/src/possible.rs:222`) because the model can
+make impossible joints. That fixes the output after the fact. Count those frames in 126000, then
+add a hinge loss past the `possible` limits (`training/ac_train/ranges.py`, the same maths as
+`crates/ac-core/src/anatomy.rs`) so the fill rarely needs bending back.
+
+## Acceptance
+Impossible frames per 1,000 filled frames drop against today's model in 126000, with joint error
+no worse.
+
+## Result
+2026-10-30. `Body.impossible` (`training/ac_train/kinematics.py`) measures the possible limits in
+torch (the same angles as `anatomy.py`, vectorised, checked in `tests/test_kinematics.py`); the
+loss adds the degrees past them on the gap frames (weight 0.002 a degree); the evaluation counts
+them per 1,000 gap frames.
+
+Finding: the shipped model makes **0** impossible frames per 1,000 on the held-out recordings, on
+every context (126000), so this acceptance can't show a drop there. The impossible fills behind
+`keep_possible` come from keys the evaluation doesn't sample (posed by hand).
+
+The evaluation now has that case (126000, "posed keys": two built-in poses, the second stepped and
+turned). The shipped model makes **17** impossible frames per 1,000 there (interpolation 20), so
+this item's acceptance is measured on the posed keys: the retrain's count there against 17, with
+joint error on the recordings no worse.
+
+## Measured by the retrain
+2026-10-30 (134000, its Result has the table). Posed keys: 19.8 impossible frames per 1,000 against the old model's 17. **Not met**.
+
+## Closed
+The owner's decision, 2026-10-31. The loss is in the shipped model, which the owner chose to ship (134000). The shipped `parts-lowweights` makes 20.0 impossible frames per 1,000 on the posed keys, against the old model's 17 and interpolation's 20, so no drop. `keep_possible` still corrects every fill in the app. 134500's acceptance now holds this number.

@@ -23,7 +23,7 @@
     { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/T-pose"], "frames": [0] } },
     { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/T-pose"], "frames": [20, 0] } },
     { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/Nope"], "frames": [0, 20] } },
-    { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/T-pose"], "frames": [0, 200] } },
+    { "command": "anim.block", "params": { "poses": ["Reference/A-pose", "Reference/T-pose"], "frames": [0, 2000] } },
     { "command": "anim.block", "params": { "poses": ["Reference/A-pose"], "frames": [0], "fill": "magic" } },
     { "command": "pose.get", "params": { "bone": "tail" } }
   ],

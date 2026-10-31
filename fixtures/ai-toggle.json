@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "ai-toggle",
   "feature": "ai.toggle",
-  "description": "One key (Shift+A) switches the span around the playhead between the model and plain interpolation. Keys of yours on 0 (root offset z 0.9450101) and 20 (one hip height, 0.8698308 m, higher), linear, with ai_force 0 so the fill is checkable: frame 10's root head is halfway, 1.3073286, either way. The first switch fills 0–20 with the model (19 AI keys, band 1..19, \"parts\"); the second clears those 19 keys (plain again, no band). A gap over the model's 45 frames (20–80, 59 frames) is refused with its length, and nothing changes. Physics is off: this checks the keys.",
+  "description": "One key (Shift+A) switches the span around the playhead between the model and plain interpolation. Keys of yours on 0 (root offset z 0.9450101) and 20 (one hip height, 0.8698308 m, higher), linear, with ai_force 0 so the fill is checkable: frame 10's root head is halfway, 1.3073286, either way. The first switch fills 0–20 with the model (19 AI keys, band 1..19, \"parts\"); the second clears those 19 keys (plain again, no band). A gap over the model's 45 frames (20–80, 59 frames) is not refused any more: it gets anchor poses from the library (ai-fill-long-gap); a span that is not between two neighbouring keys of yours (20–20, 0–80) is refused, and nothing changes. Physics is off: this checks the keys.",
   "script": [
     { "command": "physics.set", "params": { "on": false } },
     { "command": "ai.settings", "params": { "ai_force": 0 } },
@@ -25,7 +25,7 @@
   ],
   "expect": { "tolerance": 1e-6 },
   "errors": [
-    { "command": "ai.toggle", "params": { "from": 20, "to": 80 } },
+    { "command": "ai.toggle", "params": { "from": 20, "to": 20 } },
     { "command": "ai.toggle", "params": { "from": 0 } },
     { "command": "ai.toggle", "params": { "from": 0, "to": 80 } }
   ],

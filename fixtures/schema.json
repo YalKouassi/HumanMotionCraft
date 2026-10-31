@@ -116,6 +116,7 @@
             "clip.fix_impossible",
             "clip.group",
             "clip.import",
+            "clip.import_batch",
             "clip.loop",
             "clip.metrics",
             "clip.move",
@@ -188,6 +189,11 @@
             "library.list",
             "library.samples",
             "library.sync",
+            "live.clip",
+            "live.input",
+            "live.show",
+            "live.start",
+            "live.stop",
             "marker.add",
             "marker.delete",
             "marker.move",
@@ -219,10 +225,21 @@
             "pose.set_bone",
             "pose.set_root",
             "pose.spread_bend",
+            "posefill.fill",
+            "posefill.helper",
+            "posefill.install",
+            "project.info",
+            "project.open",
+            "project.save",
             "recovery.clear",
             "recovery.list",
             "recovery.restore",
             "recovery.write",
+            "retarget.check",
+            "retarget.load",
+            "retarget.map",
+            "retarget.save",
+            "retarget.unload",
             "rig.info",
             "session.info",
             "session.reset",
@@ -393,6 +410,14 @@
                     "minimum": 0,
                     "maximum": 10000000,
                     "description": "your key after the gap"
+                  },
+                  "anchors": {
+                    "type": "string",
+                    "enum": [
+                      "auto",
+                      "none"
+                    ],
+                    "description": "a gap over the model's limit: \"auto\" (default) places anchor poses from the library inside it and fills each span between them; \"none\" refuses it"
                   }
                 },
                 "required": [],
@@ -1120,6 +1145,12 @@
                       "in_place"
                     ],
                     "description": "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)"
+                  },
+                  "target": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes"
                   }
                 },
                 "required": [
@@ -1202,6 +1233,12 @@
                       "in_place"
                     ],
                     "description": "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)"
+                  },
+                  "target": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes"
                   }
                 },
                 "required": [
@@ -1315,11 +1352,58 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 4096,
-                    "description": "a file path"
+                    "description": "an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig)"
+                  },
+                  "joints": {
+                    "description": "an .fbx: landmark -> joint name, correcting the guess ({\"l_knee\": \"LeftLeg\"}); the landmarks are hips, spine, neck, head and per side shoulder, elbow, wrist, hip, knee, ankle, toe"
                   }
                 },
                 "required": [
                   "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "clip.import_batch"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Import a folder of FBX; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a folder of .fbx files (subfolders too)"
+                  },
+                  "to": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the folder the .clip.json files go in (made if missing)"
+                  },
+                  "joints": {
+                    "description": "landmark -> joint name, correcting the guess for every file ({\"l_knee\": \"LeftLeg\"})"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to"
                 ],
                 "additionalProperties": false
               }
@@ -4451,6 +4535,197 @@
           "if": {
             "properties": {
               "command": {
+                "const": "live.clip"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: keep a range; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the recording's first frame to keep (default 0)",
+                    "default": 0
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "its last frame to keep (default the last)"
+                  },
+                  "at": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the animation's frame it starts on (default the playhead)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "live.input"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: steer"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "heading": {
+                    "type": "number",
+                    "minimum": -3600.0,
+                    "maximum": 3600.0,
+                    "description": "degrees: 0 the rig's forward (-Y), positive to its left"
+                  },
+                  "speed": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 100.0,
+                    "description": "m/s, 0 to stop (held to the targets' top speed)"
+                  },
+                  "style": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a target of the set to aim at instead of blending by speed"
+                  },
+                  "frames": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 600,
+                    "description": "frames at 30 fps to move on (default 1)",
+                    "default": 1
+                  },
+                  "wait": {
+                    "type": "boolean",
+                    "description": "wait for each stretch (default); false lets the model work on a thread while the last stretch plays on"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "live.show"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: look at a recorded frame"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "frame": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "the recording's frame to show"
+                  }
+                },
+                "required": [
+                  "frame"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "live.start"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: start a take"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "max_frames": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "maximum": 18000,
+                    "description": "the most frames to record (default ten minutes at 30 fps)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "live.stop"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Live motion: stop the take"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "marker.add"
               }
             },
@@ -5672,6 +5947,218 @@
           "if": {
             "properties": {
               "command": {
+                "const": "posefill.fill"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Fill gap from poses; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key before the gap (default: around the playhead)"
+                  },
+                  "to": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10000000,
+                    "description": "your key after the gap; keys of yours between from and to are gone through, one call a gap"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "posefill.helper"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Pose fill: helper"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "status",
+                      "load",
+                      "stop"
+                    ],
+                    "description": "status (default) says what is installed and running; load starts the helper and loads the model (a few minutes the first time, while it builds its plan for this GPU); stop ends it"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "posefill.install"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Pose fill: install; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "check",
+                      "start",
+                      "stop"
+                    ],
+                    "description": "check (default) says what the install needs and what it is doing; start runs the setup (about 4 GB downloaded, a few minutes; the window stays usable); stop ends it, and start carries on from there"
+                  },
+                  "repair": {
+                    "type": "boolean",
+                    "description": "start even when it is installed: the setup updates or repairs it"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "project.info"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Project file info"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a project file (.project.json)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "project.open"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Open project; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a project file (.project.json)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "project.save"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Save project; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "where to write it (default: the file the project was opened from or saved to)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "recovery.clear"
               }
             },
@@ -5778,6 +6265,164 @@
             "properties": {
               "command": {
                 "description": "Keep unsaved work; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.check"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Check character retarget"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.load"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Load character; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a character .glb (the mapping is guessed from its node names) or a saved mapping file (.retarget.json)"
+                  },
+                  "joints": {
+                    "description": "landmark -> node name, correcting the guess ({\"l_knee\": \"L_Calf\"}; \"none\" unmaps one)"
+                  },
+                  "hands": {
+                    "type": "boolean",
+                    "description": "solve the arms onto the rig's wrists too (default: legs only)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.map"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Map character joints; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "joints": {
+                    "description": "landmark -> node name, correcting the guess ({\"l_knee\": \"L_Calf\"}; \"none\" unmaps one)"
+                  },
+                  "hands": {
+                    "type": "boolean",
+                    "description": "solve the arms onto the rig's wrists too (default: legs only)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.save"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Save character mapping; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the mapping file to write (.retarget.json)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.unload"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Unload character; undoable"
               },
               "params": {
                 "type": "object",
@@ -6313,6 +6958,7 @@
             "clip.fix_impossible",
             "clip.group",
             "clip.import",
+            "clip.import_batch",
             "clip.loop",
             "clip.metrics",
             "clip.move",
@@ -6385,6 +7031,11 @@
             "library.list",
             "library.samples",
             "library.sync",
+            "live.clip",
+            "live.input",
+            "live.show",
+            "live.start",
+            "live.stop",
             "marker.add",
             "marker.delete",
             "marker.move",
@@ -6416,10 +7067,21 @@
             "pose.set_bone",
             "pose.set_root",
             "pose.spread_bend",
+            "posefill.fill",
+            "posefill.helper",
+            "posefill.install",
+            "project.info",
+            "project.open",
+            "project.save",
             "recovery.clear",
             "recovery.list",
             "recovery.restore",
             "recovery.write",
+            "retarget.check",
+            "retarget.load",
+            "retarget.map",
+            "retarget.save",
+            "retarget.unload",
             "rig.info",
             "session.info",
             "session.reset",

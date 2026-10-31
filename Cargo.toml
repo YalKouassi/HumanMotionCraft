@@ -3,7 +3,7 @@ resolver = "3"
 members = ["crates/*", "xtask"]
 
 [workspace.package]
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.95"
 license = "GPL-3.0-or-later"
@@ -14,7 +14,9 @@ ac-core = { path = "crates/ac-core" }
 ac-ai = { path = "crates/ac-ai" }
 ac-io = { path = "crates/ac-io" }
 ac-media = { path = "crates/ac-media" }
+ac-helper = { path = "crates/ac-helper" }
 ac-textmotion = { path = "crates/ac-textmotion" }
+ac-posefill = { path = "crates/ac-posefill" }
 ac-community = { path = "crates/ac-community" }
 ac-render = { path = "crates/ac-render" }
 ac-cli = { path = "crates/ac-cli" }

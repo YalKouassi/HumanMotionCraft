@@ -1,0 +1,450 @@
+{
+ "note": "roadmap 153000, from ac_train.walkgroups --type idle: reject a group by its number on the review video",
+ "too_short": [
+  "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_idling_1_segment_3",
+  "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_idling_4_segment_3",
+  "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_idling_6_segment_3",
+  "addbiomechanics/standing_addbiomechanics_han2023_s004_split2_20220524_idling_1_segment_3",
+  "cmu/standing_cmu_132_51",
+  "cmu/standing_cmu_82_01",
+  "cmu/standing_cmu_82_18",
+  "cmu/standing_cmu_83_11"
+ ],
+ "flagged": [
+  {
+   "take": "cmu/standing_cmu_137_03",
+   "why": "Cat"
+  },
+  {
+   "take": "cmu/standing_cmu_137_11",
+   "why": "Dinosaur"
+  },
+  {
+   "take": "cmu/standing_cmu_137_15",
+   "why": "Drunk"
+  },
+  {
+   "take": "cmu/standing_cmu_137_19",
+   "why": "Gangly"
+  },
+  {
+   "take": "cmu/standing_cmu_137_23",
+   "why": "Graceful"
+  },
+  {
+   "take": "cmu/standing_cmu_137_32",
+   "why": "Old"
+  },
+  {
+   "take": "cmu/standing_cmu_137_37",
+   "why": "Sexy"
+  },
+  {
+   "take": "cmu/standing_cmu_137_41",
+   "why": "Strong"
+  },
+  {
+   "take": "cmu/standing_cmu_76_04",
+   "why": "defensive"
+  },
+  {
+   "take": "cmu/standing_cmu_77_05",
+   "why": "flashlight"
+  },
+  {
+   "take": "cmu/standing_cmu_89_01",
+   "why": "forehead"
+  }
+ ],
+ "groups": [
+  {
+   "group": "I001",
+   "kind": "idle",
+   "label": "Neutral: Normal walking (idle)",
+   "shown": "100style/standing_100style_ID_052",
+   "change": null,
+   "minutes": 0.25,
+   "takes": [
+    "100style/standing_100style_ID_052"
+   ]
+  },
+  {
+   "group": "I002",
+   "kind": "idle",
+   "label": "Female1 A01 Stand",
+   "shown": "accad/standing_accad_female1_a01_stand",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "accad/standing_accad_female1_a01_stand"
+   ]
+  },
+  {
+   "group": "I003",
+   "kind": "idle",
+   "label": "Female1 A02 Sway T2",
+   "shown": "accad/standing_accad_female1_a02_swayt2",
+   "change": null,
+   "minutes": 0.47,
+   "takes": [
+    "accad/standing_accad_female1_a02_sway",
+    "accad/standing_accad_female1_a02_swayt2"
+   ]
+  },
+  {
+   "group": "I004",
+   "kind": "idle",
+   "label": "Female1 A03 Swing",
+   "shown": "accad/standing_accad_female1_a03_swing",
+   "change": null,
+   "minutes": 0.38,
+   "takes": [
+    "accad/standing_accad_female1_a03_swing",
+    "accad/standing_accad_female1_a03_swingt2"
+   ]
+  },
+  {
+   "group": "I005",
+   "kind": "idle",
+   "label": "Female1 A04 Look",
+   "shown": "accad/standing_accad_female1_a04_look",
+   "change": null,
+   "minutes": 0.36,
+   "takes": [
+    "accad/standing_accad_female1_a04_look"
+   ]
+  },
+  {
+   "group": "I006",
+   "kind": "idle",
+   "label": "Female1 D2 Wait",
+   "shown": "accad/standing_accad_female1_d2_wait",
+   "change": null,
+   "minutes": 0.64,
+   "takes": [
+    "accad/standing_accad_female1_d2_wait"
+   ]
+  },
+  {
+   "group": "I007",
+   "kind": "idle",
+   "label": "Male1 A1 Stand",
+   "shown": "accad/standing_accad_male1_a1_stand",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "accad/standing_accad_male1_a1_stand"
+   ]
+  },
+  {
+   "group": "I008",
+   "kind": "idle",
+   "label": "Male1 A2 Sway",
+   "shown": "accad/standing_accad_male1_a2_sway",
+   "change": null,
+   "minutes": 0.16,
+   "takes": [
+    "accad/standing_accad_male1_a2_sway"
+   ]
+  },
+  {
+   "group": "I009",
+   "kind": "idle",
+   "label": "Male1 A3 Swing Arms",
+   "shown": "accad/standing_accad_male1_a3_swingarms",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "accad/standing_accad_male1_a3_swingarms"
+   ]
+  },
+  {
+   "group": "I010",
+   "kind": "idle",
+   "label": "Male1 A4 Look Around",
+   "shown": "accad/standing_accad_male1_a4_lookaround",
+   "change": null,
+   "minutes": 0.27,
+   "takes": [
+    "accad/standing_accad_male1_a4_lookaround"
+   ]
+  },
+  {
+   "group": "I011",
+   "kind": "idle",
+   "label": "Male2 A1 Stand",
+   "shown": "accad/standing_accad_male2_a1_stand",
+   "change": null,
+   "minutes": 0.06,
+   "takes": [
+    "accad/standing_accad_male2_a1_stand"
+   ]
+  },
+  {
+   "group": "I012",
+   "kind": "idle",
+   "label": "Male2 A2 Sway",
+   "shown": "accad/standing_accad_male2_a2_sway",
+   "change": null,
+   "minutes": 0.18,
+   "takes": [
+    "accad/standing_accad_male2_a2_sway"
+   ]
+  },
+  {
+   "group": "I013",
+   "kind": "idle",
+   "label": "Male2 A3 Swing Arms",
+   "shown": "accad/standing_accad_male2_a3_swingarms",
+   "change": null,
+   "minutes": 0.18,
+   "takes": [
+    "accad/standing_accad_male2_a3_swingarms"
+   ]
+  },
+  {
+   "group": "I014",
+   "kind": "idle",
+   "label": "Male2 A4 Look Around",
+   "shown": "accad/standing_accad_male2_a4_lookaround",
+   "change": null,
+   "minutes": 0.27,
+   "takes": [
+    "accad/standing_accad_male2_a4_lookaround"
+   ]
+  },
+  {
+   "group": "I015",
+   "kind": "idle",
+   "label": "han2023 s002_split2: 20220520 idling 1 segment 2",
+   "shown": "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_idling_1_segment_2",
+   "change": null,
+   "minutes": 1.82,
+   "takes": [
+    "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_idling_1_segment_2",
+    "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_idling_6_segment_1",
+    "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_idling_6_segment_2",
+    "addbiomechanics/standing_addbiomechanics_han2023_s004_split2_20220524_idling_1_segment_2",
+    "addbiomechanics/standing_addbiomechanics_han2023_s004_split2_20220524_idling_3_segment_2",
+    "addbiomechanics/standing_addbiomechanics_han2023_s005_split2_20220610_idling_1_segment_1",
+    "addbiomechanics/standing_addbiomechanics_han2023_s005_split2_20220610_idling_2_segment_1",
+    "addbiomechanics/standing_addbiomechanics_han2023_s005_split2_20220610_idling_2_segment_2",
+    "addbiomechanics/standing_addbiomechanics_han2023_s005_split2_20220610_idling_2_segment_3",
+    "addbiomechanics/standing_addbiomechanics_han2023_s005_split2_20220610_idling_3_segment_1",
+    "addbiomechanics/standing_addbiomechanics_han2023_s006_split2_20220614_idling_2_segment_0",
+    "addbiomechanics/standing_addbiomechanics_han2023_s006_split2_20220614_idling_3_segment_0",
+    "addbiomechanics/standing_addbiomechanics_han2023_s006_split2_20220614_idling_4_segment_0",
+    "addbiomechanics/standing_addbiomechanics_han2023_s006_split2_20220614_idling_4_segment_1"
+   ]
+  },
+  {
+   "group": "I016",
+   "kind": "idle",
+   "label": "han2023 s002_split2: 20220520 static 1 segment 0",
+   "shown": "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_static_1_segment_0",
+   "change": null,
+   "minutes": 0.15,
+   "takes": [
+    "addbiomechanics/standing_addbiomechanics_han2023_s002_split2_20220520_static_1_segment_0",
+    "addbiomechanics/standing_addbiomechanics_han2023_s005_split2_20220610_static_1_segment_0",
+    "addbiomechanics/standing_addbiomechanics_han2023_s007_split1_20220705_static_1_segment_0"
+   ]
+  },
+  {
+   "group": "I017",
+   "kind": "idle",
+   "label": "uhlrich2023 subject11: static1 segment 0",
+   "shown": "addbiomechanics/standing_addbiomechanics_uhlrich2023_subject11_static1_segment_0",
+   "change": null,
+   "minutes": 0.65,
+   "takes": [
+    "addbiomechanics/standing_addbiomechanics_uhlrich2023_subject11_static1_segment_0",
+    "addbiomechanics/standing_addbiomechanics_uhlrich2023_subject3_static1_segment_0",
+    "addbiomechanics/standing_addbiomechanics_uhlrich2023_subject4_static1_segment_0",
+    "addbiomechanics/standing_addbiomechanics_uhlrich2023_subject5_static1_segment_0",
+    "addbiomechanics/standing_addbiomechanics_uhlrich2023_subject6_static1_segment_0",
+    "addbiomechanics/standing_addbiomechanics_uhlrich2023_subject7_static1_segment_0",
+    "addbiomechanics/standing_addbiomechanics_uhlrich2023_subject8_static1_segment_0"
+   ]
+  },
+  {
+   "group": "I018",
+   "kind": "idle",
+   "label": "Idle",
+   "shown": "builtin_loops/Idle",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "builtin_loops/Idle"
+   ]
+  },
+  {
+   "group": "I019",
+   "kind": "idle",
+   "label": "Standing still",
+   "shown": "cmu/standing_cmu_111_28",
+   "change": null,
+   "minutes": 0.27,
+   "takes": [
+    "cmu/standing_cmu_111_28"
+   ]
+  },
+  {
+   "group": "I020",
+   "kind": "idle",
+   "label": "Standing Still",
+   "shown": "cmu/standing_cmu_113_21",
+   "change": null,
+   "minutes": 0.19,
+   "takes": [
+    "cmu/standing_cmu_113_21"
+   ]
+  },
+  {
+   "group": "I021",
+   "kind": "idle",
+   "label": "Normal Wait",
+   "shown": "cmu/standing_cmu_137_28",
+   "change": null,
+   "minutes": 0.52,
+   "takes": [
+    "cmu/standing_cmu_137_28"
+   ]
+  },
+  {
+   "group": "I022",
+   "kind": "idle",
+   "label": "Looking Around",
+   "shown": "cmu/standing_cmu_139_03",
+   "change": null,
+   "minutes": 0.14,
+   "takes": [
+    "cmu/standing_cmu_139_03"
+   ]
+  },
+  {
+   "group": "I023",
+   "kind": "idle",
+   "label": "Idle",
+   "shown": "cmu/standing_cmu_140_06",
+   "change": null,
+   "minutes": 0.66,
+   "takes": [
+    "cmu/standing_cmu_140_06",
+    "cmu/standing_cmu_140_07"
+   ]
+  },
+  {
+   "group": "I024",
+   "kind": "idle",
+   "label": "wait for bus",
+   "shown": "cmu/standing_cmu_40_10",
+   "change": null,
+   "minutes": 1.7,
+   "takes": [
+    "cmu/standing_cmu_40_10",
+    "cmu/standing_cmu_40_11"
+   ]
+  },
+  {
+   "group": "I025",
+   "kind": "idle",
+   "label": "looking around",
+   "shown": "cmu/standing_cmu_77_01",
+   "change": null,
+   "minutes": 0.27,
+   "takes": [
+    "cmu/standing_cmu_77_01",
+    "cmu/standing_cmu_77_04"
+   ]
+  },
+  {
+   "group": "I026",
+   "kind": "idle",
+   "label": "standing",
+   "shown": "cmu/standing_cmu_77_02",
+   "change": null,
+   "minutes": 0.13,
+   "takes": [
+    "cmu/standing_cmu_77_02"
+   ]
+  },
+  {
+   "group": "I027",
+   "kind": "idle",
+   "label": "T-Pose",
+   "shown": "cmu/standing_cmu_87_02",
+   "change": null,
+   "minutes": 0.05,
+   "takes": [
+    "cmu/standing_cmu_87_02"
+   ]
+  },
+  {
+   "group": "I028",
+   "kind": "idle",
+   "label": "A person stands still and looks around.",
+   "shown": "kimodo/standing_kimodo_idle_look_around_s1",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "kimodo/standing_kimodo_idle_look_around_s1"
+   ]
+  },
+  {
+   "group": "I029",
+   "kind": "idle",
+   "label": "A person stands still and looks around.",
+   "shown": "kimodo/standing_kimodo_idle_look_around_s2",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "kimodo/standing_kimodo_idle_look_around_s2"
+   ]
+  },
+  {
+   "group": "I030",
+   "kind": "idle",
+   "label": "A person stands still and looks around.",
+   "shown": "kimodo/standing_kimodo_idle_look_around_s3",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "kimodo/standing_kimodo_idle_look_around_s3"
+   ]
+  },
+  {
+   "group": "I031",
+   "kind": "idle",
+   "label": "A person stands idle, shifting their weight from foot to foot.",
+   "shown": "kimodo/standing_kimodo_idle_stand_s1",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "kimodo/standing_kimodo_idle_stand_s1"
+   ]
+  },
+  {
+   "group": "I032",
+   "kind": "idle",
+   "label": "A person stands idle, shifting their weight from foot to foot.",
+   "shown": "kimodo/standing_kimodo_idle_stand_s2",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "kimodo/standing_kimodo_idle_stand_s2"
+   ]
+  },
+  {
+   "group": "I033",
+   "kind": "idle",
+   "label": "A person stands idle, shifting their weight from foot to foot.",
+   "shown": "kimodo/standing_kimodo_idle_stand_s3",
+   "change": null,
+   "minutes": 0.1,
+   "takes": [
+    "kimodo/standing_kimodo_idle_stand_s3"
+   ]
+  }
+ ]
+}

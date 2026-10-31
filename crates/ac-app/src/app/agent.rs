@@ -107,6 +107,7 @@ impl App {
                     self.announce(&id, "agent", &out);
                     match out {
                         Ok(v) => {
+                            self.fill_marks(&id, &v);
                             // only changes are shown: an agent's queries would drown them
                             if self.session.spec(&id).is_some_and(|c| c.undoable) {
                                 self.status = format!("agent: {id}");

@@ -10,12 +10,23 @@ clips. Nothing here runs at app time.
 | `ac_train.b3d` | pure-Python `.b3d` (`SubjectOnDisk`) reader and HTTP-Range fetcher for AddBiomechanics 1.0 |
 | `ac_train.train` | trains the network on the retargeted sets into `training/data/models/<tag>/` |
 | `ac_train.evaluate` | the evaluation suite: gap bins, pose, feet, continuity, impossible joints, realistic contexts, part layers, scenarios (starts, stops, crouches, flights, turns while stepping); writes it into the card, and contact sheets |
+| `ac_train.flag` | after training: fills every window of every take with the model and puts the worst 1 % of the takes (by loss) into the review app's queue (`data/rig/flags.json`); a person decides, never the flag |
+| `ac_train.selection` | which takes a run reads: `--types`, `--styles` (styled takes left out), `--natural` (idle, walk, run, jump with no style word or `natural`), and `--takes <json>` (an explicit include/exclude list by `set/take` id); the minutes that survive by type and set (roadmap 153000) |
+| `ac_train.candidates` | one long MP4 per motion type of the takes a filter keeps (a title card and a burnt-in id a take, chapters, an index CSV), for the owner to say which to train on |
+| `ac_train.gaitcheck` | which natural walks look odd, by the words of their description and by how they move (limp, held arms, lean, low hips), tested on 100STYLE's labelled styles; proposes a take list and never changes the owner's |
+| `ac_train.walkgroups` | cuts a type's natural takes down to a short review: too short and styled takes out, the rest one clip a group on one MP4; the owner's rejects by group number go into the take list |
+| `ac_train.judge` | two models filling the same gaps in held-out takes beside the real motion: one three-panel MP4 a scene and `ALL.mp4` |
+| `ac_train.posetargets` | the target poses of live motion control (`assets/posefill-targets/`): for each gait, four frames of a free-set take at the gait's speed in its most typical posture, with where they came from; `--list` shows the candidates |
+| `ac_train.compare` | model cards side by side: joint error and foot slide by gap bin and motion type |
+| `ac_train.coverage` | how many training minutes each evaluation slice has (starts, stops, crouches, flights, turns, the motion types), by set and by what training uses, holds out or leaves out, beside each slice's windows from a card and the windows it can expect; writes `data/coverage.json` (roadmap 134750) |
 | `ac_train.split` | which subjects validation holds out (whole subjects, stable however the sets change) |
 | `ac_train.context` | the context before key A as the app gives it: a spline through sparse keys (the app's interpolation, batched), or held still |
 | `ac_train.kinematics`, `ac_train.losses` | body points, feet, contacts and joint angles in torch; training's loss terms |
 | `ac_train.export` | writes `assets/models/<tag>/` (the weights the app loads) and the `ac-ai` goldens |
 | `ac_train.library` | cuts 3-second clips from the retargeted sets into a library folder |
 | `ac_train.infer` | the reference fill (PyTorch) that the goldens pin the Rust port to |
+| `ac_train.fbxwrite` | a small binary FBX writer: the test files of the app's FBX import (`fixtures/data/*.fbx`) and the retarget golden the Rust port is pinned to (`crates/ac-core/tests/golden/retarget-walk.json`); it never reads FBX (the app's reader is the one importer) |
+| `ac_train.glbwrite` | a small glTF binary writer: the test character of the app's export onto a character (`fixtures/data/tall-character.glb`: other bone names, an A-pose, a bone roll on every joint, a scaled armature, a skinned box mesh); it never reads glTF (the app's reader is the one) |
 
 Everything under `training/data/` is gitignored: the downloads, the retargeted sets, the PyTorch
 checkpoints and the clips that may not be committed.
@@ -181,6 +192,24 @@ runs on the CPU unless the GPU has 24 GB. A clip already in `data/raw/kimodo` is
 extended with more seeds. `AC_TEXTMOTION_DIR` installs somewhere other than the default
 (`%LOCALAPPDATA%/<app>/textmotion`).
 
+### 2c. Your own FBX animations
+
+The app imports humanoid FBX (`clip.import`, roadmap 152000); there is no FBX reader in Python.
+Write a folder of clips with the batch command, then build a set from the folder:
+
+```bash
+cd .. && cargo run --release -p ac-cli -- --assets assets run clip.import_batch '{"from": "<fbx folder>", "to": "training/data/raw/myfbx"}'
+cd training && uv run python -m ac_train.datasets --clips data/raw/myfbx --name myfbx    # --commercial if they are yours to ship
+uv run python -m ac_train.quality myfbx
+```
+
+The clips are read as they are (already on the rig, their floor at z = 0); a take that walks on
+the spot (the feet step but the hips stay: a game loop) is left out and named, since it would teach
+the model that planted feet slide. Without `--commercial` the set is non-commercial (training reads
+it with `--noncommercial`). For a set you want in the registry, give its `Dataset` a `folder`.
+The test files of the import (`fixtures/data/*.fbx`) and the retarget golden come from
+`python -m ac_train.fbxwrite`.
+
 ### 3. Retarget onto the rig
 
 ```bash
@@ -240,6 +269,30 @@ What training would use, without training (`--dropped` lists the takes left out 
 uv run python -m ac_train.review
 ```
 
+### 3e. Flag the takes the model fails on
+
+After training (step 4), the model itself says which takes it fits worst:
+
+```bash
+uv run python -m ac_train.flag --tag parts-lowweights --checkpoint best    # writes data/rig/flags.json
+cargo run -p ac-review --release -- run review.list '{"show": "model", "limit": 20}'
+```
+
+Every window of every take (clean context, a gap of 15 frames, the take's own styles) is filled
+by the model and given training's loss (`ac_train/losses.py`, the card's weights); the worst 1 %
+of the takes by their mean window loss (at least one; `--by worst` ranks by the worst window,
+`--share` changes the share, `--stride n` keeps every n-th window for a quicker look) are written
+to `data/rig/flags.json` with their loss, their worst window's frame and a line saying why. The
+six sets' 2.9 million windows take about 2.5 minutes on an RTX 3080 Ti. Takes training leaves out
+(rejected by the scan or the review) are skipped: they are in the queue already.
+
+The review app reads the file beside the scans: **Model fails** in the filter (`show: "model"`)
+lists the flagged takes worst first, each take's panel says its rank, loss and why, with a link to
+the worst window, and `review.summary` reports the file (`flags`). No file is said, not silent;
+flags made before a set was rebuilt are stale: left out and said. Flagging decides nothing and
+never touches `training/review/decisions.json`: a high loss is often just hard motion (a flip, a
+drop jump), not bad data, so a person looks and then keeps, cuts or rejects as usual.
+
 ### 3d. Styles
 
 The model's styles are the labels in the training data, nothing else (`ac_train/labels.py`). A
@@ -269,6 +322,38 @@ What the next training run would learn, without training:
 ```bash
 uv run python -m ac_train.labels
 ```
+
+### 3f. Choose the takes
+
+Training, the evaluation and the label listing read every take the review allows unless told which
+(`ac_train/selection.py`; the same arguments on all three):
+
+```bash
+uv run python -m ac_train.train --dry-run --natural                       # the minutes that survive, by type and set; nothing trained
+uv run python -m ac_train.selection --natural --write-takes review/natural-takes.json   # the kept takes as a list to edit
+uv run python -m ac_train.labels --types walk,run --styles none           # what such a run would learn
+```
+
+- `--types idle,walk,run,jump` keeps those motion types (the review's type, else the take name's);
+- `--styles natural` keeps takes whose style words are all listed; an unstyled take always passes,
+  `--styles none` keeps the unstyled alone. A take's style words are 100STYLE's style (`Neutral`
+  is `natural`; a pose or prop style such as `Teapot` counts as a style too, since a walk with a
+  teapot arm is not a normal walk) and the review's tags that are not a type or a data tag
+  (`range-of-motion`, `duplicate`);
+- `--natural` is both at once (roadmap 153000);
+- `--takes <json>` is `{"include": ["cmu/walk_cmu_02_01", ...], "exclude": [...]}`: a non-empty
+  `include` is exactly the takes to read (the type and style filters then don't apply), `exclude`
+  takes out whatever else says. An id no read set has is an error, never ignored. The scan's and
+  the review's rejections still hold, listed or not.
+
+The candidate videos the owner edits the list from come from
+`uv run python -m ac_train.candidates --natural --out ../target/shots/<date>/<topic> --ac <a copy of ac.exe> --assets ../assets`:
+one MP4 a type, every kept take once with its id burnt in and a chapter marker, physics off.
+
+`ac_train.evaluate` with a filter needs `--subset <name>`: the numbers go under
+`evaluation[_best]_<name>` in the card, so the full evaluation stays, and
+`uv run python -m ac_train.compare --card parts-natural:best:natural --card parts-lowweights:best:natural`
+puts two cards side by side by gap bin and type.
 
 ### 4. Train
 
@@ -309,6 +394,19 @@ Half the windows also get the recorded root path across the gap (some smoothed, 
 keys' spline is): a model trained so (`"path"` in its card) is given the keys' path when the app's
 `trajectory` is above 0 (roadmap 141000).
 
+Two options change the window itself, and go into the card so the app builds the same window
+(`crates/ac-ai`, `ac_ai::window`); without them the window is as it always was, bit for bit:
+
+- `--context-after N` (roadmap 140000): N of the 10 context frames come after key B instead of
+  before key A (the card's `context` is then 10 − N, `context_after` N), so the model sees how the
+  motion leaves B; the time to go is signed, negative after B. Where a clip ends before them, the
+  window falls back to the frames before A; a fifth of the batches train that way too.
+- `--multi-key` (roadmap 142000): half the windows also know a few frames inside the gap, as the
+  keys between neighbouring gaps; the plain interpolation runs between neighbouring known frames
+  and the time channel is two wide (to the next known frame, from the last). With such a model
+  (`multi_key` in the card) the app's `ai.fill_all` fills neighbouring gaps that fit one window in
+  one pass, so they agree at the key they share without an ease.
+
 Every `--eval-every` steps (1000) a quick evaluation scores the model (one number, the model's
 share of the plain interpolation's error, lower is better) and the best is kept as `best.pt`
 beside the last step's `model.pt`. At the end both are evaluated in full into `model.json`
@@ -333,15 +431,31 @@ and writes it all into the card. `--sheets` draws six fixed hard fills (the reco
 the interpolation) as contact sheets with physics off, under `data/models/<tag>/sheets-<checkpoint>/`,
 so two model versions can be compared side by side.
 
+How much training motion each slice has, without a model (CPU, under two minutes for the six sets):
+
+```bash
+uv run python -m ac_train.coverage --card parts-lowweights:best --card parts   # prints the table, writes data/coverage.json
+```
+
+The slices are the evaluation's, read from the recordings with its thresholds (`ac_train/coverage.py`
+says how each one is counted frame by frame). The table gives each slice's minutes (what training
+uses, what validation holds out, what the scan or the review leaves out, by set), the card's windows
+and model / interpolation joint error (a later `--card` fills rows the first lacks), whether the
+windows are enough to trust (100), the windows the slice can expect at the default draw and the
+`--windows` it would need, and a ranking of the slices by the model's share of the interpolation's error.
+
 ### 5. Export to the app
 
 ```bash
 uv run python -m ac_train.export parts                       # the last step (model.pt)
 uv run python -m ac_train.export parts --checkpoint best     # or the best evaluation's (best.pt)
+uv run python -m ac_train.export parts-lowweights --checkpoint best --as parts   # a training run shipped as the app's "parts"
 ```
 
 Writes `assets/models/parts/weights.{bin,json}` and the goldens
-`crates/ac-ai/tests/golden/parts-{net,fill}.json`, then check the Rust port against them:
+`crates/ac-ai/tests/golden/parts-{net,fill}.json` (one network pass, and ten fills of the CC0
+library walk: gaps of 1 to 45, a style, a part layer, `trajectory`, `head`, `ai_force` 0 and a
+fill at the clip's start), then check the Rust port against them:
 
 ```bash
 cd .. && cargo nextest run -p ac-ai

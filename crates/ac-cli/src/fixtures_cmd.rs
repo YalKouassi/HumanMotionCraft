@@ -61,6 +61,8 @@ fn registry(assets: &Path) -> Result<Vec<&'static ac_core::CommandSpec>, String>
     let built = ac_io::setup::SessionBuilder::new(assets)
         .commands(ac_media::SPECS)
         .commands(ac_textmotion::SPECS)
+        .commands(ac_posefill::SPECS)
+        .commands(ac_posefill::live_commands::SPECS)
         .commands(ac_community::SPECS)
         .build()?;
     Ok(built.session.commands().to_vec())

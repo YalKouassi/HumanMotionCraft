@@ -57,6 +57,10 @@ class Dataset:
     # may the retargeted set be passed on (``python -m ac_train.publish``)? "yes", or "never" (a set
     # you add whose licence forbids derived copies)
     share: str = "never"
+    # a folder of ``.clip.json`` files the app's FBX import wrote (``clip.import_batch``): read as
+    # they are, already on the rig (roadmap 152000). ``files`` is then unused; ``folder`` is the
+    # folder (absolute, or under data/raw). In-place takes are left out: they teach sliding feet.
+    folder: str = ""
 
 
 _CMU = {"hips": "Hips", "spine": "Spine", "neck": "Neck", "head": "Head",
@@ -333,6 +337,72 @@ def resample(x: np.ndarray, fps: float, to: float = FPS) -> np.ndarray:
     return x[i] * (1 - a) + x[i + 1] * a
 
 
+def in_place(skel: Skeleton, rots: np.ndarray, roots: np.ndarray, fps: float = FPS) -> bool:
+    """Whether a take walks on the spot: the feet swing past the hips as in a walk, but the hips
+    stay. In-place animations (game loops) teach the model that planted feet slide, so training
+    leaves them out. Standing still is not in place: the feet hardly move."""
+    from .quality import feet
+
+    pts, hips = feet(skel, rots, roots)
+    if len(hips) < 2:
+        return False
+    seconds = (len(hips) - 1) / fps
+    hips_speed = np.linalg.norm(np.diff(hips[:, :2], axis=0), axis=-1).sum() / seconds
+    ankles = pts[:, 0:2, :2] - hips[:, None, :2]  # the ankles' horizontal path relative to the hips
+    foot_speed = np.linalg.norm(np.diff(ankles, axis=0), axis=-1).sum() / seconds
+    return foot_speed > IN_PLACE_FOOT_MS and hips_speed < IN_PLACE_SHARE * foot_speed
+
+
+IN_PLACE_FOOT_MS = 0.3  # the feet move past the hips at least this fast on average: stepping
+IN_PLACE_SHARE = 0.15  # ...while the hips travel less than this share of it: on the spot
+
+
+def clip_folder(ds: Dataset) -> pathlib.Path:
+    f = pathlib.Path(ds.folder)
+    return f if f.is_absolute() else RAW / f
+
+
+def clips_set(name: str, folder, commercial: bool = False, licence: str = "your own clips") -> Dataset:
+    """A set from a folder of the app's ``.clip.json`` files, not in the registry."""
+    return Dataset(name, f"clips from {folder}", licence, commercial, str(folder), "", folder=str(folder))
+
+
+def _clip_takes(ds: Dataset, skel: Skeleton, limit: int | None):
+    """(take, rotations, roots, label) of every clip file in the set's folder that is not in place."""
+    from .clip import Clip
+
+    folder = clip_folder(ds)
+    files = sorted(folder.rglob("*.clip.json"))
+    if not files:
+        raise FileNotFoundError(f"{ds.name}: no .clip.json files under {folder} (write them with clip.import_batch)")
+    n = 0
+    for f in files:
+        if limit is not None and n >= limit:
+            break
+        try:
+            clip = Clip.load(f)
+        except (OSError, ValueError, KeyError) as e:
+            print(f"  {ds.name}: {f.name} skipped (not a clip file: {e})", flush=True)
+            continue
+        if list(clip.bones) != list(skel.names):
+            print(f"  {ds.name}: {f.name} skipped (made for another rig: {len(clip.bones)} bones)", flush=True)
+            continue
+        if not clip.base.keys:
+            print(f"  {ds.name}: {f.name} skipped (no keys)", flush=True)
+            continue
+        r, o = clip.sample_all()
+        if in_place(skel, r, o, clip.fps):
+            print(f"  {ds.name}: {f.name} skipped (in place: the feet step but the hips stay)", flush=True)
+            continue
+        r, o = resample(r, clip.fps), resample(o, clip.fps)
+        if len(r) < 3:
+            print(f"  {ds.name}: {f.name} skipped (too short)", flush=True)
+            continue
+        take = re.sub(r"[^a-z0-9]+", "_", f.name[: -len(".clip.json")].lower()).strip("_") or "clip"
+        n += 1
+        yield take, r, o, clip.name or take
+
+
 def _builtin_loops():
     """(take, rotations, roots) of every built-in clip that is not mocap (the CC0 loops)."""
     from .clip import Clip
@@ -345,9 +415,11 @@ def _builtin_loops():
         yield clip.name, r, o
 
 
-def build(name: str, skel: Skeleton | None = None, limit: int | None = None) -> pathlib.Path:
-    """Retarget every take of a set onto the rig; writes and returns ``data/rig/<name>.npz``."""
-    ds = REGISTRY[name]
+def build(name: str | Dataset, skel: Skeleton | None = None, limit: int | None = None) -> pathlib.Path:
+    """Retarget every take of a set onto the rig; writes and returns ``data/rig/<name>.npz``.
+    ``name`` is a registry name, or a :class:`Dataset` of your own (see :func:`clips_set`)."""
+    ds = name if isinstance(name, Dataset) else REGISTRY[name]
+    name = ds.name
     out = RIG / f"{name}.npz"
     out.parent.mkdir(parents=True, exist_ok=True)
     skel = skel or Skeleton.load()
@@ -366,6 +438,10 @@ def build(name: str, skel: Skeleton | None = None, limit: int | None = None) -> 
     if name == "builtin_loops":
         for take, r, o in _builtin_loops():
             add(take, r, level(skel, r, o))
+    elif ds.folder:
+        for take, r, o, label in _clip_takes(ds, skel, limit):
+            add(take, r, level(skel, r, o), label)
+            print(f"  {name}: {take}: {len(r)} frames", flush=True)
     else:
         files = sorted((RAW).glob(ds.files))
         if not files:
@@ -445,7 +521,15 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Retarget motion datasets onto the rig (training/data/rig/*.npz)")
     ap.add_argument("names", nargs="*", default=list(REGISTRY), help=f"sets ({', '.join(REGISTRY)})")
     ap.add_argument("--limit", type=int, help="first N takes only (a quick check)")
+    ap.add_argument("--clips", metavar="FOLDER", help="build one set from a folder of the app's .clip.json files "
+                    "(clip.import_batch) instead of the registry")
+    ap.add_argument("--name", default="myclips", help="the set's name with --clips (default myclips)")
+    ap.add_argument("--commercial", action="store_true", help="with --clips: the clips are yours to train the shipped "
+                    "model on (default: a non-commercial set, read with --noncommercial)")
     args = ap.parse_args(argv)
+    if args.clips:
+        build(clips_set(args.name, pathlib.Path(args.clips).resolve(), commercial=args.commercial), limit=args.limit)
+        return
     for n in args.names:
         try:
             build(n, limit=args.limit)

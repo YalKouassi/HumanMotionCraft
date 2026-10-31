@@ -4,9 +4,12 @@
 //! confirm it unpacked the version it chose, and rolls the install back when it is missing. The
 //! version comes from Cargo.toml (`CARGO_PKG_VERSION`), so it always matches the release tag.
 //!
-//! On every other target this does nothing. A missing resource compiler is a warning, so a
-//! cross-compile from macOS or Linux still links, unless `HUMANMOTIONCRAFT_REQUIRE_WINRES=1` (set
-//! by the release workflow) turns it into an error.
+//! On every other target this does nothing. The test reads `CARGO_CFG_TARGET_OS` (the target) at
+//! run time, not `cfg(windows)` (the host), so a cross-compile to Windows from macOS or Linux
+//! still embeds the resource, and `winresource` is a plain build dependency so that the script
+//! compiles on every host. A missing resource compiler is a warning, so such a cross-compile
+//! still links, unless `HUMANMOTIONCRAFT_REQUIRE_WINRES=1` (set by the release workflow) turns it
+//! into an error.
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");

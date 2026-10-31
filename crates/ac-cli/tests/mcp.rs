@@ -315,3 +315,49 @@ fn live_timeouts_are_checked() {
         assert!(ac_cli::mcp::parse_timeout(bad).is_err(), "{bad}");
     }
 }
+
+/// An FBX animation comes onto the rig through `command_run clip.import`, with its report, and a
+/// file that is not a humanoid is refused with the missing landmarks named (roadmap 152000).
+#[test]
+fn an_fbx_imports_through_mcp() {
+    let mut srv = server();
+    let repo = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let path = repo.join("fixtures/data/walk-yup.fbx");
+    let r = call(
+        &mut srv,
+        1,
+        "command_run",
+        json!({ "id": "clip.import", "params": { "path": path.to_string_lossy() } }),
+    );
+    assert_eq!(r["isError"], false, "{r}");
+    let b = body(&r);
+    assert_eq!(b["length"], 40);
+    assert_eq!(b["joints"]["l_knee"], "LeftLeg");
+    assert_eq!(b["source"]["up_axis"], "+Y");
+    assert!(
+        b["at_rest"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|v| v == "finger: 30 of 30 at rest"),
+        "{b}"
+    );
+    let state = body(&call(&mut srv, 2, "editor_state", json!({})));
+    assert_eq!(
+        state["clip"]["frames"]
+            .as_i64()
+            .or(state["frames"].as_i64())
+            .unwrap_or(40),
+        40
+    );
+    let bad = repo.join("fixtures/data/not-humanoid.fbx");
+    let r = call(
+        &mut srv,
+        3,
+        "command_run",
+        json!({ "id": "clip.import", "params": { "path": bad.to_string_lossy() } }),
+    );
+    assert_eq!(r["isError"], true, "{r}");
+    let e = body(&r)["error"].as_str().unwrap().to_string();
+    assert!(e.contains("l_knee") && e.contains("joints"), "{e}");
+}

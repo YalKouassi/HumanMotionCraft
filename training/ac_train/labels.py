@@ -21,7 +21,9 @@ The styles a model learns (:func:`vocabulary`) are the labels with at least ``mi
 training frames, "any" first and the rest in name order. A rarer label teaches the network noise:
 it is left out and said so. The model card lists the styles, which is all the app offers.
 
-``python -m ac_train.labels [set ...]`` prints the labels and their minutes without training.
+``python -m ac_train.labels [set ...]`` prints the labels and their minutes without training;
+with a take filter (:mod:`ac_train.selection`: ``--natural``, ``--types``, ``--styles``,
+``--takes``) it prints what that filter's run would learn.
 """
 
 from __future__ import annotations
@@ -180,29 +182,28 @@ def mirror_matrix(styles: list[str]) -> np.ndarray:
 
 
 def main(argv=None):
-    from . import review
+    from . import review, selection
     from .quality import RIG
 
     ap = argparse.ArgumentParser(description="The labels in the training data and the styles a model would learn")
     ap.add_argument("sets", nargs="*", help="sets (default: every data/rig/*.npz)")
     ap.add_argument("--decisions", default=str(review.DECISIONS))
     ap.add_argument("--min-minutes", type=float, default=MIN_MINUTES)
+    selection.add_arguments(ap)
     args = ap.parse_args(argv)
     decisions = review.load_decisions(pathlib.Path(args.decisions))
+    select = selection.from_args(args)
     frames: Counter = Counter()
     takes: Counter = Counter()
-    for n in args.sets or sorted(p.stem for p in RIG.glob("*.npz")):
-        d = np.load(RIG / f"{n}.npz")
-        plan = review.plan_set(n, len(d["roots"]), d["starts"], d["takes"], decisions, npz=d)
-        names = d["labels"] if "labels" in d.files else d["takes"]
-        for t, lab in zip(plan.takes, names):
-            if t.drop:
-                continue
-            used = t.frames - int(t.bad().sum())
-            for w in of(n, t.name, str(lab), t.kind, t.tags):
-                frames[w] += used
-                takes[w] += 1
+    names = args.sets or sorted(p.stem for p in RIG.glob("*.npz"))
+    for rec in selection.plan_sets(names, decisions, select):
+        if not rec.kept:
+            continue
+        for w in of(rec.set, rec.take, rec.label, rec.kind, rec.tags):
+            frames[w] += rec.used
+            takes[w] += 1
     styles, rare = vocabulary(frames, args.min_minutes)
+    print(f"takes: {select.describe()}")
     print(f"{len(styles) - 1} styles with {args.min_minutes:g}+ minutes (all takes, before the 5 % held out):")
     for w in styles[1:]:
         print(f"  {w:24s} {frames[w] / FPS / 60:8.1f} min  {takes[w]:5d} takes")

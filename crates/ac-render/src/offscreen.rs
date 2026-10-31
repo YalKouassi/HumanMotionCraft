@@ -227,6 +227,7 @@ impl Offscreen {
         let body = Body {
             joints: &joints,
             tint: [0.72, 0.74, 0.78, 1.0],
+            mesh: 0,
         };
         self.renderer
             .render(&self.device, &self.queue, w, h, camera, &[body])?;

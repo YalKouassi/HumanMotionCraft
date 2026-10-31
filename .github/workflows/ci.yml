@@ -1,5 +1,5 @@
 # The pre-commit gate (`cargo xtask check`, AGENTS.md "Test what you changed") on every push and
-# pull request, plus the training checks.
+# pull request, a compile of the workspace on Linux, plus the training checks.
 #
 # Windows first: the visual goldens in tests/visual/ were blessed on Windows' software adapter
 # (WARP), which GitHub's Windows runners have. A runner on another Windows build can rasterise a
@@ -80,6 +80,39 @@ jobs:
           name: visual-diff
           path: target/visual-diff/
           if-no-files-found: ignore
+
+  # Linux compiles the whole workspace (roadmap 120400, GitHub issue #1: the app's build script
+  # once failed to compile on any non-Windows host, and only Windows built it here). It only
+  # compiles: the visual goldens are WARP renders, so the tests and fixtures stay on Windows. The
+  # runner's own C compiler is all it needs (`ring`, `wayland-backend`); every windowing library
+  # (Wayland, X11, xkbcommon, EGL) is loaded at run time, so no -dev packages are installed.
+  linux:
+    name: check (Linux)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      CRAFT_LIBS_TOKEN: ${{ secrets.CRAFT_LIBS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: private git dependencies
+        if: ${{ env.CRAFT_LIBS_TOKEN != '' }}
+        shell: bash
+        run: git config --global url."https://x-access-token:${CRAFT_LIBS_TOKEN}@github.com/storytold/".insteadOf "https://github.com/storytold/"
+
+      - name: system packages (a C compiler; README "Build on Linux")
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
+      - name: check
+        run: cargo check --workspace --all-targets --locked
 
   training:
     name: training (ruff, pytest)

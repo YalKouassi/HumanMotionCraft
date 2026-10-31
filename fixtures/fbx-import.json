@@ -1,0 +1,405 @@
+{
+  "$schema": "./schema.json",
+  "name": "fbx-import",
+  "feature": "clip.import",
+  "description": "A humanoid FBX animation comes onto the rig through clip.import (roadmap 152000). The test files are written by python -m ac_train.fbxwrite from the built-in Walk 12 (its first 40 frames) and Side step 9 (30 frames), each joint placed by the rig's own forward kinematics, so every expected position is the source clip's own joint position: fixtures/data/walk-yup.fbx is Y up in centimetres under a plain Reference node, walk-zup.fbx is Z up in metres with uncompressed arrays, walk-yup-75.fbx is version 7.5 (64-bit records); the files were checked against an outside importer to 1e-5 m. The joints are guessed from their names (LeftUpLeg is l_hip, LeftLeg the knee under it, LeftArm the upper arm and LeftShoulder the clavicle, LHipJoint, the Roll and Twist joints, LeftToe_End, HeadTop_End, LeftHandThumb1 and Prop_Sword have no landmark), fingers (30 bones) stay at rest and the result says so. The floor was 0.0022908 m above z = 0 (pinned: the Python retarget's golden, crates/ac-core/tests/golden/retarget-walk.json) and is moved there, so the root on frame 0 lands at the golden's root offset times the hip height plus the rest head, (0, -0.0098, 0.8664), and on frame 39 at (-0.0039, -1.0802, 0.8698): the walk travels -Y, 1.07 m. The ankles are reached exactly by the two-bone solve, so foot.L on frame 0 is the source's left ankle (0.1302, -0.2186, 0.0962) and foot.R its right one (-0.1142, 0.2532, 0.1164), the left foot at +X: left is the rig's left. The Y-up and Z-up files and the 7.5 one give the same root on frame 39. The side step's root goes from the source's hips on frame 0, (0, -0.0108, 0.8589), to (0.3009, -0.1654, 0.8832) on frame 29: 0.30 m to the rig's left (tolerance 0.02: its own floor is a few millimetres off). A correction (joints) is used and said (given). clip.import_batch writes a .clip.json per file into a folder, lists the non-humanoid file under failed, and the written clip opens again with its 40 frames. Physics is off for the position checks (physics.set after each import: the pass moves the root to plant the feet; this checks the keys). Tolerance 0.01 m on positions (the per-side hip joints land within 6 mm, the pelvis's tilt being estimated); the source's own hips are matched to 1e-4 at their midpoint. Refused: the non-humanoid file (names the missing landmarks), a missing file, a correction naming a joint the file lacks, a correction that is not a landmark, a batch from a folder that is not there and from one with no .fbx in it.",
+  "script": [
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-yup.fbx"
+      },
+      "expect": {
+        "length": 40,
+        "fps": 30,
+        "frames": 40,
+        "floor": 0.0022908,
+        "hips": {
+          "mid": 0.0
+        },
+        "joints": {
+          "hips": "Hips",
+          "spine": "Spine",
+          "neck": "Neck",
+          "head": "Head",
+          "l_shoulder": "LeftArm",
+          "l_elbow": "LeftForeArm",
+          "l_wrist": "LeftHand",
+          "l_hip": "LeftUpLeg",
+          "l_knee": "LeftLeg",
+          "l_ankle": "LeftFoot",
+          "l_toe": "LeftToeBase",
+          "r_shoulder": "RightArm",
+          "r_elbow": "RightForeArm",
+          "r_wrist": "RightHand",
+          "r_hip": "RightUpLeg",
+          "r_knee": "RightLeg",
+          "r_ankle": "RightFoot",
+          "r_toe": "RightToeBase"
+        },
+        "given": [],
+        "unused": {
+          "$contains": [
+            "Reference",
+            "LHipJoint",
+            "LeftArmRoll",
+            "LeftShoulderTwist",
+            "LeftShoulder",
+            "LeftToe_End",
+            "HeadTop_End",
+            "LeftHandThumb1",
+            "Prop_Sword"
+          ]
+        },
+        "at_rest": {
+          "$contains": [
+            "finger: 30 of 30 at rest"
+          ]
+        },
+        "source": {
+          "version": 7400,
+          "up_axis": "+Y",
+          "front_axis": "+Z",
+          "unit_scale": 1,
+          "fps_from": "TimeMode",
+          "take": "Take 001",
+          "joints": 44,
+          "frames": 40,
+          "dropped": 0
+        }
+      },
+      "tolerance": 0.0001
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.0,
+          -0.0098,
+          0.8664
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.L"
+      },
+      "expect": {
+        "position": [
+          0.1302,
+          -0.2186,
+          0.0962
+        ]
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "foot.R"
+      },
+      "expect": {
+        "position": [
+          -0.1142,
+          0.2532,
+          0.1164
+        ]
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 39
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          -0.0039,
+          -1.0802,
+          0.8698
+        ]
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-zup.fbx"
+      },
+      "expect": {
+        "length": 40,
+        "source": {
+          "version": 7400,
+          "up_axis": "+Z",
+          "front_axis": "-Y",
+          "unit_scale": 100
+        }
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 39
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          -0.0039,
+          -1.0802,
+          0.8698
+        ]
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-yup-75.fbx"
+      },
+      "expect": {
+        "length": 40,
+        "source": {
+          "version": 7500,
+          "up_axis": "+Y"
+        }
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 39
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          -0.0039,
+          -1.0802,
+          0.8698
+        ]
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/sidestep-left.fbx"
+      },
+      "expect": {
+        "length": 30
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.0,
+          -0.0108,
+          0.8589
+        ]
+      },
+      "tolerance": 0.02
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 29
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.3009,
+          -0.1654,
+          0.8832
+        ]
+      },
+      "tolerance": 0.02
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-yup.fbx",
+        "joints": {
+          "l_toe": "LeftToe_End"
+        }
+      },
+      "expect": {
+        "length": 40,
+        "joints": {
+          "l_toe": "LeftToe_End"
+        },
+        "given": [
+          "l_toe"
+        ]
+      }
+    },
+    {
+      "command": "clip.import_batch",
+      "params": {
+        "from": "{assets}/../fixtures/data",
+        "to": "{tmp}/clips"
+      },
+      "expect": {
+        "files": {
+          "$contains": [
+            {
+              "file": "sidestep-left.fbx",
+              "frames": 30,
+              "fps": 30
+            },
+            {
+              "file": "walk-yup.fbx",
+              "frames": 40
+            },
+            {
+              "file": "walk-zup.fbx",
+              "frames": 40
+            },
+            {
+              "file": "walk-yup-75.fbx",
+              "frames": 40
+            }
+          ]
+        },
+        "failed": [
+          {
+            "file": "not-humanoid.fbx"
+          }
+        ]
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{tmp}/clips/walk-zup.clip.json"
+      },
+      "expect": {
+        "length": 40
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 39
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          -0.0039,
+          -1.0802,
+          0.8698
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 0.01
+  },
+  "errors": [
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/not-humanoid.fbx"
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{tmp}/missing.fbx"
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-yup.fbx",
+        "joints": {
+          "l_knee": "NoSuchJoint"
+        }
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-yup.fbx",
+        "joints": {
+          "elbow": "LeftForeArm"
+        }
+      }
+    },
+    {
+      "command": "clip.import_batch",
+      "params": {
+        "from": "{tmp}/nowhere",
+        "to": "{tmp}/out"
+      }
+    },
+    {
+      "command": "clip.import_batch",
+      "params": {
+        "from": "{assets}/rig",
+        "to": "{tmp}/out"
+      }
+    }
+  ],
+  "views": [
+    "front",
+    "side"
+  ]
+}

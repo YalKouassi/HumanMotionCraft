@@ -52,3 +52,12 @@ Built with Meta Llama 3. Kimodo's text encoder (LLM2Vec by McGill NLP, on Meta L
 Instruct) is downloaded by the setup under the Meta Llama 3 Community License
 (https://www.llama.com/llama3/license/), Copyright (C) Meta Platforms, Inc. All Rights Reserved.
 No part of it is distributed with HumanMotionCraft.
+
+Pose fill (optional, installed separately from the app's Pose fill panel or by
+tools/posefill/setup_posefill.py): the pose-to-pose motion engine MotionBricks by NVIDIA
+(https://github.com/NVlabs/motionbricks), code under the Apache License, Version 2.0; its SOMA
+motion model "Licensed by NVIDIA Corporation under the NVIDIA Open Model Agreement"
+(https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-open-model-agreement/). The
+install downloads the model, TensorRT, Warp and OpenUSD; no part of them is distributed with
+HumanMotionCraft, and the engine's evaluation-only sample clips are never installed or used. The
+Python in tools/posefill is under the Apache License, Version 2.0 (tools/posefill/LICENSE-APACHE).

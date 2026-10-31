@@ -34,20 +34,32 @@ def test_weights_round_trip(tmp_path):
 
 def test_committed_model_matches_the_golden():
     tensors, card = read_weights(MODEL)
-    net = Inbetweener(styles=len(card.get("styles", [])), given=bool(card.get("given")))
+    net = Inbetweener(styles=len(card.get("styles", [])), given=bool(card.get("given")),
+                      contacts=bool(card.get("contacts")), path=bool(card.get("path")),
+                      context_after=int(card.get("context_after", 0)), multi_key=bool(card.get("multi_key", False)))
     net.load_state_dict({k: torch.from_numpy(v.copy()) for k, v in tensors.items()})
     net.eval()
     g = json.loads(GOLDEN.read_text(encoding="utf-8"))
     T = g["T"]
     f = lambda k: torch.tensor([g[k]], dtype=torch.float32)  # noqa: E731
     mask = torch.tensor(g["mask"], dtype=torch.float32).reshape(1, T, 1)
-    ttg = torch.tensor(g["ttg"], dtype=torch.float32).reshape(1, T, 1)
+    # one value a frame, or two on a multi_key model (to the next known frame, from the last)
+    ttg = torch.tensor(g["ttg"], dtype=torch.float32).reshape(1, T, -1)
     style = torch.tensor([g["style"]]) if g["style"] is not None else None
     gmask = None
     if card.get("given"):
         gmask = torch.zeros(1, len(BONES))
         gmask[0, g["given"]] = 1
+    # a model with the root path is given the golden's path on the gap frames, as the export was
+    assert bool(card.get("path")) == ("path" in g), "the golden and the card disagree on the root path"
+    path = f("path") if card.get("path") else None
+    pmask = torch.tensor(g["pmask"], dtype=torch.float32).reshape(1, T, 1) if card.get("path") else None
     with torch.no_grad():
-        y = net(f("known"), f("interp"), mask, ttg, style, gmask)
+        y, contacts = net(f("known"), f("interp"), mask, ttg, style, gmask, with_contacts=True, path=path, pmask=pmask)
     worst = float((y[0] - torch.tensor(g["out"])).abs().max())
     assert worst < 1e-4, f"the committed weights give {worst:.2e} off the golden"
+    # a model with the contact head pins its foot contacts too
+    assert (contacts is not None) == ("contacts" in g), "the golden and the card disagree on foot contacts"
+    if contacts is not None:
+        worst = float((contacts[0] - torch.tensor(g["contacts"])).abs().max())
+        assert worst < 1e-4, f"the committed weights give contacts {worst:.2e} off the golden"

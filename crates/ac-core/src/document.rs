@@ -25,6 +25,17 @@ impl Pose {
     }
 }
 
+/// A project file the document came from or was last saved to (`ac-io`'s `project.*` commands
+/// keep it): its path and what the file holds, so [`Document::unsaved`] compares a project
+/// document with its file, not with the library. The format itself is `ac-io`'s business.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ProjectFile {
+    pub path: std::path::PathBuf,
+    pub clip: Clip,
+    pub links: BTreeMap<String, Clip>,
+    pub ai_settings: crate::ai::FillSettings,
+}
+
 /// A copied pose: the pose and the bones it covers (`None`: all).
 #[derive(Debug, Clone, PartialEq)]
 pub struct Clipboard {
@@ -61,6 +72,9 @@ pub struct Document {
     pub physics_cache: Option<Arc<PhysicsCache>>,
     /// The learned in-betweener the front end loaded (`None`: AI fill is unavailable).
     pub ai: Option<Arc<dyn crate::ai::Inbetweener>>,
+    /// Where poses can be borrowed from (the front end's library; `None`: nowhere), for the
+    /// anchor poses of a long AI fill.
+    pub pose_source: Option<Arc<dyn crate::posesource::PoseSource>>,
     /// The settings AI fills run with.
     pub ai_settings: crate::ai::FillSettings,
     /// A fill shown but not kept yet (`ai.preview`); stale once the clip changes.
@@ -76,6 +90,11 @@ pub struct Document {
     /// clip has unsaved changes when it differs from its entry. The files are outside the undo
     /// history, so the session carries this across undo, redo and refused commands.
     pub saved: BTreeMap<String, Arc<Clip>>,
+    /// The project file this document is (`None`: a library animation, or never saved).
+    pub project: Option<Arc<ProjectFile>>,
+    /// A character of the person's own and the mapping onto it (`retarget.load`), for the
+    /// export onto it and the preview beside the mannequin. Not saved in a project file.
+    pub character: Option<Arc<crate::character::Loaded>>,
 }
 
 /// Height (m) of the lowest joint above the floor when standing: the toe joints sit inside the foot.
@@ -120,12 +139,15 @@ impl Document {
             ranges: None,
             physics_cache: None,
             ai: None,
+            pose_source: None,
             ai_settings: crate::ai::FillSettings::default(),
             ai_preview: None,
             ai_precomputed: None,
             clip_id: None,
             links: BTreeMap::new(),
             saved: BTreeMap::new(),
+            project: None,
+            character: None,
         }
     }
 
@@ -136,9 +158,12 @@ impl Document {
         }
     }
 
-    /// The open clip has changes the library doesn't hold. Never saved: any keys or layers
-    /// count as work to keep.
+    /// The open clip has changes the library doesn't hold (a project document: changes its file
+    /// doesn't hold). Never saved: any keys or layers count as work to keep.
     pub fn unsaved(&self) -> bool {
+        if let Some(p) = &self.project {
+            return self.clip != p.clip || self.links != p.links || self.ai_settings != p.ai_settings;
+        }
         match &self.clip_id {
             Some(id) => self.saved.get(id).is_none_or(|c| **c != self.clip),
             None => self.clip.layers.len() > 1 || self.clip.layers.iter().any(|l| !l.keys.is_empty()),
@@ -172,6 +197,7 @@ impl PartialEq for Document {
             && self.key_clipboard == other.key_clipboard
             && self.clip_id == other.clip_id
             && self.links == other.links
+            && self.character == other.character
     }
 }
 

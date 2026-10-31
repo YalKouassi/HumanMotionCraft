@@ -479,6 +479,11 @@ fn limits(
     per
 }
 
+/// Joints whose change of speed at a key is within this (m/s) of each other tie, and the first in
+/// rig order (the root first) is the one named: when the whole body jumps, every joint's number is
+/// the same but for rounding (a planted foot's IK moves it by nanometres), and "root" says so.
+pub const POP_TIE: f64 = 1e-6;
+
 fn pops(doc: &Document, frames: &[Frame], lo: i64, a: i64, b: i64, fps: f64) -> Vec<Pop> {
     let mut keyed: Vec<i64> = doc
         .clip
@@ -501,7 +506,7 @@ fn pops(doc: &Document, frames: &[Frame], lo: i64, a: i64, b: i64, fps: f64) -> 
                 let v0 = quat::scale3(quat::sub3(*x1, *x0), fps);
                 let v1 = quat::scale3(quat::sub3(*x2, *x1), fps);
                 let dv = quat::len3(quat::sub3(v1, v0));
-                if best.is_none_or(|(d, _)| dv > d + 1e-12) {
+                if best.is_none_or(|(d, _)| dv > d + POP_TIE) {
                     best = Some((dv, j));
                 }
             }
@@ -513,6 +518,31 @@ fn pops(doc: &Document, frames: &[Frame], lo: i64, a: i64, b: i64, fps: f64) -> 
             })
         })
         .collect()
+}
+
+/// The largest change of any bone's spin across a frame (rad/s), and the bone: each bone's angular
+/// velocity is its local rotation from the frame before (`prev` to `at`) and to the frame after
+/// (`at` to `next`), as rotation vectors times `fps`; the change is the length of their
+/// difference, so a spin that reverses counts as much as one that stops. `None`: the poses
+/// don't match in size.
+pub fn spin_change(prev: &[Quat], at: &[Quat], next: &[Quat], fps: f64) -> Option<(f64, usize)> {
+    if prev.len() != at.len() || next.len() != at.len() {
+        return None;
+    }
+    let omega = |from: Quat, to: Quat| {
+        quat::scale3(
+            quat::log(quat::align(quat::mul(quat::conj(from), to), quat::IDENTITY)),
+            2.0 * fps,
+        )
+    };
+    let mut best: Option<(f64, usize)> = None;
+    for (i, ((p, q), n)) in prev.iter().zip(at).zip(next).enumerate() {
+        let dw = quat::len3(quat::sub3(omega(*q, *n), omega(*p, *q)));
+        if best.is_none_or(|(d, _)| dw > d + 1e-12) {
+            best = Some((dw, i));
+        }
+    }
+    best
 }
 
 /// The joints a person sees as the body: a finger or an eye only moves with what it hangs from.

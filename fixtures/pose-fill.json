@@ -1,0 +1,110 @@
+{
+  "$schema": "./schema.json",
+  "name": "pose-fill",
+  "feature": "posefill.fill",
+  "description": "A pose fill, with the fixtures' stand-in engine in place of the optional helper (ac_posefill::stand_in): it holds key A's pose and moves the root in a straight line from key A's root to key B's, so the numbers can be worked out by hand. posefill.helper reports the stand-in, loaded, its plan built. Keys of yours stand at frame 0 (root offset z 0.9450101) and frame 30 (z 1.9450101). posefill.fill with the playhead on 12 fills the gap 0-30 in one call: 29 AI keys tagged \"posefill\", and frame 15 is halfway, z = (0.9450101 + 1.9450101) / 2 = 1.4450101; key 0 has no frames before it, so the result says the first context pose was repeated to make the model's 4. One undo step takes every AI key away (keys 0 and 30 stay) and redo brings them back. A key of yours on 60 (z 2.9450101) makes a 60-frame stretch 0-60, over the model's 58 frames in one call, so from 0 to 60 chains two calls through the key on 30 (58 AI keys): frame 45 is halfway along the second, z = (1.9450101 + 2.9450101) / 2 = 2.4450101. Raising the key on 60 to z 3.0 leaves the fill 30-60 as it was and says so, naming posefill.fill. Keys of yours on 62 and 200 are for the refusals: 60-62 (2 frames, under the model's 18) and 62-200 (138 frames, over its 58, with no key inside to aim for) are refused with the limits, from 30 to 200 is refused at the short gap 60-62 before anything is made, from without to, to before from, and frames that are not keys of yours (0 and 5) are refused, as is a target root the stand-in answers with numbers that are not finite ([9, 9, 9] on frame 230, gap 200-230) or one frame short ([8, 8, 8] on frame 260, gap 230-260). posefill.helper's unknown action fly and posefill.install's start (the stand-in installs nothing) are refused too. Every refusal leaves the animation as it was.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    {
+      "command": "posefill.helper",
+      "params": {},
+      "expect": { "running": true, "loaded": true, "busy": false, "model": "stand-in", "plan": "built" }
+    },
+    {
+      "command": "posefill.install",
+      "params": {},
+      "expect": { "state": "installed" }
+    },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 30 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.9450101] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 12 } },
+    {
+      "command": "posefill.fill",
+      "params": {},
+      "expect": {
+        "from": 0,
+        "to": 30,
+        "frames": 29,
+        "model": "posefill",
+        "calls": 1,
+        "notes": [
+          "key 0 has fewer than 3 frames before it: the first context pose was repeated to make the model's 4",
+          "made by the fixtures' stand-in, not the model"
+        ]
+      }
+    },
+    {
+      "command": "clip.sample",
+      "params": { "from": 15, "to": 15 },
+      "expect": { "roots": [[0, 0, 1.4450101]] }
+    },
+    { "command": "edit.undo", "params": {} },
+    {
+      "command": "editor.state",
+      "params": {},
+      "expect": { "keys": [{ "frame": 0, "source": "manual" }, { "frame": 30, "source": "manual" }] }
+    },
+    { "command": "edit.redo", "params": {} },
+    {
+      "command": "clip.sample",
+      "params": { "from": 1, "to": 1 },
+      "expect": { "roots": [[0, 0, 0.9783434]] }
+    },
+    { "command": "frame.set", "params": { "frame": 60 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 2.9450101] } },
+    { "command": "key.set", "params": {} },
+    {
+      "command": "posefill.fill",
+      "params": { "from": 0, "to": 60 },
+      "expect": { "from": 0, "to": 60, "frames": 58, "model": "posefill", "calls": 2 }
+    },
+    {
+      "command": "clip.sample",
+      "params": { "from": 15, "to": 45, "step": 30 },
+      "expect": { "roots": [[0, 0, 1.4450101], [0, 0, 2.4450101]] }
+    },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 3.0] } },
+    {
+      "command": "key.set",
+      "params": {},
+      "expect": {
+        "frame": 60,
+        "notes": [
+          "30-60: the motion made from poses was left as it was; make it again (posefill.fill) to meet the changed key"
+        ]
+      }
+    },
+    {
+      "command": "clip.sample",
+      "params": { "from": 45, "to": 45 },
+      "expect": { "roots": [[0, 0, 2.4450101]] }
+    },
+    { "command": "frame.set", "params": { "frame": 62 } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 200 } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 230 } },
+    { "command": "pose.set_root", "params": { "root": [9, 9, 9] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 260 } },
+    { "command": "pose.set_root", "params": { "root": [8, 8, 8] } },
+    { "command": "key.set", "params": {} },
+    { "command": "frame.set", "params": { "frame": 12 } }
+  ],
+  "errors": [
+    { "command": "posefill.fill", "params": { "from": 60, "to": 62 } },
+    { "command": "posefill.fill", "params": { "from": 62, "to": 200 } },
+    { "command": "posefill.fill", "params": { "from": 30, "to": 200 } },
+    { "command": "posefill.fill", "params": { "from": 0 } },
+    { "command": "posefill.fill", "params": { "from": 30, "to": 0 } },
+    { "command": "posefill.fill", "params": { "from": 0, "to": 5 } },
+    { "command": "posefill.fill", "params": { "from": 200, "to": 230 } },
+    { "command": "posefill.fill", "params": { "from": 230, "to": 260 } },
+    { "command": "posefill.helper", "params": { "action": "fly" } },
+    { "command": "posefill.install", "params": { "action": "start" } },
+    { "command": "posefill.install", "params": { "action": "stop" } }
+  ]
+}

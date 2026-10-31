@@ -14,7 +14,10 @@ takes have (:mod:`ac_train.labels`: each take's motion type and style words, wit
 ``type`` and ``tags``) that have at least ``--min-style-minutes`` of motion. What each take gives is
 ``review.py``'s plan: the quality scan's cuts and rejections, with the review's decisions
 (``training/review/decisions.json``) over them; no window touches a cut. Every set must be scanned
-first (``python -m ac_train.quality``), unless ``--unscanned``.
+first (``python -m ac_train.quality``), unless ``--unscanned``. Which takes are read is
+:mod:`ac_train.selection`'s (``--types``, ``--styles``, ``--natural``, ``--takes <json>``); the
+minutes that survive, by type and set, are printed before the first step, and ``--dry-run`` stops
+there.
 
 What a training window looks like, to match what the app sends:
 
@@ -27,6 +30,13 @@ What a training window looks like, to match what the app sends:
 - **root path** (141000): half the windows get the recorded root path across the gap, some of
   them smoothed (the app sends the keys' spline, rounder than a recording); the rest get none, so
   a fill without a path still works;
+- **context after key B** (``--context-after N``, roadmap 140000): N of the context frames come
+  after key B instead of before key A, the window no longer; a share of the batches
+  (:data:`AFTER_END`) get fewer of them, as a clip that ends soon after B gives, and the frames
+  before A make up the number;
+- **several keys** (``--multi-key``, roadmap 142000): a share of the windows (:data:`MULTI`) also
+  know a few frames inside the gap, as two or three neighbouring gaps filled in one pass; the
+  time channel is then two wide (to the next known frame, from the last) for every window;
 - **augmentation**: mirrored left/right; tumbled (the whole body turned over the window) only for
   motion where a spinning root happens (acrobatic, fall, ground); a mild speed change (0.8 to 1.25
   times) except for jumps, flips and falls, since gravity doesn't scale.
@@ -50,7 +60,7 @@ from collections import Counter
 import numpy as np
 import torch
 
-from . import MODELS, context, evaluate, labels, losses, review, split
+from . import MODELS, context, evaluate, labels, losses, review, selection, split
 from .datasets import REGISTRY, RIG
 from .kinematics import Body
 from .model import (
@@ -62,6 +72,9 @@ from .model import (
     canonical,
     features,
     interpolate,
+    interpolate_known,
+    known_times,
+    layout,
     mat_to_quat,
     quat_to_mat,
     slerp,
@@ -85,13 +98,20 @@ WARP = (0.8, 1.25)
 GIVEN = (0.5, 0.6)
 #: share of windows given the root path, and the smoothing widths (frames) it is drawn with
 PATH_GIVEN = (0.5, (1, 1, 5, 9, 15))
+#: with context after key B: share of the batches whose clip ends before all of it (fewer frames
+#: after B, drawn 0 to N-1, the rest before A: the window the app builds at a clip's end)
+AFTER_END = 0.2
+#: with --multi-key: share of the windows with known frames inside the gap, and at most how many
+MULTI = (0.5, 3)
 
 
 class Sets:
     """All frames of the chosen sets on the device, where a window may start, and each take's
-    labels. :meth:`learn` then gives the takes their style weights over a list of styles."""
+    labels. :meth:`learn` then gives the takes their style weights over a list of styles.
+    ``select`` (:class:`ac_train.selection.Selection`) says which takes are read; :attr:`records`
+    lists every take of the sets, kept or not, with the reason."""
 
-    def __init__(self, names, device, val=False, decisions=None, scanned=True):
+    def __init__(self, names, device, val=False, decisions=None, scanned=True, select=None):
         from .rig import Skeleton
 
         bones = list(Skeleton.load().names)
@@ -106,6 +126,7 @@ class Sets:
         self.plans: list[review.Plan] = []
         #: per set, the groups (subjects, sessions) validation holds out
         self.held: dict[str, list[str]] = {}
+        self.records: list[selection.Record] = []
         offset = 0
         for n in names:
             path = RIG / f"{n}.npz"
@@ -114,27 +135,28 @@ class Sets:
                 continue
             d = np.load(path)
             rot, root, starts, takes = d["rotations"][:, idx].astype(np.float32), d["roots"], d["starts"], d["takes"]
-            own = d["labels"] if "labels" in d.files else takes
-            plan = review.plan_set(n, len(rot), starts, takes, decisions, scanned, npz=d)
+            plan, recs = selection.records(n, d, decisions, select, scanned)
             self.plans.append(plan)
+            self.records += recs
             self.held.update(split.holdout({n: [str(t) for t in takes]}))
-            for s, take, own_label, t in zip(starts, takes, own, plan.takes):
-                held = split.held_out(n, str(take))
+            for s, rec, t in zip(starts, recs, plan.takes):
                 e = s + t.frames
                 fine = review.starts(t, WINDOW)  # none for a take left out or too short
-                if held != val or not len(fine):
+                if rec.held != val or not rec.kept or not len(fine):
                     continue
                 q.append(rot[s:e])
                 r.append(root[s:e])
-                words = labels.of(n, str(take), str(own_label), t.kind, t.tags)
+                words = labels.of(n, rec.take, rec.label, t.kind, t.tags)
                 for w in words:
-                    self.label_frames[w] += t.frames - int(t.bad().sum())
+                    self.label_frames[w] += rec.used
                 tk.append(np.full(e - s, len(self.labels), dtype=np.int64))
                 self.labels.append(words)
-                self.types.append(labels.type_of(str(take), t.kind))
+                self.types.append(rec.type)
                 ok.append(offset + fine)
                 offset += e - s
             self.used.append(n)
+        if select is not None and (select.include or select.exclude):
+            selection.check_listed(select, self.records, self.used)
         if not q:
             raise ValueError("no takes: " + ("nothing is held out for validation" if val else "every take is held out or left out"))
         self.q = torch.tensor(np.concatenate(q), device=device)
@@ -267,21 +289,49 @@ def sample_gap(mix=GAP_MIX) -> int:
     return int(torch.randint(lo, hi + 1, (1,)))
 
 
-def prepare(q, root, gap, sub, device):
-    """Canonical window, inputs and truth for a batch of quaternion windows. ``sub``: anything
-    with the rig's ``hip_height``."""
+def prepare(q, root, gap, sub, device, after: int = 0, known=None, multi_key: bool = False):
+    """Canonical window, inputs and truth for a batch of quaternion windows (``CONTEXT + gap + 1``
+    frames each). ``sub``: anything with the rig's ``hip_height``. ``after``: context frames after
+    key B instead of before key A (:func:`ac_train.model.layout`); ``known`` (N, T, 1): frames
+    inside the gap known too (several keys); ``multi_key``: the model's two-wide time channel and
+    the interpolation between neighbouring known frames. The defaults make the window as it
+    always was, bit for bit (``tests/data/prepare-reference.npz``)."""
     N, T = q.shape[:2]
-    a = torch.full((N,), CONTEXT - 1, device=device)
+    ia, ib, _ = layout(gap, after)
+    a = torch.full((N,), ia, device=device)
     b = a + gap + 1
-    rot, pos, _, _ = canonical(quat_to_mat(q), root * sub.hip_height, CONTEXT - 1)
+    rot, pos, _, _ = canonical(quat_to_mat(q), root * sub.hip_height, ia)
     truth = features(rot, pos, sub.hip_height)
-    rot_i, pos_i = interpolate(mat_to_quat(rot), pos, a, b)
-    interp = features(rot_i, pos_i, sub.hip_height)
     mask = torch.zeros(N, T, 1, device=device)
-    mask[:, :CONTEXT] = 1
-    mask[:, -1] = 1
-    ttg, _ = time_to_go(a, b, T, device)
+    mask[:, : ia + 1] = 1
+    mask[:, ib:] = 1
+    if known is not None:
+        mask = torch.maximum(mask, known)
+    if multi_key:
+        rot_i, pos_i = interpolate_known(mat_to_quat(rot), pos, mask)
+        ttg = known_times(mask)
+    else:
+        if known is not None:
+            raise ValueError("known frames inside the gap need a multi-key model (--multi-key)")
+        rot_i, pos_i = interpolate(mat_to_quat(rot), pos, a, b)
+        ttg, _ = time_to_go(a, b, T, device)
+    interp = features(rot_i, pos_i, sub.hip_height)
     return truth, interp, mask, ttg, rot, pos
+
+
+def multi_known(n: int, T: int, a: int, b: int, device, p: float = MULTI[0], most: int = MULTI[1]):
+    """(N, T, 1) frames inside the gap ``a+1 .. b-1`` that a share ``p`` of the windows know too:
+    1 to ``most`` of them at random (never every gap frame), as the keys between two or three
+    neighbouring gaps the app fills in one pass. The other windows know none."""
+    known = torch.zeros(n, T, 1, device=device)
+    g = b - a - 1
+    if g < 2:
+        return known
+    count = torch.randint(1, min(most, g - 1) + 1, (n,), device=device)
+    order = torch.rand(n, g, device=device).argsort(-1)
+    pick = (order < count[:, None]) & (torch.rand(n, 1, device=device) < p)
+    known[:, a + 1 : b, 0] = pick.float()
+    return known
 
 
 def _floats(text: str, n: int, what: str) -> tuple[float, ...]:
@@ -324,7 +374,14 @@ def main(argv=None):
     ap.add_argument("--given", type=float, default=GIVEN[0], help="share of the windows with a part mask")
     ap.add_argument("--loss-weights", default="", help="change loss weights: pos=2,vel=0.5 (" + ", ".join(losses.WEIGHTS) + ")")
     ap.add_argument("--no-contacts", action="store_true", help="no foot-contact head (the network's output as before)")
+    ap.add_argument("--context-after", type=int, default=0, metavar="N",
+                    help=f"of the {CONTEXT} context frames, N come after key B instead of before key A (140000; default 0)")
+    ap.add_argument("--multi-key", action="store_true",
+                    help="train with several known frames in a window, so neighbouring gaps fill in one pass (142000)")
     ap.add_argument("--no-warp", action="store_true", help="no speed change")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="print the sets, the takes read and the minutes that survive by type and set, then stop")
+    selection.add_arguments(ap)
     args = ap.parse_args(argv)
 
     from .rig import Skeleton
@@ -334,6 +391,8 @@ def main(argv=None):
     weights = {**losses.WEIGHTS, **_named(args.loss_weights, losses.WEIGHTS, "--loss-weights")}
     contacts = not args.no_contacts
     warp = None if args.no_warp else WARP
+    if not 0 <= args.context_after < CONTEXT:
+        ap.error(f"--context-after: 0 to {CONTEXT - 1}")
 
     torch.manual_seed(0)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -350,18 +409,26 @@ def main(argv=None):
     print(f"sets: {', '.join(names)}" + ("" if args.noncommercial else " (the free-licence sets; --noncommercial adds non-commercial sets you added)"),
           flush=True)
     skel = Skeleton.load()
-    body = Body(skel, device)
     decisions = review.load_decisions(pathlib.Path(args.decisions))
+    select = selection.from_args(args)
+    print(f"takes: {select.describe()}", flush=True)
     if args.unscanned:
         print("--unscanned: no set's scan is read; every frame of every take is used, glitches and all", flush=True)
-    train = Sets(names, device, decisions=decisions, scanned=not args.unscanned)
+    if args.dry_run:
+        recs = selection.plan_sets(names, decisions, select, not args.unscanned, progress=lambda s: print(s, flush=True))
+        print(selection.table(recs, select), flush=True)
+        print("--dry-run: nothing trained", flush=True)
+        return
+    body = Body(skel, device)
+    train = Sets(names, device, decisions=decisions, scanned=not args.unscanned, select=select)
     for plan in train.plans:
         print(plan.summary(), flush=True)
         for note in plan.notes:
             print(f"  {note}", flush=True)
+    print(selection.table(train.records, select), flush=True)
     validated_on = "held-out subjects"
     try:
-        val = Sets(names, device, val=True, decisions=decisions, scanned=not args.unscanned)
+        val = Sets(names, device, val=True, decisions=decisions, scanned=not args.unscanned, select=select)
     except ValueError:
         if args.steps is None:
             raise SystemExit("no validation takes: these sets hold out no subject (ac_train.split). A real run "
@@ -386,12 +453,13 @@ def main(argv=None):
     tag = args.tag or ("parts-own" if args.noncommercial else "parts")
     out = MODELS / tag
     out.mkdir(parents=True, exist_ok=True)
-    model = Inbetweener(styles=len(styles), given=True, contacts=contacts, path=True).to(device)
+    net_args = dict(styles=len(styles), given=True, contacts=contacts, path=True,
+                    context_after=args.context_after, multi_key=args.multi_key)
+    model = Inbetweener(**net_args).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=3e-4, weight_decay=1e-4)
     t0, step, log = time.time(), 0, []
     best = {"step": None, "score": None}
     total = args.minutes * 60
-    a = CONTEXT - 1
     running: Counter = Counter()
     while time.time() - t0 < total and (args.steps is None or step < args.steps):
         frac = (time.time() - t0) / total
@@ -400,20 +468,24 @@ def main(argv=None):
         for grp in opt.param_groups:
             grp["lr"] = 3e-4 * min(1.0, step / 500) * (0.5 * (1 + np.cos(np.pi * frac)))
         g = sample_gap(gap_mix)
-        b = a + g + 1
+        after = args.context_after
+        if after and float(torch.rand(())) < AFTER_END:
+            after = int(torch.randint(0, after, (1,)))  # the clip ends soon after B
+        a, b, T = layout(g, after)
         q, root, style, take = train.batch(args.batch, g, warp=warp)
         q, root, style = augment(q, root, style, mirror, device, train.tumbles[take])
         style = drop_styles(style)
-        q, root, mode = context.mixed(q, root, a, ctx_mix)
+        q, root, mode = context.mixed(q, root, a, ctx_mix, b=b)
         noisy = (mode != context.MODES.index("clean")) & (torch.rand(len(mode), device=device) < NOISE[0])
         if noisy.any():
             rows = noisy.nonzero().flatten()
-            q[rows], root[rows] = context.noise(q[rows], root[rows], a, NOISE[1], NOISE[2], skel.hip_height)
-        truth, interp, mask, ttg, _, _ = prepare(q, root, g, body, device)
+            q[rows], root[rows] = context.noise(q[rows], root[rows], a, NOISE[1], NOISE[2], skel.hip_height, b=b)
+        known = multi_known(q.shape[0], T, a, b, device) if args.multi_key else None
+        truth, interp, mask, ttg, _, _ = prepare(q, root, g, body, device, after, known, args.multi_key)
         gm = given_mask(q.shape[0], device, p=args.given)
         path, pmask = path_given(truth, mask)
         pred, logits = model(truth, interp, mask, ttg, style, gmask=gm, with_contacts=True, path=path, pmask=pmask)
-        parts = losses.terms(pred, truth, gm, a, b, body, logits)
+        parts = losses.terms(pred, truth, gm, a, b, body, logits, mask)
         loss = losses.total(parts, weights)
         opt.zero_grad(set_to_none=True)
         loss.backward()
@@ -442,7 +514,7 @@ def main(argv=None):
         best = {"step": step, "score": None}
     print(f"evaluating the last step ({step}) and the best ({best['step']}) on {validated_on}", flush=True)
     evaluation = evaluate.run(model, val, body, device, windows=args.eval_windows)
-    best_model = Inbetweener(styles=len(styles), given=True, contacts=contacts, path=True).to(device)
+    best_model = Inbetweener(**net_args).to(device)
     best_model.load_state_dict(torch.load(out / "best.pt", map_location=device, weights_only=True))
     evaluation_best = evaluate.run(best_model, val, body, device, windows=args.eval_windows)
     print(evaluate.report(evaluation), flush=True)
@@ -451,7 +523,8 @@ def main(argv=None):
     commercial = all(REGISTRY[n].commercial for n in train.used)
     card = {
         "tag": tag, "steps": step, "minutes": round((time.time() - t0) / 60, 1), "bones": list(BONES),
-        "context": CONTEXT, "max_gap": MAX_GAP, "styles": styles, "style_frames": style_frames,
+        "context": CONTEXT - args.context_after, "context_after": args.context_after, "max_gap": MAX_GAP,
+        "multi_key": args.multi_key, "styles": styles, "style_frames": style_frames,
         "styles_left_out": rare, "min_style_minutes": args.min_style_minutes,
         "given": True, "contacts": contacts, "path": True,
         "augment": ["mirror 0.5 (side styles swapped)", f"tumble {TUMBLE} ({', '.join(TUMBLE_TYPES)} only)",
@@ -459,6 +532,9 @@ def main(argv=None):
                     f"given parts {args.given} ({GIVEN[1]} of them the complement of a part, as a part layer sends)",
                     f"root path {PATH_GIVEN[0]} (smoothed over {', '.join(map(str, PATH_GIVEN[1]))} frames)",
                     f"context {json.dumps(ctx_mix)}", f"noise on {NOISE[0]} of the spline contexts ({NOISE[1]} deg, {NOISE[2]} m)",
+                    *([f"context after key B {args.context_after} ({AFTER_END} of the batches fewer, the clip ending)"]
+                      if args.context_after else []),
+                    *([f"several keys: {MULTI[0]} of the windows know 1 to {MULTI[1]} gap frames"] if args.multi_key else []),
                     f"gaps by bin {dict(zip((evaluate.bin_name(*x) for x in evaluate.BINS), gap_mix))}",
                     "each style dropped 0.25", "rare motion types up to x3"],
         "loss_weights": weights,
@@ -466,7 +542,9 @@ def main(argv=None):
         "commercial": commercial,
         "warning": "" if commercial else "Trained on non-commercial data: do not ship this model or its output in a commercial product.",
         "data": {"scanned": not args.unscanned, "decisions": len(decisions),
-                 "plans": [p.summary() for p in train.plans]},
+                 "plans": [p.summary() for p in train.plans],
+                 "selection": select.describe(), "takes_kept": sum(r.kept for r in train.records),
+                 "minutes": selection.minutes(train.records)},
         "split": "subjects", "holdout": train.held, "validated_on": validated_on,
         "best": best,
         "metrics": {k: {"model_m": r["model"]["joint_m"], "interp_m": r["interp"]["joint_m"]} for k, r in evaluation["bins"].items()},

@@ -1,6 +1,6 @@
 # Live motion control: drive the character, then clip it
 
-- **Status:** not started; measure targets and speed first (below)
+- **Status:** built, waiting for the owner: the owner plays it with W A S D and a controller. No controller take has been made (2026-10-31)
 - **Requires:** 157000
 - **Source:** owner's idea (2026-10-30)
 
@@ -78,3 +78,102 @@ from what was steered.
   library, then reloaded and played. Contact sheets of the clip.
 - Measured generation time and any dropped frames during those takes are under `## Result`.
 - `cargo xtask check` passes, and the owner plays it and approves.
+
+## Result
+**Built (2026-10-31):** `live.start`, `live.input`, `live.stop`, `live.show`, `live.clip` in
+`crates/ac-posefill` (`live.rs` the take as a pure state machine, `live_commands.rs` the commands, the
+model asked off the UI thread), the Live motion section under Pose fill, W A S D with Shift to run,
+a controller through gilrs on Windows, keeping a range in this animation or as a new one in one undo
+step. `fixtures/live-motion.json` and `crates/ac-posefill/tests/live.rs` pass on the stand-in and a fake.
+
+**Not tested:** no controller take: this needs a person and a controller, so `panels/gamepad.rs` has
+never read a real stick. No person has steered it: the takes below are keys held by a script through
+the control port, so they say nothing about how it feels. Reload was checked by key count, and the
+reloaded clip wasn't played back in the app.
+
+**A real take in the release app** (RTX 3080 Ti, physics off, W held, Shift, A with it, Shift off, all
+off; clipped as a new animation, saved, reopened with its 477 keys):
+`target/shots/2026-10-31/live-motion/app-take-wasd.mp4` (left following, right from above),
+`app-take/stopped-panel.png`.
+- Three takes: a stretch took 50 to 62 ms on average, 80 to 153 ms at most. The last take went over the
+  100 ms limit once, with the machine shared with another session's work. 4 to 6 frames held, 2 to 11
+  late. All 4 to 6 held frames are at the very start, before the first reply.
+- Speed: about 1.2 m/s for 1.3 walking, about 3.5 for 3.6 running. It takes about 2 to 3 s to reach a
+  run after Shift, and about 1.5 s to stop from a walk after the keys come up, and longer from a run.
+- The largest joint jump is 27 degrees in one frame at about 1.3 s, on one upper arm at a seam while
+  standing. It is twist: the wrist moves 1.6 cm that frame. First reply: the wrists move 4.6 cm.
+
+**Found by the real take, fixed:** the take ran 2.4 times too fast on a high refresh monitor (`stable_dt`
+is a prediction unless the last frame asked for a repaint; a take now uses the time really passed);
+after a take the camera stayed where the run ended, with the body out of view, up to 33 m away; in an
+animation with no keys, stopping left the pose where the take ended. The control port gained
+`modifiers` input, which holds Shift across requests as a person does.
+
+So far before this: "Measure first".
+
+**Owner's judgement (2026-10-31):** happy with everything in `target/shots/2026-10-31/`, which includes
+the video below, so the targets pass and the UI may start. The current set stays. 157000 isn't `DONE_`
+yet (training clips and two install checks), but the engine this item uses is approved and built, and
+this item's own gate was this judgement.
+
+**To judge:** `target/shots/2026-10-31/live-motion/live-target-test-old-vs-new.mp4` (three-quarter,
+following the body, physics off, a caption with what the stick is doing). Right is the current set,
+left the first one. Also `live-target-test-side.mp4` (current set, side). The stick: stand, walk from
+1 s, run from 4 s, 90 degrees left at 7 s, straight again at 9 s, walk at 11 s, stop at 13 s. Remake:
+`python tools/posefill/live_drive.py --out <folder>` with the training environment's Python (it
+starts the installed helper). The take is not played live: the script steps as fast as the helper
+answers, so this judges the motion and the timings, not how steering feels.
+
+**Speed** (RTX 3080 Ti, release helper, 30 calls in a 16 s take, 481 frames):
+| | mean | max |
+|---|---|---|
+| round trip through the helper (the 100 ms limit) | 34 ms | 96 ms (the first call; every later call about 30 to 46 ms) |
+| GPU | 6.9 ms | 56 ms (the first call), about 5 ms after |
+| conversion to our rig, for a whole stretch | 11.7 ms (0.36 ms a frame) | 19.5 ms |
+| conversion from our rig, the 4 target poses | about 6 ms | |
+
+No call is over the limit, with our rig driven live, so the simple figure isn't needed. The whole take
+took 1.04 s of helper time against 16 s of motion. Helper load 1.4 s. The first run of the test,
+before the fixes, had a first call of 241 ms: treat a first-call spike as possible and make that
+call before the take starts.
+
+**Targets** (`assets/posefill-targets/locomotion.json`, `python -m ac_train.posetargets`): stand and
+run from our Kimodo clips, walk and jog from CMU. Choosing by speed alone took a CMU run leaning 27
+degrees with hips at 0.765 m, and the character copied it (40 degrees after the turn). Posture now
+counts (the gait's median lean and hip height among the candidates at that speed), and the left foot
+leads in every moving gait.
+
+Measured on the take (`analyse.py` beside the video), first set then current:
+- Trunk tilt, worst second: 30.7 mean / 40.8 peak, then 20.8 mean / 31.0 peak.
+- Seams: no jump. The largest joint move a frame relative to the root averages 7.5 cm at the seams
+  and 7.4 cm elsewhere (peaks 16.1 and 21.4 cm).
+- Lowest foot: about 0 to 2.4 cm above the floor; lowest -0.8 cm.
+- Foot slide while planted: 0.3 to 2.7 cm a frame, worst in second 12 (slowing to a walk).
+- Speed reached: about 3.1 m/s for 3.6 asked. The target sits one second ahead and the model may take
+  longer than that to reach it. Limiting a moving stretch to 8 to 10 tokens (26 to 34 frames) is the
+  default in `live_drive.py`: between 2 and 3 s it reached 0.78 m/s against 0.15 with the helper's 8
+  to 14 tokens, and it ran a little faster. `VELOCITY_SCALE` and `POSITION_SCALE` are not tuned.
+
+**Response to the stick is slower than the generation time suggests.** The 100 ms limit is met, but
+the body answers later (`latency.py` beside the video):
+| Stick | Asked at | Body answers at | Delay |
+|---|---|---|---|
+| start walking (hips over 0.2 m/s) | 1 s | 1.97 s | about 1 s |
+| turn left (heading past 45 degrees) | 7 s | 7.43 s | about 0.4 s |
+| turn back (heading under 45 degrees) | 9 s | 9.53 s | about 0.5 s |
+| stop (hips under 0.2 m/s) | 13 s | 14.20 s | about 1.2 s |
+
+These include the stick smoothing's half-lives (0.2 to 0.6 s), which are not tuned. The slow start
+has a further cause to fix in the Rust loop: the first generation after standing fires as soon as the
+smoothed speed leaves zero, so it aims at an almost standing target (0.05 m/s), and the next waits
+for that stretch's transition point. This needs a real take to judge, because the test isn't steered
+by a person.
+
+**Seen in the frames, for the owner to judge:** elbows held out and hands splayed in the walk and run;
+a hunched, low stretch for about a second coming out of the turn (9.5 to 10.5 s). Whether those come
+from the targets, the model or our conversion is not known yet. There is no style target yet.
+
+Files: `training/ac_train/posetargets.py`, `tools/posefill/live.py`, `live_drive.py`, the
+`live_start` and `live_step` ops in `helper.py`, tests in `training/tests/test_posetargets.py` and
+`tools/posefill/tests/test_helper.py`. The ops are additions, so the helper's protocol stays 1 and
+the Rust side will look for them in `ops`.

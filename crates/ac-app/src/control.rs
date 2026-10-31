@@ -10,7 +10,7 @@
 //! | `{op: "sheet", frames? or count?, view?, width?, height?, cols?}` | `{png, frames}`: a contact sheet of the animation |
 //! | `{op: "animation", times, view?, width?, height?, fixed?, delay?, gif?, mp4?, fps?}` | `{gif?, mp4?, frames}`: the motion as an animated GIF (base64) and/or an MP4 written to `mp4` |
 //! | `{op: "ui", name, value}` | `{}`: set the window's own state, as `--ui name=value` (main.rs) |
-//! | `{op: "input", events: [{kind, x, y, button?, dx?, dy?, key?, modifiers?}]}` | `{layout, status, frame, keys, selected_keys}` once the window settles: pointer and key input, one event a frame (app/input.rs) |
+//! | `{op: "input", events: [{kind, x, y, button?, dx?, dy?, key?, state?, modifiers?}]}` | `{layout, status, frame, keys, selected_keys}` once the window settles: pointer and key input, one event a frame; a key's `state` `down` or `up` is only that half, and kind `modifiers` holds its modifiers until the next one (app/input.rs) |
 //! | `{op: "click", widget, button?, modifiers?}` | as `input`, plus `clicked`: press a widget by its stable id (`app/ui_click.rs`); a menu bar item replies `{clicked, invoked, status}` |
 //! | `{op: "layout"}` | `widgets` (every interactive widget: `{id, label, rect, enabled}`, `app/ui_ids.rs`) and where things are on screen: viewport rect, joints, timeline `frame_x`, `ruler_y`, `keys_y`; the viewport's `tool`, `selection`, `gizmo` (centre, ring radii, a grab point per axis ring), `onion` frames, `trail`, `camera`, `picker` (joints and buttons) |
 //! | `{op: "events", since?, limit?}` | `{events, cursor, latest, dropped}`: what happened after the cursor `since` |

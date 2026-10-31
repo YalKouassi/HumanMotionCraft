@@ -102,6 +102,8 @@ pub static ACTIONS: &[Action] = &[
     a("app.block_out", "Block out from poses…", "File", &[])
         .doc("pick library poses, place them on frames and fill between (one undo)"),
     a("app.recover", "Restore unsaved work…", "File", &[]).doc("work kept by autosave"),
+    a("app.project_save_as", "Save project as…", "File", &[])
+        .doc("the animation, the clips it links, its boxes and settings in one file (.project.json)"),
     a("app.welcome", "Welcome…", "Help", &[]),
     a("app.quit", "Quit", "File", &["Cmd+Q"])
         .role(ItemRole::Quit)
@@ -293,6 +295,8 @@ pub static ACTIONS: &[Action] = &[
         .sub("Camera")
         .check(),
     a("app.overlay", "Physics overlay", "View", &[]).check(),
+    a("app.character", "Character preview", "View", &[])
+        .doc("your own character (retarget.load) off, beside or over the mannequin"),
     a("app.ghost", "Ghosts", "View", &[])
         .check()
         .doc("the keyed pose behind the physics pass, the AI preview"),
@@ -430,6 +434,15 @@ impl App {
                 self.delete_keys();
                 return;
             }
+            // Open project… / Save project: the file dialogs (a project saves to its own file)
+            ("project.open", None) => {
+                self.open_project_dialog();
+                return;
+            }
+            ("project.save", None) => {
+                self.save_project(None);
+                return;
+            }
             // Shift+A: the status line says which way the span went
             ("ai.toggle", None) => {
                 self.ai_toggle();
@@ -545,9 +558,26 @@ impl App {
             "app.export_preview" => self.open_preview(),
             "app.block_out" => self.open_block(),
             "app.recover" => self.open_recovery(),
+            "app.project_save_as" => {
+                self.save_project_as_dialog();
+            }
             "app.welcome" => self.files.welcome = true,
             "app.overlay" => self.show_overlay = !self.show_overlay,
             "app.ghost" => self.show_ghost = !self.show_ghost,
+            "app.character" => {
+                self.character.view = self.character.view.next();
+                self.status = match self.session.document.character.as_ref() {
+                    Some(c) => format!(
+                        "character preview {}: {}",
+                        self.character.view.name(),
+                        c.path.display()
+                    ),
+                    None => format!(
+                        "character preview {}: no character loaded (retarget.load)",
+                        self.character.view.name()
+                    ),
+                };
+            }
             "app.dope" => self.timeline.dope = !self.timeline.dope,
             "app.range" => {
                 let on = self.is_dock_panel_open(super::DockPanel::Range);

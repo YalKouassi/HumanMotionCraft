@@ -6,11 +6,14 @@
 //! frames each side of such a key, the AI keys are re-curved (a cubic Hermite in each bone's
 //! rotation relative to the key, and in the root) so the motion goes through the key with one
 //! velocity. Your key and the frames past the window stay as they are, and the curve meets them
-//! with their own slope. Text-generated spans are never touched (see [`crate::edits::GENERATED`]).
+//! with their own slope. Spans a helper made are never touched (see [`crate::edits::GENERATED`]
+//! and [`crate::edits::POSE_FILL`]).
+//! An anchor pose inside a long fill ([`crate::anchors`]) is a key the ease goes through, like
+//! yours: the spans on both sides of it were filled on their own and meet there.
 
 use crate::clip::{Clip, Key, KeySource};
 use crate::document::Document;
-use crate::edits::GENERATED;
+use crate::edits::is_generated;
 use crate::quat::{self, Quat, Vec3};
 
 /// Frames each side of the key the ease reaches (the window's last frame keeps its value).
@@ -19,7 +22,15 @@ pub const EASE_FRAMES: i64 = 4;
 type R<T> = Result<T, String>;
 
 fn eased(k: &Key) -> bool {
-    k.source == KeySource::Ai && k.only.is_none() && !k.model.starts_with(GENERATED)
+    k.source == KeySource::Ai
+        && k.only.is_none()
+        && !is_generated(&k.model)
+        && !crate::anchors::is_anchor(&k.model)
+}
+
+/// A key two fills meet at: yours, or an anchor pose placed inside a long fill.
+fn through(k: &Key) -> bool {
+    k.source == KeySource::Manual || (k.source == KeySource::Ai && crate::anchors::is_anchor(&k.model))
 }
 
 /// The key on `frame` in the edited layer.
@@ -40,10 +51,11 @@ fn hermite(p0: f64, m0: f64, p1: f64, m1: f64, t: f64) -> f64 {
     (2.0 * t3 - 3.0 * t2 + 1.0) * p0 + (t3 - 2.0 * t2 + t) * m0 + (-2.0 * t3 + 3.0 * t2) * p1 + (t3 - t2) * m1
 }
 
-/// Ease the AI keys around your key on frame `k` when both sides are AI keys; returns the frames
-/// changed (0: a side is plain, generated from text or missing, or the key isn't yours).
+/// Ease the AI keys around your key (or an anchor) on frame `k` when both sides are AI keys;
+/// returns the frames changed (0: a side is plain, generated from text or missing, or the key
+/// is neither yours nor an anchor).
 pub fn ease_through(clip: &mut Clip, k: i64, n: i64) -> R<usize> {
-    if !key_at(clip, k).is_some_and(|x| x.source == KeySource::Manual) {
+    if !key_at(clip, k).is_some_and(through) {
         return Ok(0);
     }
     let (l, r) = (run(clip, k, -1, n), run(clip, k, 1, n));

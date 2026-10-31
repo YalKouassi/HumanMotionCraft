@@ -1,7 +1,9 @@
 //! The in-betweener network (the prototype's `Inbetweener`), forward pass only, in f32.
 //!
 //! Per frame the input is `[known * mask, interp, mask, time-to-go, given bones, root path]` (the
-//! path: x, y, z times its flag, and the flag; models whose card says `path`, 141000); a linear layer
+//! time: one value, to the last key, or two on a model whose card says `multi_key` (142000): to the
+//! next known frame and from the last; the path: x, y, z times its flag, and the flag; models
+//! whose card says `path`, 141000); a linear layer
 //! takes it to `d` wide, plus a learned position (and style) embedding; then pre-norm transformer
 //! encoder layers (full self-attention over the window, ReLU feed-forward); then a layer norm and a
 //! linear layer give a change to the plain interpolation. A model with a contact head (`contact`)
@@ -18,26 +20,108 @@ type R<T> = Result<T, String>;
 
 const EPS: f32 = 1e-5;
 
+/// Outputs a weight block holds: each block's weights are laid out `inp` x `LANES` so one pass
+/// over a row of `x` feeds `LANES` independent accumulators (the compiler packs them into SIMD
+/// lanes). Each output's sum is the same sequence of f32 operations as the plain dot product,
+/// so the result is bit-identical to one; only the order of the outputs' work changes.
+const LANES: usize = 16;
+
 struct Linear {
-    w: Vec<f32>, // out x in, row-major
+    /// Blocks of `LANES` outputs: `[block][k][lane]` = weight (out = block * LANES + lane, in = k).
+    /// `out` is padded to a whole number of blocks with zero weights (their outputs are dropped).
+    w: Vec<f32>,
+    /// Biases, padded like `w`.
     b: Vec<f32>,
     inp: usize,
     out: usize,
 }
 
 impl Linear {
-    /// `x` is rows x in; returns rows x out.
+    /// From a row-major `out` x `inp` weight matrix and its biases.
+    fn new(w: &[f32], b: &[f32], out: usize, inp: usize) -> R<Linear> {
+        if w.len() != out * inp || b.len() != out {
+            return Err(format!(
+                "weights: a {out} x {inp} layer with {} weights and {} biases",
+                w.len(),
+                b.len()
+            ));
+        }
+        let blocks = out.div_ceil(LANES);
+        let mut packed = vec![0.0f32; blocks * inp * LANES];
+        for (o, row) in w.chunks_exact(inp).enumerate() {
+            let (blk, lane) = (o / LANES, o % LANES);
+            for (k, &v) in row.iter().enumerate() {
+                packed[(blk * inp + k) * LANES + lane] = v;
+            }
+        }
+        let mut bias = vec![0.0f32; blocks * LANES];
+        bias[..out].copy_from_slice(b);
+        Ok(Linear {
+            w: packed,
+            b: bias,
+            inp,
+            out,
+        })
+    }
+
+    /// `x` is rows x in; returns rows x out. Each output is `bias + ((0 + x0 w0) + x1 w1) + ...`
+    /// in f32, as a plain dot product sums it.
     fn apply(&self, x: &[f32]) -> Vec<f32> {
         let rows = x.len() / self.inp;
         let mut y = vec![0.0f32; rows * self.out];
-        for r in 0..rows {
-            let xr = &x[r * self.inp..(r + 1) * self.inp];
-            let yr = &mut y[r * self.out..(r + 1) * self.out];
-            for (o, (yo, wo)) in yr.iter_mut().zip(self.w.chunks_exact(self.inp)).enumerate() {
-                *yo = self.b[o] + xr.iter().zip(wo).map(|(a, b)| a * b).sum::<f32>();
+        self.apply_into(x, &mut y);
+        y
+    }
+
+    fn apply_into(&self, x: &[f32], y: &mut [f32]) {
+        let (inp, out) = (self.inp, self.out);
+        let rows = x.len() / inp;
+        let blocks = out.div_ceil(LANES);
+        for blk in 0..blocks {
+            let (wb, _) = self.w[blk * inp * LANES..(blk + 1) * inp * LANES].as_chunks::<LANES>();
+            let bias = &self.b[blk * LANES..(blk + 1) * LANES];
+            let first = blk * LANES;
+            let keep = LANES.min(out - first);
+            let mut r = 0;
+            // two rows at a time: each weight loaded once for both
+            while r + 2 <= rows {
+                let x0 = &x[r * inp..(r + 1) * inp];
+                let x1 = &x[(r + 1) * inp..(r + 2) * inp];
+                let mut acc0 = [-0.0f32; LANES];
+                let mut acc1 = [-0.0f32; LANES];
+                for ((&a0, &a1), wk) in x0.iter().zip(x1).zip(wb) {
+                    for l in 0..LANES {
+                        acc0[l] += a0 * wk[l];
+                        acc1[l] += a1 * wk[l];
+                    }
+                }
+                let y0 = &mut y[r * out + first..r * out + first + keep];
+                y0.iter_mut()
+                    .zip(&acc0)
+                    .zip(bias)
+                    .for_each(|((y, a), b)| *y = b + a);
+                let y1 = &mut y[(r + 1) * out + first..(r + 1) * out + first + keep];
+                y1.iter_mut()
+                    .zip(&acc1)
+                    .zip(bias)
+                    .for_each(|((y, a), b)| *y = b + a);
+                r += 2;
+            }
+            if r < rows {
+                let x0 = &x[r * inp..(r + 1) * inp];
+                let mut acc0 = [-0.0f32; LANES];
+                for (&a0, wk) in x0.iter().zip(wb) {
+                    for l in 0..LANES {
+                        acc0[l] += a0 * wk[l];
+                    }
+                }
+                let y0 = &mut y[r * out + first..r * out + first + keep];
+                y0.iter_mut()
+                    .zip(&acc0)
+                    .zip(bias)
+                    .for_each(|((y, a), b)| *y = b + a);
             }
         }
-        y
     }
 }
 
@@ -91,6 +175,10 @@ pub struct Net {
     pub given: usize,
     /// Takes the root path across the gap ([`Net::forward_contacts`]'s `path`).
     pub path: bool,
+    /// Trained with several known frames in a window (the card's `multi_key`, 142000): the time
+    /// channel is two values a frame (to the next known frame, from the last), else one (to the
+    /// last key).
+    pub multi_key: bool,
     pub styles: usize,
 }
 
@@ -123,12 +211,12 @@ impl Tensors {
     }
 
     fn linear(&self, name: &str, out: usize, inp: usize) -> R<Linear> {
-        Ok(Linear {
-            w: self.take(&format!("{name}.weight"), &[out, inp])?,
-            b: self.take(&format!("{name}.bias"), &[out])?,
-            inp,
+        Linear::new(
+            &self.take(&format!("{name}.weight"), &[out, inp])?,
+            &self.take(&format!("{name}.bias"), &[out])?,
             out,
-        })
+            inp,
+        )
     }
 
     fn norm(&self, name: &str, d: usize) -> R<Norm> {
@@ -187,8 +275,10 @@ impl Net {
             _ => return Err("weights: bad input layer".into()),
         };
         let path = card["path"].as_bool().unwrap_or(false);
+        let multi_key = card["multi_key"].as_bool().unwrap_or(false);
+        let times = if multi_key { 2 } else { 1 };
         let given = inp_w
-            .checked_sub(feat * 2 + 2 + if path { PATH } else { 0 })
+            .checked_sub(feat * 2 + 1 + times + if path { PATH } else { 0 })
             .ok_or("weights: input narrower than the features")?;
         let style = t.shape("style.weight").map(|s| s.to_vec());
         let styles = style.as_ref().map_or(0, |s| s[0]);
@@ -200,12 +290,12 @@ impl Net {
             let p = format!("body.layers.{}", layers.len());
             let ff = t.shape(&format!("{p}.linear1.weight")).map_or(0, |s| s[0]);
             layers.push(Layer {
-                qkv: Linear {
-                    w: t.take(&format!("{p}.self_attn.in_proj_weight"), &[3 * d, d])?,
-                    b: t.take(&format!("{p}.self_attn.in_proj_bias"), &[3 * d])?,
-                    inp: d,
-                    out: 3 * d,
-                },
+                qkv: Linear::new(
+                    &t.take(&format!("{p}.self_attn.in_proj_weight"), &[3 * d, d])?,
+                    &t.take(&format!("{p}.self_attn.in_proj_bias"), &[3 * d])?,
+                    3 * d,
+                    d,
+                )?,
                 proj: t.linear(&format!("{p}.self_attn.out_proj"), d, d)?,
                 ff1: t.linear(&format!("{p}.linear1"), ff, d)?,
                 ff2: t.linear(&format!("{p}.linear2"), d, ff)?,
@@ -240,9 +330,20 @@ impl Net {
             feat,
             given,
             path,
+            multi_key,
             styles,
         };
         Ok((net, card))
+    }
+
+    /// Time values a frame ([`Net::forward_contacts`]'s `ttg`): 2 on a `multi_key` model, else 1.
+    pub fn times(&self) -> usize {
+        if self.multi_key { 2 } else { 1 }
+    }
+
+    /// Most frames a window holds (the position embedding's rows).
+    pub fn window(&self) -> usize {
+        self.pos_rows
     }
 
     /// Feature mask of the given bones: 6 numbers a bone, the root position goes with bone 0.
@@ -257,8 +358,9 @@ impl Net {
         self.contact.is_some()
     }
 
-    /// One pass. `known`, `interp`: T x feat; `mask`, `ttg`: T; `style`: an index (models with
-    /// styles); `gmask`: one per given bone (models that take them). Returns T x feat.
+    /// One pass. `known`, `interp`: T x feat; `mask`: T; `ttg`: T x [`Net::times`]; `style`: an
+    /// index (models with styles); `gmask`: one per given bone (models that take them). Returns
+    /// T x feat.
     pub fn forward(
         &self,
         known: &[f32],
@@ -289,10 +391,16 @@ impl Net {
         path: Option<(&[f32], &[f32])>,
     ) -> R<(Vec<f32>, Option<Vec<f32>>)> {
         let (f, d) = (self.feat, self.d);
+        let times = self.times();
         let t = mask.len();
-        if t == 0 || t > self.pos_rows || known.len() != t * f || interp.len() != t * f || ttg.len() != t {
+        if t == 0
+            || t > self.pos_rows
+            || known.len() != t * f
+            || interp.len() != t * f
+            || ttg.len() != t * times
+        {
             return Err(format!(
-                "network input: {t} frames (1..{}) with {f} features each",
+                "network input: {t} frames (1..{}) with {f} features and {times} time values each",
                 self.pos_rows
             ));
         }
@@ -313,7 +421,7 @@ impl Net {
             p => p.filter(|_| self.path),
         };
         // input rows
-        let w = f * 2 + 2 + self.given + if self.path { PATH } else { 0 };
+        let w = f * 2 + 1 + times + self.given + if self.path { PATH } else { 0 };
         let mut x = Vec::with_capacity(t * w);
         for i in 0..t {
             for k in 0..f {
@@ -322,7 +430,7 @@ impl Net {
             }
             x.extend_from_slice(&interp[i * f..(i + 1) * f]);
             x.push(mask[i]);
-            x.push(ttg[i]);
+            x.extend_from_slice(&ttg[i * times..(i + 1) * times]);
             x.extend_from_slice(g);
             if self.path {
                 let (p, m) = path.map_or(([0.0; 3], 0.0), |(p, pm)| {
@@ -396,5 +504,55 @@ impl Net {
             }
         }
         l.proj.apply(&ctx)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used)]
+
+    use super::{LANES, Linear};
+
+    /// A deterministic spread of awkward floats (mixed signs and magnitudes).
+    fn spread(n: usize, seed: u32) -> Vec<f32> {
+        let mut s = seed;
+        (0..n)
+            .map(|_| {
+                s = s.wrapping_mul(1664525).wrapping_add(1013904223);
+                let u = (s >> 8) as f32 / (1u32 << 24) as f32;
+                (u - 0.5) * 2.0f32.powi((s % 7) as i32 - 3)
+            })
+            .collect()
+    }
+
+    /// The blocked kernel gives exactly the plain dot product (`bias + sum(x * w)` as
+    /// `Iterator::sum` folds it) for every output: the goldens' numbers don't move.
+    #[test]
+    fn blocked_linear_is_bit_identical_to_the_dot_product() {
+        for (out, inp, rows) in [(2, 7, 1), (LANES + 3, 19, 5), (37, 64, 2), (64, 33, 41)] {
+            let w = spread(out * inp, 1 + out as u32);
+            let b = spread(out, 99 + inp as u32);
+            let x = spread(rows * inp, 7 + rows as u32);
+            let lin = Linear::new(&w, &b, out, inp).unwrap();
+            let got = lin.apply(&x);
+            for r in 0..rows {
+                let xr = &x[r * inp..(r + 1) * inp];
+                for (o, wo) in w.chunks_exact(inp).enumerate() {
+                    let want = b[o] + xr.iter().zip(wo).map(|(a, b)| a * b).sum::<f32>();
+                    assert_eq!(
+                        got[r * out + o].to_bits(),
+                        want.to_bits(),
+                        "row {r} output {o}: {} vs {want}",
+                        got[r * out + o]
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn a_linear_refuses_mismatched_weights() {
+        assert!(Linear::new(&[0.0; 5], &[0.0; 2], 2, 3).is_err());
+        assert!(Linear::new(&[0.0; 6], &[0.0; 3], 2, 3).is_err());
     }
 }

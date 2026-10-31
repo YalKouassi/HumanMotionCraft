@@ -8,17 +8,21 @@
     clippy::unreachable
 )]
 
+pub mod anchorlib;
 pub mod builtins;
+pub mod character;
 pub mod commands;
 pub mod community_record;
 pub mod data_folder;
 pub mod export;
 pub mod export_batch;
+pub mod fbx;
 pub mod find;
 pub mod import;
 pub mod layer_tools;
 pub mod layers;
 pub mod library;
+pub mod project;
 pub mod recovery;
 pub mod reload;
 mod returns;
@@ -36,8 +40,11 @@ pub const ALL: &[&[ac_core::CommandSpec]] = &[
     export::SPECS,
     // files, recovery and reloading for the window (batch A2)
     export_batch::SPECS,
+    fbx::commands::SPECS,
+    character::commands::SPECS,
     recovery::SPECS,
     reload::SPECS,
+    project::SPECS,
 ];
 
 /// Register every command of this crate; returns the clashes (empty: all registered).

@@ -3,7 +3,9 @@
 //! The window and `ac-review run <command> <json>` reach the same [`Review::run`], so an agent can
 //! review headless (a first pass from the numbers, `by: "<agent>"`) and a person checks it in the
 //! window. Commands: `review.list`, `review.take`, `review.decide`, `review.clear`,
-//! `review.summary` (`review.commands` lists them with their parameters).
+//! `review.summary` (`review.commands` lists them with their parameters). The model's flags
+//! (`flags.json`, `python -m ac_train.flag`, roadmap 137000) are read beside the scan's: `show:
+//! "model"` lists the takes the model fails on, worst first; nothing decides them.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -11,6 +13,7 @@ use std::path::{Path, PathBuf};
 use serde_json::{Map, Value, json};
 
 use crate::decisions::{self, Decision, Decisions, Status};
+use crate::flags::{Flag, Flags};
 use crate::scan::{self, ScanTake};
 use crate::store::{self, Set};
 
@@ -29,16 +32,18 @@ pub enum Show {
     Flagged,
     Decided,
     All,
+    /// The takes the model fails on (`flags.json`), worst loss first.
+    Model,
 }
 
 impl Show {
-    pub const ALL: [Show; 4] = [Show::Open, Show::Flagged, Show::Decided, Show::All];
+    pub const ALL: [Show; 5] = [Show::Open, Show::Flagged, Show::Decided, Show::All, Show::Model];
 
     pub fn parse(s: &str) -> R<Show> {
         Show::ALL
             .into_iter()
             .find(|x| x.word() == s)
-            .ok_or_else(|| format!("show {s:?}: open, flagged, decided or all"))
+            .ok_or_else(|| format!("show {s:?}: open, flagged, decided, all or model"))
     }
 
     pub fn word(self) -> &'static str {
@@ -47,6 +52,7 @@ impl Show {
             Show::Flagged => "flagged",
             Show::Decided => "decided",
             Show::All => "all",
+            Show::Model => "model",
         }
     }
 }
@@ -77,7 +83,9 @@ pub struct Review {
     pub sets: Vec<Set>,
     scans: Vec<HashMap<String, ScanTake>>,
     pub decisions: Decisions,
-    /// What failed to load (a set, a scan): said in the window and by `review.summary`.
+    /// The model's flags, or that there are none (`flags.note`).
+    pub flags: Flags,
+    /// What failed to load (a set, a scan, stale flags): said in the window and by `review.summary`.
     pub problems: Vec<String>,
 }
 
@@ -172,12 +180,21 @@ impl Review {
                 }
             }
         }
+        let mut flags = match Flags::load(data) {
+            Ok(f) => f,
+            Err(e) => {
+                problems.push(e);
+                Flags::none(data.join(crate::flags::FILE))
+            }
+        };
+        problems.extend(flags.check(&sets));
         Ok(Review {
             data: data.to_path_buf(),
             decisions_path: decisions_path.to_path_buf(),
             sets,
             scans,
             decisions,
+            flags,
             problems,
         })
     }
@@ -225,6 +242,11 @@ impl Review {
         !s.cuts.is_empty() || !s.reject.is_empty()
     }
 
+    /// The model's flag on a take, if it is among the takes the model fails on.
+    pub fn flag(&self, set: usize, take: usize) -> Option<&Flag> {
+        self.flags.get(&self.id(set, take))
+    }
+
     /// Every reason the scans give, once each.
     pub fn reasons(&self) -> Vec<String> {
         let mut out: Vec<String> = self
@@ -238,7 +260,7 @@ impl Review {
     }
 
     /// The takes the filter lets through, worst first: undecided before decided, the scan's
-    /// rejections, then the most cut, then by name.
+    /// rejections, then the most cut, then by name. `Show::Model`: the model's worst loss first.
     pub fn queue(&self, f: &Filter) -> Vec<(usize, usize)> {
         let search = f.search.to_lowercase();
         let mut out = Vec::new();
@@ -253,6 +275,7 @@ impl Review {
                     Show::Flagged => self.flagged(si, ti),
                     Show::Decided => decided,
                     Show::All => true,
+                    Show::Model => self.flag(si, ti).is_some(),
                 };
                 if !keep {
                     continue;
@@ -270,6 +293,15 @@ impl Review {
                 }
                 out.push((si, ti));
             }
+        }
+        if f.show == Show::Model {
+            out.sort_by(|a, b| {
+                let rank = |&(s, t): &(usize, usize)| self.flag(s, t).map_or(usize::MAX, |x| x.rank);
+                rank(a)
+                    .cmp(&rank(b))
+                    .then(self.id(a.0, a.1).cmp(&self.id(b.0, b.1)))
+            });
+            return out;
         }
         out.sort_by(|a, b| {
             let key = |&(s, t): &(usize, usize)| {
@@ -360,17 +392,20 @@ impl Review {
             "scan_reject": sc.reject,
             "reasons": sc.reasons(),
             "decision": self.decision(s, t).map(|d| d.status.word()),
+            "model": self.flag(s, t).map(|f| json!({
+                "rank": f.rank, "loss": f.loss, "worst": f.worst, "worst_at": f.worst_at, "windows": f.windows,
+            })),
         })
     }
 
     /// The commands and their parameters (`review.commands`).
     pub fn commands() -> Value {
         json!([
-            {"id": "review.list", "params": "show? (open|flagged|decided|all, default open), set?, reason?, search?, limit? (default 100)", "returns": "{total, takes: [{id, label, frames, scan_cut, scan_reject, reasons, decision}]}, worst first"},
-            {"id": "review.take", "params": "id (<set>/<take>)", "returns": "the take, the scan's numbers and cuts, the decision"},
+            {"id": "review.list", "params": "show? (open|flagged|decided|all|model, default open; model: the takes the model fails on, flags.json), set?, reason?, search?, limit? (default 100)", "returns": "{total, takes: [{id, label, frames, scan_cut, scan_reject, reasons, decision, model: {rank, loss, worst, worst_at, windows} | null}]}, worst first"},
+            {"id": "review.take", "params": "id (<set>/<take>)", "returns": "the take, the scan's numbers and cuts, the model's flag (why, the weighted loss terms) or null, the decision"},
             {"id": "review.decide", "params": "id, status (ok|cut|reject), cuts? ([[first, last]], default the scan's for cut), type?, tags?, note?, by? (default person)", "returns": "the decision as saved"},
             {"id": "review.clear", "params": "id", "returns": "{cleared}"},
-            {"id": "review.summary", "params": "", "returns": "per set: takes, flagged, decided (ok, cut, reject); problems"},
+            {"id": "review.summary", "params": "", "returns": "per set: takes, flagged, decided (ok, cut, reject); flags (the model's: present, note, model, path, takes); problems"},
         ])
     }
 
@@ -389,6 +424,9 @@ impl Review {
                     .and_then(Value::as_u64)
                     .map_or(100, |n| n as usize)
                     .min(MAX_LIST);
+                if f.show == Show::Model && !self.flags.present {
+                    return Err(self.flags.note.clone());
+                }
                 let q = self.queue(&f);
                 let rows: Vec<Value> = q.iter().take(limit).map(|&(s, t)| self.row(s, t)).collect();
                 Ok(json!({ "total": q.len(), "takes": rows }))
@@ -402,6 +440,16 @@ impl Review {
                     "skate_share": sc.skate_share, "float_s": sc.float_s,
                 });
                 row["decision"] = serde_json::to_value(self.decision(s, t)).map_err(|e| e.to_string())?;
+                row["model"] = match self.flag(s, t) {
+                    Some(f) => json!({
+                        "rank": f.rank, "loss": f.loss, "worst": f.worst, "worst_at": f.worst_at,
+                        "windows": f.windows, "why": f.why, "weighted": f.weighted,
+                    }),
+                    None => Value::Null,
+                };
+                if !self.flags.present {
+                    row["model_note"] = json!(self.flags.note);
+                }
                 Ok(row)
             }
             "review.decide" => {
@@ -452,7 +500,15 @@ impl Review {
                         })
                     })
                     .collect();
-                Ok(json!({ "sets": sets, "problems": self.problems }))
+                let flags = &self.flags;
+                Ok(json!({
+                    "sets": sets,
+                    "flags": {
+                        "present": flags.present, "note": flags.note, "model": flags.model,
+                        "path": flags.path.display().to_string(), "takes": flags.takes.len(),
+                    },
+                    "problems": self.problems,
+                }))
             }
             other => {
                 let ids = [

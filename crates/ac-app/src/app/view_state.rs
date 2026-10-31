@@ -76,7 +76,7 @@ impl Default for ViewAids {
 }
 
 /// The names `--ui` (and the control port's `ui` op) take, the app's own first.
-pub const UI_NAMES: &str = "tab, search, dope, overlay, ghost, tool, camera, zoom, onion, onion_count, onion_step, trails, trail_span, picker, range, handles, gizmo, ortho, follow, select";
+pub const UI_NAMES: &str = "tab, search, dope, overlay, ghost, character, playing, tool, camera, zoom, onion, onion_count, onion_step, trails, trail_span, picker, range, handles, gizmo, ortho, follow, select";
 
 fn on(value: &str) -> Result<bool, String> {
     match value {

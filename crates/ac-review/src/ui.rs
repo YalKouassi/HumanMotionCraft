@@ -442,6 +442,7 @@ impl App {
                     Show::Flagged => "Flagged",
                     Show::Decided => "Decided",
                     Show::All => "All takes",
+                    Show::Model => "Model fails",
                 })
                 .show_ui(ui, |ui| {
                     ui.selectable_value(&mut self.filter.show, Show::Open, "To review")
@@ -449,6 +450,10 @@ impl App {
                     ui.selectable_value(&mut self.filter.show, Show::Flagged, "Flagged");
                     ui.selectable_value(&mut self.filter.show, Show::Decided, "Decided");
                     ui.selectable_value(&mut self.filter.show, Show::All, "All takes");
+                    ui.selectable_value(&mut self.filter.show, Show::Model, "Model fails")
+                        .on_hover_text(
+                            "The takes the model fails on (python -m ac_train.flag), worst loss first: look, then decide; a high loss is often just hard motion",
+                        );
                 });
             let sets: Vec<String> = self.review.sets.iter().map(|s| s.name.clone()).collect();
             egui::ComboBox::from_id_salt("set")
@@ -480,6 +485,9 @@ impl App {
             ui.label(format!("{} takes", self.queue.len()));
             ui.label(RichText::new(format!("{} decided", self.review.decisions.takes.len())).weak());
             ui.checkbox(&mut self.advance, "next take after deciding");
+            if self.filter.show == Show::Model {
+                ui.label(RichText::new(&self.review.flags.note).weak());
+            }
         });
     }
 
@@ -509,6 +517,9 @@ impl App {
                 }
                 if !reasons.is_empty() {
                     text.push_str(&format!("  {}", reasons.join(" ")));
+                }
+                if let Some(f) = self.review.flag(s, t) {
+                    text.push_str(&format!("  loss {:.3} #{}", f.loss, f.rank));
                 }
                 ui.horizontal(|ui| {
                     ui.label(badge(d));
@@ -584,6 +595,35 @@ impl App {
             if let Some(f) = jump {
                 self.frame = f;
                 self.playing = false;
+            }
+        }
+        ui.separator();
+        ui.strong("The model");
+        match self.review.flag(s, t).cloned() {
+            Some(f) => {
+                ui.label(format!("#{} of the takes it fails on: {}", f.rank, f.why));
+                if ui.link(format!("worst window at frame {}", f.worst_at)).clicked() {
+                    self.frame = f.worst_at;
+                    self.playing = false;
+                }
+                ui.label(
+                    RichText::new(
+                        "A high loss is often just hard motion, not bad data: look before deciding.",
+                    )
+                    .weak(),
+                );
+            }
+            None if self.review.flags.present => {
+                ui.label(
+                    RichText::new(format!(
+                        "not among the takes {} fails on",
+                        self.review.flags.model
+                    ))
+                    .weak(),
+                );
+            }
+            None => {
+                ui.label(RichText::new(&self.review.flags.note).weak());
             }
         }
         ui.separator();

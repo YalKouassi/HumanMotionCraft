@@ -133,11 +133,24 @@ fn keep_possible_bends_the_fill_back_and_says_so() {
         k.model = "test".into();
         doc.clip.set_key(k).expect("key");
     }
-    let notes = doc.keep_possible(0, 4).expect("checked");
+    let kept = doc.keep_possible_report(0, 4).expect("checked");
+    let notes = &kept.notes;
     assert_eq!(notes.len(), 1, "{notes:?}");
     assert!(
         notes[0].contains("frames 2;") && notes[0].contains("ankle.R abduction"),
         "{notes:?}"
+    );
+    // the same, as data: one joint, bent on frame 2 only, by as much as the note says
+    assert!(kept.checked);
+    assert_eq!(kept.bent.len(), 1, "{:?}", kept.bent);
+    let b = &kept.bent[0];
+    assert_eq!(
+        (b.joint.as_str(), b.component, b.worst_frame, &b.frames[..]),
+        ("ankle.R", "abduction", 2, &[2][..])
+    );
+    assert!(
+        notes[0].contains(&format!("{:.0}° past", b.past_deg)) && b.past_deg > 0.0,
+        "{b:?} vs {notes:?}"
     );
     let possible = doc.possible().expect("limits").expect("loaded");
     let (rots, _) = doc.clip.sample_with(&[2.0], &doc.links).expect("sample");

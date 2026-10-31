@@ -17,6 +17,7 @@ ac-core.workspace = true
 ac-io.workspace = true
 ac-media.workspace = true
 ac-textmotion.workspace = true
+ac-posefill.workspace = true
 ac-community.workspace = true
 ac-render.workspace = true
 craft-atomic.workspace = true
@@ -34,7 +35,15 @@ rfd = "0.17"
 tracing.workspace = true
 
 # Version info in humanmotioncraft.exe (build.rs), which the launcher checks after a portable install.
-[target.'cfg(windows)'.build-dependencies]
+# A plain build dependency on every host: build.rs names the crate in code that is always
+# compiled and decides at run time by the target (`CARGO_CFG_TARGET_OS`). A `cfg(windows)` here
+# is evaluated for the host, so it left Linux and macOS hosts without the crate and the script
+# failed to compile (GitHub issue #1, roadmap 120400).
+[target.'cfg(windows)'.dependencies]
+# a controller for live motion: no system libraries to install on Windows
+gilrs = "0.11"
+
+[build-dependencies]
 winresource = "0.1"
 
 [lints]

@@ -45,6 +45,20 @@ HumanMotionCraft is a standalone, pure-Rust humanoid keyframe animation applicat
 cargo run --release -p ac-app
 ```
 
+### Build on Linux
+The build needs a C compiler (for `ring`, the TLS library, and the Wayland shim) and `git` (for
+the git dependencies); nothing else. Every windowing library (Wayland, X11, xkbcommon, EGL) is
+loaded at run time from the desktop you already have, so no `-dev` packages are needed.
+
+```bash
+sudo apt install build-essential git        # Debian, Ubuntu
+sudo dnf install gcc git                    # Fedora
+cargo build --release --locked -p ac-app -p ac-cli
+```
+
+CI compiles the workspace on `ubuntu-latest` (`.github/workflows/ci.yml`, the `linux` job).
+Releases are Windows only for now; a Linux release is a separate decision.
+
 Optional startup flags:
 ```text
 humanmotioncraft [--assets <dir>] [--library <dir>] [--open <id>] [--frame <n>]
@@ -113,6 +127,7 @@ the model loads, and seconds after that; the window stays usable while it works.
 | `crates/ac-io` | Library management, `.glb` animation export (`full` / `game` / `body` profiles), clip/pose serialization, and atomic file writes. |
 | `crates/ac-render` | `wgpu` renderer: GPU-skinned mannequin, joint/bone overlays, floor grid, scene boxes, onion-skin ghosts, and offscreen PNG readback. |
 | `crates/ac-cli` | Headless `ac` binary: command runner, script execution, fixture verification, image/video rendering, and stdio MCP server. |
+| `crates/ac-helper` | What the optional Python helpers share: the install folder, the setup run from the app with its progress, uv fetching, the JSON-lines helper process, the engine slot and cache, and the frame-rate fit. Depends only on `ac-core`. |
 | `crates/ac-textmotion` | Motion from text (`text.install`, `text.generate`, `text.fill`, `text.helper`) through the optional helper process. Depends only on `ac-core`. |
 | `crates/ac-media` | Video and pictures of the animation: `clip.video` (MP4 through ffmpeg, or GIF) and `clip.sheet` (contact sheets). |
 | `crates/ac-review` | The training-data review app (developers only, never shipped). |
@@ -121,7 +136,9 @@ the model loads, and seconds after that; the window stays usable while it works.
 | `assets/` | Baked 104-bone rig (`default_rig.json`), joint limits (`limits.json`), neutral mannequin (`mannequin.glb`), pose/animation library, and in-betweener weights (`models/MANIFEST.json`). |
 | `fixtures/` | Deterministic JSON command scripts with hand-worked expectations covering every registered command. |
 | `training/` | Python (offline only): retargets motion-capture datasets onto the rig, trains and exports the in-betweener, and cuts the built-in mocap clips. Datasets live in the gitignored `training/data/`. See [How to retrain](training/README.md#how-to-retrain). |
+| `crates/ac-posefill` | Pose fill (`posefill.install`, `posefill.fill`, `posefill.helper`): the gap between two keys filled by an optional pose-to-pose model (NVIDIA GPU). Depends on `ac-core` and `ac-helper`. |
 | `tools/textmotion/` | Python (optional): installs the motion-from-text model and the helper the app talks to, and generates the `kimodo` training set. Never needed to run the app. |
+| `tools/posefill/` | Python (optional): installs the pose-to-pose engine (NVIDIA GPU only) and the helper the app talks to for Pose fill. Never needed to run the app. |
 
 ---
 

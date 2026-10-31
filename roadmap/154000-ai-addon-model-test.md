@@ -2,6 +2,7 @@
 
 - **Status:** not started; starts only when the owner asks, because it trains
 - **Requires:** 153000
+- **Base:** `training/data/models/parts-natural` (best checkpoint), the owner's choice (2026-10-31)
 - **Source:** owner's preferred direction (2026-10-30)
 
 ## What

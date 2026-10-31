@@ -50,6 +50,8 @@ const AREAS: &[(&str, &str)] = &[
     ("physics", "Physics"),
     ("ai", "AI"),
     ("text", "AI"),
+    ("posefill", "AI"),
+    ("live", "AI"),
     ("editor", "View"),
     ("camera", "View"),
     ("view", "View"),

@@ -8,6 +8,19 @@ A window is ``CONTEXT`` frames that end on key A, the gap, and key B. Everything
 frame (root at the origin, facing +Y about Z), so the network sees the same motion wherever and
 whichever way the character stands. The network starts from the plain interpolation between the
 keys and predicts a correction for every frame; the known frames are given back unchanged.
+
+Two options a model card carries change that window (both off for the shipped model, whose
+inputs stay as they were, bit for bit):
+
+- ``context_after`` (roadmap 140000): that many of the ``CONTEXT`` frames come *after* key B
+  instead of before key A (the window stays ``WINDOW`` frames), so the network sees how the
+  motion leaves B. Where the clip ends before them, the window falls back to the frames before A
+  (:func:`layout`). Time to go is signed: negative after B.
+- ``multi_key`` (roadmap 142000): any set of frames in the window may be known (several keys, so
+  two neighbouring gaps fill in one pass and agree at the key they share). The plain
+  interpolation then runs between neighbouring known frames (:func:`interpolate_known`), and the
+  time channel becomes two: time to the next known frame and from the last one
+  (:func:`known_times`).
 """
 
 from __future__ import annotations
@@ -31,6 +44,7 @@ PART_GROUPS = {
     "left_arm": (7, 8, 9), "right_arm": (10, 11, 12), "arms": tuple(range(7, 13)),
     "left_leg": (13, 14, 15), "right_leg": (16, 17, 18), "legs": tuple(range(13, 19)),
 }
+#: context frames a window holds: before key A, or (``context_after``) some of them after key B
 CONTEXT = 10
 MAX_GAP = 45
 WINDOW = CONTEXT + MAX_GAP + 1
@@ -176,16 +190,25 @@ def smooth_path(pos, width):
 
 
 class Inbetweener(nn.Module):
-    def __init__(self, d=256, layers=6, heads=8, styles=0, given=False, contacts=False, path=False):
+    def __init__(self, d=256, layers=6, heads=8, styles=0, given=False, contacts=False, path=False,
+                 context_after=0, multi_key=False):
         super().__init__()
         self.given = given  # takes a per-bone mask of bones another layer drives (known in the gap)
         # takes the root path across the gap (141000): positions and a per-frame "given" flag
         self.path = path
+        if not 0 <= int(context_after) < CONTEXT:
+            raise ValueError(f"context_after {context_after}: 0 to {CONTEXT - 1} of the {CONTEXT} context frames")
+        #: of the CONTEXT frames, how many come after key B (140000); the rest come before key A
+        self.context_after = int(context_after)
+        #: trained with any set of known frames in the window (142000): the time channel is two
+        #: wide (to the next known frame, from the last), else one (time to key B)
+        self.multi_key = bool(multi_key)
+        self.times = 2 if multi_key else 1
         # also says, per frame, whether each foot is planted (left, right: logits); the app plants
         # the feet the network says are down inside the gap
         self.contacts = contacts
         self.style = nn.Embedding(styles, d) if styles else None
-        self.inp = nn.Linear(FEAT * 2 + 2 + (len(BONES) if given else 0) + (PATH if path else 0), d)
+        self.inp = nn.Linear(FEAT * 2 + 1 + self.times + (len(BONES) if given else 0) + (PATH if path else 0), d)
         self.pos = nn.Parameter(torch.randn(WINDOW, d) * 0.02)
         enc = nn.TransformerEncoderLayer(d, heads, 4 * d, dropout=0.1, batch_first=True, norm_first=True)
         self.body = nn.TransformerEncoder(enc, layers)
@@ -195,14 +218,17 @@ class Inbetweener(nn.Module):
         self.contact = nn.Linear(d, 2) if contacts else None
 
     def forward(self, known, interp, mask, ttg, style=None, gmask=None, with_contacts=False, path=None, pmask=None):
-        """known/interp (N, T, FEAT), mask (N, T, 1) 1 = known frame, ttg (N, T, 1) time to key B,
-        style (N,) style indices or (N, S) weights over the styles (several styles add up; 0 = any;
+        """known/interp (N, T, FEAT), mask (N, T, 1) 1 = known frame, ttg (N, T, 1) time to key B
+        (a ``multi_key`` model: (N, T, 2), :func:`known_times`), style (N,) style indices or (N, S) weights over the styles (several styles add up; 0 = any;
         ignored by a model trained without styles), gmask (N, J)
         1 = a bone known on every frame (another layer drives it; given back unchanged).
         ``with_contacts``: also return the contact logits (N, T, 2), left and right foot (a model
         with the head; ``None`` without it). ``path`` (N, T, 3) root positions / hip height the root
         should follow and ``pmask`` (N, T, 1) 1 on the frames that have one (a model with ``path``;
         none given: no path)."""
+        if ttg.shape[-1] != self.times:
+            raise ValueError(f"time channel {ttg.shape[-1]} wide: this model takes {self.times} "
+                             f"({'known_times' if self.multi_key else 'time_to_go'})")
         if self.given:
             g = gmask if gmask is not None else torch.zeros(known.shape[0], len(BONES), device=known.device)
             fm = given_features(g)
@@ -252,9 +278,65 @@ def interpolate(q, pos, a, b):
 
 
 def time_to_go(a, b, T, device):
+    """(N, T, 1) time to key B: ``(b - i) / MAX_GAP``, negative on the frames after B
+    (``context_after``; a window without them has no frame past B, so its values are as they
+    always were), and the gap length (N, 1)."""
     i = torch.arange(T, device=device)[None].float()
     g = (b - a).float()[:, None].clamp(min=1)
-    return ((b[:, None].float() - i) / MAX_GAP).clamp(min=0)[..., None], g
+    return ((b[:, None].float() - i) / MAX_GAP)[..., None], g
+
+
+def layout(gap: int, after: int = 0) -> tuple[int, int, int]:
+    """Where key A and key B sit in a window of ``gap`` frames with ``after`` context frames after
+    B: ``(a, b, T)``. The window is always ``CONTEXT + gap + 1`` frames: ``CONTEXT - after``
+    before and on A, the gap, B, then ``after`` more. ``after`` 0 is the window as it always was."""
+    if not 0 <= after < CONTEXT:
+        raise ValueError(f"after {after}: 0 to {CONTEXT - 1}")
+    a = CONTEXT - after - 1
+    return a, a + gap + 1, CONTEXT + gap + 1
+
+
+def _known_neighbours(mask):
+    """For every frame of (N, T, 1) known masks: the index of the last known frame at or before it
+    and of the next known frame at or after it (N, T) each. A frame before the first known frame
+    gets the first; one after the last gets the last."""
+    N, T = mask.shape[:2]
+    known = mask[..., 0] > 0.5
+    idx = torch.arange(T, device=mask.device).expand(N, T)
+    prev = torch.where(known, idx, torch.full_like(idx, -1)).cummax(-1).values
+    nxt = torch.where(known, idx, torch.full_like(idx, T)).flip(-1).cummin(-1).values.flip(-1)
+    first = nxt[:, :1].expand(N, T)
+    last = prev[:, -1:].expand(N, T)
+    prev = torch.where(prev < 0, first, prev)
+    nxt = torch.where(nxt >= T, last, nxt)
+    return prev, nxt
+
+
+def known_times(mask):
+    """The two-wide time channel of a ``multi_key`` model (N, T, 2): frames to the next known
+    frame and from the last one, each over ``MAX_GAP``; 0 and 0 on a known frame. The window's
+    first and last frames are always known (context, key B or the frames after it)."""
+    prev, nxt = _known_neighbours(mask)
+    i = torch.arange(mask.shape[1], device=mask.device).expand_as(prev)
+    return torch.stack([(nxt - i).float() / MAX_GAP, (i - prev).float() / MAX_GAP], -1)
+
+
+def interpolate_known(q, pos, mask):
+    """:func:`interpolate` for any set of known frames (N, T, 1): slerp / lerp from the last known
+    frame to the next on every unknown frame, the known ones kept. With the known frames being the
+    context and key B it is the same interpolation. Returns local matrices and positions."""
+    N, T = mask.shape[:2]
+    prev, nxt = _known_neighbours(mask)
+    i = torch.arange(T, device=q.device).expand(N, T)
+    h = (nxt - prev).to(q.dtype)
+    t = torch.where(h > 0, (i - prev).to(q.dtype) / h.clamp(min=1), torch.zeros_like(h))
+    g = lambda x, k: x.gather(1, k.view(N, T, *[1] * (x.dim() - 2)).expand(N, T, *x.shape[2:]))  # noqa: E731
+    q0, q1 = g(q, prev), g(q, nxt)
+    p0, p1 = g(pos, prev), g(pos, nxt)
+    known = mask > 0.5
+    q_i = torch.where(known[..., None], q, slerp(q0, q1, t[:, :, None, None]))
+    p_i = torch.where(known, pos, p0 + (p1 - p0) * t[..., None])
+    return quat_to_mat(q_i), p_i
 
 
 def positional(n, d):

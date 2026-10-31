@@ -1,0 +1,1 @@
+{"format": "humanmotioncraft.project", "version": 1, "clip": {"format": "humanmotioncraft.clip", "version": 1, "bones": ["root"], "fps": 24, "keys": [{"frame": 0, "interp": "linear", "root": [0, 0, 1], "rotations": [[0, 0, 0]]}]}}

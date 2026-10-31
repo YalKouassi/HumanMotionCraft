@@ -19,6 +19,12 @@ pub const MAX_FILL: i64 = 45;
 /// cleared or refilled on its own: an edit next to it leaves it as it is and says so, and only an
 /// explicit command (`ai.fill`, `ai.clear`, `ai.toggle`, making it again) replaces it.
 pub const GENERATED: &str = "text";
+/// The model tag of AI keys made from the poses around a gap (the pose-to-pose helper,
+/// `posefill.fill`): held like [`GENERATED`] spans.
+pub const POSE_FILL: &str = "posefill";
+/// Every tag of motion a helper made, which an edit beside it leaves as it is, and the command
+/// that makes it again.
+pub const GENERATED_TAGS: &[(&str, &str)] = &[(GENERATED, "text.fill"), (POSE_FILL, "posefill.fill")];
 pub const TRACKED: &[&str] = &["root", "wrist.L", "wrist.R", "foot.L", "foot.R"];
 const SPINE: &[&str] = &["spine05", "spine04", "spine03", "spine02", "spine01"];
 /// Of a hip bend the lower back takes: people round the back, not only fold at the hip.
@@ -32,6 +38,14 @@ pub trait Filler {
     /// Fills gaps longer than [`MAX_FILL`].
     fn long(&self) -> bool {
         false
+    }
+    /// Several of your keys at once (a model trained with several keys in a window): the frames
+    /// `keys[0]+1 .. keys[last]-1`, the keys inside given back as they are. The default refuses.
+    fn fill_keys(&self, _clip: &Clip, keys: &[i64]) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
+        Err(format!(
+            "filling the gaps between {} keys in one pass is not supported by this filler",
+            keys.len()
+        ))
     }
 }
 
@@ -139,24 +153,40 @@ pub fn ai_bands(clip: &Clip) -> Vec<Band> {
     bands
 }
 
-/// Whether an AI key's model tag says it was made from text ([`GENERATED`]).
-pub fn is_generated(model: &str) -> bool {
-    model
-        .strip_prefix(GENERATED)
-        .is_some_and(|rest| rest.is_empty() || rest.starts_with(' '))
+/// The command that made an AI key with this model tag, when a helper did ([`GENERATED_TAGS`]).
+fn generated_by(model: &str) -> Option<&'static str> {
+    GENERATED_TAGS.iter().find_map(|(tag, command)| {
+        model
+            .strip_prefix(tag)
+            .is_some_and(|rest| rest.is_empty() || rest.starts_with(' '))
+            .then_some(*command)
+    })
 }
 
-/// Whether the span between manual keys `a` and `b` holds motion made from text.
+/// Whether an AI key's model tag says a helper made it ([`GENERATED`], [`POSE_FILL`]).
+pub fn is_generated(model: &str) -> bool {
+    generated_by(model).is_some()
+}
+
+/// Whether the span between manual keys `a` and `b` holds motion a helper made.
 pub fn generated_in(clip: &Clip, a: i64, b: i64) -> bool {
     clip.keys()
         .iter()
         .any(|k| k.source == KeySource::Ai && a < k.frame && k.frame < b && is_generated(&k.model))
 }
 
-/// What an edit says when it leaves a span made from text as it was.
-pub fn generated_note(a: i64, b: i64) -> String {
+/// What an edit says when it leaves a span a helper made as it was.
+pub fn generated_note(clip: &Clip, a: i64, b: i64) -> String {
+    let (what, again) = clip
+        .keys()
+        .iter()
+        .find(|k| k.source == KeySource::Ai && a < k.frame && k.frame < b && is_generated(&k.model))
+        .and_then(|k| generated_by(&k.model).map(|c| (k.model.starts_with(POSE_FILL), c)))
+        .map_or(("from text", "text.fill"), |(pose, c)| {
+            (if pose { "from poses" } else { "from text" }, c)
+        });
     format!(
-        "{a}-{b}: the motion made from text was left as it was; make it again (text.fill) to meet the changed key"
+        "{a}-{b}: the motion made {what} was left as it was; make it again ({again}) to meet the changed key"
     )
 }
 
@@ -192,25 +222,75 @@ pub fn refill(clip: &mut Clip, a: i64, b: i64, filler: &dyn Filler, links: &dyn 
         return Ok(format!("{a}-{b}: gap over {MAX_FILL} frames, left to the spline"));
     }
     let (mut rots, mut roots, tag) = filler.fill(clip, a, b)?;
+    on_top(clip, a, b, &mut rots, &mut roots, links)?;
+    for (i, (r, o)) in rots.into_iter().zip(roots).enumerate() {
+        let mut k = Key::new(a + 1 + i as i64, r, o, Interp::Smooth);
+        k.source = KeySource::Ai;
+        k.model = tag.clone();
+        clip.set_key(k)?;
+    }
+    Ok(String::new())
+}
+
+/// On an additive layer a fill is a whole pose: keep its turn on top of the layers below.
+/// `rots`, `roots`: the frames `a+1 .. b-1`.
+fn on_top(
+    clip: &Clip,
+    a: i64,
+    b: i64,
+    rots: &mut [Vec<Quat>],
+    roots: &mut [Vec3],
+    links: &dyn Links,
+) -> R<()> {
     let additive = clip
         .layers
         .get(clip.edit)
         .is_some_and(|l| l.mode == LayerMode::Additive);
-    if additive {
-        // the fill is a whole pose: keep its turn on top of the layers below
-        let frames: Vec<f64> = ((a + 1)..b).map(|f| f as f64).collect();
-        let (br, bo) = clip.sample_below(&frames, clip.edit, links)?;
-        for (i, fr) in rots.iter_mut().enumerate() {
-            for (q, base) in fr.iter_mut().zip(br.get(i).into_iter().flatten()) {
-                *q = quat::normalize(quat::mul(quat::conj(*base), *q));
-            }
-            if let (Some(o), Some(base)) = (roots.get_mut(i), bo.get(i)) {
-                *o = quat::sub3(*o, *base);
-            }
+    if !additive {
+        return Ok(());
+    }
+    let frames: Vec<f64> = ((a + 1)..b).map(|f| f as f64).collect();
+    let (br, bo) = clip.sample_below(&frames, clip.edit, links)?;
+    for (i, fr) in rots.iter_mut().enumerate() {
+        for (q, base) in fr.iter_mut().zip(br.get(i).into_iter().flatten()) {
+            *q = quat::normalize(quat::mul(quat::conj(*base), *q));
+        }
+        if let (Some(o), Some(base)) = (roots.get_mut(i), bo.get(i)) {
+            *o = quat::sub3(*o, *base);
         }
     }
+    Ok(())
+}
+
+/// Replace the fills between neighbouring manual keys `keys` (in frame order) in one pass
+/// ([`Filler::fill_keys`]): the keys themselves stay, every frame between them becomes an AI
+/// key. Returns a note ("" when filled).
+pub fn refill_keys(clip: &mut Clip, keys: &[i64], filler: &dyn Filler, links: &dyn Links) -> R<String> {
+    let (Some(&a), Some(&z)) = (keys.first(), keys.last()) else {
+        return Err("a fill over several keys needs two or more".into());
+    };
+    for w in keys.windows(2) {
+        let &[p, q] = w else { continue };
+        clear_ai(clip, p, q)?;
+    }
+    if z - a - 1 < 1 {
+        return Ok(String::new());
+    }
+    let (mut rots, mut roots, tag) = filler.fill_keys(clip, keys)?;
+    if rots.len() != (z - a - 1) as usize || roots.len() != rots.len() {
+        return Err(format!(
+            "the fill over {a}–{z} gave {} frames for {}",
+            rots.len(),
+            z - a - 1
+        ));
+    }
+    on_top(clip, a, z, &mut rots, &mut roots, links)?;
     for (i, (r, o)) in rots.into_iter().zip(roots).enumerate() {
-        let mut k = Key::new(a + 1 + i as i64, r, o, Interp::Smooth);
+        let f = a + 1 + i as i64;
+        if keys.contains(&f) {
+            continue; // a key of yours inside the stretch stays as it is
+        }
+        let mut k = Key::new(f, r, o, Interp::Smooth);
         k.source = KeySource::Ai;
         k.model = tag.clone();
         clip.set_key(k)?;
@@ -250,7 +330,10 @@ fn refill_touching(
         })
         .collect();
     let (made, spans): (Vec<_>, Vec<_>) = spans.into_iter().partition(|&(a, b)| generated_in(clip, a, b));
-    let mut notes: Vec<String> = made.into_iter().map(|(a, b)| generated_note(a, b)).collect();
+    let mut notes: Vec<String> = made
+        .into_iter()
+        .map(|(a, b)| generated_note(clip, a, b))
+        .collect();
     let Some(filler) = filler else {
         return Ok(notes);
     };

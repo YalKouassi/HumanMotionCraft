@@ -35,6 +35,8 @@ pub struct AppState {
     pub preview_dir: Option<String>,
     /// mp4 or gif.
     pub preview_format: Option<String>,
+    /// Where a project file was opened or saved last.
+    pub project_dir: Option<String>,
     /// The first-run welcome was shown.
     pub welcome_seen: bool,
     /// The tips tour was finished or dismissed.
@@ -75,6 +77,7 @@ impl AppState {
         }
         self.preview_dir = self.preview_dir.take().or(old.preview_dir);
         self.preview_format = self.preview_format.take().or(old.preview_format);
+        self.project_dir = self.project_dir.take().or(old.project_dir);
         self.welcome_seen |= old.welcome_seen;
         self.tips_seen |= old.tips_seen;
     }
@@ -109,6 +112,7 @@ impl FilesPrefs {
             export_bones: self.export_bones.clone(),
             preview_dir: self.preview_dir.clone(),
             preview_format: self.preview_format.clone(),
+            project_dir: self.project_dir.clone(),
             welcome_seen: self.welcome_seen,
             tips_seen: self.tips_seen,
             guide_off: self.guide_off,
@@ -122,6 +126,7 @@ impl FilesPrefs {
         self.export_bones = s.export_bones.clone();
         self.preview_dir = s.preview_dir.clone();
         self.preview_format = s.preview_format.clone();
+        self.project_dir = s.project_dir.clone();
         self.welcome_seen = s.welcome_seen;
         self.tips_seen = s.tips_seen;
         self.guide_off = s.guide_off;

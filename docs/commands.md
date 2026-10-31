@@ -68,6 +68,7 @@ Inputs:
 |---|---|---|---|---|
 | `from` | integer |  | 0 to 10000000 | your key before the gap (default: around the playhead) |
 | `to` | integer |  | 0 to 10000000 | your key after the gap |
+| `anchors` | one of auto \| none |  |  | a gap over the model's limit: "auto" (default) places anchor poses from the library inside it and fills each span between them; "none" refuses it |
 
 Outputs:
 
@@ -77,7 +78,10 @@ Outputs:
 | `to` | integer | yes |  | your key after the gap |
 | `frames` | integer | yes |  | frames filled |
 | `model` | text | yes |  | the model label |
-| `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left (empty: none) |
+| `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left, and library animations left out of the anchor poses (empty: none) |
+| `anchors` | JSON | yes |  | a gap over the model's limit: the anchor poses placed inside it, [{frame, id, source_frame}] (the library animation and its frame the pose is); empty: the model took the gap in one |
+| `anchor_segment` | JSON | yes |  | the library segment the anchors came from: {id, from, to, speed, match_deg} (its frames matched to the two keys, library frames per animation frame, and the mean angle between its end poses and the keys); null: the model took the gap in one |
+| `diagnostics` | JSON | yes |  | measured on the keys the fill wrote: {from, to, sliding: [{foot, from, to, slide_cm}] per contact span, sliding_max_cm, path: {max_m, frame} (the root from the keys' own path), seams: [{frame, dv (m/s), joint, dw (rad/s), bone}] at the two keys and at each anchor pose between them (null: no frame beyond it), bent: [{joint, component, past_deg, worst_frame, spans}] the joints bent back inside the possible limits, flags: [{kind: sliding\|path\|pop\|spin\|bent, from, to, text}] what is past a line, notes: what could not be measured} |
 
 ### `ai.fill_all`: AI fill all gaps
 
@@ -97,6 +101,9 @@ Outputs:
 | `skipped` | JSON | yes |  | the gaps left: [{from, to, reason}] |
 | `model` | text | yes |  | the model label |
 | `notes` | list of text | yes |  | impossible poses the fills made and bent back to the possible limit, or left (each starts with its gap, from–to; empty: none) |
+| `anchors` | JSON | yes |  | the anchor poses placed in gaps over the model's limit: [{from, to, frame, id, source_frame}] (empty: none needed) |
+| `passes` | JSON | yes |  | the gaps filled several at once, with a model trained with several keys in a window (ai.info's multi_key): one list of keys per pass, [[from, key, ..., to]] (empty: every gap on its own) |
+| `diagnostics` | JSON | yes |  | one per gap filled, in order, as ai.fill's: [{from, to, sliding, sliding_max_cm, path, seams, bent, flags, notes}] |
 
 ### `ai.gaps`: AI gaps
 
@@ -108,7 +115,7 @@ Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `gaps` | JSON | yes |  | every gap between your keys: [{from, to, frames, filled, refused}] (refused: why the model can't fill it, null: it can) |
+| `gaps` | JSON | yes |  | every gap between your keys: [{from, to, frames, filled, refused, anchors}] (refused: why the model can't fill it, null: it can; anchors: over the model's limit, how many anchor poses from the library split it, null: none needed) |
 | `at` | JSON | yes |  | the gap the playhead is in (null: none) |
 | `max_gap` | integer | yes |  | most frames the model fills in one gap (null: no model loaded) |
 
@@ -212,6 +219,8 @@ Outputs:
 | `cleared` | integer |  |  | plain: AI keys removed |
 | `model` | text |  |  | ai: the model label |
 | `notes` | list of text |  |  | ai: impossible poses the fill made and bent back, or left |
+| `anchors` | JSON |  |  | ai: the anchor poses placed in a gap over the model's limit, as ai.fill's (empty: none) |
+| `diagnostics` | JSON |  |  | ai: why the fill might look wrong, measured, as ai.fill's |
 
 ## anim
 
@@ -406,16 +415,18 @@ Inputs:
 | `bones` | list of text |  |  | exactly these joints instead of a profile |
 | `drop` | list of text |  |  | joints to leave out as well |
 | `root` | one of hips \| ground \| in_place |  |  | root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed) |
+| `target` | text |  |  | export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes |
 
 Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `bytes` | integer | yes |  | file size |
-| `joints` | integer | yes |  | joints exported |
+| `joints` | integer | yes |  | joints exported (with a target: nodes driven) |
 | `animations` | integer | yes |  | animations in the file |
 | `frames` | list of integers | yes |  | frames per animation |
 | `path` | text | yes |  | the file written |
+| `target` | JSON |  |  | with a target character: {character, driven, undriven: [node], scale, feet: [{clip, L: {planted_frames, slide_cm, travel_cm, lowest_cm, unreached_frames, holds}, R}], problems: [[{from, to, kind, label}]], notes} |
 
 ### `clip.export_batch`: Export each to .glb
 
@@ -431,6 +442,7 @@ Inputs:
 | `bones` | list of text |  |  | exactly these joints instead of a profile |
 | `drop` | list of text |  |  | joints to leave out as well |
 | `root` | one of hips \| ground \| in_place |  |  | root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed) |
+| `target` | text |  |  | export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes |
 
 Outputs:
 
@@ -486,13 +498,46 @@ Inputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
-| `path` | text | yes |  | a file path |
+| `path` | text | yes |  | an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig) |
+| `joints` | JSON |  |  | an .fbx: landmark -> joint name, correcting the guess ({"l_knee": "LeftLeg"}); the landmarks are hips, spine, neck, head and per side shoulder, elbow, wrist, hip, knee, ankle, toe |
 
 Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `length` | integer | yes |  | frames |
+| `fps` | number |  |  | an .fbx: the file's frame rate |
+| `frames` | integer |  |  | an .fbx: frames read (setup frames dropped) |
+| `joints` | JSON |  |  | an .fbx: {landmark: the file's joint that stood for it} |
+| `given` | list of text |  |  | an .fbx: the landmarks the joints parameter set |
+| `unused` | list of text |  |  | an .fbx: the file's joints with no landmark (fingers, face, props, ends) |
+| `at_rest` | list of text |  |  | an .fbx: rig bone families left at rest ("finger: 30 of 30 at rest") |
+| `scale` | number |  |  | an .fbx: the factor that made the source's legs the rig's |
+| `floor` | number |  |  | an .fbx: how far the floor was moved to z = 0 (metres; 0: left as it was) |
+| `hips` | JSON |  |  | an .fbx: {mid, left, right}: how far the rig's hip joints land from the source's on the worst frame (metres) |
+| `notes` | list of text |  |  | an .fbx: what was guessed, dropped or left at rest |
+| `source` | JSON |  |  | an .fbx: {version, up_axis, front_axis, unit_scale, fps_from, take, joints, frames, dropped} |
+
+### `clip.import_batch`: Import a folder of FBX
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `import`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | text | yes |  | a folder of .fbx files (subfolders too) |
+| `to` | text | yes |  | the folder the .clip.json files go in (made if missing) |
+| `joints` | JSON |  |  | landmark -> joint name, correcting the guess for every file ({"l_knee": "LeftLeg"}) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `folder` | text | yes |  | the folder the clips went in |
+| `files` | JSON | yes |  | [{file, path, frames, fps, notes}] written |
+| `failed` | JSON | yes |  | [{file, error}] not imported |
+| `cut` | text |  |  | set when more files were found than one batch takes |
 
 ### `clip.loop`: Loop
 
@@ -1149,7 +1194,8 @@ Outputs:
 | `name` | text | yes |  | its name |
 | `group` | text | yes |  | its group |
 | `id` | text | yes |  | its library id (null: not saved) |
-| `unsaved` | bool | yes |  | changes the library lacks |
+| `project` | text | yes |  | the project file it is (null: a library animation) |
+| `unsaved` | bool | yes |  | changes the library (or the project file) lacks |
 | `keys` | JSON | yes |  | [{frame, interp, source, model, part?, rows?}] of the edited layer |
 | `layers` | JSON | yes |  | [{name, keys, muted, weight, link}] |
 | `edit_layer` | integer | yes |  | the layer keys go on |
@@ -1858,6 +1904,111 @@ Outputs:
 | `poses` | JSON | yes |  | the same for poses |
 | `changed` | integer | yes |  | items added, updated, retired or moved |
 
+## live
+
+### `live.clip`: Live motion: keep a range
+
+undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer |  | 0 to 10000000 | the recording's first frame to keep (default 0) |
+| `to` | integer |  | 0 to 10000000 | its last frame to keep (default the last) |
+| `at` | integer |  | 0 to 10000000 | the animation's frame it starts on (default the playhead) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer | yes |  | the animation's first frame written |
+| `to` | integer | yes |  | its last |
+| `frames` | integer | yes |  | AI keys written between them |
+| `model` | text | yes |  | the keys' model tag |
+| `notes` | list of text | yes |  | what to know |
+
+### `live.input`: Live motion: steer
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `heading` | number |  | -3600 to 3600 | degrees: 0 the rig's forward (-Y), positive to its left |
+| `speed` | number |  | 0 to 100 | m/s, 0 to stop (held to the targets' top speed) |
+| `style` | text |  |  | a target of the set to aim at instead of blending by speed |
+| `frames` | integer |  | 0 to 600 | frames at 30 fps to move on (default 1) |
+| `wait` | bool |  |  | wait for each stretch (default); false lets the model work on a thread while the last stretch plays on |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `state` | one of live \| full | yes |  | full: the recording reached its cap and the character stands |
+| `frames` | integer | yes |  | frames recorded so far |
+| `calls` | integer | yes |  | stretches asked of the model so far |
+| `speed` | number | yes |  | the stick smoothed, m/s |
+| `target` | text | yes |  | what the last stretch aimed at |
+| `why` | text | yes |  | why the last stretch was asked for |
+| `root` | [x, y, z] | yes |  | the root offset on show |
+| `notes` | list of text | yes |  | what to know |
+
+### `live.show`: Live motion: look at a recorded frame
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frame` | integer | yes | 0 to 10000000 | the recording's frame to show |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frame` | integer | yes |  | the frame on show |
+| `root` | [x, y, z] | yes |  | its root offset |
+
+### `live.start`: Live motion: start a take
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `max_frames` | integer |  | 2 to 18000 | the most frames to record (default ten minutes at 30 fps) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `session` | integer | yes |  | the take's number |
+| `targets` | list of text | yes |  | the target poses of the set |
+| `max_speed` | number | yes |  | the set's top speed, m/s |
+| `max_frames` | integer | yes |  | the most frames it records |
+
+### `live.stop`: Live motion: stop the take
+
+not undoable, icon `ai`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frames` | integer | yes |  | frames recorded; they stay for live.clip |
+| `calls` | integer | yes |  | stretches asked of the model |
+| `held` | integer | yes |  | frames shown with no motion ready: the last pose held |
+| `late` | integer | yes |  | frames skipped because a stretch came late |
+| `round_trip_ms` | number | yes |  | mean time a stretch took, helper round trip |
+| `round_trip_max_ms` | number | yes |  | the longest |
+| `model_ms` | number | yes |  | mean of the model's own time |
+
 ## marker
 
 ### `marker.add`: Add marker
@@ -2360,6 +2511,159 @@ Outputs:
 |---|---|---|---|---|
 | `degrees` | number | yes |  | the lean moved into the back |
 
+## posefill
+
+### `posefill.fill`: Fill gap from poses
+
+undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer |  | 0 to 10000000 | your key before the gap (default: around the playhead) |
+| `to` | integer |  | 0 to 10000000 | your key after the gap; keys of yours between from and to are gone through, one call a gap |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `from` | integer | yes |  | the fill's first frame (a key of yours) |
+| `to` | integer | yes |  | its last frame (a key of yours) |
+| `frames` | integer | yes |  | AI keys written between them |
+| `model` | text | yes |  | the keys' model tag |
+| `calls` | integer | yes |  | model calls made: one a gap between keys of yours |
+| `seconds` | number | yes |  | the model's own time over those calls, as it reports it |
+| `notes` | list of text | yes |  | what to know about the result |
+
+### `posefill.helper`: Pose fill: helper
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `action` | one of status \| load \| stop |  |  | status (default) says what is installed and running; load starts the helper and loads the model (a few minutes the first time, while it builds its plan for this GPU); stop ends it |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `installed` | bool | yes |  | the helper is installed |
+| `dir` | text | yes |  | where it is (or would be) installed |
+| `running` | bool | yes |  | its process is up |
+| `loaded` | bool | yes |  | the model is in memory |
+| `busy` | bool | yes |  | it is making a fill now |
+| `model` | text | yes |  | the model installed |
+| `plan` | text |  |  | whether the model's plan for this GPU is built (the first load builds it, a few minutes) |
+| `gpu` | text |  |  | the GPU the helper runs on |
+| `note` | text |  |  | what is missing and how to install it |
+
+### `posefill.install`: Pose fill: install
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `action` | one of check \| start \| stop |  |  | check (default) says what the install needs and what it is doing; start runs the setup (about 4 GB downloaded, a few minutes; the window stays usable); stop ends it, and start carries on from there |
+| `repair` | bool |  |  | start even when it is installed: the setup updates or repairs it |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `state` | one of not installed \| installing \| stopping \| installed \| failed \| stopped | yes |  | what the install is doing |
+| `dir` | text | yes |  | where it is (or would be) installed |
+| `log` | text |  |  | the setup's log |
+| `step` | integer |  |  | the setup's step working now (or where it ended), of steps |
+| `steps` | integer |  |  | how many steps the setup has |
+| `label` | text |  |  | what that step does |
+| `last` | text |  |  | the last line the setup printed (a download's progress) |
+| `seconds` | integer |  |  | how long the setup started here has run |
+| `error` | text |  |  | why it failed |
+| `requirements` | JSON |  |  | when it is not installed or running: what it needs, a list of {name, ok, required, note} |
+| `ready` | bool |  |  | everything required is there: start can run |
+| `licences` | JSON |  |  | what installing accepts, a list of {part, licence, url} |
+| `left_out` | text |  |  | what the install never takes from the engine's source |
+
+## project
+
+### `project.info`: Project file info
+
+not undoable, icon `info`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | a project file (.project.json) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file read |
+| `version` | integer | yes |  | the version it was written with |
+| `current` | bool | yes |  | whether that is the version this build writes |
+| `name` | text | yes |  | the animation's name |
+| `group` | text | yes |  | its group |
+| `fps` | number | yes |  | frames per second |
+| `frames` | integer | yes |  | its length |
+| `layers` | integer | yes |  | layers, the base included |
+| `boxes` | integer | yes |  | scene boxes |
+| `links` | list of text | yes |  | the linked clips it carries, by library id |
+| `clips` | integer | yes |  | clips in the file |
+| `bytes` | integer | yes |  | its size |
+| `hash` | text | yes |  | FNV-1a of its bytes |
+
+### `project.open`: Open project
+
+undoable, shortcut `Ctrl+Shift+O`, icon `open`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | a project file (.project.json) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file opened |
+| `name` | text | yes |  | the animation's name |
+| `length` | integer | yes |  | frames |
+| `frame` | number | yes |  | the playhead, as saved |
+| `links` | list of text | yes |  | the linked clips it carries, by library id |
+| `layers` | integer | yes |  | layers, the base included |
+| `boxes` | integer | yes |  | scene boxes |
+| `version` | integer | yes |  | the version the file was written with |
+| `migrated` | bool | yes |  | an older version, brought up to date on opening |
+| `notes` | list of text | yes |  | what the open session can't honour (an unknown AI style) |
+
+### `project.save`: Save project
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), shortcut `Ctrl+Shift+S`, icon `save`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text |  |  | where to write it (default: the file the project was opened from or saved to) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file written |
+| `bytes` | integer | yes |  | its size |
+| `hash` | text | yes |  | FNV-1a of its bytes (the same document gives the same hash) |
+| `links` | list of text | yes |  | the linked clips embedded, by library id |
+| `clips` | integer | yes |  | clips in the file (the animation and its links) |
+
 ## recovery
 
 ### `recovery.clear`: Discard unsaved work
@@ -2422,6 +2726,123 @@ Outputs:
 |---|---|---|---|---|
 | `file` | text | yes |  | the recovery file's name |
 | `id` | text | yes |  | the animation's library id (null: never saved) |
+
+## retarget
+
+### `retarget.check`: Check character retarget
+
+not undoable, icon `graph`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frames` | integer | yes |  | frames driven |
+| `scale` | number | yes |  | the character's legs over the rig's |
+| `driven` | integer | yes |  | nodes the rig drives |
+| `undriven` | list of text | yes |  | nodes under the hips nothing drives |
+| `feet` | JSON | yes |  | {L, R: {planted_frames, spans: [{from, to, slide_cm}], slide_cm, travel_cm, lowest_cm, unreached_frames, unreached_cm, holds}}: how far a planted foot drifts from where it came down (slide), its per-frame travel added up (travel), the lowest it got above the character's floor, frames its leg could not reach, and whether it holds (drift under 1 cm, never under the floor, always reached) |
+| `problems` | JSON | yes |  | [{from, to, kind: foot-slide \| below-floor \| unreached \| undriven, label}] |
+| `notes` | list of text | yes |  | the plan's notes |
+
+### `retarget.load`: Load character
+
+undoable, icon `import`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | a character .glb (the mapping is guessed from its node names) or a saved mapping file (.retarget.json) |
+| `joints` | JSON |  |  | landmark -> node name, correcting the guess ({"l_knee": "L_Calf"}; "none" unmaps one) |
+| `hands` | bool |  |  | solve the arms onto the rig's wrists too (default: legs only) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `character` | text | yes |  | the character file, as given |
+| `nodes` | integer | yes |  | nodes in the file |
+| `skin_joints` | integer | yes |  | joints of its skin (0: no skin) |
+| `mesh` | bool | yes |  | a mesh is skinned to it |
+| `joints` | JSON | yes |  | {landmark: the node that stands for it} |
+| `given` | list of text | yes |  | the landmarks the joints parameter set |
+| `hands` | bool | yes |  | the arms are solved onto the wrists |
+| `missing` | list of text | yes |  | required landmarks with no node yet |
+| `ready` | bool | yes |  | the mapping is complete and the character can be checked and exported |
+| `driven` | integer | yes |  | nodes the rig drives |
+| `undriven` | list of text | yes |  | nodes under the hips nothing drives (they keep their rest) |
+| `outside` | list of text | yes |  | nodes not under the hips (left as they are) |
+| `scale` | number |  |  | the character's legs over the rig's (null: not ready) |
+| `floor` | number |  |  | the character's floor height (null: not ready) |
+| `source` | JSON |  |  | {nodes, skin_joints, meshes, animations} of the file |
+| `notes` | list of text | yes |  | what was guessed, left out or is missing |
+
+### `retarget.map`: Map character joints
+
+undoable, icon `edit`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `joints` | JSON |  |  | landmark -> node name, correcting the guess ({"l_knee": "L_Calf"}; "none" unmaps one) |
+| `hands` | bool |  |  | solve the arms onto the rig's wrists too (default: legs only) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `character` | text | yes |  | the character file, as given |
+| `nodes` | integer | yes |  | nodes in the file |
+| `skin_joints` | integer | yes |  | joints of its skin (0: no skin) |
+| `mesh` | bool | yes |  | a mesh is skinned to it |
+| `joints` | JSON | yes |  | {landmark: the node that stands for it} |
+| `given` | list of text | yes |  | the landmarks the joints parameter set |
+| `hands` | bool | yes |  | the arms are solved onto the wrists |
+| `missing` | list of text | yes |  | required landmarks with no node yet |
+| `ready` | bool | yes |  | the mapping is complete and the character can be checked and exported |
+| `driven` | integer | yes |  | nodes the rig drives |
+| `undriven` | list of text | yes |  | nodes under the hips nothing drives (they keep their rest) |
+| `outside` | list of text | yes |  | nodes not under the hips (left as they are) |
+| `scale` | number |  |  | the character's legs over the rig's (null: not ready) |
+| `floor` | number |  |  | the character's floor height (null: not ready) |
+| `source` | JSON |  |  | {nodes, skin_joints, meshes, animations} of the file |
+| `notes` | list of text | yes |  | what was guessed, left out or is missing |
+
+### `retarget.save`: Save character mapping
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `save`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the mapping file to write (.retarget.json) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file written |
+| `bytes` | integer | yes |  | its size |
+| `hash` | text | yes |  | a hash of its bytes (the same mapping gives the same file) |
+| `character` | text | yes |  | the character file it names |
+
+### `retarget.unload`: Unload character
+
+undoable, icon `close`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `unloaded` | bool | yes |  | the character is out of the document |
+| `character` | text | yes |  | the character file that was loaded |
 
 ## rig
 
