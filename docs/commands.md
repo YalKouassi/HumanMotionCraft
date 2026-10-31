@@ -724,6 +724,7 @@ Inputs:
 | `root` | text | yes |  | the folder the paths lie under: the first folder below it is the pack |
 | `to` | text | yes |  | the output folder for the clips and the manifest (made if missing; never inside a repository) |
 | `limit` | integer |  |  | finish at most this many new sources, then stop |
+| `retry_refused` | bool |  |  | try again the sources whose latest outcome is refused; imported and duplicate stay skipped |
 
 Outputs:
 

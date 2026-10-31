@@ -1862,6 +1862,10 @@
                   "limit": {
                     "type": "integer",
                     "description": "finish at most this many new sources, then stop"
+                  },
+                  "retry_refused": {
+                    "type": "boolean",
+                    "description": "try again the sources whose latest outcome is refused; imported and duplicate stay skipped"
                   }
                 },
                 "required": [
