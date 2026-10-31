@@ -10,6 +10,7 @@ use serde_json::{Value, json};
 
 use super::ai_worker::{self, Worker};
 use crate::app::App;
+use crate::app::shell::Level;
 use crate::app::timeline::marks::Mark;
 use crate::app::ui_ids::Tag;
 
@@ -32,8 +33,6 @@ pub struct AiState {
     worker: Option<Result<Worker, String>>,
     /// How long the last preview took to work out.
     last_ms: Option<u128>,
-    /// Why the last preview failed, shown under the buttons.
-    error: Option<String>,
     /// Fill with the pose-to-pose model (roadmap 163000), once it's installed; else our own.
     pub pose_fill: bool,
     /// Footsteps: the left foot steps first (else the right).
@@ -44,6 +43,8 @@ pub struct AiState {
     pub steps_ai: bool,
     /// The last fill's diagnostics, while the animation is as it left it.
     pub report: Option<FillReport>,
+    /// The Fill report window is open.
+    report_open: bool,
 }
 
 impl App {
@@ -104,80 +105,136 @@ impl App {
         }
     }
 
-    /// What the last fill measured, per span: the numbers in one line, each flag (a click goes
-    /// to its frame), and what could not be measured.
-    fn fill_report(&mut self, ui: &mut egui::Ui) {
-        let Some(rep) = self.panels.ai.report.as_ref() else {
+    /// The Fill report button: always there, so nothing below it moves when a fill reports.
+    fn fill_report_button(&mut self, ui: &mut egui::Ui) {
+        let flags = self.panels.ai.report.as_ref().map(|r| {
+            r.spans
+                .iter()
+                .map(|d| d["flags"].as_array().map_or(0, Vec::len))
+                .sum::<usize>()
+        });
+        let label = match flags {
+            Some(n) if n > 0 => format!("Fill report ({n})"),
+            _ => "Fill report".to_string(),
+        };
+        if ui
+            .add_enabled(flags.is_some(), egui::Button::new(&label))
+            .on_hover_text("What the last fill measured, and anything to look at")
+            .on_disabled_hover_text("Fill a gap first: this says what the fill measured")
+            .tag("panel.ai.report", label.as_str())
+            .clicked()
+        {
+            self.panels.ai.report_open = !self.panels.ai.report_open;
+        }
+    }
+
+    /// What the last fill measured, per span, in a window of its own: the numbers in one line,
+    /// each flag (a click goes to its frame), and what could not be measured.
+    pub(in crate::app) fn fill_report_window(&mut self, ctx: &egui::Context) {
+        let Some(rep) = self
+            .panels
+            .ai
+            .report
+            .as_ref()
+            .filter(|_| self.panels.ai.report_open)
+        else {
             return;
         };
         let spans = rep.spans.clone();
         let pal = self.palette();
-        for (n, d) in spans.iter().enumerate() {
-            let (a, b) = (d["from"].as_i64().unwrap_or(0), d["to"].as_i64().unwrap_or(0));
-            let flags = d["flags"].as_array().cloned().unwrap_or_default();
-            let seams: Vec<String> = d["seams"]
-                .as_array()
-                .into_iter()
-                .flatten()
-                .map(|s| match (s["dv"].as_f64(), s["dw"].as_f64()) {
-                    (Some(dv), Some(dw)) => format!("key {}: {dv:.2} m/s, {dw:.2} rad/s", s["frame"]),
-                    (Some(dv), None) => format!("key {}: {dv:.2} m/s", s["frame"]),
-                    _ => format!("key {}: not measurable", s["frame"]),
-                })
-                .collect();
-            ui.label(
-                egui::RichText::new(format!(
-                    "Fill {}–{}: {}. Slide {:.1} cm, root {:.2} m off the keys' path, {}, {} joint{} bent back.",
-                    a + 1,
-                    b - 1,
-                    match flags.len() {
-                        0 => "nothing past a line".to_string(),
-                        1 => "1 thing to look at".to_string(),
-                        k => format!("{k} things to look at"),
-                    },
-                    d["sliding_max_cm"].as_f64().unwrap_or(0.0),
-                    d["path"]["max_m"].as_f64().unwrap_or(0.0),
-                    seams.join(", "),
-                    d["bent"].as_array().map_or(0, Vec::len),
-                    if d["bent"].as_array().map_or(0, Vec::len) == 1 { "" } else { "s" },
-                ))
-                .small(),
-            );
-            for (i, f) in flags.iter().enumerate() {
-                let kind = f["kind"].as_str().unwrap_or_default();
-                let family = match kind {
-                    "sliding" => "sliding",
-                    "bent" => "penetration",
-                    "path" => "unbalanced",
-                    _ => "other",
-                };
-                let text = f["text"].as_str().unwrap_or_default();
-                let frame = f["from"].as_i64().unwrap_or(0);
-                if ui
-                    .add(
-                        egui::Label::new(
-                            egui::RichText::new(text)
-                                .small()
-                                .color(super::physics::colour(pal, family)),
-                        )
-                        .sense(egui::Sense::click()),
-                    )
-                    .on_hover_text(format!("Go to frame {frame}"))
-                    .tag(format!("panel.ai.flag.{n}.{i}"), text)
-                    .clicked()
-                {
-                    self.run("frame.set", json!({ "frame": frame }));
-                }
-            }
-            for note in d["notes"].as_array().into_iter().flatten() {
+        let flagged = spans
+            .iter()
+            .filter(|d| d["flags"].as_array().is_some_and(|f| !f.is_empty()))
+            .count();
+        let mut open = true;
+        let mut go = None;
+        egui::Window::new("Fill report")
+            .open(&mut open)
+            .default_size([520.0, 380.0])
+            .show(ctx, |ui| {
                 ui.label(
-                    egui::RichText::new(note.as_str().unwrap_or_default())
-                        .small()
-                        .weak(),
+                    egui::RichText::new(format!(
+                        "{} fills, {flagged} with something to look at · click a line to go to its frame",
+                        spans.len()
+                    ))
+                    .weak()
+                    .small(),
                 );
-            }
+                ui.separator();
+                egui::ScrollArea::vertical().auto_shrink(false).show(ui, |ui| {
+                    for (n, d) in spans.iter().enumerate() {
+                        let (a, b) = (d["from"].as_i64().unwrap_or(0), d["to"].as_i64().unwrap_or(0));
+                        let flags = d["flags"].as_array().cloned().unwrap_or_default();
+                        let seams: Vec<String> = d["seams"]
+                            .as_array()
+                            .into_iter()
+                            .flatten()
+                            .map(|s| match (s["dv"].as_f64(), s["dw"].as_f64()) {
+                                (Some(dv), Some(dw)) => format!("key {}: {dv:.2} m/s, {dw:.2} rad/s", s["frame"]),
+                                (Some(dv), None) => format!("key {}: {dv:.2} m/s", s["frame"]),
+                                _ => format!("key {}: not measurable", s["frame"]),
+                            })
+                            .collect();
+                        ui.label(
+                            egui::RichText::new(format!(
+                                "Fill {}–{}: {}. Slide {:.1} cm, root {:.2} m off the keys' path, {}, {} joint{} bent back.",
+                                a + 1,
+                                b - 1,
+                                match flags.len() {
+                                    0 => "nothing past a line".to_string(),
+                                    1 => "1 thing to look at".to_string(),
+                                    k => format!("{k} things to look at"),
+                                },
+                                d["sliding_max_cm"].as_f64().unwrap_or(0.0),
+                                d["path"]["max_m"].as_f64().unwrap_or(0.0),
+                                seams.join(", "),
+                                d["bent"].as_array().map_or(0, Vec::len),
+                                if d["bent"].as_array().map_or(0, Vec::len) == 1 { "" } else { "s" },
+                            ))
+                            .small(),
+                        );
+                        for (i, f) in flags.iter().enumerate() {
+                            let kind = f["kind"].as_str().unwrap_or_default();
+                            let family = match kind {
+                                "sliding" => "sliding",
+                                "bent" => "penetration",
+                                "path" => "unbalanced",
+                                _ => "other",
+                            };
+                            let text = f["text"].as_str().unwrap_or_default();
+                            let frame = f["from"].as_i64().unwrap_or(0);
+                            if ui
+                                .add(
+                                    egui::Label::new(
+                                        egui::RichText::new(text)
+                                            .small()
+                                            .color(super::physics::colour(pal, family)),
+                                    )
+                                    .sense(egui::Sense::click()),
+                                )
+                                .on_hover_text(format!("Go to frame {frame}"))
+                                .tag(format!("window.fill_report.flag.{n}.{i}"), text)
+                                .clicked()
+                            {
+                                go = Some(frame);
+                            }
+                        }
+                        for note in d["notes"].as_array().into_iter().flatten() {
+                            ui.label(
+                                egui::RichText::new(note.as_str().unwrap_or_default())
+                                    .small()
+                                    .weak(),
+                            );
+                        }
+                    }
+                });
+            });
+        self.panels.ai.report_open = open;
+        if let Some(frame) = go {
+            self.run("frame.set", json!({ "frame": frame }));
         }
     }
+
     /// Collect a finished preview and show it (runs every frame, panel open or not).
     pub(in crate::app) fn ai_poll(&mut self) {
         let Some(Ok(w)) = self.panels.ai.worker.as_mut() else {
@@ -190,7 +247,6 @@ impl App {
                 let params =
                     json!({ "from": p.from, "to": p.to, "mode": if p.plain { "plain" } else { "ai" } });
                 self.session.document.ai_precomputed = Some(p);
-                self.panels.ai.error = None;
                 if let Some(r) = self.run("ai.preview", params) {
                     self.status = format!(
                         "preview {}–{}: {}",
@@ -206,7 +262,7 @@ impl App {
             Ok(_) => {}
             Err(e) => {
                 self.status = format!("AI preview: {e}");
-                self.panels.ai.error = Some(e);
+                self.shell.messages.push(Level::Error, format!("AI preview: {e}"));
             }
         }
     }
@@ -300,24 +356,30 @@ impl App {
                     None => text,
                 };
                 let filled = if g.filled { ", filled by the model" } else { "" };
-                ui.label(
-                    egui::RichText::new(format!("{text}{filled}")).color(if refusal.is_some() {
+                // one line whatever it says: the rest is in the hover, so nothing below moves
+                let line = format!("{text}{filled}");
+                let hover = match &refusal {
+                    Some(why) => format!("{line}\nPreview and Fill are off: {why}"),
+                    None => line.clone(),
+                };
+                ui.add(
+                    egui::Label::new(egui::RichText::new(line).color(if refusal.is_some() {
                         self.palette().error
                     } else {
                         ui.visuals().text_color()
-                    }),
-                );
+                    }))
+                    .truncate(),
+                )
+                .on_hover_text(hover);
             }
             None => {
-                ui.label(egui::RichText::new("The playhead is not between two of your keys.").weak());
+                ui.add(
+                    egui::Label::new(
+                        egui::RichText::new("The playhead is not between two of your keys.").weak(),
+                    )
+                    .truncate(),
+                );
             }
-        }
-        if let (Some(why), Some(_)) = (&refusal, &gap) {
-            ui.label(
-                egui::RichText::new(format!("Preview and Fill are off: {why}"))
-                    .small()
-                    .color(self.palette().error),
-            );
         }
         let pending = self.ai_pending();
         ui.horizontal_wrapped(|ui| {
@@ -359,10 +421,11 @@ impl App {
             }
         });
         self.fill_all_row(ui, &all);
-        self.fill_report(ui);
         self.steps_row(ui, gap.as_ref().map(|g| (g.from, g.to)));
-        if let Some(p) = pending {
-            ui.horizontal_wrapped(|ui| {
+        // the same height working or not, so the controls below stay where they are
+        ui.horizontal(|ui| {
+            ui.set_min_height(20.0);
+            if let Some(p) = &pending {
                 ui.spinner();
                 ui.label(format!(
                     "working out the {}... {} ms",
@@ -378,18 +441,15 @@ impl App {
                     w.cancel();
                     self.status = "AI preview cancelled".into();
                 }
-            });
-            ctx.request_repaint_after(Duration::from_millis(50));
-        } else if let Some(ms) = self.panels.ai.last_ms {
-            ui.label(
-                egui::RichText::new(format!("last preview worked out in {ms} ms"))
-                    .small()
-                    .weak(),
-            );
-        }
-        if let Some(e) = &self.panels.ai.error {
-            ui.label(egui::RichText::new(e).small().color(self.palette().error));
-        }
+                ctx.request_repaint_after(Duration::from_millis(50));
+            } else if let Some(ms) = self.panels.ai.last_ms {
+                ui.label(
+                    egui::RichText::new(format!("last preview worked out in {ms} ms"))
+                        .small()
+                        .weak(),
+                );
+            }
+        });
         self.preview_controls(ui, &info, &ctx);
         self.ai_settings_controls(ui, &info, &ctx);
         ui.label(
@@ -449,6 +509,12 @@ impl App {
         } else {
             all.iter().filter(|g| g.refused.is_some() && g.frames > 0).count()
         };
+        let hover = match too_long {
+            0 => "Fill every empty gap between your keys with the model (one undo)".to_string(),
+            n => format!(
+                "Fill every empty gap between your keys with the model (one undo). {n} too long for the model stay as they are"
+            ),
+        };
         ui.horizontal_wrapped(|ui| {
             let why = if all.is_empty() {
                 "needs at least two keys of yours".to_string()
@@ -457,7 +523,7 @@ impl App {
             };
             if ui
                 .add_enabled(open > 0, egui::Button::new(format!("Fill all gaps ({open})")))
-                .on_hover_text("Fill every empty gap between your keys with the model (one undo)")
+                .on_hover_text(hover)
                 .on_disabled_hover_text(why)
                 .tag("panel.ai.fill_all", format!("Fill all gaps ({open})"))
                 .clicked()
@@ -477,13 +543,7 @@ impl App {
                     format!("AI filled {n} gaps; left to the spline: {}", skipped.join(", "))
                 };
             }
-            if too_long > 0 {
-                ui.label(
-                    egui::RichText::new(format!("{too_long} too long for the model"))
-                        .small()
-                        .color(self.palette().error),
-                );
-            }
+            self.fill_report_button(ui);
         });
     }
 

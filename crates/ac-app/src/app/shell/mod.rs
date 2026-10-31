@@ -211,6 +211,8 @@ impl App {
         self.settings_window(ctx);
         self.history_window(ctx);
         self.messages_window(ctx);
+        self.fill_report_window(ctx);
+        self.physics_problems_window(ctx);
         self.shortcuts_window(ctx);
         self.about_window(ctx);
         self.perf_hud(ctx);
