@@ -55,6 +55,7 @@ pub mod ranges;
 pub mod retarget;
 pub mod retime;
 pub mod rig;
+pub mod secondary;
 pub mod session;
 pub mod steps;
 pub mod suggest;

@@ -164,6 +164,24 @@ impl App {
             self.run("layer.add", json!({}));
             self.panels.layers.picked = None;
         }
+        if ui
+            .button("Secondary motion")
+            .on_hover_text(
+                "Arm swing, shoulders, pelvis, spine, head, hands and follow-through, worked out from the \
+                 motion, on a layer of its own: mute it to get your animation back",
+            )
+            .tag("panel.layers.secondary", "Secondary motion")
+            .clicked()
+            && let Some(r) = self.run("layer.secondary", json!({}))
+        {
+            self.status = r["notes"]
+                .as_array()
+                .and_then(|n| n.last())
+                .and_then(|n| n.as_str())
+                .unwrap_or_default()
+                .to_string();
+            self.panels.layers.picked = None;
+        }
         if let Some(row) = rows.get(picked) {
             ui.separator();
             self.layer_details(ui, picked, row);
