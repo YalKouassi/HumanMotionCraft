@@ -413,7 +413,8 @@ impl Library {
             }
             out.push(item);
         }
-        if new != old {
+        // an empty list leaves no file: a folder that isn't a library yet gets nothing put in it
+        if new.items != old.items && !(new.items.is_empty() && !self.index_path().is_some_and(|p| p.exists())) {
             self.save_index(&new);
         }
         out
