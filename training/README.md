@@ -11,6 +11,9 @@ clips. Nothing here runs at app time.
 | `ac_train.train` | trains the network on the retargeted sets into `training/data/models/<tag>/` |
 | `ac_train.evaluate` | the evaluation suite: gap bins, pose, feet, continuity, impossible joints, realistic contexts, part layers, scenarios (starts, stops, crouches, flights, turns while stepping); writes it into the card, and contact sheets |
 | `ac_train.flag` | after training: fills every window of every take with the model and puts the worst 1 % of the takes (by loss) into the review app's queue (`data/rig/flags.json`); a person decides, never the flag |
+| `ac_train.selection` | which takes a run reads: `--types`, `--styles` (styled takes left out), `--natural` (idle, walk, run, jump with no style word or `natural`), and `--takes <json>` (an explicit include/exclude list by `set/take` id); the minutes that survive by type and set (roadmap 153000) |
+| `ac_train.candidates` | one long MP4 per motion type of the takes a filter keeps (a title card and a burnt-in id a take, chapters, an index CSV), for the owner to say which to train on |
+| `ac_train.compare` | model cards side by side: joint error and foot slide by gap bin and motion type |
 | `ac_train.coverage` | how many training minutes each evaluation slice has (starts, stops, crouches, flights, turns, the motion types), by set and by what training uses, holds out or leaves out, beside each slice's windows from a card and the windows it can expect; writes `data/coverage.json` (roadmap 134750) |
 | `ac_train.split` | which subjects validation holds out (whole subjects, stable however the sets change) |
 | `ac_train.context` | the context before key A as the app gives it: a spline through sparse keys (the app's interpolation, batched), or held still |
@@ -19,6 +22,7 @@ clips. Nothing here runs at app time.
 | `ac_train.library` | cuts 3-second clips from the retargeted sets into a library folder |
 | `ac_train.infer` | the reference fill (PyTorch) that the goldens pin the Rust port to |
 | `ac_train.fbxwrite` | a small binary FBX writer: the test files of the app's FBX import (`fixtures/data/*.fbx`) and the retarget golden the Rust port is pinned to (`crates/ac-core/tests/golden/retarget-walk.json`); it never reads FBX (the app's reader is the one importer) |
+| `ac_train.glbwrite` | a small glTF binary writer: the test character of the app's export onto a character (`fixtures/data/tall-character.glb`: other bone names, an A-pose, a bone roll on every joint, a scaled armature, a skinned box mesh); it never reads glTF (the app's reader is the one) |
 
 Everything under `training/data/` is gitignored: the downloads, the retargeted sets, the PyTorch
 checkpoints and the clips that may not be committed.
@@ -314,6 +318,38 @@ What the next training run would learn, without training:
 ```bash
 uv run python -m ac_train.labels
 ```
+
+### 3f. Choose the takes
+
+Training, the evaluation and the label listing read every take the review allows unless told which
+(`ac_train/selection.py`; the same arguments on all three):
+
+```bash
+uv run python -m ac_train.train --dry-run --natural                       # the minutes that survive, by type and set; nothing trained
+uv run python -m ac_train.selection --natural --write-takes review/natural-takes.json   # the kept takes as a list to edit
+uv run python -m ac_train.labels --types walk,run --styles none           # what such a run would learn
+```
+
+- `--types idle,walk,run,jump` keeps those motion types (the review's type, else the take name's);
+- `--styles natural` keeps takes whose style words are all listed; an unstyled take always passes,
+  `--styles none` keeps the unstyled alone. A take's style words are 100STYLE's style (`Neutral`
+  is `natural`; a pose or prop style such as `Teapot` counts as a style too, since a walk with a
+  teapot arm is not a normal walk) and the review's tags that are not a type or a data tag
+  (`range-of-motion`, `duplicate`);
+- `--natural` is both at once (roadmap 153000);
+- `--takes <json>` is `{"include": ["cmu/walk_cmu_02_01", ...], "exclude": [...]}`: a non-empty
+  `include` is exactly the takes to read (the type and style filters then don't apply), `exclude`
+  takes out whatever else says. An id no read set has is an error, never ignored. The scan's and
+  the review's rejections still hold, listed or not.
+
+The candidate videos the owner edits the list from come from
+`uv run python -m ac_train.candidates --natural --out ../target/shots/<date>/<topic> --ac <a copy of ac.exe> --assets ../assets`:
+one MP4 a type, every kept take once with its id burnt in and a chapter marker, physics off.
+
+`ac_train.evaluate` with a filter needs `--subset <name>`: the numbers go under
+`evaluation[_best]_<name>` in the card, so the full evaluation stays, and
+`uv run python -m ac_train.compare --card parts-natural:best:natural --card parts-lowweights:best:natural`
+puts two cards side by side by gap bin and type.
 
 ### 4. Train
 

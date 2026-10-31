@@ -227,6 +227,11 @@
             "recovery.list",
             "recovery.restore",
             "recovery.write",
+            "retarget.check",
+            "retarget.load",
+            "retarget.map",
+            "retarget.save",
+            "retarget.unload",
             "rig.info",
             "session.info",
             "session.reset",
@@ -1132,6 +1137,12 @@
                       "in_place"
                     ],
                     "description": "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)"
+                  },
+                  "target": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes"
                   }
                 },
                 "required": [
@@ -1214,6 +1225,12 @@
                       "in_place"
                     ],
                     "description": "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)"
+                  },
+                  "target": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes"
                   }
                 },
                 "required": [
@@ -5951,6 +5968,164 @@
           "if": {
             "properties": {
               "command": {
+                "const": "retarget.check"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Check character retarget"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.load"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Load character; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "a character .glb (the mapping is guessed from its node names) or a saved mapping file (.retarget.json)"
+                  },
+                  "joints": {
+                    "description": "landmark -> node name, correcting the guess ({\"l_knee\": \"L_Calf\"}; \"none\" unmaps one)"
+                  },
+                  "hands": {
+                    "type": "boolean",
+                    "description": "solve the arms onto the rig's wrists too (default: legs only)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.map"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Map character joints; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "joints": {
+                    "description": "landmark -> node name, correcting the guess ({\"l_knee\": \"L_Calf\"}; \"none\" unmaps one)"
+                  },
+                  "hands": {
+                    "type": "boolean",
+                    "description": "solve the arms onto the rig's wrists too (default: legs only)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.save"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Save character mapping; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the mapping file to write (.retarget.json)"
+                  }
+                },
+                "required": [
+                  "path"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "retarget.unload"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Unload character; undoable"
+              },
+              "params": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "rig.info"
               }
             },
@@ -6583,6 +6758,11 @@
             "recovery.list",
             "recovery.restore",
             "recovery.write",
+            "retarget.check",
+            "retarget.load",
+            "retarget.map",
+            "retarget.save",
+            "retarget.unload",
             "rig.info",
             "session.info",
             "session.reset",

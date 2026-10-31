@@ -40,6 +40,7 @@ pub static SPECS: &[CommandSpec] =
                     K::Choice(&["hips", "ground", "in_place"]),
                     "root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed)",
                 ),
+                crate::export::TARGET,
             ])
             .writes()
             .outputs(crate::returns::CLIP_EXPORT_BATCH),
@@ -103,7 +104,7 @@ fn export_batch(doc: &mut Document, p: &P) -> Out {
         let mut q = P::new();
         q.insert("path".into(), json!(folder.join(name).to_string_lossy()));
         q.insert("ids".into(), json!([id]));
-        for k in ["profile", "bones", "drop", "root"] {
+        for k in ["profile", "bones", "drop", "root", "target"] {
             if let Some(v) = p.get(k) {
                 q.insert(k.into(), v.clone());
             }

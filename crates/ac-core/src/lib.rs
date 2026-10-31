@@ -15,6 +15,7 @@ pub mod ai;
 pub mod anatomy;
 pub mod anchors;
 mod batch;
+pub mod character;
 pub mod clip;
 pub mod clipfile;
 pub mod command;

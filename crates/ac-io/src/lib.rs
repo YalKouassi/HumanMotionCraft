@@ -10,6 +10,7 @@
 
 pub mod anchorlib;
 pub mod builtins;
+pub mod character;
 pub mod commands;
 pub mod community_record;
 pub mod data_folder;
@@ -40,6 +41,7 @@ pub const ALL: &[&[ac_core::CommandSpec]] = &[
     // files, recovery and reloading for the window (batch A2)
     export_batch::SPECS,
     fbx::commands::SPECS,
+    character::commands::SPECS,
     recovery::SPECS,
     reload::SPECS,
     project::SPECS,

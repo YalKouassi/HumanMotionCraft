@@ -199,10 +199,100 @@ pub const LIBRARY_SAMPLES: &[ParamSpec] = &[
 
 pub const CLIP_EXPORT: &[ParamSpec] = &[
     ParamSpec::new("bytes", K::Integer, "file size").required(),
-    ParamSpec::new("joints", K::Integer, "joints exported").required(),
+    ParamSpec::new("joints", K::Integer, "joints exported (with a target: nodes driven)").required(),
     ParamSpec::new("animations", K::Integer, "animations in the file").required(),
     ParamSpec::new("frames", K::IntList, "frames per animation").required(),
     ParamSpec::new("path", K::Text, "the file written").required(),
+    ParamSpec::new(
+        "target",
+        K::Text,
+        "with a target character: {character, driven, undriven: [node], scale, feet: [{clip, L: {planted_frames, slide_cm, travel_cm, lowest_cm, unreached_frames, holds}, R}], problems: [[{from, to, kind, label}]], notes}",
+    )
+    .json(),
+];
+
+pub const RETARGET_LOAD: &[ParamSpec] = &[
+    ParamSpec::new("character", K::Text, "the character file, as given").required(),
+    ParamSpec::new("nodes", K::Integer, "nodes in the file").required(),
+    ParamSpec::new("skin_joints", K::Integer, "joints of its skin (0: no skin)").required(),
+    ParamSpec::new("mesh", K::Bool, "a mesh is skinned to it").required(),
+    ParamSpec::new("joints", K::Text, "{landmark: the node that stands for it}")
+        .json()
+        .required(),
+    ParamSpec::new("given", K::TextList, "the landmarks the joints parameter set").required(),
+    ParamSpec::new("hands", K::Bool, "the arms are solved onto the wrists").required(),
+    ParamSpec::new("missing", K::TextList, "required landmarks with no node yet").required(),
+    ParamSpec::new(
+        "ready",
+        K::Bool,
+        "the mapping is complete and the character can be checked and exported",
+    )
+    .required(),
+    ParamSpec::new("driven", K::Integer, "nodes the rig drives").required(),
+    ParamSpec::new(
+        "undriven",
+        K::TextList,
+        "nodes under the hips nothing drives (they keep their rest)",
+    )
+    .required(),
+    ParamSpec::new(
+        "outside",
+        K::TextList,
+        "nodes not under the hips (left as they are)",
+    )
+    .required(),
+    ParamSpec::new(
+        "scale",
+        K::Number,
+        "the character's legs over the rig's (null: not ready)",
+    ),
+    ParamSpec::new(
+        "floor",
+        K::Number,
+        "the character's floor height (null: not ready)",
+    ),
+    ParamSpec::new(
+        "source",
+        K::Text,
+        "{nodes, skin_joints, meshes, animations} of the file",
+    )
+    .json(),
+    ParamSpec::new("notes", K::TextList, "what was guessed, left out or is missing").required(),
+];
+
+pub const RETARGET_CHECK: &[ParamSpec] = &[
+    ParamSpec::new("frames", K::Integer, "frames driven").required(),
+    ParamSpec::new("scale", K::Number, "the character's legs over the rig's").required(),
+    ParamSpec::new("driven", K::Integer, "nodes the rig drives").required(),
+    ParamSpec::new("undriven", K::TextList, "nodes under the hips nothing drives").required(),
+    ParamSpec::new(
+        "feet",
+        K::Text,
+        "{L, R: {planted_frames, spans: [{from, to, slide_cm}], slide_cm, travel_cm, lowest_cm, unreached_frames, unreached_cm, holds}}: how far a planted foot drifts from where it came down (slide), its per-frame travel added up (travel), the lowest it got above the character's floor, frames its leg could not reach, and whether it holds (drift under 1 cm, never under the floor, always reached)",
+    )
+    .json()
+    .required(),
+    ParamSpec::new("problems", K::Text, "[{from, to, kind: foot-slide | below-floor | unreached | undriven, label}]")
+        .json()
+        .required(),
+    ParamSpec::new("notes", K::TextList, "the plan's notes").required(),
+];
+
+pub const RETARGET_SAVE: &[ParamSpec] = &[
+    ParamSpec::new("path", K::Text, "the file written").required(),
+    ParamSpec::new("bytes", K::Integer, "its size").required(),
+    ParamSpec::new(
+        "hash",
+        K::Text,
+        "a hash of its bytes (the same mapping gives the same file)",
+    )
+    .required(),
+    ParamSpec::new("character", K::Text, "the character file it names").required(),
+];
+
+pub const RETARGET_UNLOAD: &[ParamSpec] = &[
+    ParamSpec::new("unloaded", K::Bool, "the character is out of the document").required(),
+    ParamSpec::new("character", K::Text, "the character file that was loaded").required(),
 ];
 
 pub const LAYER_TRAVEL_PREVIEW: &[ParamSpec] = &[

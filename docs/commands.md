@@ -415,16 +415,18 @@ Inputs:
 | `bones` | list of text |  |  | exactly these joints instead of a profile |
 | `drop` | list of text |  |  | joints to leave out as well |
 | `root` | one of hips \| ground \| in_place |  |  | root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed) |
+| `target` | text |  |  | export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes |
 
 Outputs:
 
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `bytes` | integer | yes |  | file size |
-| `joints` | integer | yes |  | joints exported |
+| `joints` | integer | yes |  | joints exported (with a target: nodes driven) |
 | `animations` | integer | yes |  | animations in the file |
 | `frames` | list of integers | yes |  | frames per animation |
 | `path` | text | yes |  | the file written |
+| `target` | JSON |  |  | with a target character: {character, driven, undriven: [node], scale, feet: [{clip, L: {planted_frames, slide_cm, travel_cm, lowest_cm, unreached_frames, holds}, R}], problems: [[{from, to, kind, label}]], notes} |
 
 ### `clip.export_batch`: Export each to .glb
 
@@ -440,6 +442,7 @@ Inputs:
 | `bones` | list of text |  |  | exactly these joints instead of a profile |
 | `drop` | list of text |  |  | joints to leave out as well |
 | `root` | one of hips \| ground \| in_place |  |  | root motion bone: hips (pelvis only), ground (bone on the floor), in_place (ground bone with movement removed) |
+| `target` | text |  |  | export onto your own character: its .glb (the mapping is guessed) or a mapping file saved by retarget.save; the file is written with the animation on the character's own nodes |
 
 Outputs:
 
@@ -2540,6 +2543,123 @@ Outputs:
 |---|---|---|---|---|
 | `file` | text | yes |  | the recovery file's name |
 | `id` | text | yes |  | the animation's library id (null: never saved) |
+
+## retarget
+
+### `retarget.check`: Check character retarget
+
+not undoable, icon `graph`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `frames` | integer | yes |  | frames driven |
+| `scale` | number | yes |  | the character's legs over the rig's |
+| `driven` | integer | yes |  | nodes the rig drives |
+| `undriven` | list of text | yes |  | nodes under the hips nothing drives |
+| `feet` | JSON | yes |  | {L, R: {planted_frames, spans: [{from, to, slide_cm}], slide_cm, travel_cm, lowest_cm, unreached_frames, unreached_cm, holds}}: how far a planted foot drifts from where it came down (slide), its per-frame travel added up (travel), the lowest it got above the character's floor, frames its leg could not reach, and whether it holds (drift under 1 cm, never under the floor, always reached) |
+| `problems` | JSON | yes |  | [{from, to, kind: foot-slide \| below-floor \| unreached \| undriven, label}] |
+| `notes` | list of text | yes |  | the plan's notes |
+
+### `retarget.load`: Load character
+
+undoable, icon `import`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | a character .glb (the mapping is guessed from its node names) or a saved mapping file (.retarget.json) |
+| `joints` | JSON |  |  | landmark -> node name, correcting the guess ({"l_knee": "L_Calf"}; "none" unmaps one) |
+| `hands` | bool |  |  | solve the arms onto the rig's wrists too (default: legs only) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `character` | text | yes |  | the character file, as given |
+| `nodes` | integer | yes |  | nodes in the file |
+| `skin_joints` | integer | yes |  | joints of its skin (0: no skin) |
+| `mesh` | bool | yes |  | a mesh is skinned to it |
+| `joints` | JSON | yes |  | {landmark: the node that stands for it} |
+| `given` | list of text | yes |  | the landmarks the joints parameter set |
+| `hands` | bool | yes |  | the arms are solved onto the wrists |
+| `missing` | list of text | yes |  | required landmarks with no node yet |
+| `ready` | bool | yes |  | the mapping is complete and the character can be checked and exported |
+| `driven` | integer | yes |  | nodes the rig drives |
+| `undriven` | list of text | yes |  | nodes under the hips nothing drives (they keep their rest) |
+| `outside` | list of text | yes |  | nodes not under the hips (left as they are) |
+| `scale` | number |  |  | the character's legs over the rig's (null: not ready) |
+| `floor` | number |  |  | the character's floor height (null: not ready) |
+| `source` | JSON |  |  | {nodes, skin_joints, meshes, animations} of the file |
+| `notes` | list of text | yes |  | what was guessed, left out or is missing |
+
+### `retarget.map`: Map character joints
+
+undoable, icon `edit`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `joints` | JSON |  |  | landmark -> node name, correcting the guess ({"l_knee": "L_Calf"}; "none" unmaps one) |
+| `hands` | bool |  |  | solve the arms onto the rig's wrists too (default: legs only) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `character` | text | yes |  | the character file, as given |
+| `nodes` | integer | yes |  | nodes in the file |
+| `skin_joints` | integer | yes |  | joints of its skin (0: no skin) |
+| `mesh` | bool | yes |  | a mesh is skinned to it |
+| `joints` | JSON | yes |  | {landmark: the node that stands for it} |
+| `given` | list of text | yes |  | the landmarks the joints parameter set |
+| `hands` | bool | yes |  | the arms are solved onto the wrists |
+| `missing` | list of text | yes |  | required landmarks with no node yet |
+| `ready` | bool | yes |  | the mapping is complete and the character can be checked and exported |
+| `driven` | integer | yes |  | nodes the rig drives |
+| `undriven` | list of text | yes |  | nodes under the hips nothing drives (they keep their rest) |
+| `outside` | list of text | yes |  | nodes not under the hips (left as they are) |
+| `scale` | number |  |  | the character's legs over the rig's (null: not ready) |
+| `floor` | number |  |  | the character's floor height (null: not ready) |
+| `source` | JSON |  |  | {nodes, skin_joints, meshes, animations} of the file |
+| `notes` | list of text | yes |  | what was guessed, left out or is missing |
+
+### `retarget.save`: Save character mapping
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `save`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the mapping file to write (.retarget.json) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `path` | text | yes |  | the file written |
+| `bytes` | integer | yes |  | its size |
+| `hash` | text | yes |  | a hash of its bytes (the same mapping gives the same file) |
+| `character` | text | yes |  | the character file it names |
+
+### `retarget.unload`: Unload character
+
+undoable, icon `close`.
+
+No inputs.
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `unloaded` | bool | yes |  | the character is out of the document |
+| `character` | text | yes |  | the character file that was loaded |
 
 ## rig
 

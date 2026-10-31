@@ -92,6 +92,9 @@ pub struct Document {
     pub saved: BTreeMap<String, Arc<Clip>>,
     /// The project file this document is (`None`: a library animation, or never saved).
     pub project: Option<Arc<ProjectFile>>,
+    /// A character of the person's own and the mapping onto it (`retarget.load`), for the
+    /// export onto it and the preview beside the mannequin. Not saved in a project file.
+    pub character: Option<Arc<crate::character::Loaded>>,
 }
 
 /// Height (m) of the lowest joint above the floor when standing: the toe joints sit inside the foot.
@@ -144,6 +147,7 @@ impl Document {
             links: BTreeMap::new(),
             saved: BTreeMap::new(),
             project: None,
+            character: None,
         }
     }
 
@@ -193,6 +197,7 @@ impl PartialEq for Document {
             && self.key_clipboard == other.key_clipboard
             && self.clip_id == other.clip_id
             && self.links == other.links
+            && self.character == other.character
     }
 }
 

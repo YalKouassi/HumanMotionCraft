@@ -1,0 +1,242 @@
+{
+  "$schema": "./schema.json",
+  "name": "retarget-character",
+  "feature": "retarget.load",
+  "description": "Exporting onto a character of the person's own (roadmap 146000). The test character fixtures/data/tall-character.glb is written by python -m ac_train.glbwrite: 38 nodes (an Armature root scaled 0.01 with the 36 skin joints in centimetres under it, and a Body mesh node), 1.9 m tall in an A-pose (arms 45 degrees down), a bone roll on every joint, other bone names (Pelvis, Spine, Spine1, Spine2, Neck, Head, L_Clavicle, L_UpperArm, L_Forearm, L_ForearmTwist, L_Hand, fingers, L_Thigh, L_Calf, L_Foot, L_Toe0, Nub ends, a Weapon_Prop) and a skinned box mesh whose soles are at y = 0 (so floor is 0). retarget.load guesses the mapping from the names (the clavicles are not landmarks: they are driven from the tree, the twist, finger, Nub and prop nodes are not driven: 14 nodes, listed). The scale is the character's legs over the rig's: (0.420119 + 0.500400) / (0.391739 + 0.402323) = 0.920519 / 0.794062 = 1.15925. Driven nodes: Pelvis, 3 spine, Neck, Head, and per side clavicle, upper arm, forearm, hand, thigh, calf, foot, toe = 6 + 16 = 22. On the built-in Walk 12 (90 frames) retarget.check drives every frame: each planted foot drifts under 1 cm from where it came down, never goes under the floor and its leg always reaches (holds). A correction unmaps the left toe (the foot is then the leaf, said in the notes) and maps it again with the hands switched on; the mapping is saved, loaded again from its file (the same joints and hands) and the walk, its feet locked, is exported onto the character through that file: 22 nodes driven, one animation of 90 frames, both feet hold. Refused: a character file that is not there, a check with no character loaded, a correction naming a landmark that does not exist, a mapping saved under a .glb name, an export with a target and a ground root bone (not supported yet), an unload with no character loaded.",
+  "script": [
+    {
+      "command": "retarget.load",
+      "params": {
+        "path": "{assets}/../fixtures/data/tall-character.glb"
+      },
+      "expect": {
+        "nodes": 38,
+        "skin_joints": 36,
+        "mesh": true,
+        "ready": true,
+        "driven": 22,
+        "scale": 1.15925,
+        "floor": 0.0,
+        "given": [],
+        "missing": [],
+        "hands": false,
+        "joints": {
+          "hips": "Pelvis",
+          "spine": "Spine",
+          "neck": "Neck",
+          "head": "Head",
+          "l_shoulder": "L_UpperArm",
+          "l_elbow": "L_Forearm",
+          "l_wrist": "L_Hand",
+          "l_hip": "L_Thigh",
+          "l_knee": "L_Calf",
+          "l_ankle": "L_Foot",
+          "l_toe": "L_Toe0",
+          "r_shoulder": "R_UpperArm",
+          "r_elbow": "R_Forearm",
+          "r_wrist": "R_Hand",
+          "r_hip": "R_Thigh",
+          "r_knee": "R_Calf",
+          "r_ankle": "R_Foot",
+          "r_toe": "R_Toe0"
+        },
+        "undriven": [
+          "HeadNub",
+          "L_ForearmTwist",
+          "L_Finger0",
+          "L_Finger01",
+          "L_Finger1",
+          "L_Finger11",
+          "L_Toe0Nub",
+          "R_ForearmTwist",
+          "R_Finger0",
+          "R_Finger01",
+          "R_Finger1",
+          "R_Finger11",
+          "R_Toe0Nub",
+          "Weapon_Prop"
+        ],
+        "outside": [
+          "Armature",
+          "Body"
+        ],
+        "source": {
+          "nodes": 38,
+          "skin_joints": 36,
+          "meshes": 1,
+          "animations": 0
+        }
+      },
+      "tolerance": 0.0001
+    },
+    {
+      "command": "clip.open",
+      "params": {
+        "id": "Locomotion/Walk 12"
+      }
+    },
+    {
+      "command": "retarget.check",
+      "params": {},
+      "expect": {
+        "frames": 90,
+        "driven": 22,
+        "feet": {
+          "L": {
+            "holds": true,
+            "unreached_frames": 0
+          },
+          "R": {
+            "holds": true,
+            "unreached_frames": 0
+          }
+        },
+        "problems": [
+          {
+            "from": 0,
+            "to": 89,
+            "kind": "undriven"
+          }
+        ]
+      }
+    },
+    {
+      "command": "retarget.map",
+      "params": {
+        "joints": {
+          "l_toe": "none"
+        }
+      },
+      "expect": {
+        "ready": true,
+        "given": [
+          "l_toe"
+        ],
+        "driven": 21,
+        "notes": {
+          "$contains": [
+            "no left toe is mapped: the foot is the leaf"
+          ]
+        }
+      }
+    },
+    {
+      "command": "retarget.map",
+      "params": {
+        "joints": {
+          "l_toe": "L_Toe0"
+        },
+        "hands": true
+      },
+      "expect": {
+        "ready": true,
+        "hands": true,
+        "driven": 22
+      }
+    },
+    {
+      "command": "retarget.save",
+      "params": {
+        "path": "{tmp}/tall.retarget.json"
+      }
+    },
+    {
+      "command": "retarget.load",
+      "params": {
+        "path": "{tmp}/tall.retarget.json"
+      },
+      "expect": {
+        "ready": true,
+        "hands": true,
+        "driven": 22,
+        "joints": {
+          "l_toe": "L_Toe0",
+          "r_ankle": "R_Foot",
+          "hips": "Pelvis"
+        }
+      }
+    },
+    {
+      "command": "feet.lock",
+      "params": {}
+    },
+    {
+      "command": "clip.export",
+      "params": {
+        "path": "{tmp}/tall-walk.glb",
+        "target": "{tmp}/tall.retarget.json"
+      },
+      "expect": {
+        "joints": 22,
+        "animations": 1,
+        "frames": [
+          90
+        ],
+        "target": {
+          "driven": 22,
+          "scale": 1.1593,
+          "feet": [
+            {
+              "clip": "Walk 12",
+              "L": {
+                "holds": true
+              },
+              "R": {
+                "holds": true
+              }
+            }
+          ]
+        }
+      },
+      "tolerance": 0.001
+    },
+    {
+      "command": "retarget.unload",
+      "params": {},
+      "expect": {
+        "unloaded": true
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 1e-06
+  },
+  "errors": [
+    {
+      "command": "retarget.unload",
+      "params": {}
+    },
+    {
+      "command": "retarget.load",
+      "params": {
+        "path": "{tmp}/nowhere/hero.glb"
+      }
+    },
+    {
+      "command": "retarget.check",
+      "params": {}
+    },
+    {
+      "command": "retarget.map",
+      "params": {
+        "joints": {
+          "elbowz": "Spine"
+        }
+      }
+    },
+    {
+      "command": "retarget.save",
+      "params": {
+        "path": "{tmp}/mapping.glb"
+      }
+    },
+    {
+      "command": "clip.export",
+      "params": {
+        "path": "{tmp}/tall-ground.glb",
+        "target": "{assets}/../fixtures/data/tall-character.glb",
+        "root": "ground"
+      }
+    }
+  ]
+}

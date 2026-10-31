@@ -12,6 +12,8 @@ Python API (bpy) and its bundled glTF importer as a black box.
   on its own first frame; the script finds that frame from the action and offsets by it, so the
   clip's frame `f` is rendered, not Blender's frame `f`.
 - `[engine]`: `workbench` (default, needs no GPU) or `eevee`.
+- `[follow]`: `follow` moves the cameras along with the root bone's floor position, so a walk
+  that travels stays in the picture (default: the cameras stay at the origin, so travel shows).
 
 Prints one line starting with `BLENDER_CHECK ` followed by JSON: bone count and names, the
 action's frame range and the scene fps, the root bone's world position and the lowest mesh vertex
@@ -43,7 +45,8 @@ def args():
         sys.exit(2)
     glb, prefix, frames = rest[0], rest[1], [int(x) for x in rest[2].split(",") if x]
     engine = rest[3] if len(rest) > 3 else "workbench"
-    return glb, prefix, frames, engine
+    follow = len(rest) > 4 and rest[4] == "follow"
+    return glb, prefix, frames, engine, follow
 
 
 def import_glb(path):
@@ -80,7 +83,7 @@ def look_at(cam, eye, target):
 
 
 def main():
-    glb, prefix, frames, engine = args()
+    glb, prefix, frames, engine, follow = args()
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
     scene.render.fps = FPS
@@ -174,7 +177,11 @@ def main():
             }
         )
         for view, (eye, target) in views.items():
-            look_at(cam, eye, target)
+            if follow:
+                shift = Vector((root_world.x, root_world.y, 0.0))
+                look_at(cam, Vector(eye) + shift, Vector(target) + shift)
+            else:
+                look_at(cam, eye, target)
             out = f"{prefix}-{view}-{f}.png"
             scene.render.filepath = out
             bpy.ops.render.render(write_still=True)
