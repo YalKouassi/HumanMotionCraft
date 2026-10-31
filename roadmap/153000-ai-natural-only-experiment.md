@@ -1,6 +1,6 @@
 # Experiment: train on natural motion only
 
-- **Status:** not started; starts only when the owner asks, because it trains; videos and filter ready (2026-10-30)
+- **Status:** not started; starts only when the owner asks, because it trains; take list final (2026-10-31)
 - **Requires:** 134500
 - **Source:** owner request (2026-10-30)
 
@@ -169,6 +169,21 @@ These types are short of minutes, so only descriptions naming a character or a s
 | `jump-review/jump-review.mp4` | 3.5 min | 75 | 178 | 16.1 | 65 | 7 |
 
 Each has a chapter a group and an `index.csv`. Physics off, fixed three-quarter camera. Jump clips are
-3 s around the highest point, so a take with several jumps shows one. `natural-takes.json` still has
-these types as they were until the owner has reviewed: `uv run python -m ac_train.walkgroups --type run
-apply --reject R012` takes out the too short, the styled and the rejected.
+3 s around the highest point, so a take with several jumps shows one.
+
+The owner accepted all three with no rejects (2026-10-31), so `natural-takes.json` is final: 739 takes,
+1,461 excluded. `uv run python -m ac_train.train --dry-run --natural --takes review/natural-takes.json`
+prints the same table as `ac_train.selection`:
+
+```
+type          takes  train min        100style           accad  addbiomechanic   builtin_loops             cmu          kimodo  held out
+idle             59        9.8             0.3             2.5             2.6             0.1             3.7             0.6       1.0
+jump            178       15.9             0.0             0.9             2.6             0.0            11.6             0.8       0.2
+run              95        9.3             2.5             2.9             0.0             0.0             3.0             0.9       0.8
+walk            407       79.3             5.7             5.3             2.8             0.0            64.7             0.8       3.1
+all             739      114.3             8.5            11.6             8.0             0.1            83.0             3.1       5.1
+```
+
+Jump's held-out set fell from 1.1 to 0.2 minutes, so the natural-subset jump row of the acceptance table
+rests on about 12 s of motion; the full evaluation (step 3 of the overnight script) reads every
+held-out window and doesn't change. Training hasn't run.
