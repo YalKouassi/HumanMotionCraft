@@ -1,0 +1,9 @@
+PackA/Walks/walk.fbx
+PackB/Walks/walk.fbx
+PackA/Walks/takes.fbx
+PackA/Turns/turned.fbx
+PackA/Hangs/hang.fbx
+PackA/Bad/sunk.fbx
+PackA/Bad/swapped.fbx
+PackA/Bad/not-humanoid.fbx
+PackA/Bad/missing.fbx

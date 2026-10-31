@@ -41,6 +41,7 @@ pub const ALL: &[&[ac_core::CommandSpec]] = &[
     // files, recovery and reloading for the window (batch A2)
     export_batch::SPECS,
     fbx::commands::SPECS,
+    fbx::port::SPECS,
     character::commands::SPECS,
     recovery::SPECS,
     reload::SPECS,

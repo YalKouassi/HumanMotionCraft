@@ -843,7 +843,7 @@ const FEET: [&str; 4] = ["foot.L", "foot.R", "toe2-1.L", "toe2-1.R"];
 pub const FLOOR_MOST_M: f64 = 0.2;
 
 /// How far the lowest foot point is above where it would be standing flat, on every frame.
-fn lowest(skel: &Skeleton, rots: &[Vec<Quat>], roots: &[Vec3]) -> Result<Vec<f64>, CoreError> {
+pub fn lowest(skel: &Skeleton, rots: &[Vec<Quat>], roots: &[Vec3]) -> Result<Vec<f64>, CoreError> {
     let feet: Vec<usize> = FEET.iter().map(|b| bone(skel, b)).collect::<Result<_, _>>()?;
     // how far the rest pose rises to stand on the floor
     let lift = skel.hip_height - head(skel, 0)[2];

@@ -3,7 +3,8 @@
 //! axes ([`scene`]), and the retarget of those onto the rig as a clip ([`import`]), plus
 //! `clip.import_batch` ([`commands`]). `clip.import` (in `crate::commands`) reads `.fbx` through
 //! [`import::import_file`]. A Unity `.meta` beside the file ([`unity_meta`], roadmap 164000) says
-//! which bone is which and cuts the take into named clips.
+//! which bone is which and cuts the takes into named clips. `clip.port` ([`port`], roadmap 164000)
+//! is the resumable bulk run over a list of files.
 //!
 //! Written from the public layout of the format and our own retarget; no other product's reader
 //! was read or copied. Test files are written by `training/ac_train/fbxwrite.py`.
@@ -12,6 +13,7 @@ pub mod binary;
 pub mod commands;
 pub mod import;
 pub mod legacy;
+pub mod port;
 pub mod scene;
 pub mod text;
 pub mod unity_meta;
