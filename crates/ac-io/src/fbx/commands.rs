@@ -1,6 +1,7 @@
 //! `clip.import_batch`: every `.fbx` in a folder imported onto the rig and written as a
 //! `.clip.json` each, into another folder (the training set reader in `training/` reads those,
-//! so there is one FBX importer). The open animation is left alone.
+//! so there is one FBX importer). A file a Unity `.meta` cuts into named clips gives one
+//! `.clip.json` each, `<file> - <clip>`. The open animation is left alone.
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
@@ -10,7 +11,7 @@ use ac_core::clipfile;
 use ac_core::command::{self as cmd, CommandSpec, Kind as K, ParamSpec};
 use serde_json::{Map, Value, json};
 
-use super::import::import_file;
+use super::import::{Imported, open_file};
 
 type P = Map<String, Value>;
 type Out = Result<Value, String>;
@@ -103,9 +104,85 @@ fn find(from: &Path) -> Vec<(PathBuf, String)> {
     out
 }
 
+/// A clip's name as part of a file name: what a file name can't hold (a `.meta` is input, and a
+/// slash must not walk out of the folder) becomes `_`.
+fn file_part(name: &str) -> String {
+    let out: String = name
+        .chars()
+        .map(|c| {
+            if c.is_control() || "/\\:*?\"<>|".contains(c) {
+                '_'
+            } else {
+                c
+            }
+        })
+        .collect();
+    let out = out.trim_matches([' ', '.']);
+    if out.is_empty() {
+        "clip".into()
+    } else {
+        out.to_string()
+    }
+}
+
+/// What a batch has done so far.
+struct Written<'a> {
+    to: &'a Path,
+    files: Vec<Value>,
+    failed: Vec<Value>,
+    /// Output file -> the file it came from.
+    outputs: BTreeMap<String, String>,
+}
+
+impl Written<'_> {
+    fn fail(&mut self, rel: &str, clip: Option<&str>, error: String) {
+        let mut f = json!({ "file": rel, "error": error });
+        if let Some(c) = clip {
+            f["clip"] = json!(c);
+        }
+        self.failed.push(f);
+    }
+
+    /// Write one imported clip as `<stem>.clip.json`, never over one written before.
+    fn write(&mut self, rel: &str, clip: Option<&str>, stem: &str, imported: Result<Imported, String>) {
+        let out = self
+            .to
+            .join(format!("{stem}{}", crate::library::Kind::Animations.ext()));
+        if let Some(first) = self.outputs.get(&stem.to_lowercase()) {
+            let error = format!(
+                "a file of the same name, {first}, was already written to {}: rename one of them",
+                out.display()
+            );
+            self.fail(rel, clip, error);
+            return;
+        }
+        let imported = match imported {
+            Ok(i) => i,
+            Err(e) => return self.fail(rel, clip, e),
+        };
+        self.outputs.insert(stem.to_lowercase(), rel.to_string());
+        if let Err(e) = craft_atomic::atomic_write(&out, clipfile::save_clip(&imported.clip).as_bytes()) {
+            self.fail(rel, clip, format!("can't write {}: {e}", out.display()));
+            return;
+        }
+        let mut f = json!({
+            "file": rel,
+            "path": out.to_string_lossy(),
+            "frames": imported.report.get("frames").cloned().unwrap_or(Value::Null),
+            "fps": imported.report.get("fps").cloned().unwrap_or(Value::Null),
+            "notes": imported.report.get("notes").cloned().unwrap_or(json!([])),
+        });
+        if let Some(c) = clip {
+            f["clip"] = json!(c);
+            f["loop"] = json!(imported.clip.loop_);
+        }
+        self.files.push(f);
+    }
+}
+
 /// Import each file; one that can't be is listed in `failed` with why, and the rest are still
-/// written. Two files of one name in different subfolders would land on one `.clip.json`: the
-/// second is listed in `failed` instead of overwriting the first. Refused only when none could be.
+/// written, and likewise one named clip of a file. Two of one name would land on one `.clip.json`:
+/// the second is listed in `failed` instead of overwriting the first. Refused only when none could be.
 fn import_batch(doc: &mut Document, p: &P) -> Out {
     let from = PathBuf::from(cmd::text(p, "from").unwrap_or_default());
     if !from.is_dir() {
@@ -121,43 +198,33 @@ fn import_batch(doc: &mut Document, p: &P) -> Out {
         return Err(format!("no .fbx files under {}", from.display()));
     }
     std::fs::create_dir_all(&to).map_err(|e| format!("{}: {e}", to.display()))?;
-    let mut files = Vec::new();
-    let mut failed = Vec::new();
-    let mut written: BTreeMap<String, &str> = BTreeMap::new(); // output file -> the file it came from
+    let mut w = Written {
+        to: &to,
+        files: Vec::new(),
+        failed: Vec::new(),
+        outputs: BTreeMap::new(),
+    };
     for (path, rel) in &found {
         let stem = path
             .file_stem()
             .map(|s| s.to_string_lossy().to_string())
             .unwrap_or_else(|| "imported".into());
-        let out = to.join(format!("{stem}{}", crate::library::Kind::Animations.ext()));
-        if let Some(first) = written.get(&stem.to_lowercase()) {
-            failed.push(json!({
-                "file": rel,
-                "error": format!(
-                    "a file of the same name, {first}, was already written to {}: rename one of them",
-                    out.display()
-                ),
-            }));
-            continue;
-        }
-        match import_file(path, &doc.skeleton, &joints) {
-            Ok(imported) => {
-                written.insert(stem.to_lowercase(), rel.as_str());
-                match craft_atomic::atomic_write(&out, clipfile::save_clip(&imported.clip).as_bytes()) {
-                    Ok(()) => files.push(json!({
-                        "file": rel,
-                        "path": out.to_string_lossy(),
-                        "frames": imported.report.get("frames").cloned().unwrap_or(Value::Null),
-                        "fps": imported.report.get("fps").cloned().unwrap_or(Value::Null),
-                        "notes": imported.report.get("notes").cloned().unwrap_or(json!([])),
-                    })),
-                    Err(e) => failed
-                        .push(json!({ "file": rel, "error": format!("can't write {}: {e}", out.display()) })),
-                }
+        let source = match open_file(path, &joints) {
+            Ok(s) => s,
+            Err(e) => {
+                w.fail(rel, None, e);
+                continue;
             }
-            Err(e) => failed.push(json!({ "file": rel, "error": e })),
+        };
+        if source.clips().is_empty() {
+            w.write(rel, None, &stem, source.whole(&doc.skeleton));
+        }
+        for clip in source.clips() {
+            let out = format!("{stem} - {}", file_part(&clip.name));
+            w.write(rel, Some(&clip.name), &out, source.clip(&doc.skeleton, clip));
         }
     }
+    let Written { files, failed, .. } = w;
     if files.is_empty() {
         let first = failed
             .first()

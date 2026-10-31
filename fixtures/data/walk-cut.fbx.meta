@@ -1,0 +1,107 @@
+fileFormatVersion: 2
+guid: 00000000000000000000000000000164
+ModelImporter:
+  serializedVersion: 19
+  animations:
+    legacyGenerateAnimations: 4
+    clipAnimations:
+    - serializedVersion: 16
+      name: Walk start
+      takeName: Take 001
+      firstFrame: 0
+      lastFrame: 19
+      loop: 0
+      loopTime: 1
+      curves: []
+      transformMask:
+      - path: 
+        weight: 1
+    - serializedVersion: 16
+      name: Walk end
+      takeName: Take 001
+      firstFrame: 20
+      lastFrame: 39
+      loop: 0
+      loopTime: 0
+      curves: []
+      transformMask:
+      - path: 
+        weight: 1
+    isReadable: 0
+  humanDescription:
+    serializedVersion: 2
+    human:
+    - boneName: Bone00
+      humanName: Hips
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone15
+      humanName: Spine
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone20
+      humanName: Neck
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone23
+      humanName: Head
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone26
+      humanName: LeftUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone28
+      humanName: LeftLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone30
+      humanName: LeftHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone02
+      humanName: LeftUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone04
+      humanName: LeftLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone06
+      humanName: LeftFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone07
+      humanName: LeftToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone34
+      humanName: RightUpperArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone36
+      humanName: RightLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone38
+      humanName: RightHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone09
+      humanName: RightUpperLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone11
+      humanName: RightLowerLeg
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone13
+      humanName: RightFoot
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    - boneName: Bone14
+      humanName: RightToes
+      limit:
+        min: {x: 0, y: 0, z: 0}
+    skeleton: []
+  animationType: 3

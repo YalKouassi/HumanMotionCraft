@@ -437,6 +437,50 @@ def not_humanoid_scene() -> Scene:
     return sc
 
 
+# the humanoid bone name of each landmark, as a model's .meta states it
+HUMAN_OF = {"hips": "Hips", "spine": "Spine", "neck": "Neck", "head": "Head",
+            "l_shoulder": "LeftUpperArm", "l_elbow": "LeftLowerArm", "l_wrist": "LeftHand",
+            "l_hip": "LeftUpperLeg", "l_knee": "LeftLowerLeg", "l_ankle": "LeftFoot", "l_toe": "LeftToes",
+            "r_shoulder": "RightUpperArm", "r_elbow": "RightLowerArm", "r_wrist": "RightHand",
+            "r_hip": "RightUpperLeg", "r_knee": "RightLowerLeg", "r_ankle": "RightFoot", "r_toe": "RightToes"}
+
+
+def unnamed_scene(scene: Scene) -> tuple[Scene, dict[str, str]]:
+    """``scene`` with its joints named ``Bone00``, ``Bone01``, ...: names the guess can't read."""
+    names = {name: f"Bone{i:02d}" for i, (name, _, _) in enumerate(scene.joints)}
+    out = Scene(scene.fps, scene.up, scene.units, scene.reference, scene.creator)
+    out.joints = [(names[n], kind, names.get(parent)) for n, kind, parent in scene.joints]
+    out.static = {names[n]: v for n, v in scene.static.items()}
+    out.curves = {names[n]: v for n, v in scene.curves.items()}
+    out.frames = scene.frames
+    return out, names
+
+
+def meta_text(names: dict[str, str], clips: list[tuple[str, int, int, int]]) -> str:
+    """A model's ``.meta``: the bone map and ``clips`` of (name, first, last, loops)."""
+    out = ["fileFormatVersion: 2", "guid: 00000000000000000000000000000164", "ModelImporter:",
+           "  serializedVersion: 19", "  animations:", "    legacyGenerateAnimations: 4", "    clipAnimations:"]
+    for name, first, last, loops in clips:
+        out += ["    - serializedVersion: 16", f"      name: {name}", "      takeName: Take 001",
+                f"      firstFrame: {first}", f"      lastFrame: {last}", "      loop: 0", f"      loopTime: {loops}",
+                "      curves: []", "      transformMask:", "      - path: ", "        weight: 1"]
+    out += ["    isReadable: 0", "  humanDescription:", "    serializedVersion: 2", "    human:"]
+    for lm, human in HUMAN_OF.items():
+        out += [f"    - boneName: {names[LANDMARK_OF[lm]]}", f"      humanName: {human}", "      limit:",
+                "        min: {x: 0, y: 0, z: 0}"]
+    out += ["    skeleton: []", "  animationType: 3", ""]
+    return "\n".join(out)
+
+
+def write_cut_fixture(fixtures=FIXTURES, skel=None) -> list[pathlib.Path]:
+    """The walk with unreadable joint names, and a ``.meta`` naming them and cutting it in two clips."""
+    scene, names = unnamed_scene(walk_scene(skel or Skeleton.load(), up="y", units=1.0))
+    fbx, meta = fixtures / "walk-cut.fbx", fixtures / "walk-cut.fbx.meta"
+    write_fbx(fbx, scene.nodes(), version=7400)
+    meta.write_bytes(meta_text(names, [("Walk start", 0, 19, 1), ("Walk end", 20, 39, 0)]).encode("utf-8"))
+    return [fbx, meta]
+
+
 def write_fixtures(fixtures=FIXTURES, golden_path=GOLDEN) -> list[pathlib.Path]:
     skel = Skeleton.load()
     fixtures.mkdir(parents=True, exist_ok=True)
@@ -459,6 +503,7 @@ def write_fixtures(fixtures=FIXTURES, golden_path=GOLDEN) -> list[pathlib.Path]:
     sc = walk_scene(skel, up="y", units=1.0)
     out.append(fixtures / "walk-yup-75.fbx")
     write_fbx(out[-1], sc.nodes(), version=7500)
+    out += write_cut_fixture(fixtures, skel)
     golden_path.parent.mkdir(parents=True, exist_ok=True)
     golden_path.write_text(json.dumps(golden(skel), separators=(",", ":")) + "\n", encoding="utf-8")
     out.append(golden_path)

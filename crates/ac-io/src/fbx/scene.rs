@@ -301,6 +301,8 @@ pub struct Motion {
     pub parents: Vec<Option<usize>>,
     pub fps: f64,
     pub frames: usize,
+    /// Where sample 0 is in the file's own timeline, in frames (the take's start).
+    pub start_frame: f64,
     /// `[frame][joint]`.
     pub positions: Vec<Vec<Vec3>>,
     pub version: u32,
@@ -782,6 +784,7 @@ pub fn motion(doc: &Document) -> R<Motion> {
         parents: parent_index,
         fps,
         frames,
+        start_frame: start as f64 / ticks,
         positions,
         version: doc.version,
         up_axis: up_name,
@@ -994,6 +997,10 @@ mod tests {
             "{:?}",
             m.positions[10][0]
         );
+        assert_eq!(m.start_frame, 0.0);
+        // a take that starts later says where: 5 frames in
+        let late = motion(&scene(2, 5 * ticks, 10 * ticks)).unwrap();
+        assert_eq!(late.start_frame.round(), 5.0);
     }
 
     #[test]

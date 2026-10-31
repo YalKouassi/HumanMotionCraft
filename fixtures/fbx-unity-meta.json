@@ -1,0 +1,128 @@
+{
+  "$schema": "./schema.json",
+  "name": "fbx-unity-meta",
+  "feature": "clip.import",
+  "description": "An FBX with a Unity .meta beside it imports as named clips (roadmap 164000). fixtures/data/walk-cut.fbx is written by python -m ac_train.fbxwrite: the same 40 frames of the built-in Walk 12 as fbx-import's files, Y up in centimetres, but with its 43 joints named Bone00 to Bone42 in the writer's order, so the guess from names finds nothing. Its .meta states the humanoid bones (Hips is Bone00, the writer's first joint; LeftUpperLeg is Bone02, LeftLowerLeg Bone04, LeftFoot Bone06, Neck Bone20) and cuts the take into Walk start (frames 0 to 19, both ends in: 20 frames, looping) and Walk end (20 to 39: 20 frames, not looping). So with no clip named, Walk start opens, and both clips are listed. Its root on frame 0 is the source's, (0, -0.0098, 0.8664) as in fbx-import. Walk end's frame 19 is the source's frame 39, (-0.0039, -1.0802, 0.8698). The tolerance is 0.02 m because each clip finds its own floor, a few millimetres from the whole take's, as in fbx-import's side step. Physics is off for the position checks. Refused: a clip the .meta doesn't name, and a clip named for a file that isn't an .fbx.",
+  "script": [
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-cut.fbx"
+      },
+      "expect": {
+        "length": 20,
+        "fps": 30,
+        "frames": 20,
+        "bone_map": "unity_meta",
+        "joints": {
+          "hips": "Bone00",
+          "l_hip": "Bone02",
+          "l_knee": "Bone04",
+          "l_ankle": "Bone06",
+          "neck": "Bone20"
+        },
+        "given": [],
+        "clip": {
+          "name": "Walk start",
+          "first": 0,
+          "last": 19,
+          "loop": true,
+          "take": "Take 001"
+        },
+        "clips": [
+          {
+            "name": "Walk start",
+            "first": 0,
+            "last": 19,
+            "loop": true
+          },
+          {
+            "name": "Walk end",
+            "first": 20,
+            "last": 39,
+            "loop": false
+          }
+        ]
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.0,
+          -0.0098,
+          0.8664
+        ]
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-cut.fbx",
+        "clip": "Walk end"
+      },
+      "expect": {
+        "length": 20,
+        "clip": {
+          "name": "Walk end",
+          "first": 20,
+          "last": 39,
+          "loop": false
+        }
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "frame.set",
+      "params": {
+        "frame": 19
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          -0.0039,
+          -1.0802,
+          0.8698
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 0.02
+  },
+  "errors": [
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-cut.fbx",
+        "clip": "No such clip"
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/library/animations/Locomotion/Walk 12.clip.json",
+        "clip": "Walk end"
+      }
+    }
+  ]
+}

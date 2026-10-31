@@ -1424,10 +1424,16 @@
                     "type": "string",
                     "minLength": 1,
                     "maxLength": 4096,
-                    "description": "an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig)"
+                    "description": "an animation file: .clip.json, or a humanoid .fbx (retargeted onto the rig; a Unity .meta beside it gives the bone map and named clips)"
                   },
                   "joints": {
                     "description": "an .fbx: landmark -> joint name, correcting the guess ({\"l_knee\": \"LeftLeg\"}); the landmarks are hips, spine, neck, head and per side shoulder, elbow, wrist, hip, knee, ankle, toe"
+                  },
+                  "clip": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "an .fbx with named clips in its .meta: which to open (default the first)"
                   }
                 },
                 "required": [
