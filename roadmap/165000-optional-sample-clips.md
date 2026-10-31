@@ -55,6 +55,10 @@ Built 2026-10-31. Number 165000, because 164000 is the owner's FBX library.
 - **Not run: the real download.** It needs the person's acceptance, so it is left to the owner. Both
   URL forms answer (the licence, and one clip by its large-file URL, with the pinned size), but the
   download path itself has only been run with every file already present.
+- **Found by the owner's first real try (2026-10-31):** the download stopped at `LICENSE.txt` with a hash
+  mismatch. Its pin and README's came from the Windows checkout, which has CRLF line endings; GitHub
+  serves LF. The text is the same. Both are now pinned from the upstream commit itself, and all 38 clip
+  pins match that commit's large-file pointers.
 - **Limits.** The mark is honest marking, not protection: window screenshots, inline previews to an
   agent, `clip.sample`-style queries, `project.save` and editing the JSON by hand aren't blocked. A
   project keeps the mark. 38 clips add 64 MB of JSON the library reads when it lists items; how much slower that makes
