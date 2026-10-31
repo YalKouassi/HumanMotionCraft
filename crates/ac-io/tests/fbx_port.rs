@@ -248,6 +248,126 @@ fn a_run_again_changes_nothing_and_a_deleted_clip_stays_deleted() {
 }
 
 #[test]
+fn a_retry_that_changes_nothing_writes_nothing_and_a_deleted_clip_stays_deleted() {
+    let (mut s, lib) = common::session("fbx-port-retry-same");
+    let to = lib.join("port");
+    s.run("clip.port", &params(&to)).unwrap();
+    let manifest = to.join(MANIFEST);
+    let before = std::fs::read(&manifest).unwrap();
+    let walk = to.join("animations/PackA - Walks/walk.clip.json");
+    std::fs::remove_file(&walk).unwrap();
+
+    let mut p = params(&to);
+    p["retry_refused"] = json!(true);
+    let r = s.run("clip.port", &p).unwrap();
+    // the 3 refused are refused the same way: 5 finished + 3 unchanged; missing.fbx is still away
+    assert_eq!(r["new"], 0, "{r}");
+    assert_eq!(r["skipped"], 8, "{r}");
+    assert_eq!(r["refused"], 3, "{r}");
+    assert_eq!(r["imported"], 4, "{r}");
+    assert_eq!(r["duplicate"], 1, "{r}");
+    assert_eq!(std::fs::read(&manifest).unwrap(), before);
+    assert!(!walk.exists(), "a deleted clip stays deleted");
+    std::fs::remove_dir_all(lib).unwrap();
+}
+
+/// A tree of two copies of the walk cut in two, with a `.meta` that refuses each, and the params.
+fn refused_tree(lib: &Path) -> Value {
+    let list = lib.join("from/list.txt");
+    let good = std::fs::read_to_string(repo().join("fixtures/data/walk-cut.fbx.meta")).unwrap();
+    for pack in ["P", "Q"] {
+        let dir = lib.join("from").join(pack).join("A");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::copy(repo().join("fixtures/data/walk-cut.fbx"), dir.join("w.fbx")).unwrap();
+        std::fs::write(
+            dir.join("w.fbx.meta"),
+            good.replace("boneName: Bone23", "boneName: Gone"),
+        )
+        .unwrap();
+    }
+    std::fs::write(&list, "P/A/w.fbx\nQ/A/w.fbx\n").unwrap();
+    json!({
+        "list": list.to_string_lossy(),
+        "root": lib.join("from").to_string_lossy(),
+        "to": lib.join("port").to_string_lossy(),
+    })
+}
+
+#[test]
+fn a_retry_replaces_a_refused_outcome_and_leaves_a_duplicate() {
+    let (mut s, lib) = common::session("fbx-port-retry");
+    let mut p = refused_tree(&lib);
+    let r = s.run("clip.port", &p).unwrap();
+    assert_eq!((&r["refused"], &r["duplicate"]), (&json!(1), &json!(1)), "{r}");
+
+    // the cause is mended; without the flag a refused source stays as it was
+    let good = std::fs::read(repo().join("fixtures/data/walk-cut.fbx.meta")).unwrap();
+    std::fs::write(lib.join("from/P/A/w.fbx.meta"), &good).unwrap();
+    assert_eq!(s.run("clip.port", &p).unwrap()["new"], 0);
+
+    p["retry_refused"] = json!(true);
+    let r = s.run("clip.port", &p).unwrap();
+    assert_eq!(r["new"], 1, "{r}");
+    assert_eq!(r["imported"], 1, "{r}");
+    assert_eq!(r["refused"], 0, "{r}");
+    assert_eq!(r["duplicate"], 1, "a duplicate isn't tried again: {r}");
+    assert_eq!(r["clips"], 2, "{r}");
+    let manifest = lib.join("port").join(MANIFEST);
+    let text = std::fs::read_to_string(&manifest).unwrap();
+    assert_eq!(text.lines().count(), 4, "the first line and 3 outcomes: {text}");
+    assert_eq!(
+        lines(&manifest)["P/A/w.fbx"]["outcome"],
+        "imported",
+        "the last line wins"
+    );
+
+    // a later run reads the last line too: delete a clip, and neither form brings it back
+    let clip = lib.join("port/animations/P - A/w - Walk start.clip.json");
+    std::fs::remove_file(&clip).unwrap();
+    for retry in [true, false] {
+        p["retry_refused"] = json!(retry);
+        let r = s.run("clip.port", &p).unwrap();
+        assert_eq!((&r["new"], &r["skipped"]), (&json!(0), &json!(2)), "{r}");
+        assert_eq!(r["imported"], 1, "{r}");
+    }
+    assert!(!clip.exists());
+    std::fs::remove_dir_all(lib).unwrap();
+}
+
+#[test]
+fn a_source_tried_again_is_not_a_duplicate_of_itself() {
+    let (mut s, lib) = common::session("fbx-port-retry-self");
+    let from = lib.join("from/P/A");
+    std::fs::create_dir_all(&from).unwrap();
+    std::fs::copy(data().join("PackA/Walks/walk.fbx"), from.join("w.fbx")).unwrap();
+    let list = lib.join("from/list.txt");
+    std::fs::write(&list, "P/A/w.fbx\n").unwrap();
+    let mut p = json!({
+        "list": list.to_string_lossy(),
+        "root": lib.join("from").to_string_lossy(),
+        "to": lib.join("port").to_string_lossy(),
+    });
+    s.run("clip.port", &p).unwrap();
+    // an older importer refused this very content: only the importer has changed since
+    let manifest = lib.join("port").join(MANIFEST);
+    let first = lines(&manifest)["P/A/w.fbx"].clone();
+    let refused = json!({
+        "source": "P/A/w.fbx",
+        "outcome": "refused",
+        "reason": "an older importer's reason",
+        "content": first["content"],
+    });
+    std::fs::write(&manifest, format!("{{\"port_manifest\":1}}\n{refused}\n")).unwrap();
+    std::fs::remove_dir_all(lib.join("port/animations")).unwrap();
+
+    p["retry_refused"] = json!(true);
+    let r = s.run("clip.port", &p).unwrap();
+    assert_eq!(r["imported"], 1, "{r}");
+    assert_eq!(r["duplicate"], 0, "{r}");
+    std::fs::remove_dir_all(lib).unwrap();
+}
+
+#[test]
 fn a_stopped_run_resumes_and_a_cut_off_line_is_done_again() {
     let (mut s, lib) = common::session("fbx-port-resume");
     let to = lib.join("port");

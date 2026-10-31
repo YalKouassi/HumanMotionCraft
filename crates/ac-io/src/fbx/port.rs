@@ -13,6 +13,10 @@
 //! nothing to do the run writes nothing. The pack is the first folder under `root`, the action the
 //! file's own folder.
 //!
+//! `retry_refused` tries again the sources whose latest outcome is `refused`, after an importer fix.
+//! A changed outcome is a new line, and the last line of a source is its outcome. One that comes out
+//! the same adds nothing. A refused source wrote no clip, so this can't bring back a deleted one.
+//!
 //! Each clip is turned to start facing -Y when it is more than [`FACING_MOST_DEG`] off, then checked:
 //! its values are finite, it faces -Y, its feet aren't swapped, and its feet are on z = 0 unless it
 //! has no floor. A clip that fails is left out and listed. Bone lengths are the rig's by construction,
@@ -91,6 +95,11 @@ pub static SPECS: &[CommandSpec] = &[CommandSpec::new("clip.port", "Port a list 
             K::Integer,
             "finish at most this many new sources, then stop",
         ),
+        ParamSpec::new(
+            "retry_refused",
+            K::Bool,
+            "try again the sources whose latest outcome is refused; imported and duplicate stay skipped",
+        ),
     ])
     .writes()
     .outputs(crate::returns::CLIP_PORT)];
@@ -98,6 +107,7 @@ pub static SPECS: &[CommandSpec] = &[CommandSpec::new("clip.port", "Port a list 
 /// What the manifest holds so far.
 #[derive(Default)]
 struct Book {
+    /// A source's latest outcome: a later line replaces an earlier one.
     done: BTreeMap<String, Value>,
     /// A source's content -> the first source with it.
     content: BTreeMap<String, String>,
@@ -111,6 +121,12 @@ struct Book {
 impl Book {
     fn add(&mut self, entry: Value) {
         let source = entry["source"].as_str().unwrap_or_default().to_string();
+        // what a replaced line said about the source's content is no longer so
+        if let Some(c) = self.done.get(&source).and_then(|old| old["content"].as_str())
+            && self.content.get(c) == Some(&source)
+        {
+            self.content.remove(c);
+        }
         if let Some(c) = entry["content"].as_str() {
             self.content
                 .entry(c.to_string())
@@ -529,7 +545,8 @@ fn one(skel: &Skeleton, line: &str, path: &Path, root: &Path, to: &Path, book: &
         ac_core::hash::of_bytes(format!("{m:?}").as_bytes())
     });
     let content = format!("{hash}:{meta_hash}:{}", bytes.len());
-    if let Some(first) = book.content.get(&content) {
+    // a source tried again isn't a copy of itself
+    if let Some(first) = book.content.get(&content).filter(|first| *first != line) {
         return Ok(Some(json!({
             "source": line,
             "outcome": "duplicate",
@@ -684,6 +701,8 @@ fn port(doc: &mut Document, p: &P) -> Out {
         ));
     }
     let limit = p.get("limit").and_then(Value::as_u64).unwrap_or(u64::MAX);
+    let retry = p.get("retry_refused").and_then(Value::as_bool).unwrap_or(false);
+    let finished = |e: &Value| !(retry && e["outcome"] == "refused");
     let sources = read_list(&list)?;
     let from = list.parent().unwrap_or_else(|| Path::new(""));
     // a wrong root is the caller's slip, not an outcome to keep for every file
@@ -699,11 +718,14 @@ fn port(doc: &mut Document, p: &P) -> Out {
         whole: book.whole,
         file: None,
     };
-    let skipped = sources.iter().filter(|s| book.done.contains_key(*s)).count();
+    let mut skipped = sources
+        .iter()
+        .filter(|s| book.done.get(*s).is_some_and(finished))
+        .count();
     let mut new = 0u64;
     let mut unreachable: Vec<&str> = Vec::new();
     for line in &sources {
-        if book.done.contains_key(line) {
+        if book.done.get(line).is_some_and(finished) {
             continue;
         }
         if new >= limit {
@@ -711,6 +733,8 @@ fn port(doc: &mut Document, p: &P) -> Out {
         }
         tracing::info!(source = %line, "clip.port");
         match one(&doc.skeleton, line, &from.join(line), &root, &to, &book)? {
+            // tried again and refused the same way: nothing to add, and no use of the limit
+            Some(entry) if book.done.get(line) == Some(&entry) => skipped += 1,
             Some(entry) => {
                 journal.add(&entry)?;
                 book.add(entry);
