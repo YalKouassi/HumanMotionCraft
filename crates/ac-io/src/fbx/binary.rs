@@ -5,7 +5,9 @@
 //! 32-bit end offsets, property counts and lengths (and 64-bit ones from version 7500 on); scalar
 //! properties `Y` i16, `C` bool, `I` i32, `F` f32, `D` f64, `L` i64; arrays `f d l i b` with a
 //! count, an encoding (0 raw, 1 zlib) and a byte length; `S` strings and `R` raw bytes with a
-//! length. Every number read from the file is hostile: counts are capped, offsets checked against
+//! length; `c` byte arrays, laid out as the other arrays, are passed over (they hold embedded
+//! images in `ImageData`, which the animation doesn't need), never inflated. A `C` byte is a bool
+//! when it is 0 or 1 and a character otherwise: FBX 6's keys spell their kind with one. Every number read from the file is hostile: counts are capped, offsets checked against
 //! the file, inflated sizes bounded, and a file that lies about itself is refused with where.
 
 /// Most node records in one file.
@@ -32,6 +34,8 @@ const MAGIC: &[u8] = b"Kaydara FBX Binary  \x00\x1a\x00";
 pub enum Prop {
     I16(i16),
     Bool(bool),
+    /// A `C` byte that is neither 0 nor 1: a letter, in FBX 6's `Key` records.
+    Char(u8),
     I32(i32),
     F32(f32),
     F64(f64),
@@ -51,6 +55,7 @@ impl Prop {
         match self {
             Prop::I16(v) => Some(f64::from(*v)),
             Prop::Bool(v) => Some(if *v { 1.0 } else { 0.0 }),
+            Prop::Char(_) => Some(1.0),
             Prop::I32(v) => Some(f64::from(*v)),
             Prop::F32(v) => Some(f64::from(*v)),
             Prop::F64(v) => Some(*v),
@@ -64,6 +69,7 @@ impl Prop {
         match self {
             Prop::I16(v) => Some(i64::from(*v)),
             Prop::Bool(v) => Some(i64::from(*v)),
+            Prop::Char(_) => Some(1),
             Prop::I32(v) => Some(i64::from(*v)),
             Prop::I64(v) => Some(*v),
             Prop::F32(v) if v.fract() == 0.0 && v.is_finite() => Some(*v as i64),
@@ -209,7 +215,10 @@ impl<'a> Reader<'a> {
                 let b = self.take(2, what)?;
                 Prop::I16(i16::from_le_bytes([b[0], b[1]]))
             }
-            b'C' => Prop::Bool(self.u8(what)? != 0),
+            b'C' => match self.u8(what)? {
+                c @ (0 | 1) => Prop::Bool(c == 1),
+                c => Prop::Char(c),
+            },
             b'I' => Prop::I32(self.u32(what)? as i32),
             b'F' => Prop::F32(f32::from_bits(self.u32(what)?)),
             b'D' => Prop::F64(f64::from_bits(self.u64(what)?)),
@@ -230,6 +239,14 @@ impl<'a> Reader<'a> {
                 }
             }
             b'f' | b'd' | b'l' | b'i' | b'b' => self.array(code, what)?,
+            b'c' => {
+                // count, encoding, stored length, bytes: checked against the file, not kept
+                self.u32(what)?;
+                self.u32(what)?;
+                let stored = self.u32(what)? as usize;
+                self.take(stored, what)?;
+                Prop::Raw(Vec::new())
+            }
             other => {
                 return Err(format!(
                     "{what}: unknown property type {:?} at byte {}",
@@ -507,6 +524,48 @@ mod tests {
         bad[start + 14] = b'Q';
         let e = parse(&bad).unwrap_err();
         assert!(e.contains("unknown property type"), "{e}");
+    }
+
+    /// A file of one record whose one property is `body`.
+    fn with_property(body: &[u8]) -> Vec<u8> {
+        let mut v = header(7400);
+        let end = v.len() + 13 + 1 + body.len();
+        v.extend_from_slice(&(end as u32).to_le_bytes());
+        v.extend_from_slice(&1u32.to_le_bytes());
+        v.extend_from_slice(&(body.len() as u32).to_le_bytes());
+        v.push(1);
+        v.push(b'A');
+        v.extend_from_slice(body);
+        v.extend_from_slice(&[0; 13]);
+        v
+    }
+
+    #[test]
+    fn a_byte_array_is_passed_over_without_inflating() {
+        // 4 values, "compressed", with bytes that are not zlib: never looked at
+        let mut body = vec![b'c'];
+        body.extend_from_slice(&4u32.to_le_bytes());
+        body.extend_from_slice(&1u32.to_le_bytes());
+        body.extend_from_slice(&3u32.to_le_bytes());
+        body.extend_from_slice(&[0xFF, 0xFF, 0xFF]);
+        let d = parse(&with_property(&body)).unwrap();
+        assert_eq!(d.nodes[0].props, vec![Prop::Raw(Vec::new())]);
+        // its stored length is still checked against the record
+        body[9..13].copy_from_slice(&2u32.to_le_bytes());
+        assert!(
+            parse(&with_property(&body))
+                .unwrap_err()
+                .contains("properties take")
+        );
+    }
+
+    #[test]
+    fn a_c_byte_is_a_bool_or_a_letter() {
+        let one = parse(&with_property(&[b'C', 1])).unwrap();
+        assert_eq!(one.nodes[0].props, vec![Prop::Bool(true)]);
+        let letter = parse(&with_property(&[b'C', b'L'])).unwrap();
+        assert_eq!(letter.nodes[0].props, vec![Prop::Char(b'L')]);
+        assert_eq!(letter.nodes[0].props[0].as_i64(), Some(1));
     }
 
     /// A file of one record holding `arrays` compressed f64 arrays of `count` zeros each.
