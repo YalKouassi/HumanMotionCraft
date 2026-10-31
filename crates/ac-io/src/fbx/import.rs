@@ -9,6 +9,10 @@
 //! which joint is which, and the name guess is used only without one, or for a landmark the map
 //! leaves out (said in the notes). Its clip ranges cut the take into named clips, each retargeted
 //! and levelled on its own, like a file of its own. Open with [`open_file`], then make a clip.
+//!
+//! Three things real files need are read with a note, and only where one answer is left: a clip
+//! naming a take that isn't there, when the file has one take; a `.meta` bone that matches one joint
+//! once spaces and case are ignored; a missing neck, from the head's parent if no landmark has it.
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -65,6 +69,36 @@ pub struct Source {
     notes: Vec<String>,
     name: String,
     clips: Vec<MetaClip>,
+}
+
+/// A name with its spaces gone and in lower case.
+fn loose(name: &str) -> String {
+    name.chars()
+        .filter(|c| !c.is_whitespace())
+        .flat_map(char::to_lowercase)
+        .collect()
+}
+
+/// The joints a `.meta` bone's name matches once spaces and case are ignored.
+fn loose_matches(names: &[String], bone: &str) -> Vec<usize> {
+    let wanted = loose(bone);
+    if wanted.is_empty() {
+        return Vec::new();
+    }
+    names
+        .iter()
+        .enumerate()
+        .filter(|(_, n)| loose(n) == wanted)
+        .map(|(i, _)| i)
+        .collect()
+}
+
+/// The joint to read as the neck when only the neck is missing: the head's parent, unless a landmark
+/// already has it (the chest, say), since one joint can't be both.
+fn neck_from_head(map: &BTreeMap<&'static str, usize>, parents: &[Option<usize>]) -> Option<usize> {
+    let head = *map.get("head")?;
+    let parent = (*parents.get(head)?)?;
+    (!map.values().any(|&i| i == parent)).then_some(parent)
 }
 
 /// Open an `.fbx` file and the `.meta` beside it, if any. `joints` corrects the landmark -> joint
@@ -248,16 +282,47 @@ pub fn open_bytes(
                 left_out.join(", ")
             ));
         }
+        let mut read: BTreeMap<usize, &str> = BTreeMap::new();
         for (&lm, bone) in stated {
             if joints.contains_key(lm) {
                 continue;
             }
-            let index = motion.names.iter().position(|n| n == bone).ok_or_else(|| {
-                format!(
-                    "the .meta says {bone:?} is {lm}, but the file has no such joint (is the .meta this file's?); correct it with joints; the file's joints: {}",
-                    joint_list(&motion)
-                )
-            })?;
+            let index = match motion.names.iter().position(|n| n == bone) {
+                Some(i) => i,
+                None => {
+                    let found = loose_matches(&motion.names, bone);
+                    let names: Vec<&str> = found
+                        .iter()
+                        .filter_map(|&i| motion.names.get(i).map(String::as_str))
+                        .collect();
+                    match (found.as_slice(), names.as_slice()) {
+                        ([i], [name]) => {
+                            notes.push(format!(
+                                "the .meta says {bone:?} is {lm}: read as the joint {name:?}, ignoring spaces and case"
+                            ));
+                            *i
+                        }
+                        ([], _) => {
+                            return Err(format!(
+                                "the .meta says {bone:?} is {lm}, but the file has no such joint (is the .meta this file's?); correct it with joints; the file's joints: {}",
+                                joint_list(&motion)
+                            ));
+                        }
+                        _ => {
+                            return Err(format!(
+                                "the .meta says {bone:?} is {lm}, and ignoring spaces and case that matches several joints: {}; correct it with joints",
+                                names.join(", ")
+                            ));
+                        }
+                    }
+                }
+            };
+            if let Some(other) = read.insert(index, lm) {
+                return Err(format!(
+                    "the .meta's {other} and {lm} both come to the joint {:?} once spaces and case are ignored; correct it with joints",
+                    motion.names.get(index).map_or("", String::as_str)
+                ));
+            }
             if motion.names.iter().filter(|n| *n == bone).count() > 1 {
                 notes.push(format!(
                     "{bone:?} ({lm}) names several joints: the first was read"
@@ -289,6 +354,16 @@ pub fn open_bytes(
         guess.map.insert(lm_static, index);
         guess.missing.retain(|m| *m != lm_static);
         given.push(lm.clone());
+    }
+    if guess.missing == ["neck"]
+        && let Some(parent) = neck_from_head(&guess.map, &motion.parents)
+    {
+        guess.map.insert("neck", parent);
+        guess.missing.clear();
+        notes.push(format!(
+            "no joint found for neck: the head's parent, {}, is read as the neck",
+            motion.names.get(parent).map_or("", String::as_str)
+        ));
     }
     if !guess.missing.is_empty() {
         let hint: Vec<String> = guess
@@ -381,12 +456,6 @@ fn open_takes(
 /// Where a named clip lies among the samples: its first sample and how many, and a note if its
 /// range had to be rounded to whole frames.
 fn clip_range(motion: &Motion, clip: &MetaClip) -> R<(usize, usize, Option<String>)> {
-    if !clip.take.is_empty() && clip.take != motion.take {
-        return Err(format!(
-            "it cuts the take {:?}, but the take read is {:?}",
-            clip.take, motion.take
-        ));
-    }
     let (first, last) = (clip.first.round(), clip.last.round());
     let start = motion.start_frame.round();
     let (a, b) = (first - start, last - start);
@@ -420,9 +489,16 @@ impl Source {
         &self.clips
     }
 
-    /// The take a named clip cuts: its `takeName` picks it among the file's takes.
+    /// The take a clip names, when the file doesn't have it and has one take to read instead.
+    fn stale_take<'a>(&self, clip: &'a MetaClip) -> Option<&'a str> {
+        (self.take_names.len() == 1 && !clip.take.is_empty() && !self.take_names.contains(&clip.take))
+            .then_some(clip.take.as_str())
+    }
+
+    /// The take a named clip cuts: its `takeName` picks it among the file's takes. A name the file
+    /// doesn't have can only mean its one take; with several it could be any, so it is refused.
     fn motion_for(&self, clip: &MetaClip) -> R<&Motion> {
-        if clip.take.is_empty() || clip.take == self.motion.take {
+        if clip.take.is_empty() || clip.take == self.motion.take || self.stale_take(clip).is_some() {
             return Ok(&self.motion);
         }
         match self.takes.get(&clip.take) {
@@ -494,6 +570,12 @@ impl Source {
             Some(clip) => {
                 let (first, count, note) = clip_range(motion, clip)?;
                 notes.extend(note);
+                if let Some(stale) = self.stale_take(clip) {
+                    notes.push(format!(
+                        "the .meta's clip names the take {stale:?}, which the file doesn't have: its frames are read from the file's one take, {:?}",
+                        motion.take
+                    ));
+                }
                 (first, count)
             }
             None => (0, motion.frames),
@@ -705,10 +787,37 @@ mod tests {
     }
 
     #[test]
+    fn a_bone_matches_loosely_only_where_one_joint_does() {
+        let names: Vec<String> = ["Humanoid_Head", "Hips", "Left Arm", "LEFTARM"]
+            .map(String::from)
+            .to_vec();
+        assert_eq!(loose_matches(&names, "Humanoid_ Head"), [0]);
+        assert_eq!(loose_matches(&names, "hips"), [1]);
+        assert_eq!(loose_matches(&names, "left arm"), [2, 3]);
+        assert!(loose_matches(&names, "Head").is_empty(), "a part is no match");
+        assert!(loose_matches(&names, "  ").is_empty());
+    }
+
+    #[test]
+    fn the_neck_is_the_heads_parent_unless_a_landmark_has_it() {
+        // 0 hips, 1 chest, 2 upper chest, 3 head
+        let parents = [None, Some(0), Some(1), Some(2)];
+        let mut map = BTreeMap::from([("hips", 0), ("spine", 1), ("head", 3)]);
+        assert_eq!(neck_from_head(&map, &parents), Some(2));
+        map.insert("spine", 2);
+        assert_eq!(neck_from_head(&map, &parents), None);
+        assert_eq!(
+            neck_from_head(&BTreeMap::from([("head", 0)]), &parents),
+            None,
+            "a head with no parent"
+        );
+        assert_eq!(neck_from_head(&BTreeMap::new(), &parents), None);
+    }
+
+    #[test]
     fn a_clip_outside_its_take_or_too_short_is_refused() {
         let m = motion(40, 0.0);
         for (clip, want) in [
-            (range("Other", 0.0, 10.0), "take read is"),
             (range("Take", 10.0, 10.0), "fewer than 2"),
             (range("Take", 10.0, 2.0), "fewer than 2"),
             (range("Take", 30.0, 40.0), "outside the take"),

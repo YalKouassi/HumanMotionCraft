@@ -150,14 +150,94 @@ fn a_meta_of_another_file_or_a_missing_bone_is_refused() {
     assert!(e.contains("NoSuchBone") && e.contains("no such joint"), "{e}");
     // the file's own joints follow, so the fix can be written
     assert!(e.contains("Bone01"), "{e}");
-    // with the bone gone from the map, the guess can't stand in for it
+}
+
+#[test]
+fn a_map_without_a_neck_reads_the_heads_parent() {
+    let sk = skeleton();
+    // the writer's Head (Bone23) hangs from Neck2 (Bone22)
     let m = meta_with("humanName: Neck", "humanName: Left Index Proximal");
+    let s = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap();
+    let got = s.clip(&sk, &s.clips()[0]).unwrap();
+    assert_eq!(got.report["joints"]["neck"], "Bone22");
+    let notes = got.report["notes"].to_string();
+    assert!(notes.contains("head's parent, Bone22"), "{notes}");
+    // the map's own neck has no such note
+    let s = open_bytes(&fbx(), "w", &none(), Some(&meta())).unwrap();
+    let got = s.clip(&sk, &s.clips()[0]).unwrap();
+    assert_eq!(got.report["joints"]["neck"], "Bone20");
+    assert!(!got.report["notes"].to_string().contains("head's parent"));
+    // that parent already stands for the spine: one joint can't be both, so refused
+    let text = meta_text()
+        .replace("humanName: Neck", "humanName: Left Index Proximal")
+        .replace("boneName: Bone15", "boneName: Bone22");
+    let m = unity_meta::parse(&text).unwrap();
     let e = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap_err();
     assert!(e.contains("not a humanoid") && e.contains("neck"), "{e}");
 }
 
 #[test]
-fn clips_outside_the_take_or_of_another_take_are_refused_by_name() {
+fn a_guess_without_a_neck_reads_the_heads_parent() {
+    // no name here can be guessed, so the guess's map is what joints gives: all but the neck
+    let mut j: BTreeMap<String, String> = meta()
+        .bones
+        .iter()
+        .map(|(lm, b)| ((*lm).to_string(), b.clone()))
+        .collect();
+    j.remove("neck");
+    let got = import_bytes(&fbx(), &skeleton(), "w", &j).unwrap();
+    assert_eq!(got.report["bone_map"], "names");
+    assert_eq!(got.report["joints"]["neck"], "Bone22");
+    // with the head missing too, it stays refused
+    j.remove("head");
+    let e = import_bytes(&fbx(), &skeleton(), "w", &j).unwrap_err();
+    assert!(e.contains("not a humanoid") && e.contains("neck"), "{e}");
+}
+
+#[test]
+fn a_bone_name_matches_ignoring_spaces_and_case_when_one_joint_does() {
+    let sk = skeleton();
+    let m = meta_with("boneName: Bone23", "boneName: 'bone 23'");
+    let s = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap();
+    let got = s.clip(&sk, &s.clips()[0]).unwrap();
+    assert_eq!(got.report["joints"]["head"], "Bone23");
+    let notes = got.report["notes"].to_string();
+    assert!(notes.contains("ignoring spaces and case"), "{notes}");
+    // two names of the map landing on one joint is one bone for two
+    let text = meta_text()
+        .replace("boneName: Bone23", "boneName: 'bone 23'")
+        .replace("boneName: Bone20", "boneName: BONE23");
+    let m = unity_meta::parse(&text).unwrap();
+    let e = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap_err();
+    assert!(e.contains("both come to"), "{e}");
+}
+
+#[test]
+fn a_stale_take_name_reads_the_files_one_take_with_the_clips_frames() {
+    let sk = skeleton();
+    let plain = open_bytes(&fbx(), "w", &none(), Some(&meta())).unwrap();
+    let want = plain.clip(&sk, &plain.clips()[1]).unwrap();
+    assert!(!want.report["notes"].to_string().contains("doesn't have"));
+    let m = meta_with("takeName: Take 001", "takeName: Another");
+    let s = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap();
+    let got = s.clip(&sk, &s.clips()[1]).unwrap();
+    assert_eq!(got.report["source"]["take"], "Take 001");
+    assert_eq!(got.clip.length(), 20);
+    assert_eq!(got.clip.keys()[0].root, want.clip.keys()[0].root, "frame 20 on");
+    let notes = got.report["notes"].to_string();
+    assert!(notes.contains("Another") && notes.contains("Take 001"), "{notes}");
+    // the range is still checked
+    let text = meta_text()
+        .replace("takeName: Take 001", "takeName: Another")
+        .replace("lastFrame: 39", "lastFrame: 40");
+    let m = unity_meta::parse(&text).unwrap();
+    let s = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap();
+    let e = s.clip(&sk, &s.clips()[1]).unwrap_err();
+    assert!(e.contains("outside the take"), "{e}");
+}
+
+#[test]
+fn clips_outside_the_take_are_refused_by_name() {
     let sk = skeleton();
     for (m, want) in [
         (meta_with("lastFrame: 39", "lastFrame: 40"), "outside the take"),
@@ -170,10 +250,6 @@ fn clips_outside_the_take_or_of_another_take_are_refused_by_name() {
         let e = s.clip(&sk, &s.clips()[1]).unwrap_err();
         assert!(e.contains("Walk end") && e.contains(want), "{e}");
     }
-    let m = meta_with("takeName: Take 001", "takeName: Another");
-    let s = open_bytes(&fbx(), "w", &none(), Some(&m)).unwrap();
-    let e = s.clip(&sk, &s.clips()[0]).unwrap_err();
-    assert!(e.contains("Another") && e.contains("Take 001"), "{e}");
 }
 
 #[test]
