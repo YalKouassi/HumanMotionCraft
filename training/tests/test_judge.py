@@ -1,4 +1,8 @@
-from ac_train import judge as J
+import pytest
+
+pytest.importorskip("torch")
+
+from ac_train import judge as J  # noqa: E402
 
 
 def test_span_keeps_the_context_and_stays_in_the_take():

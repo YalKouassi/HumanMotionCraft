@@ -4,7 +4,9 @@ import json
 
 import pytest
 
-from ac_train import flag
+pytest.importorskip("torch")
+
+from ac_train import flag  # noqa: E402
 
 
 def take(id_, loss, worst=None, windows=10, worst_at=3):

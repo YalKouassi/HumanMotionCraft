@@ -1,6 +1,9 @@
 import numpy as np
+import pytest
 
-from ac_train import walkgroups as W
+pytest.importorskip("torch")
+
+from ac_train import walkgroups as W  # noqa: E402
 
 
 def test_first_change_finds_a_stop_and_ignores_a_blip():
