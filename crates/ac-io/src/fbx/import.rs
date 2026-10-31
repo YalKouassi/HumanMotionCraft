@@ -857,7 +857,10 @@ mod tests {
         let (a, n, note) = clip_range(&m, &range("Take", 37.5, 40.0)).unwrap();
         assert_eq!((a, n), (38, 2));
         let note = note.unwrap();
-        assert!(note.contains("between frames") && note.contains("frames 40 to 40 cut"), "{note}");
+        assert!(
+            note.contains("between frames") && note.contains("frames 40 to 40 cut"),
+            "{note}"
+        );
     }
 
     #[test]

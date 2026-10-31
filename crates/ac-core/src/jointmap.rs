@@ -512,7 +512,11 @@ mod tests {
                 ],
             );
             let forearm = names.len() - 2;
-            chain(&mut names, forearm, &[side("Hand"), side("Finger0"), side("Finger01")]);
+            chain(
+                &mut names,
+                forearm,
+                &[side("Hand"), side("Finger0"), side("Finger01")],
+            );
         }
         chain(&mut names, top, &[n("Neck"), n("Head"), n("HeadNub")]);
         for s in ["L", "R"] {
