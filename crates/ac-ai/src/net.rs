@@ -39,7 +39,7 @@ struct Linear {
 impl Linear {
     /// From a row-major `out` x `inp` weight matrix and its biases.
     fn new(w: &[f32], b: &[f32], out: usize, inp: usize) -> R<Linear> {
-        if w.len() != out * inp || b.len() != out {
+        if inp == 0 || out.checked_mul(inp) != Some(w.len()) || b.len() != out {
             return Err(format!(
                 "weights: a {out} x {inp} layer with {} weights and {} biases",
                 w.len(),
@@ -199,9 +199,12 @@ impl Tensors {
         if s != shape {
             return Err(format!("weights: {name} is {s:?}, expected {shape:?}"));
         }
-        let n: usize = s.iter().product();
-        self.data
-            .get(*off..off + n)
+        let n = s
+            .iter()
+            .try_fold(1usize, |a, &b| a.checked_mul(b))
+            .ok_or_else(|| format!("weights: {name} has an impossible shape"))?;
+        off.checked_add(n)
+            .and_then(|end| self.data.get(*off..end))
             .map(<[f32]>::to_vec)
             .ok_or_else(|| format!("weights: {name} runs past the end"))
     }
@@ -263,7 +266,7 @@ impl Net {
         let t = Tensors { index, data };
         let card = v["card"].clone();
         let (pos_rows, d) = match t.shape("pos") {
-            Some([r, d]) => (*r, *d),
+            Some([r, d]) if *r > 0 && *d > 0 => (*r, *d),
             _ => return Err("weights: no pos embedding".into()),
         };
         let (feat, _) = match t.shape("out.1.weight") {
@@ -280,15 +283,23 @@ impl Net {
         let given = inp_w
             .checked_sub(feat * 2 + 1 + times + if path { PATH } else { 0 })
             .ok_or("weights: input narrower than the features")?;
-        let style = t.shape("style.weight").map(|s| s.to_vec());
-        let styles = style.as_ref().map_or(0, |s| s[0]);
+        let style: Option<Vec<usize>> = match t.shape("style.weight") {
+            Some([n, dd]) if *dd == d => Some(vec![*n, d]),
+            Some(s) => return Err(format!("weights: style.weight is {s:?}, expected [styles, {d}]")),
+            None => None,
+        };
+        let styles = style.as_ref().and_then(|s| s.first().copied()).unwrap_or(0);
         let mut layers = Vec::new();
         while t
             .shape(&format!("body.layers.{}.norm1.weight", layers.len()))
             .is_some()
         {
             let p = format!("body.layers.{}", layers.len());
-            let ff = t.shape(&format!("{p}.linear1.weight")).map_or(0, |s| s[0]);
+            let ff = t
+                .shape(&format!("{p}.linear1.weight"))
+                .and_then(|s| s.first().copied())
+                .filter(|&ff| ff > 0)
+                .ok_or_else(|| format!("weights: {p} has no feed-forward width"))?;
             layers.push(Layer {
                 qkv: Linear::new(
                     &t.take(&format!("{p}.self_attn.in_proj_weight"), &[3 * d, d])?,
@@ -306,8 +317,8 @@ impl Net {
         if layers.is_empty() {
             return Err("weights: no encoder layers".into());
         }
-        let heads = card["heads"].as_u64().unwrap_or(8) as usize;
-        if d % heads != 0 {
+        let heads = card["heads"].as_u64().unwrap_or(8).min(1024) as usize;
+        if heads == 0 || d % heads != 0 {
             return Err(format!("weights: width {d} does not split into {heads} heads"));
         }
         let net = Net {

@@ -1,0 +1,116 @@
+{
+  "$schema": "./schema.json",
+  "name": "ai-choose-model",
+  "feature": "ai.model",
+  "description": "Choosing which AI model fills (roadmap 155000). ai.models with the folder fixtures/data/models lists the bundled parts (the default) and two tiny test models written by python -m ac_train.tinymodel: tiny, a base model of its own whose every weight is zero but the output bias, so its fill is the plain interpolation with the root raised by 0.25 hip heights on every filled frame; and stale, an add-on whose card names parts as its base with a hash parts never had, refused for that reason (its hash is FNV-1a over weights.json then weights.bin, as session.info reports it: tiny ae671a139173c4d0, stale 1bd1841469b2aa6c). The keys are ai-fill's: standing at frame 0 (root offset z 0.9450101) and one hip height higher at frame 20, interpolated linearly. With parts at ai_force 0 the fill is the plain interpolation and frame 10's root head is halfway, 1.3073286 (ai-fill). ai.model tiny makes tiny the model (session.info says tiny and its hash); at ai_force 1 its fill lifts the root by 0.25 hip heights = 0.25 x 0.8698308 = 0.2174577 m, so frame 10's root head is 1.3073286 + 0.2174577 = 1.5247863, the keys are labelled tiny and carry its hash, and the same fill twice gives the same number. ai.model stale is refused and says why, with parts used instead: session.info says parts again and the same fill at ai_force 0 gives 1.3073286 again. A style the new model doesn't know (walk, on parts) goes back to any when tiny is chosen, and the result says so. Refused: a tag that isn't there, no tag, a folder that isn't there, an empty folder name.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    {
+      "command": "ai.models",
+      "params": { "folder": "{assets}/../fixtures/data/models" },
+      "expect": {
+        "chosen": { "tag": "parts" },
+        "models": {
+          "$contains": [
+            { "tag": "parts", "source": "bundled", "default": true, "loads": true, "refused": null, "context": 10, "max_gap": 45 },
+            {
+              "tag": "tiny",
+              "name": "Tiny test model",
+              "hash": "ae671a139173c4d0",
+              "source": "folder",
+              "default": false,
+              "loads": true,
+              "refused": null,
+              "bones": ["root"],
+              "context": 10,
+              "max_gap": 45,
+              "context_after": 0,
+              "multi_key": false,
+              "styles": [],
+              "given": false,
+              "commercial": true,
+              "base": null
+            },
+            {
+              "tag": "stale",
+              "name": "Stale add-on (test)",
+              "hash": "1bd1841469b2aa6c",
+              "source": "folder",
+              "default": false,
+              "loads": false,
+              "base": { "tag": "parts", "hash": "0000000000000000" },
+              "refused": "an add-on made for parts with hash 0000000000000000, not the parts here (ai.models shows its hash)"
+            }
+          ]
+        }
+      }
+    },
+    { "command": "session.info", "params": {}, "expect": { "model": { "tag": "parts" } } },
+    { "command": "ai.settings", "params": { "ai_force": 0 }, "expect": { "ai_force": 0 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 0.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 20 } },
+    { "command": "pose.set_root", "params": { "root": [0, 0, 1.9450101] } },
+    { "command": "key.set", "params": { "interp": "linear" } },
+    { "command": "frame.set", "params": { "frame": 10 } },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 20 },
+      "expect": { "from": 0, "to": 20, "frames": 19, "model": "parts" }
+    },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.3073286] } },
+    {
+      "command": "ai.model",
+      "params": { "tag": "tiny" },
+      "expect": { "tag": "tiny", "asked": "tiny", "refused": null, "hash": "ae671a139173c4d0", "name": "Tiny test model", "notes": [] }
+    },
+    { "command": "session.info", "params": {}, "expect": { "model": { "tag": "tiny", "hash": "ae671a139173c4d0" } } },
+    { "command": "ai.settings", "params": { "ai_force": 1 }, "expect": { "ai_force": 1 } },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 20 },
+      "expect": { "from": 0, "to": 20, "frames": 19, "model": "tiny", "model_hash": "ae671a139173c4d0" }
+    },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.5247863] } },
+    { "command": "editor.state", "params": {}, "expect": { "bands": [{ "from": 1, "to": 19, "model": "tiny" }] } },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 20 },
+      "expect": { "frames": 19, "model": "tiny", "model_hash": "ae671a139173c4d0" }
+    },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.5247863] } },
+    {
+      "command": "ai.model",
+      "params": { "tag": "stale" },
+      "expect": {
+        "tag": "parts",
+        "asked": "stale",
+        "refused": "model stale: an add-on made for parts with hash 0000000000000000, not the parts here (ai.models shows its hash); parts used instead",
+        "notes": ["model stale: an add-on made for parts with hash 0000000000000000, not the parts here (ai.models shows its hash); parts used instead"]
+      }
+    },
+    { "command": "session.info", "params": {}, "expect": { "model": { "tag": "parts" } } },
+    { "command": "ai.settings", "params": { "ai_force": 0, "style": "walk" }, "expect": { "ai_force": 0, "style": "walk" } },
+    {
+      "command": "ai.fill",
+      "params": { "from": 0, "to": 20 },
+      "expect": { "frames": 19, "model": "parts" }
+    },
+    { "command": "bone.world", "params": { "bone": "root" }, "expect": { "position": [0, -0.0108229, 1.3073286] } },
+    {
+      "command": "ai.model",
+      "params": { "tag": "tiny" },
+      "expect": { "tag": "tiny", "refused": null, "notes": ["style \"walk\": tiny doesn't know it; the style is \"any\" now"] }
+    },
+    { "command": "ai.info", "params": {}, "expect": { "model": { "tag": "tiny" }, "settings": { "style": "any" } } },
+    { "command": "ai.model", "params": { "tag": "parts" }, "expect": { "tag": "parts", "refused": null, "notes": [] } },
+    { "command": "session.info", "params": {}, "expect": { "model": { "tag": "parts" } } }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": [
+    { "command": "ai.model", "params": { "tag": "no-such-model" } },
+    { "command": "ai.model", "params": {} },
+    { "command": "ai.models", "params": { "folder": "{tmp}/not-a-folder" } },
+    { "command": "ai.models", "params": { "folder": "" } }
+  ]
+}

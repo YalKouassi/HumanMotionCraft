@@ -24,9 +24,10 @@
     clippy::unreachable
 )]
 
+pub mod models;
 pub mod net;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use ac_core::ai::{Contacts, FillSettings, FillWithContacts, Inbetweener, ModelInfo};
 use ac_core::clip::{Clip, Interp, Links};
@@ -43,12 +44,21 @@ type M3 = [[f64; 3]; 3];
 /// the only one that fills around layer-driven parts.
 pub const DEFAULT_TAG: &str = "parts";
 
+/// Most frames a card may claim for its context, context after or gap (hostile input: the sum
+/// must fit the network's window anyway).
+const MAX_CARD_FRAMES: u64 = 100_000;
+
 #[derive(Debug)]
 pub struct Model {
     info: ModelInfo,
     net: NetBox,
     /// FNV-1a of `weights.json` then `weights.bin` (`session.info`).
     hash: String,
+    /// What the card calls the model (the tag when it has no name).
+    name: String,
+    /// For an add-on (roadmap 154000): the base's tag and the hash of its weights when the
+    /// add-on was made (the card's `base` and `base_hash`).
+    base: Option<(String, String)>,
 }
 
 /// The network behind `Debug` (its weights are not worth printing).
@@ -96,6 +106,9 @@ impl Model {
                 bones.len()
             ));
         }
+        // every number in the card is hostile: capped before any sum
+        let frames =
+            |k: &str, default: u64| card[k].as_u64().unwrap_or(default).min(MAX_CARD_FRAMES) as usize;
         let info = ModelInfo {
             tag: s("tag").unwrap_or_else(|| {
                 dir.file_name()
@@ -105,16 +118,30 @@ impl Model {
             bones,
             styles,
             given: net.given != 0,
-            context: card["context"].as_u64().unwrap_or(10) as usize,
-            max_gap: card["max_gap"].as_u64().unwrap_or(45) as usize,
-            context_after: card["context_after"].as_u64().unwrap_or(0) as usize,
+            context: frames("context", 10),
+            max_gap: frames("max_gap", 45),
+            context_after: frames("context_after", 0),
             multi_key: card["multi_key"].as_bool().unwrap_or(false),
             commercial: card["commercial"].as_bool().unwrap_or(false),
             warning: s("warning").unwrap_or_default(),
         };
-        if info.context == 0 || info.context + info.context_after + info.max_gap + 1 > net.window() {
+        if info.tag.trim().is_empty() {
+            return Err("model card: no tag".into());
+        }
+        if info.context == 0
+            || info.max_gap == 0
+            || info.context + info.context_after + info.max_gap + 1 > net.window()
+        {
             return Err("model card: context, context_after and max_gap do not fit the network".into());
         }
+        let name = s("name")
+            .filter(|n| !n.trim().is_empty())
+            .unwrap_or_else(|| info.tag.clone());
+        let base = match (s("base"), s("base_hash")) {
+            (Some(t), Some(h)) if !t.trim().is_empty() && !h.trim().is_empty() => Some((t, h)),
+            (None, None) => None,
+            _ => return Err("model card: an add-on names both its base and base_hash".into()),
+        };
         let mut hash = ac_core::hash::Fnv::default();
         for f in ["weights.json", "weights.bin"] {
             let bytes = std::fs::read(dir.join(f)).map_err(|e| format!("{}: {e}", dir.join(f).display()))?;
@@ -124,7 +151,24 @@ impl Model {
             info,
             net: NetBox(net),
             hash: hash.hex(),
+            name,
+            base,
         })
+    }
+
+    /// What the card calls the model (the tag when it has no name).
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    /// The hash of the weights (`session.info`'s `model.hash`).
+    pub fn hash_hex(&self) -> &str {
+        &self.hash
+    }
+
+    /// For an add-on: its base's tag and the hash of the base's weights it was made on.
+    pub fn base(&self) -> Option<(&str, &str)> {
+        self.base.as_ref().map(|(t, h)| (t.as_str(), h.as_str()))
     }
 
     /// The default model under `<assets>/models` ([`DEFAULT_TAG`], else the first by name).
@@ -135,22 +179,7 @@ impl Model {
     /// The default model in a models folder (`<root>/<tag>/weights.json`): [`DEFAULT_TAG`], else
     /// the first by name.
     pub fn load_default_in(root: &Path) -> R<Model> {
-        let root = root.to_path_buf();
-        let pick = if root.join(DEFAULT_TAG).join("weights.json").is_file() {
-            root.join(DEFAULT_TAG)
-        } else {
-            let mut dirs: Vec<_> = std::fs::read_dir(&root)
-                .map_err(|e| format!("{}: {e}", root.display()))?
-                .filter_map(Result::ok)
-                .map(|e| e.path())
-                .filter(|p| p.join("weights.json").is_file())
-                .collect();
-            dirs.sort();
-            dirs.into_iter()
-                .next()
-                .ok_or_else(|| format!("no model under {}", root.display()))?
-        };
-        Model::load(&pick)
+        Model::load(&default_dir(root)?)
     }
 
     pub fn net(&self) -> &Net {
@@ -654,6 +683,24 @@ pub fn shared(assets: &Path) -> R<Option<std::sync::Arc<dyn Inbetweener>>> {
     shared_in(&assets.join("models"))
 }
 
+/// The default model's folder in a models folder: `<root>/parts` ([`DEFAULT_TAG`]) when it
+/// holds a `weights.json`, else the first folder by name that does.
+pub fn default_dir(root: &Path) -> R<PathBuf> {
+    if root.join(DEFAULT_TAG).join("weights.json").is_file() {
+        return Ok(root.join(DEFAULT_TAG));
+    }
+    let mut dirs: Vec<PathBuf> = std::fs::read_dir(root)
+        .map_err(|e| format!("{}: {e}", root.display()))?
+        .filter_map(Result::ok)
+        .map(|e| e.path())
+        .filter(|p| p.join("weights.json").is_file())
+        .collect();
+    dirs.sort();
+    dirs.into_iter()
+        .next()
+        .ok_or_else(|| format!("no model under {}", root.display()))
+}
+
 /// Whether a models folder holds a model (`<root>/<tag>/weights.json`).
 pub fn has_model(root: &Path) -> bool {
     std::fs::read_dir(root)
@@ -666,21 +713,27 @@ pub fn has_model(root: &Path) -> bool {
 /// [`shared`] for a models folder: the bundled `<assets>/models`, or a person's own (a model
 /// trained on data that may not be shipped stays there, never in the repo).
 pub fn shared_in(root: &Path) -> R<Option<std::sync::Arc<dyn Inbetweener>>> {
-    use std::collections::BTreeMap;
-    use std::sync::{Arc, Mutex, OnceLock};
-    static CACHE: OnceLock<Mutex<BTreeMap<std::path::PathBuf, Arc<Model>>>> = OnceLock::new();
-    let root = root.to_path_buf();
-    if !has_model(&root) {
+    if !has_model(root) {
         return Ok(None);
     }
+    Ok(Some(shared_model(&default_dir(root)?)?))
+}
+
+/// The model in `<dir>` (a folder with `weights.json` and `weights.bin`), loaded once per
+/// process and shared: `ai.models` lists every model it finds through here, so the cards cost
+/// one load each, and `ai.model` hands out the same one.
+pub fn shared_model(dir: &Path) -> R<std::sync::Arc<Model>> {
+    use std::collections::BTreeMap;
+    use std::sync::{Arc, Mutex, OnceLock};
+    static CACHE: OnceLock<Mutex<BTreeMap<PathBuf, Arc<Model>>>> = OnceLock::new();
     let mut cache = CACHE
         .get_or_init(|| Mutex::new(BTreeMap::new()))
         .lock()
         .map_err(|_| "the model cache is poisoned")?;
-    if let Some(m) = cache.get(&root) {
-        return Ok(Some(m.clone()));
+    if let Some(m) = cache.get(dir) {
+        return Ok(m.clone());
     }
-    let m = Arc::new(Model::load_default_in(&root)?);
-    cache.insert(root, m.clone());
-    Ok(Some(m))
+    let m = Arc::new(Model::load(dir)?);
+    cache.insert(dir.to_path_buf(), m.clone());
+    Ok(m)
 }

@@ -189,10 +189,17 @@ impl App {
         } else {
             ac_ai::shared(&assets)
         };
+        // the models the AI panel offers (ai.models): the installed ones first, as above
+        let models: std::sync::Arc<dyn ac_core::ai::ModelSource> = if automated {
+            std::sync::Arc::new(ac_ai::models::Models::bundled(&assets))
+        } else {
+            std::sync::Arc::new(ac_ai::models::Models::with_installed(&assets, &own))
+        };
         // the same setup as the CLI and MCP; what failed to load is said in the status line
         let built = ac_io::setup::SessionBuilder::new(&assets)
             .library(&library)
             .ai(model)
+            .models(models)
             .commands(ac_media::SPECS)
             .commands(ac_textmotion::SPECS)
             .commands(ac_posefill::SPECS)

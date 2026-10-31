@@ -1,0 +1,161 @@
+{
+ "format": "ac-inbetweener",
+ "version": 1,
+ "tensors": {
+  "pos": {
+   "offset": 0,
+   "shape": [
+    56,
+    8
+   ]
+  },
+  "inp.weight": {
+   "offset": 448,
+   "shape": [
+    8,
+    236
+   ]
+  },
+  "inp.bias": {
+   "offset": 2336,
+   "shape": [
+    8
+   ]
+  },
+  "body.layers.0.self_attn.in_proj_weight": {
+   "offset": 2344,
+   "shape": [
+    24,
+    8
+   ]
+  },
+  "body.layers.0.self_attn.in_proj_bias": {
+   "offset": 2536,
+   "shape": [
+    24
+   ]
+  },
+  "body.layers.0.self_attn.out_proj.weight": {
+   "offset": 2560,
+   "shape": [
+    8,
+    8
+   ]
+  },
+  "body.layers.0.self_attn.out_proj.bias": {
+   "offset": 2624,
+   "shape": [
+    8
+   ]
+  },
+  "body.layers.0.linear1.weight": {
+   "offset": 2632,
+   "shape": [
+    8,
+    8
+   ]
+  },
+  "body.layers.0.linear1.bias": {
+   "offset": 2696,
+   "shape": [
+    8
+   ]
+  },
+  "body.layers.0.linear2.weight": {
+   "offset": 2704,
+   "shape": [
+    8,
+    8
+   ]
+  },
+  "body.layers.0.linear2.bias": {
+   "offset": 2768,
+   "shape": [
+    8
+   ]
+  },
+  "body.layers.0.norm1.weight": {
+   "offset": 2776,
+   "shape": [
+    8
+   ]
+  },
+  "body.layers.0.norm1.bias": {
+   "offset": 2784,
+   "shape": [
+    8
+   ]
+  },
+  "body.layers.0.norm2.weight": {
+   "offset": 2792,
+   "shape": [
+    8
+   ]
+  },
+  "body.layers.0.norm2.bias": {
+   "offset": 2800,
+   "shape": [
+    8
+   ]
+  },
+  "out.0.weight": {
+   "offset": 2808,
+   "shape": [
+    8
+   ]
+  },
+  "out.0.bias": {
+   "offset": 2816,
+   "shape": [
+    8
+   ]
+  },
+  "out.1.weight": {
+   "offset": 2824,
+   "shape": [
+    117,
+    8
+   ]
+  },
+  "out.1.bias": {
+   "offset": 3760,
+   "shape": [
+    117
+   ]
+  }
+ },
+ "card": {
+  "tag": "stale",
+  "bones": [
+   "root",
+   "spine05",
+   "spine04",
+   "spine03",
+   "spine02",
+   "spine01",
+   "neck01",
+   "clavicle.L",
+   "upperarm01.L",
+   "lowerarm01.L",
+   "clavicle.R",
+   "upperarm01.R",
+   "lowerarm01.R",
+   "upperleg01.L",
+   "lowerleg01.L",
+   "foot.L",
+   "upperleg01.R",
+   "lowerleg01.R",
+   "foot.R"
+  ],
+  "context": 10,
+  "max_gap": 45,
+  "heads": 2,
+  "styles": [],
+  "commercial": true,
+  "lift": 0.5,
+  "note": "A test model for the fixtures that choose a model (roadmap 155000), written by python -m ac_train.tinymodel: every weight is zero but the output bias, so a fill is the plain interpolation with the root raised by `lift` hip heights on every filled frame. Not trained on anything.",
+  "name": "Stale add-on (test)",
+  "base": "parts",
+  "base_hash": "0000000000000000"
+ }
+}

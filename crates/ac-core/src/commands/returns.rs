@@ -69,11 +69,20 @@ pub const AI_KEEP: &[ParamSpec] = &[ParamSpec::new("kept", Kind::Integer, "AI ke
 
 pub const AI_CLEAR: &[ParamSpec] = &[ParamSpec::new("cleared", Kind::Integer, "AI keys removed").required()];
 
+/// Which weights made a fill (`session.info`'s `model.hash`), kept on its keys and in the file.
+const MODEL_HASH: ParamSpec = ParamSpec::new(
+    "model_hash",
+    Kind::Text,
+    "the hash of the model's weights that made it (session.info; empty: the model gives none)",
+)
+.required();
+
 pub const AI_FILL: &[ParamSpec] = &[
     ParamSpec::new("from", Kind::Integer, "your key before the gap").required(),
     ParamSpec::new("to", Kind::Integer, "your key after the gap").required(),
     ParamSpec::new("frames", Kind::Integer, "frames filled").required(),
     ParamSpec::new("model", Kind::Text, "the model label").required(),
+    MODEL_HASH,
     ParamSpec::new(
         "notes",
         Kind::TextList,
@@ -120,6 +129,44 @@ pub const AI_SETTINGS: &[ParamSpec] = &[
     .required(),
     ParamSpec::new("trajectory", Kind::Number, "pull onto the keys' path").required(),
     ParamSpec::new("head", Kind::Number, "neck and head on the keys' spline").required(),
+];
+
+pub const AI_MODELS: &[ParamSpec] = &[
+    ParamSpec::new(
+        "models",
+        Kind::Text,
+        "every model found, in the order a tag is resolved (the first with a tag wins): [{tag, name, hash, bones, context, max_gap, context_after, multi_key, styles, given, commercial, warning, base: {tag, hash} | null (an add-on's base and the hash it was made on), path, source: installed | bundled | folder, default, loads, refused: why | null}]",
+    )
+    .json()
+    .required(),
+    ParamSpec::new(
+        "chosen",
+        Kind::Text,
+        "the model fills run with: {tag, hash} (null: none loaded)",
+    )
+    .json()
+    .required(),
+    ParamSpec::new("folders", Kind::TextList, "the folders added with `folder` this session").required(),
+];
+
+pub const AI_MODEL: &[ParamSpec] = &[
+    ParamSpec::new("tag", Kind::Text, "the model fills run with from now on").required(),
+    ParamSpec::new("hash", Kind::Text, "the hash of its weights (session.info)").required(),
+    ParamSpec::new("name", Kind::Text, "its name").required(),
+    ParamSpec::new("path", Kind::Text, "its folder").required(),
+    ParamSpec::new("asked", Kind::Text, "the tag asked for").required(),
+    ParamSpec::new(
+        "refused",
+        Kind::Text,
+        "why the model asked for was not used and which one was (null: it was used)",
+    )
+    .required(),
+    ParamSpec::new(
+        "notes",
+        Kind::TextList,
+        "what else changed (a style the model doesn't know set to \"any\"; the refusal)",
+    )
+    .required(),
 ];
 
 pub const AI_INFO: &[ParamSpec] = &[
@@ -279,6 +326,7 @@ pub const AI_FILL_ALL: &[ParamSpec] = &[
         .json()
         .required(),
     ParamSpec::new("model", Kind::Text, "the model label").required(),
+    MODEL_HASH,
     ParamSpec::new(
         "notes",
         Kind::TextList,
@@ -314,6 +362,11 @@ pub const AI_TOGGLE: &[ParamSpec] = &[
     ParamSpec::new("mode", Kind::Choice(&["ai", "plain"]), "what the span is now").required(),
     ParamSpec::new("cleared", Kind::Integer, "plain: AI keys removed"),
     ParamSpec::new("model", Kind::Text, "ai: the model label"),
+    ParamSpec::new(
+        "model_hash",
+        Kind::Text,
+        "ai: the hash of the model's weights that made it (session.info)",
+    ),
     ParamSpec::new(
         "notes",
         Kind::TextList,

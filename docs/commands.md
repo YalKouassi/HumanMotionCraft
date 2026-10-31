@@ -78,6 +78,7 @@ Outputs:
 | `to` | integer | yes |  | your key after the gap |
 | `frames` | integer | yes |  | frames filled |
 | `model` | text | yes |  | the model label |
+| `model_hash` | text | yes |  | the hash of the model's weights that made it (session.info; empty: the model gives none) |
 | `notes` | list of text | yes |  | impossible poses the fill made and bent back to the possible limit, or left, and library animations left out of the anchor poses (empty: none) |
 | `anchors` | JSON | yes |  | a gap over the model's limit: the anchor poses placed inside it, [{frame, id, source_frame}] (the library animation and its frame the pose is); empty: the model took the gap in one |
 | `anchor_segment` | JSON | yes |  | the library segment the anchors came from: {id, from, to, speed, match_deg} (its frames matched to the two keys, library frames per animation frame, and the mean angle between its end poses and the keys); null: the model took the gap in one |
@@ -100,6 +101,7 @@ Outputs:
 | `filled` | JSON | yes |  | the gaps filled: [[from, to]] |
 | `skipped` | JSON | yes |  | the gaps left: [{from, to, reason}] |
 | `model` | text | yes |  | the model label |
+| `model_hash` | text | yes |  | the hash of the model's weights that made it (session.info; empty: the model gives none) |
 | `notes` | list of text | yes |  | impossible poses the fills made and bent back to the possible limit, or left (each starts with its gap, from–to; empty: none) |
 | `anchors` | JSON | yes |  | the anchor poses placed in gaps over the model's limit: [{from, to, frame, id, source_frame}] (empty: none needed) |
 | `passes` | JSON | yes |  | the gaps filled several at once, with a model trained with several keys in a window (ai.info's multi_key): one list of keys per pass, [[from, key, ..., to]] (empty: every gap on its own) |
@@ -148,6 +150,46 @@ Outputs:
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `kept` | integer | yes |  | AI keys made yours |
+
+### `ai.model`: Choose AI model
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `tag` | text | yes |  | the model's tag (ai.models lists them) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `tag` | text | yes |  | the model fills run with from now on |
+| `hash` | text | yes |  | the hash of its weights (session.info) |
+| `name` | text | yes |  | its name |
+| `path` | text | yes |  | its folder |
+| `asked` | text | yes |  | the tag asked for |
+| `refused` | text | yes |  | why the model asked for was not used and which one was (null: it was used) |
+| `notes` | list of text | yes |  | what else changed (a style the model doesn't know set to "any"; the refusal) |
+
+### `ai.models`: AI models
+
+not undoable, icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `folder` | text |  |  | another folder of models (<folder>/<tag>/weights.json) to list after the installed and bundled ones; kept for ai.model and the AI panel for this session |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `models` | JSON | yes |  | every model found, in the order a tag is resolved (the first with a tag wins): [{tag, name, hash, bones, context, max_gap, context_after, multi_key, styles, given, commercial, warning, base: {tag, hash} \| null (an add-on's base and the hash it was made on), path, source: installed \| bundled \| folder, default, loads, refused: why \| null}] |
+| `chosen` | JSON | yes |  | the model fills run with: {tag, hash} (null: none loaded) |
+| `folders` | list of text | yes |  | the folders added with `folder` this session |
 
 ### `ai.preview`: Preview AI fill
 
@@ -218,6 +260,7 @@ Outputs:
 | `mode` | one of ai \| plain | yes |  | what the span is now |
 | `cleared` | integer |  |  | plain: AI keys removed |
 | `model` | text |  |  | ai: the model label |
+| `model_hash` | text |  |  | ai: the hash of the model's weights that made it (session.info) |
 | `notes` | list of text |  |  | ai: impossible poses the fill made and bent back, or left |
 | `anchors` | JSON |  |  | ai: the anchor poses placed in a gap over the model's limit, as ai.fill's (empty: none) |
 | `diagnostics` | JSON |  |  | ai: why the fill might look wrong, measured, as ai.fill's |

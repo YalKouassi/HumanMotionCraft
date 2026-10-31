@@ -3,6 +3,7 @@
 mod ai;
 mod clipquery;
 mod keys;
+mod models;
 mod placement;
 mod pose;
 mod possible;
@@ -28,6 +29,7 @@ pub static AREAS: &[&[CommandSpec]] = &[
     clipquery::SPECS,
     placement::SPECS,
     ai::SPECS,
+    models::SPECS,
     quality::SPECS,
     possible::SPECS,
     view::SPECS,

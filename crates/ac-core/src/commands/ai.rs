@@ -58,6 +58,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
     let mut filled: Vec<Value> = Vec::new();
     let mut skipped: Vec<Value> = Vec::new();
     let mut model = String::new();
+    let mut model_hash = String::new();
     let mut notes: Vec<String> = Vec::new();
     let mut anchors: Vec<Value> = Vec::new();
     let mut diagnostics: Vec<Value> = Vec::new();
@@ -108,6 +109,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
                 filled.push(json!([p, q]));
             }
             model = f.model;
+            model_hash = f.hash;
             passes.push(json!(keys));
             continue;
         }
@@ -121,6 +123,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
         }));
         diagnostics.push(crate::filldiag::diagnose(doc, &f).json());
         model = f.model;
+        model_hash = f.hash;
         filled.push(json!([f.from, f.to]));
     }
     if filled.is_empty() {
@@ -142,8 +145,8 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
         });
     }
     Ok(json!({
-        "filled": filled, "skipped": skipped, "model": model, "notes": notes, "anchors": anchors,
-        "diagnostics": diagnostics, "passes": passes,
+        "filled": filled, "skipped": skipped, "model": model, "model_hash": model_hash, "notes": notes,
+        "anchors": anchors, "diagnostics": diagnostics, "passes": passes,
     }))
 }
 
@@ -178,7 +181,7 @@ fn ai_toggle(doc: &mut Document, p: &P) -> Out {
     let f = doc.ai_fill(Some((g.from, g.to)))?;
     let d = crate::filldiag::diagnose(doc, &f).json();
     Ok(json!({
-        "from": f.from, "to": f.to, "mode": "ai", "model": f.model, "notes": f.notes,
-        "anchors": f.anchors, "diagnostics": d,
+        "from": f.from, "to": f.to, "mode": "ai", "model": f.model, "model_hash": f.hash,
+        "notes": f.notes, "anchors": f.anchors, "diagnostics": d,
     }))
 }
