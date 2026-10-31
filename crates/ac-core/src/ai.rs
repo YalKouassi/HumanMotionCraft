@@ -596,6 +596,20 @@ impl crate::document::Document {
         })
     }
 
+    /// Fill the span `a..b` again after a key of it changed, finished as [`Document::ai_fill`]
+    /// finishes it; returns the notes.
+    pub(crate) fn refill_finished(&mut self, filler: &AiFiller, a: i64, b: i64) -> R<Vec<String>> {
+        let note = crate::edits::refill(&mut self.clip, a, b, filler, &self.links)?;
+        if !note.is_empty() {
+            // the span's AI keys are gone and nothing took their place: say so (Rule 1)
+            return Ok(vec![note]);
+        }
+        let (_, placing) = self.finish_fill(filler, a, b)?;
+        let mut notes = self.keep_possible(a, b)?;
+        notes.extend(placing);
+        Ok(notes)
+    }
+
     /// After `refill` wrote the span `a..b`: tag the anchor keys of a long fill, ease through
     /// the keys at both ends and through each anchor, and plant the feet of every span between
     /// them. Returns what was placed and the notes of placing it.
@@ -862,15 +876,7 @@ impl crate::document::Document {
             if !ai.iter().any(|&x| a < x && x < b) || crate::edits::generated_in(&self.clip, a, b) {
                 continue;
             }
-            let note = crate::edits::refill(&mut self.clip, a, b, &filler, &self.links)?;
-            if note.is_empty() {
-                let (_, placing) = self.finish_fill(&filler, a, b)?;
-                notes.extend(self.keep_possible(a, b)?);
-                notes.extend(placing);
-            } else {
-                // the span's AI keys are gone and nothing took their place: say so (Rule 1)
-                notes.push(note);
-            }
+            notes.extend(self.refill_finished(&filler, a, b)?);
         }
         let fr = self.frame;
         self.go_to(fr)?;

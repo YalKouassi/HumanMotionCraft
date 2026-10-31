@@ -1,0 +1,69 @@
+{
+  "$schema": "./schema.json",
+  "name": "bug-refill-finishes-like-a-fill",
+  "feature": "key.move",
+  "description": "A key move or copy used to refill the spans it touched with the model's frames alone: no ease through the keys and anchors, no planting, no bending back of impossible poses, all of which ai.fill and key.set do. Now each refilled span is finished as ai.fill finishes it (Document::refill_finished). This fixture walks the commands and hand-works the spans and anchors; crates/ac-cli/tests/refill_finish.rs compares every key with a fresh ai.fill of the same keys. A short fill: the built-in walk's frame 8 pasted on 20 and 40, filled, then key.move 20 to 25: the bands are 1-24 and 26-39, and one undo step puts 1-19 and 21-39 back. A long fill: the walk pose on 90, 2 m ahead (as ai-fill-long-gap), filled, then key.copy 90 to 40: 0-40 holds 39 frames, under the model's 45, so it has no anchor; 40-90 holds 49, so ceil(50 / 30) = 2 spans and one anchor, 40 + (2 x 50 + 2) / 4 = 65 (whole-number division), so the bands are 1-39, 41-64, 65, 66-89. One undo step puts back the bands around anchors 30 and 60. Physics is off: this checks the keys.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "ai.settings", "params": { "ai_force": 1, "style": "any" } },
+    { "command": "clip.open", "params": { "id": "Locomotion/Walk" } },
+    { "command": "keys.copy", "params": { "frames": [8] }, "expect": { "copied": 1 } },
+    { "command": "pose.reset" },
+    { "command": "clip.new", "params": { "name": "Moved short", "group": "Mine" }, "expect": { "id": "Mine/Moved short" } },
+    { "command": "keys.paste", "params": { "at": 20 }, "expect": { "frames": [20] } },
+    { "command": "pose.set_root", "params": { "root": [0, -0.5, 0.9027198] } },
+    { "command": "key.set", "expect": { "frame": 20 } },
+    { "command": "keys.paste", "params": { "at": 40 }, "expect": { "frames": [40] } },
+    { "command": "pose.set_root", "params": { "root": [0, -1, 0.9027198] } },
+    { "command": "key.set", "expect": { "frame": 40 } },
+    { "command": "ai.fill", "params": { "from": 0, "to": 20 } },
+    { "command": "ai.fill", "params": { "from": 20, "to": 40 } },
+    {
+      "command": "editor.state",
+      "expect": { "bands": [{ "from": 1, "to": 19, "model": "parts" }, { "from": 21, "to": 39, "model": "parts" }] }
+    },
+    { "command": "key.move", "params": { "from": 20, "to": 25 } },
+    {
+      "command": "editor.state",
+      "expect": { "bands": [{ "from": 1, "to": 24, "model": "parts" }, { "from": 26, "to": 39, "model": "parts" }] }
+    },
+    { "command": "edit.undo", "expect": { "command": "key.move" } },
+    {
+      "command": "editor.state",
+      "expect": { "bands": [{ "from": 1, "to": 19, "model": "parts" }, { "from": 21, "to": 39, "model": "parts" }] }
+    },
+    { "command": "pose.reset" },
+    { "command": "clip.new", "params": { "name": "Copied long", "group": "Mine" }, "expect": { "id": "Mine/Copied long" } },
+    { "command": "keys.paste", "params": { "at": 90 }, "expect": { "frames": [90] } },
+    { "command": "pose.set_root", "params": { "root": [0, -2.2993044, 0.9027198] } },
+    { "command": "key.set", "expect": { "frame": 90 } },
+    { "command": "ai.fill", "params": { "from": 0, "to": 90 }, "expect": { "anchors": [{ "frame": 30 }, { "frame": 60 }] } },
+    { "command": "key.copy", "params": { "from": 90, "to": 40 } },
+    {
+      "command": "editor.state",
+      "expect": {
+        "bands": [
+          { "from": 1, "to": 39 },
+          { "from": 41, "to": 64 },
+          { "from": 65, "to": 65 },
+          { "from": 66, "to": 89 }
+        ]
+      }
+    },
+    { "command": "edit.undo", "expect": { "command": "key.copy" } },
+    {
+      "command": "editor.state",
+      "expect": {
+        "bands": [
+          { "from": 1, "to": 29 },
+          { "from": 30, "to": 30 },
+          { "from": 31, "to": 59 },
+          { "from": 60, "to": 60 },
+          { "from": 61, "to": 89 }
+        ]
+      }
+    }
+  ],
+  "expect": { "tolerance": 1e-6 },
+  "errors": []
+}

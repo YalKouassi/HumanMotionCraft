@@ -1,6 +1,6 @@
 # A key move or copy finishes its refill like a fill
 
-- **Status:** not started
+- **Status:** built, waiting for the owner
 - **Requires:** none
 - **Source:** the 2026-10-31 review of 121000 (finding 5); the owner's decision
 
@@ -12,3 +12,12 @@ does all three.
 ## Acceptance
 A bug fixture moves and copies a key beside a short and a long fill; each span ends as a fresh `ai.fill` with
 the same keys would. One undo step each. The existing `ai.fill` goldens don't change.
+
+## Result
+`Document::refill_finished` (`crates/ac-core/src/ai.rs`) is now the one refill-and-finish: `key.set`'s `resync_ai`,
+`key.move` and `key.copy` all go through it, so the ease through keys and anchors, the planting and `keep_possible`
+run on every refilled span. `move_key` and `copy_key` take the model from the document instead of a `Filler`
+argument. `ai.fill`'s own path is untouched, so its goldens are not expected to change. Fixture
+`bug-refill-finishes-like-a-fill` walks a short and a long fill with hand-worked bands and undo steps;
+`crates/ac-cli/tests/refill_finish.rs` compares every key with a fresh `ai.fill`, within 1e-6 (2026-10-31).
+Written without a build: neither has been run yet.

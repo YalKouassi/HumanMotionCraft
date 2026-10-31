@@ -341,40 +341,6 @@ fn filled_spans(clip: &Clip) -> Vec<(i64, i64)> {
         .collect()
 }
 
-fn refill_touching(
-    links: &dyn Links,
-    clip: &mut Clip,
-    frames: &[i64],
-    was: &[(i64, i64)],
-    filler: Option<&dyn Filler>,
-) -> R<Vec<String>> {
-    let m = manual_frames(clip);
-    let spans: BTreeSet<(i64, i64)> = m
-        .windows(2)
-        .filter_map(|w| match w {
-            [a, b] if frames.iter().any(|&f| *a <= f && f <= *b) => Some((*a, *b)),
-            _ => None,
-        })
-        .collect();
-    let (made, spans): (Vec<_>, Vec<_>) = spans.into_iter().partition(|&(a, b)| generated_in(clip, a, b));
-    let mut notes: Vec<String> = made
-        .into_iter()
-        .map(|(a, b)| generated_note(clip, a, b))
-        .collect();
-    let Some(filler) = filler else {
-        return Ok(notes);
-    };
-    for (a, b) in spans {
-        if was.iter().any(|&(a2, b2)| !(b2 <= a || a2 >= b)) {
-            let note = refill(clip, a, b, filler, links)?;
-            if !note.is_empty() {
-                notes.push(note);
-            }
-        }
-    }
-    Ok(notes)
-}
-
 /// Drop the in-betweener's AI keys in the spans on both sides of `f` (keys made from text stay).
 fn clear_ai_around(clip: &mut Clip, f: i64) -> R<()> {
     let m = manual_frames(clip);
@@ -395,8 +361,38 @@ fn sample1(clip: &Clip, f: f64, links: &dyn Links) -> R<Pose> {
 }
 
 impl Document {
+    /// Fill again the spans between your keys that hold one of `frames` and were filled (`was`),
+    /// each finished as `ai.fill` finishes it ([`Document::refill_finished`]). A span made by a
+    /// helper stays as it is, and a note says so.
+    fn refill_touching(&mut self, frames: &[i64], was: &[(i64, i64)]) -> R<Vec<String>> {
+        let m = manual_frames(&self.clip);
+        let spans: BTreeSet<(i64, i64)> = m
+            .windows(2)
+            .filter_map(|w| match w {
+                [a, b] if frames.iter().any(|&f| *a <= f && f <= *b) => Some((*a, *b)),
+                _ => None,
+            })
+            .collect();
+        let (made, spans): (Vec<_>, Vec<_>) = spans
+            .into_iter()
+            .partition(|&(a, b)| generated_in(&self.clip, a, b));
+        let mut notes: Vec<String> = made
+            .into_iter()
+            .map(|(a, b)| generated_note(&self.clip, a, b))
+            .collect();
+        let Some(filler) = self.ai_filler() else {
+            return Ok(notes);
+        };
+        for (a, b) in spans {
+            if was.iter().any(|&(a2, b2)| !(b2 <= a || a2 >= b)) {
+                notes.extend(self.refill_finished(&filler, a, b)?);
+            }
+        }
+        Ok(notes)
+    }
+
     /// The pose on frame `src` (keyed or not) as a manual key on `dst`.
-    pub fn copy_key(&mut self, src: i64, dst: i64, filler: Option<&dyn Filler>) -> R<Vec<String>> {
+    pub fn copy_key(&mut self, src: i64, dst: i64) -> R<Vec<String>> {
         let dst = dst.max(0);
         let was = filled_spans(&self.clip);
         let p = sample1(&self.clip, src as f64, &self.links)?;
@@ -404,13 +400,13 @@ impl Document {
         self.clip
             .set_key(Key::new(dst, p.rotations, p.root, Interp::Smooth))?;
         clear_ai_around(&mut self.clip, dst)?;
-        let notes = refill_touching(&self.links, &mut self.clip, &[dst], &was, filler)?;
+        let notes = self.refill_touching(&[dst], &was)?;
         self.go_to(dst as f64)?;
         Ok(notes)
     }
 
     /// Move the key on `src` to `dst`; the spans it leaves and joins are refilled.
-    pub fn move_key(&mut self, src: i64, dst: i64, filler: Option<&dyn Filler>) -> R<Vec<String>> {
+    pub fn move_key(&mut self, src: i64, dst: i64) -> R<Vec<String>> {
         let dst = dst.max(0);
         let mut key = self
             .clip
@@ -433,7 +429,7 @@ impl Document {
         let mut notes = Vec::new();
         if key.source == KeySource::Manual {
             clear_ai_around(&mut self.clip, dst)?;
-            notes = refill_touching(&self.links, &mut self.clip, &[dst, src], &was, filler)?;
+            notes = self.refill_touching(&[dst, src], &was)?;
         }
         self.go_to(dst as f64)?;
         Ok(notes)
