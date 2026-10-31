@@ -387,22 +387,12 @@ fn key_interp(doc: &mut Document, p: &P) -> Out {
 }
 
 fn key_move(doc: &mut Document, p: &P) -> Out {
-    let filler = doc.ai_filler();
-    let notes = doc.move_key(
-        int(p, "from")?,
-        int(p, "to")?,
-        filler.as_ref().map(|f| f as &dyn edits::Filler),
-    )?;
+    let notes = doc.move_key(int(p, "from")?, int(p, "to")?)?;
     Ok(json!({ "notes": notes }))
 }
 
 fn key_copy(doc: &mut Document, p: &P) -> Out {
-    let filler = doc.ai_filler();
-    let notes = doc.copy_key(
-        int(p, "from")?,
-        int(p, "to")?,
-        filler.as_ref().map(|f| f as &dyn edits::Filler),
-    )?;
+    let notes = doc.copy_key(int(p, "from")?, int(p, "to")?)?;
     Ok(json!({ "notes": notes }))
 }
 

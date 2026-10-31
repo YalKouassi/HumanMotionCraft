@@ -64,6 +64,8 @@ pub trait Filler {
 
 /// Frames either side of a foot's contact over which a lock eases in and out.
 pub const LOCK_FADE: usize = 4;
+/// The most times [`Document::hold_contacts`] goes over a fill.
+const HOLD_PASSES: usize = 3;
 
 /// How far `feet.lock` moves a foot on each frame, across the floor only (a heel may rise as the foot
 /// rolls). `balls`: where the ball of the foot is, which stays put as the foot rolls over it. Through
@@ -92,13 +94,19 @@ fn lock_moves(balls: &[Vec3], flags: &[bool]) -> Vec<Vec3> {
         }
         f = f.max(start + 1);
     }
+    faded(&by, &held, &ends)
+}
+
+/// `by` with each contact's move (`ends`) fading out over the [`LOCK_FADE`] frames either side.
+fn faded(by: &[Vec3], held: &[bool], ends: &[(usize, usize)]) -> Vec<Vec3> {
+    let n = by.len();
     let reach = LOCK_FADE + 1;
     let smooth = |d: usize| {
         let u = 1.0 - d as f64 / reach as f64;
         u * u * (3.0 - 2.0 * u)
     };
     let mut fades = vec![[0.0; 3]; n];
-    for (a, b) in ends {
+    for &(a, b) in ends {
         for d in 1..reach {
             if let Some(i) = a.checked_sub(d).filter(|&i| !held[i]) {
                 fades[i] = quat::add3(fades[i], quat::scale3(by[a], smooth(d)));
@@ -109,6 +117,51 @@ fn lock_moves(balls: &[Vec3], flags: &[bool]) -> Vec<Vec3> {
         }
     }
     by.iter().zip(&fades).map(|(a, b)| quat::add3(*a, *b)).collect()
+}
+
+/// How far to move a foot on each frame so the point it stands on stays put through each contact.
+/// `drift`: how far that point has travelled across the floor by each frame; `down`: the foot is in
+/// contact; `fixed`: a frame that can't change (your key, an anchor). A contact holds at its mean
+/// place, or at the place on its fixed frames, going straight from one to the next when it has
+/// several; the moves fade out either side as [`lock_moves`]'s do, and a fixed frame never moves.
+fn hold_moves(drift: &[Vec3], down: &[bool], fixed: &[bool]) -> Vec<Vec3> {
+    let n = drift.len().min(down.len()).min(fixed.len());
+    let mut held = vec![false; n];
+    let mut by = vec![[0.0; 3]; n];
+    let mut ends: Vec<(usize, usize)> = Vec::new();
+    let mut f = 0;
+    while f < n {
+        let start = f;
+        while f < n && down[f] {
+            f += 1;
+        }
+        if f - start >= 2 {
+            let pins: Vec<usize> = (start..f).filter(|&i| fixed[i]).collect();
+            let mean = quat::scale3(
+                drift[start..f].iter().fold([0.0; 3], |s, d| quat::add3(s, *d)),
+                1.0 / (f - start) as f64,
+            );
+            for i in start..f {
+                let at = match (pins.iter().rfind(|&&p| p <= i), pins.iter().find(|&&p| p >= i)) {
+                    (Some(&p), Some(&q)) if q > p => {
+                        let w = (i - p) as f64 / (q - p) as f64;
+                        quat::add3(drift[p], quat::scale3(quat::sub3(drift[q], drift[p]), w))
+                    }
+                    (Some(&p), _) | (_, Some(&p)) => drift[p],
+                    (None, None) => mean,
+                };
+                held[i] = true;
+                by[i] = [at[0] - drift[i][0], at[1] - drift[i][1], 0.0];
+            }
+            ends.push((start, f - 1));
+        }
+        f = f.max(start + 1);
+    }
+    let mut out = faded(&by, &held, &ends);
+    for (m, _) in out.iter_mut().zip(fixed).filter(|(_, fix)| **fix) {
+        *m = [0.0; 3];
+    }
+    out
 }
 
 fn keys_mut(clip: &mut Clip) -> R<&mut Vec<Key>> {
@@ -341,40 +394,6 @@ fn filled_spans(clip: &Clip) -> Vec<(i64, i64)> {
         .collect()
 }
 
-fn refill_touching(
-    links: &dyn Links,
-    clip: &mut Clip,
-    frames: &[i64],
-    was: &[(i64, i64)],
-    filler: Option<&dyn Filler>,
-) -> R<Vec<String>> {
-    let m = manual_frames(clip);
-    let spans: BTreeSet<(i64, i64)> = m
-        .windows(2)
-        .filter_map(|w| match w {
-            [a, b] if frames.iter().any(|&f| *a <= f && f <= *b) => Some((*a, *b)),
-            _ => None,
-        })
-        .collect();
-    let (made, spans): (Vec<_>, Vec<_>) = spans.into_iter().partition(|&(a, b)| generated_in(clip, a, b));
-    let mut notes: Vec<String> = made
-        .into_iter()
-        .map(|(a, b)| generated_note(clip, a, b))
-        .collect();
-    let Some(filler) = filler else {
-        return Ok(notes);
-    };
-    for (a, b) in spans {
-        if was.iter().any(|&(a2, b2)| !(b2 <= a || a2 >= b)) {
-            let note = refill(clip, a, b, filler, links)?;
-            if !note.is_empty() {
-                notes.push(note);
-            }
-        }
-    }
-    Ok(notes)
-}
-
 /// Drop the in-betweener's AI keys in the spans on both sides of `f` (keys made from text stay).
 fn clear_ai_around(clip: &mut Clip, f: i64) -> R<()> {
     let m = manual_frames(clip);
@@ -395,8 +414,38 @@ fn sample1(clip: &Clip, f: f64, links: &dyn Links) -> R<Pose> {
 }
 
 impl Document {
+    /// Fill again the spans between your keys that hold one of `frames` and were filled (`was`),
+    /// each finished as `ai.fill` finishes it ([`Document::refill_finished`]). A span made by a
+    /// helper stays as it is, and a note says so.
+    fn refill_touching(&mut self, frames: &[i64], was: &[(i64, i64)]) -> R<Vec<String>> {
+        let m = manual_frames(&self.clip);
+        let spans: BTreeSet<(i64, i64)> = m
+            .windows(2)
+            .filter_map(|w| match w {
+                [a, b] if frames.iter().any(|&f| *a <= f && f <= *b) => Some((*a, *b)),
+                _ => None,
+            })
+            .collect();
+        let (made, spans): (Vec<_>, Vec<_>) = spans
+            .into_iter()
+            .partition(|&(a, b)| generated_in(&self.clip, a, b));
+        let mut notes: Vec<String> = made
+            .into_iter()
+            .map(|(a, b)| generated_note(&self.clip, a, b))
+            .collect();
+        let Some(filler) = self.ai_filler() else {
+            return Ok(notes);
+        };
+        for (a, b) in spans {
+            if was.iter().any(|&(a2, b2)| !(b2 <= a || a2 >= b)) {
+                notes.extend(self.refill_finished(&filler, a, b)?);
+            }
+        }
+        Ok(notes)
+    }
+
     /// The pose on frame `src` (keyed or not) as a manual key on `dst`.
-    pub fn copy_key(&mut self, src: i64, dst: i64, filler: Option<&dyn Filler>) -> R<Vec<String>> {
+    pub fn copy_key(&mut self, src: i64, dst: i64) -> R<Vec<String>> {
         let dst = dst.max(0);
         let was = filled_spans(&self.clip);
         let p = sample1(&self.clip, src as f64, &self.links)?;
@@ -404,13 +453,13 @@ impl Document {
         self.clip
             .set_key(Key::new(dst, p.rotations, p.root, Interp::Smooth))?;
         clear_ai_around(&mut self.clip, dst)?;
-        let notes = refill_touching(&self.links, &mut self.clip, &[dst], &was, filler)?;
+        let notes = self.refill_touching(&[dst], &was)?;
         self.go_to(dst as f64)?;
         Ok(notes)
     }
 
     /// Move the key on `src` to `dst`; the spans it leaves and joins are refilled.
-    pub fn move_key(&mut self, src: i64, dst: i64, filler: Option<&dyn Filler>) -> R<Vec<String>> {
+    pub fn move_key(&mut self, src: i64, dst: i64) -> R<Vec<String>> {
         let dst = dst.max(0);
         let mut key = self
             .clip
@@ -433,7 +482,7 @@ impl Document {
         let mut notes = Vec::new();
         if key.source == KeySource::Manual {
             clear_ai_around(&mut self.clip, dst)?;
-            notes = refill_touching(&self.links, &mut self.clip, &[dst, src], &was, filler)?;
+            notes = self.refill_touching(&[dst, src], &was)?;
         }
         self.go_to(dst as f64)?;
         Ok(notes)
@@ -757,6 +806,104 @@ impl Document {
         self.write_solved(&changed, a, &rots, &roots, "foot-plant")?;
         self.go_to(self.frame)?;
         Ok(changed.len())
+    }
+
+    /// Hold each foot in contact on the frames `a..=b` (the test `clip.metrics` measures slide
+    /// with, [`crate::contact`]) so the point it stands on stays put: the heel as it lands, the
+    /// ball as it rolls off. [`Document::plant_steps`] and [`Document::plant_feet`] hold the ankle,
+    /// and a foot rolling over a held ankle slides its toes. Your keys and the anchors stay as they
+    /// are, and only the legs of the fill's own frames change. A held foot stays slow for longer and
+    /// counts as in contact for longer, so this runs again until nothing moves
+    /// ([`HOLD_PASSES`] at most). Returns the frames changed.
+    pub(crate) fn hold_contacts(&mut self, a: i64, b: i64) -> R<usize> {
+        let additive = self
+            .clip
+            .layers
+            .get(self.clip.edit)
+            .is_some_and(|l| l.mode == LayerMode::Additive);
+        if b - a < 2 || additive {
+            return Ok(0);
+        }
+        let mut all = BTreeSet::new();
+        for _ in 0..HOLD_PASSES {
+            let changed = self.hold_pass(a, b)?;
+            if changed.is_empty() {
+                break;
+            }
+            all.extend(changed);
+        }
+        self.go_to(self.frame)?;
+        Ok(all.len())
+    }
+
+    /// One pass of [`Document::hold_contacts`]: the frames it changed (from `a`).
+    fn hold_pass(&mut self, a: i64, b: i64) -> R<BTreeSet<usize>> {
+        let sk = self.skeleton.clone();
+        let frames: Vec<f64> = (a..=b).map(|f| f as f64).collect();
+        let (mut rots, roots) = self.clip.sample_with(&frames, &self.links)?;
+        let body = crate::physics::Body::new(&sk)?;
+        let phases =
+            crate::contact::clip_phases(&body, &sk, &rots, &roots, self.clip.fps, &self.clip.surfaces)?;
+        let mut posed = Vec::with_capacity(rots.len());
+        for (r, o) in rots.iter().zip(&roots) {
+            let (w, p) = sk.fk(r, *o).map_err(|e| e.to_string())?;
+            posed.push((body.points(&w, &p), p));
+        }
+        let fixed: Vec<bool> = (a..=b)
+            .map(|f| {
+                !self
+                    .clip
+                    .keys()
+                    .iter()
+                    .find(|k| k.frame == f)
+                    .is_some_and(crate::ease::eased)
+            })
+            .collect();
+        let mut changed = BTreeSet::new();
+        for (foot, s) in ["L", "R"].into_iter().enumerate() {
+            let ankle = sk.bone(&format!("foot.{s}")).ok_or("no foot")?;
+            let flags = phases.get(foot).ok_or("no phases")?;
+            let down: Vec<bool> = flags.iter().map(|p| p.down()).collect();
+            let mut drift = vec![[0.0; 3]; posed.len()];
+            for i in 1..posed.len() {
+                let (Some(now), Some(before)) = (posed.get(i), posed.get(i - 1)) else {
+                    continue;
+                };
+                // the foot's lowest point now, and how far it came across the floor
+                let low = now
+                    .0
+                    .iter()
+                    .enumerate()
+                    .filter(|(k, _)| body.foot_of(*k) == foot)
+                    .map(|(k, p)| (k, p[2] - crate::physics::ground(&self.clip.surfaces, p[0], p[1])))
+                    .min_by(|x, y| x.1.total_cmp(&y.1))
+                    .map(|(k, _)| k);
+                let step = low
+                    .and_then(|k| Some(quat::sub3(*now.0.get(k)?, *before.0.get(k)?)))
+                    .unwrap_or([0.0; 3]);
+                drift[i] = quat::add3(drift[i - 1], [step[0], step[1], 0.0]);
+            }
+            let leg = format!("leg.{s}");
+            for (i, by) in hold_moves(&drift, &down, &fixed).into_iter().enumerate() {
+                if by.iter().all(|x| x.abs() < 1e-6) {
+                    continue;
+                }
+                let (Some(r), Some(o), Some(at)) =
+                    (rots.get(i), roots.get(i), posed.get(i).and_then(|x| x.1.get(ankle)))
+                else {
+                    continue;
+                };
+                let pole = ik::own_pole(&sk, r, *o, &leg).map_err(|e| e.to_string())?;
+                let solved = ik::two_bone(&sk, r, *o, &leg, quat::add3(*at, by), pole, None)
+                    .map_err(|e| e.to_string())?;
+                if let Some(slot) = rots.get_mut(i) {
+                    *slot = solved;
+                }
+                changed.insert(i);
+            }
+        }
+        self.write_solved(&changed, a, &rots, &roots, "foot-plant")?;
+        Ok(changed)
     }
 
     pub(crate) fn write_solved(
@@ -1136,4 +1283,57 @@ pub fn curves(clip: &Clip, bone: usize, links: &dyn Links) -> R<serde_json::Valu
         keys.push(serde_json::json!({ "frame": k.frame, "values": values }));
     }
     Ok(serde_json::json!({ "frames": vals, "keys": keys }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The point drifts 1 cm a frame along x on 7 frames; the foot is down on 1..=3.
+    fn drift() -> Vec<Vec3> {
+        (0..7).map(|i| [0.01 * i as f64, 0.0, 0.0]).collect()
+    }
+
+    fn down() -> Vec<bool> {
+        (0..7).map(|i| (1..=3).contains(&i)).collect()
+    }
+
+    fn near(a: f64, b: f64) -> bool {
+        (a - b).abs() < 1e-12
+    }
+
+    /// Mean of 0.01, 0.02, 0.03 is 0.02: moves +1, 0, -1 cm. One frame beyond the contact fades
+    /// by smoothstep(1 - 1/5) = 0.896.
+    #[test]
+    fn a_free_contact_holds_at_its_mean_place() {
+        let by = hold_moves(&drift(), &down(), &[false; 7]);
+        assert!(near(by[1][0], 0.01) && near(by[2][0], 0.0) && near(by[3][0], -0.01));
+        assert!(near(by[0][0], 0.01 * 0.896) && near(by[4][0], -0.01 * 0.896));
+    }
+
+    /// A key on frame 1 stays: the contact holds where the key has it, 0, -1, -2 cm.
+    #[test]
+    fn a_contact_over_a_key_holds_at_the_key() {
+        let fixed: Vec<bool> = (0..7).map(|i| i == 1).collect();
+        let by = hold_moves(&drift(), &down(), &fixed);
+        assert!(near(by[1][0], 0.0) && near(by[2][0], -0.01) && near(by[3][0], -0.02));
+    }
+
+    /// Keys on 1 and 3 can't both be left: the foot goes straight from one to the other, and a
+    /// fixed frame beside the contact doesn't take its fade.
+    #[test]
+    fn a_contact_between_two_keys_goes_straight_and_fixed_frames_stay() {
+        let fixed: Vec<bool> = (0..7).map(|i| i == 1 || i == 3 || i == 4).collect();
+        let by = hold_moves(&drift(), &down(), &fixed);
+        assert!(by.iter().all(|m| near(m[0], 0.0)), "{by:?}");
+    }
+
+    /// One frame down is no contact, and the move never leaves the floor's plane.
+    #[test]
+    fn one_frame_is_not_a_contact_and_height_stays() {
+        let one: Vec<bool> = (0..7).map(|i| i == 2).collect();
+        assert!(hold_moves(&drift(), &one, &[false; 7]).iter().all(|m| *m == [0.0; 3]));
+        let high: Vec<Vec3> = (0..7).map(|i| [0.0, 0.0, 0.01 * i as f64]).collect();
+        assert!(hold_moves(&high, &down(), &[false; 7]).iter().all(|m| m[2] == 0.0));
+    }
 }

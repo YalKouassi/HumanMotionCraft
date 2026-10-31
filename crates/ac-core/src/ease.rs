@@ -21,7 +21,7 @@ pub const EASE_FRAMES: i64 = 4;
 
 type R<T> = Result<T, String>;
 
-fn eased(k: &Key) -> bool {
+pub(crate) fn eased(k: &Key) -> bool {
     k.source == KeySource::Ai
         && k.only.is_none()
         && !is_generated(&k.model)
