@@ -18,6 +18,9 @@ pub const MAX_PROPS: usize = 1 << 20;
 pub const MAX_ARRAY: usize = 64_000_000;
 /// Most bytes one string or raw property may hold.
 pub const MAX_BLOB: usize = 64 << 20;
+/// Most bytes the compressed arrays of one file may inflate to in all: a small file whose arrays
+/// each inflate to the per-array limit would otherwise fill memory (a zip bomb).
+pub const MAX_INFLATED: usize = 1 << 30;
 /// The lowest version read: older files lay their records out the same way, but were never checked.
 pub const MIN_VERSION: u32 = 6000;
 pub const MAX_VERSION: u32 = 9999;
@@ -150,6 +153,9 @@ struct Reader<'a> {
     pos: usize,
     wide: bool,
     nodes: usize,
+    /// Bytes the compressed arrays so far inflate to, against `budget`.
+    inflated: usize,
+    budget: usize,
 }
 
 type R<T> = Result<T, String>;
@@ -262,6 +268,13 @@ impl<'a> Reader<'a> {
                 std::borrow::Cow::Borrowed(data)
             }
             1 => {
+                self.inflated = self.inflated.saturating_add(raw_len);
+                if self.inflated > self.budget {
+                    return Err(format!(
+                        "{what}: the file's compressed arrays inflate to more than {} bytes in all",
+                        self.budget
+                    ));
+                }
                 let out = miniz_oxide::inflate::decompress_to_vec_zlib_with_limit(data, raw_len)
                     .map_err(|e| format!("{what}: a compressed array does not inflate ({e})"))?;
                 if out.len() != raw_len {
@@ -377,6 +390,11 @@ impl<'a> Reader<'a> {
 
 /// Read a binary FBX file's records.
 pub fn parse(bytes: &[u8]) -> R<Document> {
+    parse_with(bytes, MAX_INFLATED)
+}
+
+/// [`parse`] with `budget` as the most bytes the file's compressed arrays may inflate to in all.
+fn parse_with(bytes: &[u8], budget: usize) -> R<Document> {
     if bytes.starts_with(b"; FBX") || bytes.starts_with(b"FBXHeaderExtension") {
         return Err("a text (ASCII) FBX file: only binary FBX is read; save it as binary".into());
     }
@@ -394,6 +412,8 @@ pub fn parse(bytes: &[u8]) -> R<Document> {
         pos: MAGIC.len(),
         wide: false,
         nodes: 0,
+        inflated: 0,
+        budget,
     };
     let version = r.u32("version")?;
     if !(MIN_VERSION..=MAX_VERSION).contains(&version) {
@@ -487,5 +507,42 @@ mod tests {
         bad[start + 14] = b'Q';
         let e = parse(&bad).unwrap_err();
         assert!(e.contains("unknown property type"), "{e}");
+    }
+
+    /// A file of one record holding `arrays` compressed f64 arrays of `count` zeros each.
+    fn with_compressed_arrays(arrays: usize, count: usize) -> Vec<u8> {
+        let zeros = vec![0u8; count * 8];
+        let packed = miniz_oxide::deflate::compress_to_vec_zlib(&zeros, 6);
+        let mut body = Vec::new();
+        for _ in 0..arrays {
+            body.push(b'd');
+            body.extend_from_slice(&(count as u32).to_le_bytes());
+            body.extend_from_slice(&1u32.to_le_bytes());
+            body.extend_from_slice(&(packed.len() as u32).to_le_bytes());
+            body.extend_from_slice(&packed);
+        }
+        let mut v = header(7400);
+        let start = v.len();
+        let end = start + 13 + 1 + body.len();
+        v.extend_from_slice(&(end as u32).to_le_bytes());
+        v.extend_from_slice(&(arrays as u32).to_le_bytes());
+        v.extend_from_slice(&(body.len() as u32).to_le_bytes());
+        v.push(1);
+        v.push(b'A');
+        v.extend_from_slice(&body);
+        v.extend_from_slice(&[0; 13]);
+        v
+    }
+
+    #[test]
+    fn the_compressed_arrays_of_a_file_inflate_to_a_bounded_total() {
+        // two arrays of 16 f64 each inflate to 256 bytes in all, from a few bytes of zlib
+        let v = with_compressed_arrays(2, 16);
+        let d = parse_with(&v, 256).unwrap();
+        assert_eq!(d.nodes[0].props, vec![Prop::F64s(vec![0.0; 16]); 2]);
+        // one array fits the budget, the second takes the file over it: refused, not inflated
+        let e = parse_with(&v, 200).unwrap_err();
+        assert!(e.contains("inflate to more than 200 bytes in all"), "{e}");
+        assert!(parse(&v).is_ok(), "the real budget is far above");
     }
 }
