@@ -190,6 +190,9 @@ pub fn migrate(mut v: Value) -> R<Value> {
         d.insert("links".into(), Value::Object(map));
     }
     if let Some(f) = d.remove("playhead") {
+        if d.contains_key("frame") {
+            return Err("version 0: the file has both playhead and frame; which is the playhead?".into());
+        }
         d.insert("frame".into(), f);
     }
     d.insert("version".into(), json!(1));

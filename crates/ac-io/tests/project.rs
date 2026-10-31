@@ -82,6 +82,10 @@ fn a_version_0_file_migrates() {
     assert!(loaded.migrated());
     assert_eq!(loaded.frame, 7.0);
     assert_eq!(loaded.links.keys().collect::<Vec<_>>(), ["Mine/Base"]);
+    assert_eq!(loaded.locked, ["Left arm"]);
+    assert!(loaded.pins.is_empty());
+    assert_eq!(loaded.edit, 0);
+    assert_eq!(loaded.ai, ac_core::ai::FillSettings::default());
     let r = s
         .run(
             "project.open",
@@ -162,4 +166,16 @@ fn migrate_rejects_a_bad_version_0_links_list() {
         v,
         "only version 0 is touched"
     );
+}
+
+#[test]
+fn migrate_refuses_a_version_0_file_that_names_the_playhead_twice() {
+    // version 0 wrote `playhead`; a file with `frame` beside it can't say which is the playhead
+    let v = json!({ "version": 0, "playhead": 7, "frame": 3 });
+    let e = ac_io::project::migrate(v).unwrap_err();
+    assert!(e.contains("both playhead and frame"), "{e}");
+    let v = ac_io::project::migrate(json!({ "version": 0, "playhead": 7 })).unwrap();
+    assert_eq!(v["frame"], json!(7));
+    assert_eq!(v["version"], json!(1));
+    assert!(v.get("playhead").is_none());
 }
