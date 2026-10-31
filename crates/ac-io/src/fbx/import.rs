@@ -40,6 +40,8 @@ pub struct Imported {
     pub clip: Clip,
     /// The command's result besides `length`: fps, frames, joints, unused, at_rest, floor, hips, notes, source.
     pub report: Map<String, Value>,
+    /// The share of the checks whose toes and knees say the sides are swapped (0 to 1).
+    pub swapped: f64,
 }
 
 type R<T> = Result<T, String>;
@@ -47,10 +49,15 @@ type R<T> = Result<T, String>;
 static NO_BONES: BTreeMap<&'static str, String> = BTreeMap::new();
 
 /// An opened FBX: its sampled motion, which joint stands for each landmark, and the named clips
-/// a `.meta` cuts it into (none: the take is one clip).
+/// a `.meta` cuts it into (none: the take is one clip). Its clips may name other takes of the file.
 #[derive(Debug, Clone)]
 pub struct Source {
+    /// The take read for what names no other: the first, or the first a clip names.
     motion: Motion,
+    /// The other takes the clips name; one that can't be read refuses only its own clips.
+    takes: BTreeMap<String, R<Motion>>,
+    /// Every take in the file, to say what a stale name could have been.
+    take_names: Vec<String>,
     map: BTreeMap<&'static str, usize>,
     given: Vec<String>,
     /// `unity_meta` or `names`: what said which joint is which.
@@ -214,8 +221,9 @@ pub fn open_bytes(
     meta: Option<&UnityMeta>,
 ) -> R<Source> {
     let doc = super::read(bytes)?;
-    let motion = scene::motion(&doc)?;
-    let mut notes = motion.notes.clone();
+    let take_names = scene::take_names(&doc);
+    let (motion, takes) = open_takes(&doc, &take_names, meta)?;
+    let mut notes = Vec::new();
     let mut guess = jointmap::guess(&motion.names, &motion.parents);
     let stated = meta.map_or(&NO_BONES, |m| &m.bones);
     let bone_map = if stated.is_empty() { "names" } else { "unity_meta" };
@@ -303,7 +311,71 @@ pub fn open_bytes(
         name: name.to_string(),
         clips: meta.map(|m| m.clips.clone()).unwrap_or_default(),
         motion,
+        takes,
+        take_names,
     })
+}
+
+/// Sample the takes the `.meta`'s clips name, and the first too if a clip names none, or none it
+/// knows. All of them together stay under the cap of one take; past it, a take refuses its clips.
+fn open_takes(
+    doc: &super::binary::Document,
+    take_names: &[String],
+    meta: Option<&UnityMeta>,
+) -> R<(Motion, BTreeMap<String, R<Motion>>)> {
+    let clips = meta.map_or(&[][..], |m| m.clips.as_slice());
+    let needs_first = clips.is_empty()
+        || clips
+            .iter()
+            .any(|c| c.take.is_empty() || !take_names.contains(&c.take));
+    let mut named: Vec<&str> = Vec::new();
+    for c in clips {
+        if take_names.contains(&c.take) && !named.contains(&c.take.as_str()) {
+            named.push(&c.take);
+        }
+    }
+    let mut base = if needs_first {
+        Some(scene::motion(doc)?)
+    } else {
+        None
+    };
+    let mut takes: BTreeMap<String, R<Motion>> = BTreeMap::new();
+    let mut samples = base
+        .as_ref()
+        .map_or(0, |m| m.frames.saturating_mul(m.names.len()));
+    for name in named {
+        if base.as_ref().is_some_and(|m| m.take == name) {
+            continue;
+        }
+        let read = if samples > scene::MAX_SAMPLES {
+            Err(format!(
+                "the takes read so far hold more than {} joint positions",
+                scene::MAX_SAMPLES
+            ))
+        } else {
+            scene::motion_of(doc, Some(name))
+        };
+        match read {
+            Ok(m) => {
+                samples = samples.saturating_add(m.frames.saturating_mul(m.names.len()));
+                if base.is_none() {
+                    base = Some(m);
+                } else {
+                    takes.insert(name.to_string(), Ok(m));
+                }
+            }
+            Err(e) => {
+                takes.insert(name.to_string(), Err(e));
+            }
+        }
+    }
+    match base {
+        Some(m) => Ok((m, takes)),
+        None => Err(takes
+            .into_iter()
+            .find_map(|(name, read)| read.err().map(|e| format!("take {name:?}: {e}")))
+            .unwrap_or_else(|| "the file has no take to read".into())),
+    }
 }
 
 /// Where a named clip lies among the samples: its first sample and how many, and a note if its
@@ -346,6 +418,21 @@ impl Source {
     /// The named clips; empty: the take is one clip.
     pub fn clips(&self) -> &[MetaClip] {
         &self.clips
+    }
+
+    /// The take a named clip cuts: its `takeName` picks it among the file's takes.
+    fn motion_for(&self, clip: &MetaClip) -> R<&Motion> {
+        if clip.take.is_empty() || clip.take == self.motion.take {
+            return Ok(&self.motion);
+        }
+        match self.takes.get(&clip.take) {
+            Some(Ok(m)) => Ok(m),
+            Some(Err(e)) => Err(format!("take {:?}: {e}", clip.take)),
+            None => Err(format!(
+                "it cuts the take {:?}, but the file's takes are {:?}",
+                clip.take, self.take_names
+            )),
+        }
     }
 
     /// The whole take as one clip, setup frames dropped.
@@ -397,8 +484,12 @@ impl Source {
     }
 
     fn build(&self, skel: &Skeleton, part: Option<&MetaClip>) -> R<Imported> {
-        let motion = &self.motion;
-        let mut notes = self.notes.clone();
+        let motion = match part {
+            Some(clip) => self.motion_for(clip)?,
+            None => &self.motion,
+        };
+        let mut notes = motion.notes.clone();
+        notes.extend(self.notes.iter().cloned());
         let (first, count) = match part {
             Some(clip) => {
                 let (first, count, note) = clip_range(motion, clip)?;
@@ -446,8 +537,10 @@ impl Source {
         }
         let src = Landmarks::new(points).map_err(|e| e.to_string())?;
         let (swapped, votes) = swapped_frames(&src);
+        let mut swapped_share = 0.0;
         if votes > 0 {
             let share = swapped as f64 / votes as f64;
+            swapped_share = share;
             let what = format!(
                 "the toes and knees point the other way from what the hip line says on {swapped} of {votes} checks: the left and right joints look swapped; check the joints map (l_hip, r_hip, ...) or the file's axis system"
             );
@@ -537,7 +630,11 @@ impl Source {
                 "dropped": junk,
             }),
         );
-        Ok(Imported { clip, report })
+        Ok(Imported {
+            clip,
+            report,
+            swapped: swapped_share,
+        })
     }
 }
 

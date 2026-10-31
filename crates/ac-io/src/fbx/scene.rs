@@ -450,8 +450,24 @@ fn axis_matrix(settings: &BTreeMap<String, Vec<Prop>>) -> R<(Mat3, String, Strin
     Ok((m, name(u), name(f)))
 }
 
+/// The file's takes (animation stacks), in the file's order.
+pub fn take_names(doc: &Document) -> Vec<String> {
+    doc.top("Objects").map_or_else(Vec::new, |objects| {
+        objects
+            .children_named("AnimationStack")
+            .map(|n| object_name(n.str_at(1).unwrap_or("")))
+            .collect()
+    })
+}
+
 /// Sample the file's animation: every frame of the first take.
 pub fn motion(doc: &Document) -> R<Motion> {
+    motion_of(doc, None)
+}
+
+/// Sample every frame of the take named `wanted`, else of the first. Takes are separate animations
+/// over one skeleton: only the chosen take's layer drives the models.
+pub fn motion_of(doc: &Document, wanted: Option<&str>) -> R<Motion> {
     let mut notes = Vec::new();
     let settings = doc
         .top("GlobalSettings")
@@ -642,14 +658,28 @@ pub fn motion(doc: &Document) -> R<Motion> {
         }
     }
 
-    // the take: the first stack and its first layer
-    let (take, stack_props, wanted_layer) = match stacks.first() {
+    // the take: the stack asked for, else the first, and its first layer
+    let chosen = match wanted {
+        Some(w) => Some(stacks.iter().find(|s| s.1 == w).ok_or_else(|| {
+            let names: Vec<&str> = stacks.iter().map(|s| s.1.as_str()).collect();
+            format!("no take {w:?}; the file's takes are {names:?}")
+        })?),
+        None => stacks.first(),
+    };
+    let (take, stack_props, wanted_layer) = match chosen {
         Some((sid, name, p)) => {
             if stacks.len() > 1 {
-                notes.push(format!(
-                    "the file has {} takes (animation stacks): the first, {name:?}, was read",
-                    stacks.len()
-                ));
+                notes.push(if wanted.is_some() {
+                    format!(
+                        "the file has {} takes (animation stacks): {name:?} was read",
+                        stacks.len()
+                    )
+                } else {
+                    format!(
+                        "the file has {} takes (animation stacks): the first, {name:?}, was read",
+                        stacks.len()
+                    )
+                });
             }
             let of_stack: Vec<i64> = stack_of_layer
                 .iter()
@@ -668,6 +698,10 @@ pub fn motion(doc: &Document) -> R<Motion> {
             };
             if let Some(note) = plan.check(&of_stack)? {
                 notes.push(note);
+            }
+            // with no layer, curve nodes can't be told apart by take: another take's would be read
+            if wanted.is_some() && stacks.len() > 1 && of_stack.is_empty() {
+                return Err(format!("take {name:?} has no animation layer"));
             }
             (name.clone(), Some(p), of_stack.first().copied())
         }
@@ -723,7 +757,7 @@ pub fn motion(doc: &Document) -> R<Motion> {
     if used_nodes == 0 {
         if elsewhere > 0 {
             return Err(format!(
-                "the first take, {take:?}, drives no model: the file's curves belong to another take's layer"
+                "the take {take:?} drives no model: the file's curves belong to another take's layer"
             ));
         }
         if curves.is_empty() {
