@@ -1,6 +1,6 @@
 # Live motion control: drive the character, then clip it
 
-- **Status:** target test built and speed measured, waiting for the owner to judge the targets by eye; no Rust and no UI until then (`## Result`)
+- **Status:** in progress: target test approved by the owner (2026-10-31); the `live.*` commands and the window are next
 - **Requires:** 157000
 - **Source:** owner's idea (2026-10-30)
 
@@ -81,7 +81,12 @@ from what was steered.
 
 ## Result
 So far: "Measure first" only. The Rust crate's `live.*` commands, the fixture, the window, recording
-and clipping are not started, and they wait for the owner's judgement of the video below.
+and clipping are not started.
+
+**Owner's judgement (2026-10-31):** happy with everything in `target/shots/2026-10-31/`, which includes
+the video below, so the targets pass and the UI may start. The current set stays. 157000 isn't `DONE_`
+yet (training clips and two install checks), but the engine this item uses is approved and built, and
+this item's own gate was this judgement.
 
 **To judge:** `target/shots/2026-10-31/live-motion/live-target-test-old-vs-new.mp4` (three-quarter,
 following the body, physics off, a caption with what the stick is doing). Right is the current set,

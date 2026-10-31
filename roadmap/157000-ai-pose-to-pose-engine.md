@@ -1,6 +1,6 @@
 # Pose-to-pose motion from MotionBricks
 
-- **Status:** built, waiting for the owner (2026-10-31)
+- **Status:** in progress: motion and panel approved by the owner (2026-10-31); training clips and two install checks still open (end of `## Result`)
 - **Requires:** 113000, 114000
 - **Source:** owner request (2026-10-30), after the licence check. This replaces the decision of
   2026-10-28 to use only Kimodo as a third-party generator.
@@ -460,3 +460,15 @@ installed helper (`target/shots/2026-10-31/posefill/`, gitignored):
   the fill strides and swings the arms; at the keys the body is on them. The panel:
   `panel-installed.png`, `panel-not-installed.png` (at UI scale 0.6 so the whole inspector
   shows; the licence list goes on below the fold).
+
+**Owner's judgement (2026-10-31):** happy with everything in `target/shots/2026-10-31/`, which holds
+this item's fill MP4s, contact sheets and panel screenshots. That approves the motion and the panel.
+
+Still open before `DONE_`:
+- The training clips ("Training clips, last"), unblocked by this approval and not built. The owner
+  approves those clips.
+- A real `posefill.install` run from the panel, with Stop and resume, and a check that the folder
+  has no `assets/motions/` afterwards.
+- The refusal on a machine without an NVIDIA GPU (none here to try).
+- For the owner's eye, not covered by that approval: TensorRT's licence term (item 11 above), where
+  NVIDIA can end a person's licence with 90 days' notice, and item 10.
