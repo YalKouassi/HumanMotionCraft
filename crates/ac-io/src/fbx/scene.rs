@@ -415,6 +415,12 @@ pub fn motion(doc: &Document) -> R<Motion> {
         if models.len() >= MAX_MODELS {
             return Err(format!("more than {MAX_MODELS} models"));
         }
+        if let Some(&other) = by_id.get(&id) {
+            let first = models.get(other).map_or("", |m| m.name.as_str());
+            return Err(format!(
+                "two models share the id {id} ({first:?} and {name:?}): the file is corrupt"
+            ));
+        }
         by_id.insert(id, models.len());
         models.push(Model {
             name,
@@ -999,4 +1005,14 @@ mod tests {
         assert_eq!(m.frames, 11);
     }
 
+    #[test]
+    fn two_models_with_one_id_are_refused() {
+        let mut d = scene(2, 0, 10 * (TICKS_PER_SECOND / 30.0) as i64);
+        d.nodes[1].children[1].props[0] = Prop::I64(1000);
+        let e = motion(&d).unwrap_err();
+        assert!(
+            e.contains("share the id 1000") && e.contains("J0") && e.contains("J1"),
+            "{e}"
+        );
+    }
 }
