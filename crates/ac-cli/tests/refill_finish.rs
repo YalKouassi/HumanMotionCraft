@@ -62,7 +62,7 @@ fn same(name: &str, x: &[Key], y: &[Key]) {
     within(name, x, y, TOL);
 }
 
-fn within(name: &str, x: &[Key], y: &[Key], tol: f32) {
+fn within(name: &str, x: &[Key], y: &[Key], tol: f64) {
     assert_eq!(x.len(), y.len(), "{name}: the number of keys");
     for (p, q) in x.iter().zip(y) {
         let f = p.frame;
