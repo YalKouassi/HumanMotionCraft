@@ -20,7 +20,6 @@ use ac_core::retarget::{self, LANDMARKS, Landmarks, SPINE};
 use ac_core::rig::Skeleton;
 use serde_json::{Map, Value, json};
 
-use super::binary;
 use super::scene::{self, Motion};
 use super::unity_meta::{self, MetaClip, UnityMeta};
 
@@ -214,7 +213,7 @@ pub fn open_bytes(
     joints: &BTreeMap<String, String>,
     meta: Option<&UnityMeta>,
 ) -> R<Source> {
-    let doc = binary::parse(bytes)?;
+    let doc = super::read(bytes)?;
     let motion = scene::motion(&doc)?;
     let mut notes = motion.notes.clone();
     let mut guess = jointmap::guess(&motion.names, &motion.parents);

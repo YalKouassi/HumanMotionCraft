@@ -1,4 +1,4 @@
-"""A small binary FBX writer: the test files and the retarget golden for the app's FBX import.
+"""A small FBX writer, binary and text: the test files and the retarget golden for the app's FBX import.
 
 The app reads FBX in Rust (``crates/ac-io/src/fbx``, roadmap 152000); this module only writes, so
 there is one importer and no second reader in Python. It writes what that reader has to cope
@@ -99,6 +99,8 @@ WALK = ASSETS / "library" / "animations" / "Locomotion" / "Walk 12.clip.json"
 WALK_FRAMES = 40
 SIDESTEP = ASSETS / "library" / "animations" / "Locomotion" / "Side step 9.clip.json"
 SIDESTEP_FRAMES = 30
+# the text and FBX 6 files: short, since text is large
+OLD_TEXT_FRAMES = 12
 FIXTURES = REPO / "fixtures" / "data"
 GOLDEN = REPO / "crates" / "ac-core" / "tests" / "golden" / "retarget-walk.json"
 
@@ -185,6 +187,50 @@ def write_fbx(path, nodes: list[Node], version: int = 7400, compress: bool = Tru
     out += bytes([0xF8, 0x5A, 0x8C, 0x6A, 0xDE, 0xF5, 0xD9, 0x7E, 0xEC, 0xE9, 0x0C, 0xE3, 0x75, 0x8F, 0x29, 0x0B])
     pathlib.Path(path).write_bytes(out)
     return bytes(out)
+
+
+def _text_value(p: tuple) -> str:
+    code, v = p
+    if code == "S":
+        s = v.decode("utf-8") if isinstance(v, bytes) else v
+        if "\x00\x01" in s:  # the binary form of an object's name; text writes Class::Name
+            name, kind = s.split("\x00\x01", 1)
+            s = f"{kind}::{name}"
+        return '"' + s.replace('"', "&quot;") + '"'
+    if code == "C":
+        return chr(v) if v > 1 else ("T" if v else "F")
+    if code in ("D", "F"):
+        return repr(float(v))
+    if code in ("Y", "I", "L"):
+        return str(int(v))
+    raise ValueError(f"no text form for property code {code!r}")
+
+
+def _text_record(node: Node, depth: int) -> list[str]:
+    pad = "\t" * depth
+    arrays = [p for p in node.props if p[0] in _ARRAY]
+    if arrays:  # 7.x: *N { a: v, v, ... }
+        values = np.asarray(arrays[0][1])
+        text = ",".join(repr(float(x)) if arrays[0][0] in "fd" else str(int(x)) for x in values)
+        return [f"{pad}{node.name}: *{len(values)} {{", f"{pad}\ta: {text}", f"{pad}}}"]
+    head = f"{pad}{node.name}: " + ", ".join(_text_value(p) for p in node.props)
+    if not node.children and node.props:
+        return [head]
+    out = [head.rstrip() + " {"]
+    for c in node.children:
+        out += _text_record(c, depth + 1)
+    return out + [f"{pad}}}"]
+
+
+def write_fbx_text(path, nodes: list[Node], version: int = 7400) -> bytes:
+    """Write ``nodes`` as a text FBX; the comment and the header both state ``version``."""
+    major, minor = version // 1000, version % 1000 // 100
+    lines = [f"; FBX {major}.{minor}.0 project file", "; written by ac_train.fbxwrite", ""]
+    for n in nodes:
+        lines += _text_record(n, 0)
+    out = ("\n".join(lines) + "\n").encode("utf-8")
+    pathlib.Path(path).write_bytes(out)
+    return out
 
 
 # ---- rotations ------------------------------------------------------------------------------
@@ -344,6 +390,59 @@ class Scene:
         return [header, settings, definitions, objects, connections, takes]
 
 
+def fbx6_nodes(scene: Scene) -> list[Node]:
+    """``scene`` as the records of FBX 6.1: objects named, not numbered, ``GlobalSettings`` among
+    them, ``Properties60``, ``Connect`` by name, and the animation in ``Takes``."""
+    def prop(name, kind, flags, *values):
+        return Node("Property", S(name), S(kind), S(flags), *values)
+
+    def named(name):
+        return S(f"{name}\x00\x01Model".encode())
+
+    ticks = int(round(TICKS_PER_SECOND / scene.fps))
+    stop = (max(scene.frames, 1) - 1) * ticks
+    up_axis, front_axis, front_sign = (1, 2, 1) if scene.up == "y" else (2, 1, -1)
+    objects = Node("Objects")
+    connections = Node("Connections")
+    for name, kind, parent in scene.joints:
+        t, r, s, pre, order = scene.static[name]
+        props = [prop("Lcl Translation", "Lcl Translation", "A+", *D(*t)),
+                 prop("Lcl Rotation", "Lcl Rotation", "A+", *D(*r)),
+                 prop("Lcl Scaling", "Lcl Scaling", "A+", *D(*s)),
+                 prop("RotationActive", "bool", "", ("I", 1)),
+                 prop("RotationOrder", "enum", "", ("I", ORDERS[order]))]
+        if pre is not None:
+            props.append(prop("PreRotation", "Vector3D", "", *D(*pre)))
+        objects.add(Node("Model", named(name), S("Limb" if kind == "LimbNode" else kind), children=[
+            Node("Version", ("I", 232)), Node("Properties60", children=props)]))
+        connections.add(Node("Connect", S("OO"), named(name), named(parent) if parent else S(b"Scene\x00\x01Model")))
+    objects.add(Node("GlobalSettings", children=[Node("Version", ("I", 1000)), Node("Properties60", children=[
+        prop("UpAxis", "int", "", ("I", up_axis)), prop("UpAxisSign", "int", "", ("I", 1)),
+        prop("FrontAxis", "int", "", ("I", front_axis)), prop("FrontAxisSign", "int", "", ("I", front_sign)),
+        prop("CoordAxis", "int", "", ("I", 0)), prop("CoordAxisSign", "int", "", ("I", 1)),
+        prop("UnitScaleFactor", "double", "", ("D", float(scene.units))),
+        prop("TimeMode", "enum", "", ("I", 6))])]))
+    take = Node("Take", S("Take 001"), children=[
+        Node("FileName", S("Take_001.tak")), Node("LocalTime", ("L", 0), ("L", stop)),
+        Node("ReferenceTime", ("L", 0), ("L", stop))])
+    for name, channels in scene.curves.items():
+        transform = Node("Channel", S("Transform"))
+        for ch, values in channels.items():
+            channel = transform.add(Node("Channel", S(ch)))
+            for k, ax in enumerate("XYZ"):
+                key = Node("Key")
+                for f, v in enumerate(values[:, k]):
+                    key.props += [("L", f * ticks), ("D", float(v)), ("C", ord("L"))]
+                channel.add(Node("Channel", S(ax), children=[
+                    Node("Default", ("D", float(values[0, k]))), Node("KeyVer", ("I", 4005)),
+                    Node("KeyCount", ("I", len(values))), key, Node("Color", *D(1, 1, 1))]))
+        transform.add(Node("LayerType", ("I", 1)))
+        take.add(Node("Model", named(name), children=[Node("Version", ("D", 1.1)), transform]))
+    header = Node("FBXHeaderExtension", children=[
+        Node("FBXHeaderVersion", ("I", 1003)), Node("FBXVersion", ("I", 6100)), Node("Creator", S(scene.creator))])
+    return [header, objects, connections, Node("Takes", children=[Node("Current", S("Take 001")), take])]
+
+
 # ---- the walk as an FBX --------------------------------------------------------------------
 
 
@@ -481,6 +580,19 @@ def write_cut_fixture(fixtures=FIXTURES, skel=None) -> list[pathlib.Path]:
     return [fbx, meta]
 
 
+def write_old_and_text_fixtures(fixtures=FIXTURES, skel=None) -> list[pathlib.Path]:
+    """The walk's first ``OLD_TEXT_FRAMES`` frames as text 7.4, text 6.1 and binary 6.1, and the
+    text 7.4 cut in half, which must be refused."""
+    scene = walk_scene(skel or Skeleton.load(), up="y", units=1.0, frames=OLD_TEXT_FRAMES)
+    text74, text61, binary61 = (fixtures / n for n in ("walk-text-74.fbx", "walk-text-61.fbx", "walk-binary-61.fbx"))
+    whole = write_fbx_text(text74, scene.nodes(), version=7400)
+    cut = fixtures / "walk-text-cut.fbx"
+    cut.write_bytes(whole[:len(whole) // 2])
+    write_fbx_text(text61, fbx6_nodes(scene), version=6100)
+    write_fbx(binary61, fbx6_nodes(scene), version=6100)
+    return [text74, text61, binary61, cut]
+
+
 def write_fixtures(fixtures=FIXTURES, golden_path=GOLDEN) -> list[pathlib.Path]:
     skel = Skeleton.load()
     fixtures.mkdir(parents=True, exist_ok=True)
@@ -504,6 +616,7 @@ def write_fixtures(fixtures=FIXTURES, golden_path=GOLDEN) -> list[pathlib.Path]:
     out.append(fixtures / "walk-yup-75.fbx")
     write_fbx(out[-1], sc.nodes(), version=7500)
     out += write_cut_fixture(fixtures, skel)
+    out += write_old_and_text_fixtures(fixtures, skel)
     golden_path.parent.mkdir(parents=True, exist_ok=True)
     golden_path.write_text(json.dumps(golden(skel), separators=(",", ":")) + "\n", encoding="utf-8")
     out.append(golden_path)

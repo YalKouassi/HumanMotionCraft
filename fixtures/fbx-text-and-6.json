@@ -1,0 +1,120 @@
+{
+  "$schema": "./schema.json",
+  "name": "fbx-text-and-6",
+  "feature": "clip.import",
+  "description": "A text FBX and an FBX 6.1 import like a binary 7 file (roadmap 164000). fixtures/data/walk-text-74.fbx, walk-text-61.fbx and walk-binary-61.fbx are written by python -m ac_train.fbxwrite: the first 12 frames of the built-in Walk 12 that fbx-import's files hold, Y up in centimetres at 30 fps. So each opens with 12 frames, with the name guess, and its root on frame 0 is the source's, (0, -0.0098, 0.8664), as in fbx-import. The tolerance is 0.02 m because a shorter clip finds its own floor, a few millimetres from the whole take's, as in fbx-unity-meta. Physics is off for the position checks. Refused: a text file that is cut off, which never closes a block.",
+  "script": [
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-text-74.fbx"
+      },
+      "expect": {
+        "length": 12,
+        "fps": 30,
+        "frames": 12,
+        "bone_map": "names",
+        "joints": {
+          "hips": "Hips",
+          "l_knee": "LeftLeg"
+        }
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.0,
+          -0.0098,
+          0.8664
+        ]
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-text-61.fbx"
+      },
+      "expect": {
+        "length": 12,
+        "fps": 30,
+        "frames": 12,
+        "bone_map": "names",
+        "joints": {
+          "hips": "Hips",
+          "l_knee": "LeftLeg"
+        }
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.0,
+          -0.0098,
+          0.8664
+        ]
+      }
+    },
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-binary-61.fbx"
+      },
+      "expect": {
+        "length": 12,
+        "fps": 30,
+        "frames": 12,
+        "bone_map": "names"
+      }
+    },
+    {
+      "command": "physics.set",
+      "params": {
+        "on": false
+      }
+    },
+    {
+      "command": "bone.world",
+      "params": {
+        "bone": "root"
+      },
+      "expect": {
+        "position": [
+          0.0,
+          -0.0098,
+          0.8664
+        ]
+      }
+    }
+  ],
+  "expect": {
+    "tolerance": 0.02
+  },
+  "errors": [
+    {
+      "command": "clip.import",
+      "params": {
+        "path": "{assets}/../fixtures/data/walk-text-cut.fbx"
+      }
+    }
+  ]
+}
