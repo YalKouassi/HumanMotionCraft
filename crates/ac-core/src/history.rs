@@ -157,6 +157,8 @@ impl Session {
         fresh.limits.clone_from(&old.limits);
         fresh.ranges.clone_from(&old.ranges);
         fresh.ai.clone_from(&old.ai);
+        fresh.models.clone_from(&old.models);
+        fresh.model_folders.clone_from(&old.model_folders);
         fresh.pose_source.clone_from(&old.pose_source);
         fresh.custom_parts.clone_from(&old.custom_parts);
         fresh.saved.clone_from(&old.saved);

@@ -58,6 +58,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
     let mut filled: Vec<Value> = Vec::new();
     let mut skipped: Vec<Value> = Vec::new();
     let mut model = String::new();
+    let mut model_hash = String::new();
     let mut notes: Vec<String> = Vec::new();
     let mut anchors: Vec<Value> = Vec::new();
     // measured once every gap is filled: a later fill eases through the key it shares with an
@@ -100,6 +101,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
                     from: p,
                     to: q,
                     model: f.model.clone(),
+                    hash: f.hash.clone(),
                     notes: Vec::new(),
                     kept: f.kept.clone(),
                     anchors: Vec::new(),
@@ -109,6 +111,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
                 filled.push(json!([p, q]));
             }
             model = f.model;
+            model_hash = f.hash;
             passes.push(json!(keys));
             continue;
         }
@@ -121,6 +124,7 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
             })
         }));
         model = f.model.clone();
+        model_hash = f.hash.clone();
         filled.push(json!([f.from, f.to]));
         fills.push(f);
     }
@@ -147,8 +151,8 @@ fn ai_fill_all(doc: &mut Document, p: &P) -> Out {
         });
     }
     Ok(json!({
-        "filled": filled, "skipped": skipped, "model": model, "notes": notes, "anchors": anchors,
-        "diagnostics": diagnostics, "passes": passes,
+        "filled": filled, "skipped": skipped, "model": model, "model_hash": model_hash, "notes": notes,
+        "anchors": anchors, "diagnostics": diagnostics, "passes": passes,
     }))
 }
 
@@ -183,7 +187,7 @@ fn ai_toggle(doc: &mut Document, p: &P) -> Out {
     let f = doc.ai_fill(Some((g.from, g.to)))?;
     let d = crate::filldiag::diagnose(doc, &f).json();
     Ok(json!({
-        "from": f.from, "to": f.to, "mode": "ai", "model": f.model, "notes": f.notes,
-        "anchors": f.anchors, "diagnostics": d,
+        "from": f.from, "to": f.to, "mode": "ai", "model": f.model, "model_hash": f.hash,
+        "notes": f.notes, "anchors": f.anchors, "diagnostics": d,
     }))
 }

@@ -1,7 +1,8 @@
 //! The AI in-between panel: the gap around the playhead measured before anything is clicked (and
 //! Preview / Fill refused with the reason when the model can't take it), Fill all gaps, the
 //! preview worked out off the UI thread (spinner, time taken, cancel; superseded while sliders
-//! move), keep / compare / styles, and Shift+A to switch the span between AI and plain.
+//! move), keep / compare / styles, which model fills (`ai.models`, `ai.model`; the model's own
+//! styles stay under it), and Shift+A to switch the span between AI and plain.
 
 use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
@@ -44,6 +45,8 @@ pub struct AiState {
     pub steps_ai: bool,
     /// The last fill's diagnostics, while the animation is as it left it.
     pub report: Option<FillReport>,
+    /// What `ai.models` said last (the model menu); `None`: ask again at the next frame.
+    models: Option<Value>,
 }
 
 impl App {
@@ -644,6 +647,110 @@ impl App {
         });
     }
 
+    /// Which model fills (`ai.models`): every model the session can load, the chosen one selected;
+    /// one its checks refuse is listed greyed with the reason, and said under the menu too (Rule
+    /// 1). Picking one runs `ai.model`; the model's own styles stay in the Style menu under it.
+    /// With one model only there is nothing to choose, so the row stays away.
+    fn model_row(&mut self, ui: &mut egui::Ui, info: &ac_core::ai::ModelInfo) {
+        if self.panels.ai.models.is_none() {
+            self.panels.ai.models = Some(
+                self.session
+                    .run("ai.models", &json!({}))
+                    .unwrap_or_else(|e| json!({ "error": e.to_string() })),
+            );
+        }
+        let Some(listed) = self.panels.ai.models.clone() else {
+            return;
+        };
+        if let Some(e) = listed["error"].as_str() {
+            ui.label(
+                egui::RichText::new(format!("Models: {e}"))
+                    .small()
+                    .color(self.palette().error),
+            );
+            return;
+        }
+        let models: Vec<Value> = listed["models"].as_array().cloned().unwrap_or_default();
+        if models.len() < 2 {
+            return;
+        }
+        let name_of = |m: &Value| {
+            let name = m["name"].as_str().unwrap_or_default();
+            let tag = m["tag"].as_str().unwrap_or_default();
+            if name.is_empty() || name == tag {
+                tag.to_string()
+            } else {
+                format!("{name} ({tag})")
+            }
+        };
+        let current = models
+            .iter()
+            .find(|m| m["tag"] == info.tag.as_str())
+            .map_or_else(|| info.tag.clone(), name_of);
+        let mut pick: Option<String> = None;
+        egui::ComboBox::from_label("Model")
+            .selected_text(&current)
+            .show_ui(ui, |ui| {
+                for m in &models {
+                    let tag = m["tag"].as_str().unwrap_or_default().to_string();
+                    let loads = m["loads"].as_bool().unwrap_or(false);
+                    let why = m["refused"].as_str().unwrap_or("does not load").to_string();
+                    let about = format!(
+                        "{}: {} bones, {} frames of context, gaps up to {} frames, {}{}\n{}",
+                        m["source"].as_str().unwrap_or_default(),
+                        m["bones"].as_array().map_or(0, Vec::len),
+                        m["context"],
+                        m["max_gap"],
+                        match m["styles"].as_array().map_or(0, Vec::len) {
+                            0 => "no styles".to_string(),
+                            n => format!("{n} styles"),
+                        },
+                        m["base"]["tag"]
+                            .as_str()
+                            .map(|b| format!(", an add-on to {b}"))
+                            .unwrap_or_default(),
+                        m["hash"].as_str().unwrap_or_default(),
+                    );
+                    if ui
+                        .add_enabled(loads, egui::Button::selectable(tag == info.tag, name_of(m)))
+                        .on_hover_text(&about)
+                        .on_disabled_hover_text(format!("Not used: {why}"))
+                        .tag(format!("panel.ai.model.{tag}"), &tag)
+                        .clicked()
+                    {
+                        pick = Some(tag);
+                    }
+                }
+            })
+            .response
+            .on_hover_text("Which model fills; its styles, if any, are in the Style menu below")
+            .tag("panel.ai.model", "Model");
+        for m in models.iter().filter(|m| m["loads"] != true) {
+            ui.label(
+                egui::RichText::new(format!(
+                    "{} not used: {}",
+                    m["tag"].as_str().unwrap_or_default(),
+                    m["refused"].as_str().unwrap_or("does not load")
+                ))
+                .small()
+                .color(self.palette().error),
+            );
+        }
+        if let Some(tag) = pick
+            && let Some(r) = self.run("ai.model", json!({ "tag": tag }))
+        {
+            self.status = match r["refused"].as_str() {
+                Some(why) => why.to_string(),
+                None => format!("filling with {}", r["name"].as_str().unwrap_or_default()),
+            };
+            // list again: the chosen one changed, and so may the styles under it
+            self.panels.ai.models = None;
+            if self.session.document.live_preview().is_some() {
+                self.ai_dirty = true;
+            }
+        }
+    }
+
     /// Style, forces and holds; a live preview follows them (on the worker, newest wins).
     fn ai_settings_controls(
         &mut self,
@@ -685,6 +792,7 @@ impl App {
             // the sliders below show the preset's values this same frame
             st = self.session.document.ai_settings.clone();
         }
+        self.model_row(ui, info);
         let mut changed = false;
         if !info.styles.is_empty() {
             // the model's styles ("any" first): a hundred or more with 100STYLE, so the list scrolls

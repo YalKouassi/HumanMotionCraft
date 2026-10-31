@@ -76,6 +76,11 @@ pub struct Document {
     pub physics_cache: Option<Arc<PhysicsCache>>,
     /// The learned in-betweener the front end loaded (`None`: AI fill is unavailable).
     pub ai: Option<Arc<dyn crate::ai::Inbetweener>>,
+    /// Where other models come from (`ai.models`, `ai.model`; `None`: only the loaded one).
+    pub models: Option<Arc<dyn crate::ai::ModelSource>>,
+    /// More folders of models (`<folder>/<tag>/weights.json`) `ai.models` was given this
+    /// session, listed after the installed and bundled ones. Not saved.
+    pub model_folders: Vec<std::path::PathBuf>,
     /// Where poses can be borrowed from (the front end's library; `None`: nowhere), for the
     /// anchor poses of a long AI fill.
     pub pose_source: Option<Arc<dyn crate::posesource::PoseSource>>,
@@ -144,6 +149,8 @@ impl Document {
             ranges: None,
             physics_cache: None,
             ai: None,
+            models: None,
+            model_folders: Vec::new(),
             pose_source: None,
             ai_settings: crate::ai::FillSettings::default(),
             ai_preview: None,

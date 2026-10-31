@@ -46,6 +46,12 @@ pub trait Filler {
     fn anchor_tags(&self, _a: i64, _b: i64) -> Vec<(i64, String)> {
         Vec::new()
     }
+
+    /// The hash of the model's weights, kept on every key it makes ([`Key::model_hash`]) so a
+    /// saved animation says which weights made its motion; empty when the filler has none.
+    fn hash(&self) -> String {
+        String::new()
+    }
     /// Several of your keys at once (a model trained with several keys in a window): the frames
     /// `keys[0]+1 .. keys[last]-1`, the keys inside given back as they are. The default refuses.
     fn fill_keys(&self, _clip: &Clip, keys: &[i64]) -> R<(Vec<Vec<Quat>>, Vec<Vec3>, String)> {
@@ -214,6 +220,7 @@ pub fn keep_ai(clip: &mut Clip, a: i64, b: i64) -> R<usize> {
     {
         k.source = KeySource::Manual;
         k.model.clear();
+        k.model_hash.clear();
         n += 1;
     }
     Ok(n)
@@ -229,11 +236,13 @@ pub fn refill(clip: &mut Clip, a: i64, b: i64, filler: &dyn Filler, links: &dyn 
         return Ok(format!("{a}-{b}: gap over {MAX_FILL} frames, left to the spline"));
     }
     let (mut rots, mut roots, tag) = filler.fill(clip, a, b)?;
+    let hash = filler.hash();
     on_top(clip, a, b, &mut rots, &mut roots, links)?;
     for (i, (r, o)) in rots.into_iter().zip(roots).enumerate() {
         let mut k = Key::new(a + 1 + i as i64, r, o, Interp::Smooth);
         k.source = KeySource::Ai;
         k.model = tag.clone();
+        k.model_hash = hash.clone();
         clip.set_key(k)?;
     }
     // the anchor poses of a long fill keep their own tag (the timeline's band, the ease through them)
@@ -293,6 +302,7 @@ pub fn refill_keys(clip: &mut Clip, keys: &[i64], filler: &dyn Filler, links: &d
         return Ok(String::new());
     }
     let (mut rots, mut roots, tag) = filler.fill_keys(clip, keys)?;
+    let hash = filler.hash();
     if rots.len() != (z - a - 1) as usize || roots.len() != rots.len() {
         return Err(format!(
             "the fill over {a}–{z} gave {} frames for {}",
@@ -309,6 +319,7 @@ pub fn refill_keys(clip: &mut Clip, keys: &[i64], filler: &dyn Filler, links: &d
         let mut k = Key::new(f, r, o, Interp::Smooth);
         k.source = KeySource::Ai;
         k.model = tag.clone();
+        k.model_hash = hash.clone();
         clip.set_key(k)?;
     }
     Ok(String::new())

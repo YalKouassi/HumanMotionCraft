@@ -76,6 +76,10 @@ pub struct Key {
     pub source: KeySource,
     /// The in-betweener that made an AI key.
     pub model: String,
+    /// The hash of that in-betweener's weights (`session.info`'s `model.hash`), so a saved
+    /// animation says which weights made its motion; empty on keys made before 155000 or by a
+    /// filler without one.
+    pub model_hash: String,
     /// The bones this key sets (sorted, unique); `None`: all of them.
     pub only: Option<Vec<usize>>,
 }
@@ -101,6 +105,7 @@ impl Key {
             interp,
             source: KeySource::Manual,
             model: String::new(),
+            model_hash: String::new(),
             only: None,
         }
     }

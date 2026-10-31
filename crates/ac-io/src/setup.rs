@@ -12,7 +12,7 @@
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use ac_core::ai::Inbetweener;
+use ac_core::ai::{Inbetweener, ModelSource};
 use ac_core::{CommandSpec, Document, Session, Skeleton};
 use serde_json::json;
 
@@ -26,6 +26,7 @@ pub struct SessionBuilder {
     library: Option<PathBuf>,
     limits: bool,
     ai: Result<Model, String>,
+    models: Option<Arc<dyn ModelSource>>,
     install: bool,
     strict: bool,
     extra: Vec<&'static [CommandSpec]>,
@@ -50,6 +51,7 @@ impl SessionBuilder {
             library: None,
             limits: true,
             ai: Ok(None),
+            models: None,
             install: true,
             strict: false,
             extra: Vec::new(),
@@ -67,6 +69,13 @@ impl SessionBuilder {
     /// says there is no model, and the rest of the session works.
     pub fn ai(mut self, model: Result<Model, String>) -> SessionBuilder {
         self.ai = model;
+        self
+    }
+
+    /// Where other models come from (`ac_ai::models::Models`): `ai.models` lists them and
+    /// `ai.model` picks one. Without it a session keeps the one model it was given.
+    pub fn models(mut self, source: Arc<dyn ModelSource>) -> SessionBuilder {
+        self.models = Some(source);
         self
     }
 
@@ -125,6 +134,7 @@ impl SessionBuilder {
                 notes.push(e);
             }
         }
+        doc.models = self.models;
         match self.ai {
             Ok(model) => doc.ai = model,
             Err(e) => {

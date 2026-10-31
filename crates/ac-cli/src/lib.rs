@@ -51,6 +51,7 @@ pub fn session(assets: &Path, library: &Path) -> Result<Session, String> {
     Ok(ac_io::setup::SessionBuilder::new(assets)
         .library(library)
         .ai(ac_ai::shared(assets))
+        .models(std::sync::Arc::new(ac_ai::models::Models::bundled(assets)))
         .commands(ac_media::SPECS)
         .commands(ac_textmotion::SPECS)
         .commands(ac_posefill::SPECS)

@@ -99,6 +99,8 @@
             "ai.gaps",
             "ai.info",
             "ai.keep",
+            "ai.model",
+            "ai.models",
             "ai.preview",
             "ai.settings",
             "ai.toggle",
@@ -546,6 +548,72 @@
                   "from",
                   "to"
                 ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.model"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Choose AI model"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "tag": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "the model's tag (ai.models lists them)"
+                  }
+                },
+                "required": [
+                  "tag"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
+                "const": "ai.models"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "AI models"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "folder": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4096,
+                    "description": "another folder of models (<folder>/<tag>/weights.json) to list after the installed and bundled ones; kept for ai.model and the AI panel for this session"
+                  }
+                },
+                "required": [],
                 "additionalProperties": false
               }
             }
@@ -7239,6 +7307,8 @@
             "ai.gaps",
             "ai.info",
             "ai.keep",
+            "ai.model",
+            "ai.models",
             "ai.preview",
             "ai.settings",
             "ai.toggle",

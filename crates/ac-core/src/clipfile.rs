@@ -114,6 +114,7 @@ fn keys_of(names: &[String], v: Option<&Value>) -> R<Vec<Key>> {
             "ai" => {
                 key.source = KeySource::Ai;
                 key.model = text(k, "model");
+                key.model_hash = text(k, "model_hash");
             }
             other => return Err(format!("key {i}: unknown source {other:?}")),
         }
@@ -298,6 +299,9 @@ fn keys_json(bones: &[String], keys: &[Key]) -> Value {
             if k.source == KeySource::Ai {
                 m.insert("source".into(), json!("ai"));
                 m.insert("model".into(), json!(k.model));
+                if !k.model_hash.is_empty() {
+                    m.insert("model_hash".into(), json!(k.model_hash));
+                }
             }
             if let Some(only) = &k.only {
                 m.insert(

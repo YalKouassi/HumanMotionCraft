@@ -596,8 +596,8 @@ fn ai_fill(doc: &mut Document, p: &P) -> Out {
     let f = doc.ai_fill_with(span, anchors)?;
     let d = crate::filldiag::diagnose(doc, &f).json();
     Ok(json!({
-        "from": f.from, "to": f.to, "frames": f.to - f.from - 1, "model": f.model, "notes": f.notes,
-        "anchors": f.anchors, "anchor_segment": f.segment, "diagnostics": d,
+        "from": f.from, "to": f.to, "frames": f.to - f.from - 1, "model": f.model, "model_hash": f.hash,
+        "notes": f.notes, "anchors": f.anchors, "anchor_segment": f.segment, "diagnostics": d,
     }))
 }
 
