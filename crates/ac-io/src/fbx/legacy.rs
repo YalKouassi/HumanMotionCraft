@@ -439,12 +439,8 @@ Takes:  {{
         // 7 over the model's 2; Z has no channel and stays the model's 3. Y up, cm: the rig's
         // (x, y, z) is (15, -3, 7) cm.
         let want = [0.15, -0.03, 0.07];
-        for k in 0..3 {
-            assert!(
-                (m.positions[15][0][k] - want[k]).abs() < 1e-9,
-                "{:?}",
-                m.positions[15][0]
-            );
+        for (got, want) in m.positions[15][0].iter().zip(&want) {
+            assert!((got - want).abs() < 1e-9, "{:?}", m.positions[15][0]);
         }
         // the child 10 cm along the parent's X, which has no turn
         assert!(

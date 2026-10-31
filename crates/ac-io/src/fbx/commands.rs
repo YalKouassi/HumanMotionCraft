@@ -66,9 +66,12 @@ pub fn joints_param(p: &P) -> Result<BTreeMap<String, String>, String> {
     Ok(out)
 }
 
+/// The FBX files under a folder (path, name), and those it could not look at (name, why).
+type Found = (Vec<(PathBuf, String)>, Vec<(String, String)>);
+
 /// Every `.fbx` under `from`, sorted, with its path below `from`, and the folders that couldn't be
 /// read, with why.
-fn find(from: &Path) -> (Vec<(PathBuf, String)>, Vec<(String, String)>) {
+fn find(from: &Path) -> Found {
     let mut out = Vec::new();
     let mut unreadable = Vec::new();
     let mut stack = vec![(from.to_path_buf(), Vec::<String>::new())];

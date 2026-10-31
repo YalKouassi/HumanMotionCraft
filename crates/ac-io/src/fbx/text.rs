@@ -145,8 +145,13 @@ impl Text<'_> {
     fn array(&mut self) -> R<Prop> {
         self.pos += 1;
         let line = self.line;
-        let count: usize = self
-            .word()
+        let word = self.word();
+        if word.is_empty() {
+            return Err(format!(
+                "line {line}: the file is truncated: an array's * has no count"
+            ));
+        }
+        let count: usize = word
             .parse()
             .map_err(|_| format!("line {line}: an array's * has no count"))?;
         if count > MAX_ARRAY {

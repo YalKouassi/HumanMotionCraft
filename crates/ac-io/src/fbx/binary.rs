@@ -563,7 +563,7 @@ mod tests {
     fn a_c_byte_is_a_bool_or_a_letter() {
         let one = parse(&with_property(&[b'C', 1])).unwrap();
         assert_eq!(one.nodes[0].props, vec![Prop::Bool(true)]);
-        let letter = parse(&with_property(&[b'C', b'L'])).unwrap();
+        let letter = parse(&with_property(b"CL")).unwrap();
         assert_eq!(letter.nodes[0].props, vec![Prop::Char(b'L')]);
         assert_eq!(letter.nodes[0].props[0].as_i64(), Some(1));
     }
