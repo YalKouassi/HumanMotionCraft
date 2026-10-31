@@ -6,7 +6,8 @@ starts with `!` so it sorts above everything else; it is the only file without a
 ## Why
 
 - **The folder listing is the roadmap.** `ls roadmap` (or any file explorer) shows, in order:
-  this file, then what's left in pickup order, then what's done, then what was dropped. No
+  this file, then what's left in pickup order, then what's deferred, then what's done, then what was
+  dropped. No
   separate index to keep in step.
 - **Inserting never renames anything.** The numbers are spaced 1000 apart, so new work fits
   between two items by taking a number in the gap. No other file moves, no link breaks, and a
@@ -44,6 +45,7 @@ after it and break every prerequisite that named them.
 ```
 !README.md                            this file: sorts first
 126000-ai-evaluation-suite.md         not done: digits sort before letters, so these come next
+DEFERRED_162000-engine-check-unity.md  put off: "DE" sorts before "DO", so these come after the open work
 DONE_111000-train-on-100style.md      done
 OBSOLETE_133000-ai-augmentation.md    dropped: "O" sorts after "D", so these come last
 ```
@@ -52,8 +54,16 @@ OBSOLETE_133000-ai-augmentation.md    dropped: "O" sorts after "D", so these com
 - **Slug:** lower-case kebab-case ASCII (letters, digits, `-`).
 - **The number is the pickup order.** Among the not-done files, the lowest number whose
   prerequisites are all done is next.
-- **A file keeps its number for life.** Finishing it only adds `DONE_` to the front
+- **A file keeps its number for life.** Deferring it only adds `DEFERRED_` to the front; finishing it only adds `DONE_` to the front
   (`git mv 126000-x.md DONE_126000-x.md`); dropping it only adds `OBSOLETE_`.
+
+## Deferred items
+
+`DEFERRED_` marks an item still wanted but put off, so it leaves the pickup order until someone brings
+it back. Only the owner defers an item or brings it back.
+
+- Set the status to `deferred (YYYY-MM-DD)` and say why in the file. To bring it back, drop the prefix.
+- An item that `Requires:` a deferred one waits for it.
 
 ## Obsolete items
 
@@ -83,7 +93,7 @@ its number is never reused.
 ```markdown
 # Title
 
-- **Status:** not started | in progress | built, waiting for the owner | open (the owner's decision) | done (date) | obsolete (date)
+- **Status:** not started | in progress | built, waiting for the owner | open (the owner's decision) | deferred (date) | done (date) | obsolete (date)
 - **Requires:** none | 126000, 129000
 - **Source:** where it came from
 

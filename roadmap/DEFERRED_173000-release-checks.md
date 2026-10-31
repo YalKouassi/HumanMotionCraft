@@ -1,6 +1,6 @@
 # Real-world checks before the next release
 
-- **Status:** not started; needs the owner's machine and hands
+- **Status:** deferred (2026-10-31)
 - **Requires:** none
 - **Source:** what closing 124000, 157000, 158000 and 165000 left unrun (2026-10-31)
 
@@ -13,3 +13,6 @@ sample download and a controller take.
 - A real `posefill.install` from the panel with Stop and resume, and no `assets/motions/` in the folder afterwards.
 - A real `posefill.samples` download once its licence is accepted.
 - A controller take in live motion (158000).
+
+## Deferred (2026-10-31)
+The owner: the real-world release checks are put off; v0.3.0 went out without them.

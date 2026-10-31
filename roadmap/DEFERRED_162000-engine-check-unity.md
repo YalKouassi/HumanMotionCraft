@@ -1,6 +1,6 @@
 # Engine check of the export in Unity
 
-- **Status:** not started; left for now (the owner, 2026-10-31)
+- **Status:** deferred (2026-10-31)
 - **Requires:** 122000
 - **Source:** 122000, split off by the owner 2026-10-31
 
@@ -17,3 +17,6 @@ on the ground, with no mirrored sides and root motion on the root bone; screensh
 
 ## Decision (2026-10-31)
 The owner: stays parked until a Unity user reports a problem.
+
+## Deferred (2026-10-31)
+The owner: parked until a Unity user reports a problem.

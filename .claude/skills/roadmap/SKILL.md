@@ -14,6 +14,7 @@ example. `ROADMAP.md` at the repo root only points here.
 
 ```
 roadmap/NNNNNN-short-slug.md         not done (sorts first: digits come before "D")
+roadmap/DEFERRED_NNNNNN-short-slug.md  put off by the owner (sorts after the not-done files)
 roadmap/DONE_NNNNNN-short-slug.md    done
 roadmap/OBSOLETE_NNNNNN-short-slug.md  dropped (sorts last: "O" comes after "D")
 ```
@@ -76,6 +77,8 @@ Decisions use `## Question` (open) or `## Decision` (made) in place of What.
   `ac-review-video` skill) are ready, set the status to
   `built, waiting for the owner`. Rename to `DONE_` **only after the owner confirms**, and set the
   status to `done (YYYY-MM-DD)` with the result (numbers, screenshots) under `## Result`.
+- **Deferred.** Still wanted but put off: only the owner renames an item `DEFERRED_` or brings it back.
+  Set the status to `deferred (YYYY-MM-DD)` with the reason. It keeps its number and leaves the pickup order.
 - **Obsolete, not deleted.** An item that won't be built (overtaken, ended by a decision, split
   into new items) is renamed `OBSOLETE_`, its status set to `obsolete (YYYY-MM-DD)`, with a
   `## Why obsolete` section naming what replaced it (by number) or the decision that ended it.
@@ -94,5 +97,5 @@ Decisions use `## Question` (open) or `## Decision` (made) in place of What.
 ls roadmap                                  # not-done first, in pickup order
 ls roadmap | rg '^[0-9]'                    # only what's left
 rg -n "Requires:.*\b126000\b" roadmap       # what waits on 126000
-ls roadmap | rg -v '^(!README\.md|(DONE_|OBSOLETE_)?[0-9]{6}-[a-z0-9]+(-[a-z0-9]+)*\.md)$'   # names breaking the rule (should print nothing)
+ls roadmap | rg -v '^(!README\.md|(DEFERRED_|DONE_|OBSOLETE_)?[0-9]{6}-[a-z0-9]+(-[a-z0-9]+)*\.md)$'   # names breaking the rule (should print nothing)
 ```

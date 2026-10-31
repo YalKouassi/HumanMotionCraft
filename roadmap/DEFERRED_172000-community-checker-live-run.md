@@ -1,6 +1,6 @@
 # Watch the community checker on a live run
 
-- **Status:** not started; needs the owner, who holds `CHECKER_SECRET`
+- **Status:** deferred (2026-10-31)
 - **Requires:** none
 - **Source:** the 2026-10-31 review of 150000; the owner's decision
 
@@ -11,3 +11,6 @@ through. The first run with a clip pending builds cold.
 ## Acceptance
 A good clip is published within one run, an impossible clip fails with a reason naming the frame and joints,
 and a run with nothing pending ends in under a minute. The test clips are removed afterwards.
+
+## Deferred (2026-10-31)
+The owner: the watched live run is put off.
