@@ -341,6 +341,7 @@ fn real_main() -> Result<ExitCode, String> {
                 run_script(&mut s.session, file, None)?;
             }
             let doc = &s.session.document;
+            ac_core::evaluation::check(doc, "a video of it")?;
             let fps = fps.unwrap_or(doc.clip.fps);
             let last = (doc.clip.length_with(&doc.links) - 1).max(0) as f64;
             let (from, to) = (from.unwrap_or(0.0), to.unwrap_or(last));

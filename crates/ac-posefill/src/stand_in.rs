@@ -129,5 +129,6 @@ pub fn use_stand_in() {
     ONCE.call_once(|| {
         engine::use_engine(Box::<StandIn>::default());
         crate::setup::use_stand_in();
+        crate::samples::use_stand_in();
     });
 }

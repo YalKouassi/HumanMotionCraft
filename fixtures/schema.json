@@ -231,6 +231,7 @@
             "posefill.helper",
             "posefill.install",
             "posefill.preview",
+            "posefill.samples",
             "project.info",
             "project.open",
             "project.save",
@@ -6311,6 +6312,51 @@
           "if": {
             "properties": {
               "command": {
+                "const": "posefill.samples"
+              }
+            },
+            "required": [
+              "command"
+            ]
+          },
+          "then": {
+            "properties": {
+              "command": {
+                "description": "Pose fill: sample clips; writes files (undo does not take them back)"
+              },
+              "params": {
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "check",
+                      "start",
+                      "stop",
+                      "add",
+                      "remove"
+                    ],
+                    "description": "check (default) says where it is; start downloads them (about 115 MB, needs accept); stop ends that, and start carries on; add puts them in the library, in the group Evaluation only; remove deletes the download and the sample clips, edited or not"
+                  },
+                  "accept": {
+                    "type": "boolean",
+                    "description": "start: the person has read the licence and accepts it, as `accept` says. It is their own answer: ask them, don't set it for them"
+                  },
+                  "derived": {
+                    "type": "boolean",
+                    "description": "remove: also delete the other marked animations and poses (default: they are listed and left)"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "command": {
                 "const": "project.info"
               }
             },
@@ -7325,6 +7371,7 @@
             "posefill.helper",
             "posefill.install",
             "posefill.preview",
+            "posefill.samples",
             "project.info",
             "project.open",
             "project.save",

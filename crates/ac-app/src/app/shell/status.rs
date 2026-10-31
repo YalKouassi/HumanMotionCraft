@@ -172,7 +172,14 @@ impl App {
             .as_ref()
             .map_or("no AI model".to_string(), |m| format!("AI: {}", m.info().tag));
         let palette = self.palette();
+        let evaluation_only = ac_core::evaluation::holds(doc);
         ui.horizontal(|ui| {
+            if evaluation_only {
+                ui.colored_label(egui::Color32::from_rgb(230, 170, 60), "Evaluation only")
+                    .on_hover_text("This animation holds motion from NVIDIA's sample clips, so it can't be exported or shared")
+                    .tag("status.evaluation_only", "Evaluation only");
+                ui.separator();
+            }
             ui.label(RichText::new(self.tool_hint(shift)).weak());
             ui.separator();
             ui.label(&selection);

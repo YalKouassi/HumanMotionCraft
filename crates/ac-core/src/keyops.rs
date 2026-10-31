@@ -118,6 +118,7 @@ impl Document {
         keys.sort_by_key(|k| k.frame);
         let n = keys.len();
         self.key_clipboard = Some(Arc::new(keys));
+        self.keys_evaluation_only = crate::evaluation::holds(self);
         Ok(n)
     }
 
@@ -132,6 +133,7 @@ impl Document {
             .clone()
             .ok_or("no keys copied yet: select keys and copy them first")?;
         let first = keys.first().ok_or("no keys copied yet")?;
+        self.clip.evaluation_only |= self.keys_evaluation_only;
         let (f0, x0) = (first.frame, first.root[0]);
         let mut pasted = Vec::with_capacity(keys.len());
         let mut replaced = Vec::new();

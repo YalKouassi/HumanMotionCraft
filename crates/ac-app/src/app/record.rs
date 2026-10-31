@@ -164,6 +164,7 @@ impl App {
         match r.stage {
             Stage::Start => {
                 let doc = &self.session.document;
+                ac_core::evaluation::check(doc, "a video of it")?;
                 let fps = r.plan.fps.unwrap_or(doc.clip.fps);
                 let last = (doc.clip.length_with(&doc.links) - 1).max(0) as f64;
                 let (from, to) = (r.plan.from.unwrap_or(0.0), r.plan.to.unwrap_or(last));

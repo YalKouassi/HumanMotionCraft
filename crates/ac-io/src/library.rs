@@ -188,6 +188,9 @@ impl Library {
             {
                 Ok(d) => {
                     meta["origin"] = d.get("origin").cloned().unwrap_or(json!(""));
+                    if d.get("evaluation_only").and_then(Value::as_bool) == Some(true) {
+                        meta["evaluation_only"] = json!(true);
+                    }
                     if self.kind == Kind::Animations {
                         let last = d
                             .get("keys")

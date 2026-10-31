@@ -76,7 +76,7 @@ pub const LICENCES: &[Licence] = &[
 ];
 
 /// What the install leaves out, for the panel.
-pub const NOT_INSTALLED: &str = "The engine's sample motion clips are evaluation-only and are never installed, read or used; the install checks they are absent.";
+pub const NOT_INSTALLED: &str = "The engine's sample motion clips are evaluation-only and aren't part of this install, which checks they are absent. They are a separate optional download once it is installed.";
 
 /// Fixture runs: report the install as there and never start the setup.
 pub fn use_stand_in() {

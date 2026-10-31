@@ -83,7 +83,7 @@ TENSORRT = "10.8.0.43"
 TENSORRT_PACKAGES = [f"tensorrt-cu12=={TENSORRT}", f"tensorrt-cu12-bindings=={TENSORRT}", f"tensorrt-cu12-libs=={TENSORRT}"]
 NVIDIA_INDEX = "https://pypi.nvidia.com"
 SCRIPTS = ["helper.py", "engine.py", "live.py"]
-RIG_MODULES = ["rig.py", "quat.py", "retarget.py"]
+RIG_MODULES = ["rig.py", "quat.py", "retarget.py", "bvh.py"]
 INSTALL_VERSION = 1
 STEPS = 6
 NEED_GB, NEED_GB_RESUMED = 6, 2
@@ -107,7 +107,8 @@ LICENCES = [
 NOT_INSTALLED = (
     "The upstream archive's sample motion clips (assets/motions/, NVIDIA Sample Data Evaluation License,\n"
     "evaluation-only), its Smart Primitive and scene documents, demo app, docs, tests and tools are not\n"
-    "installed, never read, and the install checks they are absent. The TensorRT plan built on first use\n"
+    "installed, and the install checks they are absent; they are a separate optional download\n"
+    "(setup_samples.py, its own folder and acceptance). The TensorRT plan built on first use\n"
     "(trt-cache/) stays in this folder: it is a derivative of the model and is never shared."
 )
 

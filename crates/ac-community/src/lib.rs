@@ -494,6 +494,9 @@ fn share(ctx: &Ctx, p: &P) -> Out {
         return Err(format!("{id} is a built-in: share one of your own animations"));
     }
     let mut clip = clipfile::load_clip(&lib.read(&id)?)?;
+    if ac_core::evaluation::marked(&clip, &ac_io::commands::load_links(&lib, &clip)?) {
+        return Err(ac_core::evaluation::refusal(&format!("sharing {id}")));
+    }
     if clip.origin.starts_with(ORIGIN) {
         return Err(format!(
             "{id} came from the community: share one of your own animations"

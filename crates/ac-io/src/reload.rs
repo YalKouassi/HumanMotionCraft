@@ -53,6 +53,7 @@ fn reload_library(doc: &mut Document) -> Out {
     load_parts(doc)?;
     let lib = anims(doc)?;
     doc.links = load_links(&lib, &doc.clip)?;
+    ac_core::evaluation::mark_from_links(doc);
     if doc.clip.layers.iter().any(|l| !l.link.is_empty()) {
         doc.go_to(doc.frame)?;
     }

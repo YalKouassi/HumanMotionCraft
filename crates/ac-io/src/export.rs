@@ -715,6 +715,9 @@ pub(crate) fn clip_export(doc: &mut Document, p: &Map<String, Value>) -> R<Value
         let lib = crate::commands::anims(doc)?;
         let clip = ac_core::clipfile::load_clip(&lib.read(id)?).map_err(|e| format!("{id}: {e}"))?;
         let links = crate::commands::load_links(&lib, &clip)?;
+        if ac_core::evaluation::marked(&clip, &links) {
+            return Err(ac_core::evaluation::refusal(&format!("exporting {id}")));
+        }
         loaded.push((id.clone(), clip, links));
     }
     let mut items: Vec<Item> = loaded
@@ -726,6 +729,7 @@ pub(crate) fn clip_export(doc: &mut Document, p: &Map<String, Value>) -> R<Value
         })
         .collect();
     if ids.is_empty() {
+        ac_core::evaluation::check(doc, "exporting it")?;
         if doc.clip.base().keys.is_empty() {
             return Err("the animation has no keys to export".into());
         }

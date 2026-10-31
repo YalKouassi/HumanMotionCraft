@@ -93,6 +93,10 @@ impl PoseSource for LibraryPoses {
                     }
                 }
             };
+            // sample clips are for evaluating, not a source for the fills of other animations
+            if clip.evaluation_only {
+                continue;
+            }
             out.clips.push(SourceClip {
                 id: id.to_string(),
                 clip,

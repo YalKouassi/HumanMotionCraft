@@ -189,6 +189,9 @@ pub fn clip_strip(
 ) -> Result<Vec<u8>, String> {
     let clip = ac_core::clipfile::load_clip(text)?;
     let links = ac_io::commands::load_links(lib, &clip)?;
+    if ac_core::evaluation::marked(&clip, &links) {
+        return Err(ac_core::evaluation::refusal("a picture of it"));
+    }
     let last = (clip.length_with(&links) - 1).max(0) as f64;
     let n = ac_community::PREVIEW_FRAMES.max(2);
     let frames: Vec<f64> = (0..n)

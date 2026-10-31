@@ -384,6 +384,9 @@ def _clip_takes(ds: Dataset, skel: Skeleton, limit: int | None):
         except (OSError, ValueError, KeyError) as e:
             print(f"  {ds.name}: {f.name} skipped (not a clip file: {e})", flush=True)
             continue
+        if clip.evaluation_only:
+            print(f"  {ds.name}: {f.name} skipped (evaluation-only: its licence doesn't allow training on it)", flush=True)
+            continue
         if list(clip.bones) != list(skel.names):
             print(f"  {ds.name}: {f.name} skipped (made for another rig: {len(clip.bones)} bones)", flush=True)
             continue

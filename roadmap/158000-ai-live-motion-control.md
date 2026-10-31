@@ -24,7 +24,8 @@ see D:/CreativeFusion/AnimationCraft/reference repos
 The model only moves towards target poses, and those decide what the walk looks like. The demo's
 come from `assets/smart_primitives/soma/locomotion_bs1_linear.smart_primitive.json` and
 `locomotion_style_variations_bs1_linear`, and both point at clips in `assets/motions/` (checked
-2026-10-30). Those clips are evaluation-only and come from Bones' data, so anything we keep can't be
+2026-10-30). Those clips are evaluation-only and come from Bones' data (the person may download them for
+evaluation since 2026-10-31, 165000, and that doesn't change this), so anything we keep can't be
 made with them. Its six style modes (zombie, combat and so on) go with them. The upstream notice
 says the sample licence doesn't cover the Smart Primitive documents themselves, but the README gives
 those documents no licence of their own, so we don't copy them either.

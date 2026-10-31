@@ -297,6 +297,7 @@ fn layer_add(doc: &mut Document, p: &P) -> Out {
             }
         }
         doc.links = links;
+        ac_core::evaluation::mark_from_links(doc);
     } else {
         doc.clip.edit = doc.clip.layers.len() - 1;
     }
@@ -313,7 +314,7 @@ fn locomotion(doc: &Document, gait: &str) -> Result<Vec<(String, Clip)>, String>
         };
         if travel::uses(gait, id) {
             let clip = ac_core::clipfile::load_clip(&lib.read(id)?).map_err(|e| format!("{id}: {e}"))?;
-            if clip.bones == doc.skeleton.names {
+            if clip.bones == doc.skeleton.names && !clip.evaluation_only {
                 out.push((id.to_string(), clip));
             }
         }

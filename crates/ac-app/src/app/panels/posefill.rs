@@ -40,6 +40,11 @@ pub struct PoseFillState {
     /// What `posefill.install` said last, and when.
     install: Option<Value>,
     install_at: Option<Instant>,
+    /// What `posefill.samples` said last, and when.
+    samples: Option<Value>,
+    samples_at: Option<Instant>,
+    /// The person ticked that they accept the sample clips' licence.
+    samples_accepted: bool,
     ctx: Option<egui::Context>,
 }
 
@@ -296,7 +301,93 @@ impl App {
                 ));
             });
         }
+        self.posefill_samples_panel(ui);
         self.live_panel(ui);
+    }
+
+    /// The optional sample clips: off until the person accepts their licence here.
+    fn posefill_samples_panel(&mut self, ui: &mut egui::Ui) {
+        let ctx = ui.ctx().clone();
+        let st = &mut self.panels.posefill;
+        let due = match (&st.samples, st.samples_at) {
+            (Some(v), Some(t)) => active(v) && t.elapsed() >= POLL,
+            _ => true,
+        };
+        if due {
+            st.samples = self.session.run("posefill.samples", &json!({})).ok();
+            st.samples_at = Some(Instant::now());
+        }
+        let v = st.samples.clone().unwrap_or(Value::Null);
+        if active(&v) {
+            ctx.request_repaint_after(POLL);
+        }
+        let mut action = None;
+        egui::CollapsingHeader::new("Sample clips (optional)")
+            .id_salt("panel.posefill.samples")
+            .show(ui, |ui| {
+                ui.label(egui::RichText::new(ac_posefill::samples::NOTICE).small().weak());
+                ui.hyperlink_to(ac_posefill::samples::LICENCE.licence, ac_posefill::samples::LICENCE.url);
+                let state = v["state"].as_str().unwrap_or("not installed");
+                if active(&v) {
+                    ui.horizontal_wrapped(|ui| {
+                        ui.spinner();
+                        ui.label(step(&v).unwrap_or_else(|| "starting".to_string()));
+                        if ui.button("Stop").tag("panel.posefill.samples.stop", "Stop").clicked() {
+                            action = Some(json!({ "action": "stop" }));
+                        }
+                    });
+                } else if state == "installed" {
+                    let (have, there) = (v["downloaded"].as_i64().unwrap_or(0), v["in_library"].as_i64().unwrap_or(0));
+                    ui.label(format!("{have} clips downloaded, {there} in the library"));
+                    ui.horizontal_wrapped(|ui| {
+                        if ui
+                            .add_enabled(there < have, egui::Button::new("Add to library"))
+                            .on_hover_text("Into the group Evaluation only, marked evaluation-only")
+                            .tag("panel.posefill.samples.add", "Add to library")
+                            .clicked()
+                        {
+                            action = Some(json!({ "action": "add" }));
+                        }
+                        if ui
+                            .button("Remove")
+                            .on_hover_text("Delete the download and the sample clips, edited or not. What you made from them stays, and is listed")
+                            .tag("panel.posefill.samples.remove", "Remove")
+                            .clicked()
+                        {
+                            action = Some(json!({ "action": "remove" }));
+                        }
+                    });
+                } else {
+                    if let Some(e) = v["error"].as_str() {
+                        ui.colored_label(ui.visuals().warn_fg_color, e);
+                    }
+                    let st = &mut self.panels.posefill;
+                    ui.checkbox(&mut st.samples_accepted, ac_posefill::samples::ACCEPT)
+                        .tag("panel.posefill.samples.accept", "Accept");
+                    if ui
+                        .add_enabled(st.samples_accepted, egui::Button::new("Download (about 115 MB)"))
+                        .tag("panel.posefill.samples.start", "Download")
+                        .clicked()
+                    {
+                        action = Some(json!({ "action": "start", "accept": true }));
+                    }
+                }
+            })
+            .header_response
+            .tag("panel.posefill.samples", "Sample clips");
+        if let Some(params) = action {
+            if let Some(out) = self.run("posefill.samples", params) {
+                if let Some(left) = out["derived"].as_array().filter(|d| !d.is_empty()) {
+                    self.status = format!(
+                        "Sample clips removed. {} marked items made from them are still in your library: use Remove from an agent with derived, or delete them",
+                        left.len()
+                    );
+                }
+                self.panels.posefill.samples = Some(out);
+            }
+            self.panels.posefill.samples_at = Some(Instant::now());
+            self.panels.posefill.samples_accepted = false;
+        }
     }
 
     /// Ask `posefill.install` again (now, or once a second while it runs).

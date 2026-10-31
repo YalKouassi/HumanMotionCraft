@@ -1,0 +1,46 @@
+{
+  "$schema": "./schema.json",
+  "name": "sample-clips",
+  "feature": "posefill.samples",
+  "description": "The optional evaluation-only sample clips (roadmap 165000), with one made-up clip standing in for the download. add puts it in the library marked, the mark follows a copied pose into another animation, undo takes it back off, and export, video, pictures, writing to a file and community upload all refuse. remove deletes the sample clip and lists what was made from it.",
+  "script": [
+    {
+      "command": "posefill.samples",
+      "params": {},
+      "expect": { "state": "installed", "in_library": 0, "licence": { "licence": "NVIDIA Sample Data Evaluation License" } }
+    },
+    {
+      "command": "posefill.samples",
+      "params": { "action": "add" },
+      "expect": { "added": ["Evaluation only/Stand-in sample"], "in_library": 1 }
+    },
+    { "command": "clip.open", "params": { "id": "Locomotion/Walk 12" } },
+    { "command": "editor.state", "params": {}, "expect": { "evaluation_only": false } },
+    { "command": "clip.open", "params": { "id": "Evaluation only/Stand-in sample" } },
+    { "command": "editor.state", "params": {}, "expect": { "evaluation_only": true } },
+    { "command": "pose.copy", "params": {} },
+    { "command": "pose.save", "params": { "name": "from the sample" } },
+    { "command": "clip.open", "params": { "id": "Locomotion/Walk 12" } },
+    { "command": "pose.paste", "params": {} },
+    { "command": "editor.state", "params": {}, "expect": { "evaluation_only": true } },
+    { "command": "edit.undo" },
+    { "command": "editor.state", "params": {}, "expect": { "evaluation_only": false } },
+    {
+      "command": "posefill.samples",
+      "params": { "action": "remove" },
+      "expect": { "removed": ["Evaluation only/Stand-in sample"], "derived": ["Ungrouped/from the sample"], "in_library": 0 }
+    },
+    { "command": "posefill.samples", "params": { "action": "add" } },
+    { "command": "clip.open", "params": { "id": "Evaluation only/Stand-in sample" } }
+  ],
+  "errors": [
+    { "command": "posefill.samples", "params": { "action": "start" } },
+    { "command": "clip.export", "params": { "path": "a.glb" } },
+    { "command": "clip.export_batch", "params": { "ids": ["Evaluation only/Missing"], "folder": "out" } },
+    { "command": "clip.write", "params": { "path": "a.clip.json" } },
+    { "command": "clip.video", "params": { "path": "a.mp4" } },
+    { "command": "clip.picture", "params": { "path": "a.png" } },
+    { "command": "clip.sheet", "params": { "path": "a.png" } },
+    { "command": "community.share", "params": { "id": "Evaluation only/Stand-in sample" } }
+  ]
+}

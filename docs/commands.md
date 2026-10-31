@@ -1240,6 +1240,7 @@ Outputs:
 | `keys` | JSON | yes |  | [{frame, interp, source, model, part?, rows?}] of the edited layer |
 | `layers` | JSON | yes |  | [{name, keys, muted, weight, link}] |
 | `edit_layer` | integer | yes |  | the layer keys go on |
+| `evaluation_only` | bool | yes |  | the animation holds motion from the optional sample clips, so it can't be exported or shared |
 | `locked` | list of text | yes |  | locked parts |
 | `pins` | list of text | yes |  | pinned bones |
 | `bands` | JSON | yes |  | AI bands [{from, to, model}] |
@@ -2682,6 +2683,40 @@ Outputs:
 | `calls` | integer | yes |  | model calls made: one a gap between keys of yours |
 | `seconds` | number | yes |  | the model's own time over those calls, as it reports it |
 | `notes` | list of text | yes |  | what to know about the result |
+
+### `posefill.samples`: Pose fill: sample clips
+
+not undoable, writes files (undo and a batch rollback leave them; a dry run refuses it), icon `ai`.
+
+Inputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `action` | one of check \| start \| stop \| add \| remove |  |  | check (default) says where it is; start downloads them (about 115 MB, needs accept); stop ends that, and start carries on; add puts them in the library, in the group Evaluation only; remove deletes the download and the sample clips, edited or not |
+| `accept` | bool |  |  | start: the person has read the licence and accepts it, as `accept` says. It is their own answer: ask them, don't set it for them |
+| `derived` | bool |  |  | remove: also delete the other marked animations and poses (default: they are listed and left) |
+
+Outputs:
+
+| Name | Kind | Required | Range | What |
+|---|---|---|---|---|
+| `state` | one of not installed \| installing \| stopping \| installed \| stopped \| failed | yes |  | where the download is |
+| `dir` | text | yes |  | the folder they go in |
+| `notice` | text | yes |  | what to check before using these clips |
+| `accept` | text | yes |  | what accepting says |
+| `licence` | JSON | yes |  | the licence: {part, licence, url} |
+| `downloaded` | integer | yes |  | the clips on the rig in the folder |
+| `in_library` | integer | yes |  | the sample clips in the library |
+| `log` | text |  |  | the setup's log |
+| `seconds` | integer |  |  | how long this run has taken |
+| `step` | integer |  |  | the step working now |
+| `steps` | integer |  |  | how many steps |
+| `label` | text |  |  | what the step does |
+| `last` | text |  |  | the setup's last line |
+| `error` | text |  |  | why it failed |
+| `added` | list of text |  |  | add: the ids put in the library |
+| `removed` | list of text |  |  | remove: the ids deleted |
+| `derived` | list of text |  |  | remove: other marked animations and poses still in the library, which the licence wants gone too when it ends |
 
 ## project
 

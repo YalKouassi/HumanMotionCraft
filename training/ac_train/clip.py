@@ -157,6 +157,7 @@ class Clip:
         self.dataset = dataset  # for a mocap built-in: the dataset it was cut from (its licence)
         self.layers: list[Layer] = [Layer("Base", keys=list(keys or []))] + list(layers or [])
         self.edit = 0  # the layer the key tools work on
+        self.evaluation_only = False  # holds the optional sample clips' motion: never trained on
         self.physics = True  # play and export through the physics pass (ac_core::physics)
         # boxes in the scene the body stands on, puts a hand on or jumps over:
         # {"name", "min": [x, y], "max": [x, y] (m, rig world), "top": height above the floor (m)}
@@ -458,6 +459,7 @@ class Clip:
         clip = cls(bones=list(d["bones"]), fps=float(d["fps"]), loop=bool(d["loop"]), name=d.get("name", ""),
                    group=d.get("group", ""), origin=d.get("origin", ""), dataset=d.get("dataset", ""))
         clip.physics = bool(d.get("physics", True))
+        clip.evaluation_only = bool(d.get("evaluation_only", False))
         clip.surfaces = [dict(s) for s in d.get("surfaces", [])]
         index = {b: i for i, b in enumerate(clip.bones)}
 

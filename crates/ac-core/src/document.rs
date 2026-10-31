@@ -41,6 +41,8 @@ pub struct ProjectFile {
 pub struct Clipboard {
     pub pose: Pose,
     pub only: Option<Vec<usize>>,
+    /// Copied from an evaluation-only animation: pasting marks the animation it lands in.
+    pub evaluation_only: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -60,6 +62,8 @@ pub struct Document {
     pub clipboard: Option<Clipboard>,
     /// Keys copied on the timeline (`keys.copy`), pasted by `keys.paste`.
     pub key_clipboard: Option<Arc<Vec<crate::clip::Key>>>,
+    /// The copied keys came from an evaluation-only animation.
+    pub keys_evaluation_only: bool,
     /// The library folder files are read from and saved to (set by the front end).
     pub library: Option<std::path::PathBuf>,
     /// The assets folder (rig, mannequin) the front end loaded, for export.
@@ -133,6 +137,7 @@ impl Document {
             custom_parts: parts::Custom::new(),
             clipboard: None,
             key_clipboard: None,
+            keys_evaluation_only: false,
             library: None,
             assets: None,
             limits: None,
@@ -195,6 +200,7 @@ impl PartialEq for Document {
             && self.custom_parts == other.custom_parts
             && self.clipboard == other.clipboard
             && self.key_clipboard == other.key_clipboard
+            && self.keys_evaluation_only == other.keys_evaluation_only
             && self.clip_id == other.clip_id
             && self.links == other.links
             && self.character == other.character

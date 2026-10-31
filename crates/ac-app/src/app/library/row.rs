@@ -232,7 +232,12 @@ impl App {
             vis.text_color()
         };
         child.vertical(|ui| {
-            let mut t = egui::RichText::new(&name).color(text_col);
+            let shown = if item["evaluation_only"] == true {
+                format!("{name} (evaluation only)")
+            } else {
+                name.clone()
+            };
+            let mut t = egui::RichText::new(shown).color(text_col);
             if open {
                 t = t.strong();
             }

@@ -191,6 +191,12 @@ pub const EDITOR_STATE: &[ParamSpec] = &[
         .json()
         .required(),
     ParamSpec::new("edit_layer", Kind::Integer, "the layer keys go on").required(),
+    ParamSpec::new(
+        "evaluation_only",
+        Kind::Bool,
+        "the animation holds motion from the optional sample clips, so it can't be exported or shared",
+    )
+    .required(),
     ParamSpec::new("locked", Kind::TextList, "locked parts").required(),
     ParamSpec::new("pins", Kind::TextList, "pinned bones").required(),
     ParamSpec::new("bands", Kind::Text, "AI bands [{from, to, model}]")

@@ -493,6 +493,7 @@ fn pose_copy(doc: &mut Document, p: &P) -> Out {
     doc.clipboard = Some(Clipboard {
         pose: doc.pose.clone(),
         only,
+        evaluation_only: crate::evaluation::holds(doc),
     });
     Ok(json!({ "copied": label }))
 }
@@ -503,6 +504,7 @@ fn pose_paste(doc: &mut Document, p: &P) -> Out {
         .clone()
         .ok_or_else(|| crate::error::hinted("nothing copied yet", "run pose.copy first"))?;
     let (mut pose, mut only) = (cb.pose, cb.only);
+    doc.clip.evaluation_only |= cb.evaluation_only;
     if let Some(ask) = parts_of(doc, p)? {
         only = Some(match only {
             None => ask,

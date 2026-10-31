@@ -81,6 +81,7 @@ fn editor_state(doc: &mut Document, _: &P) -> Out {
         "part_presets": parts::PRESETS,
         "part_rows": parts::ROWS,
         "physics": doc.clip.physics,
+        "evaluation_only": crate::evaluation::holds(doc),
         "markers": crate::markers::json(&doc.clip),
         "preview": doc.ai_preview.as_ref().map(|p| json!({
             "from": p.from, "to": p.to, "model": p.label, "plain": p.plain,

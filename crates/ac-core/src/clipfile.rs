@@ -167,6 +167,7 @@ pub fn load_clip(text_in: &str) -> R<Clip> {
     }
     clip.markers = markers_of(d.get("markers"))?;
     clip.contacts = contacts_of(&names, d.get("contacts"))?;
+    clip.evaluation_only = d.get("evaluation_only").and_then(Value::as_bool).unwrap_or(false);
     if let Some(base) = clip.layers.first_mut() {
         base.keys = keys_of(&names, d.get("keys"))?;
     }
@@ -353,6 +354,9 @@ pub fn save_clip(clip: &Clip) -> String {
                 .collect(),
         );
     }
+    if clip.evaluation_only {
+        d.insert("evaluation_only".into(), json!(true));
+    }
     d.insert("fps".into(), json!(clip.fps));
     d.insert("loop".into(), json!(clip.loop_));
     d.insert("bones".into(), json!(clip.bones));
@@ -437,6 +441,8 @@ pub struct PoseFile {
     pub rotations: Vec<Quat>,
     pub root: Vec3,
     pub only: Option<Vec<usize>>,
+    /// See [`crate::clip::Clip::evaluation_only`].
+    pub evaluation_only: bool,
 }
 
 pub fn load_pose(text_in: &str) -> R<PoseFile> {
@@ -470,6 +476,7 @@ pub fn load_pose(text_in: &str) -> R<PoseFile> {
         rotations,
         root,
         only,
+        evaluation_only: d.get("evaluation_only").and_then(Value::as_bool).unwrap_or(false),
     })
 }
 
@@ -482,6 +489,9 @@ pub fn save_pose(p: &PoseFile) -> String {
     d.insert("bones", json!(p.bones));
     d.insert("rotations", json!(p.rotations));
     d.insert("root", json!(p.root));
+    if p.evaluation_only {
+        d.insert("evaluation_only", json!(true));
+    }
     if let Some(only) = &p.only {
         d.insert(
             "only",

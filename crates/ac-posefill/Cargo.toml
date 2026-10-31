@@ -10,6 +10,7 @@ publish.workspace = true
 [dependencies]
 ac-core.workspace = true
 ac-helper.workspace = true
+ac-io.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 

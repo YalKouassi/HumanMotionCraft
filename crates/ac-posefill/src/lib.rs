@@ -34,6 +34,7 @@ pub mod install;
 pub mod live;
 pub mod live_commands;
 pub mod plan;
+pub mod samples;
 pub mod setup;
 pub mod stand_in;
 
@@ -87,6 +88,11 @@ pub static SPECS: &[CommandSpec] = &[
             ),
         ])
         .outputs(INSTALL_OUT),
+    CommandSpec::new("posefill.samples", "Pose fill: sample clips", samples::command)
+        .icon("ai")
+        .writes()
+        .inputs(samples::IN)
+        .outputs(samples::OUT),
     CommandSpec::new("posefill.fill", "Fill gap from poses", posefill_fill)
         .icon("ai")
         .undoable()

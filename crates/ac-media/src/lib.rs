@@ -259,6 +259,7 @@ pub fn no_transparent(look: &Look, what: &str) -> Result<(), String> {
 
 /// Play the open animation into a video file.
 fn clip_video(doc: &mut Document, p: &P) -> Out {
+    ac_core::evaluation::check(doc, "a video of it")?;
     let path = PathBuf::from(cmd::text(p, "path").unwrap_or_default());
     let format = Format::of(&path)?;
     let look = look_of(&Value::Object(p.clone()))?;
@@ -308,6 +309,7 @@ fn clip_video(doc: &mut Document, p: &P) -> Out {
 
 /// One picture of the open animation as a PNG.
 fn clip_picture(doc: &mut Document, p: &P) -> Out {
+    ac_core::evaluation::check(doc, "a picture of it")?;
     let path = PathBuf::from(cmd::text(p, "path").unwrap_or_default());
     if path.extension().is_none_or(|e| !e.eq_ignore_ascii_case("png")) {
         return Err(format!("{}: the file must end in .png", path.display()));
@@ -332,6 +334,7 @@ fn clip_picture(doc: &mut Document, p: &P) -> Out {
 
 /// A contact sheet of the open animation as a PNG.
 fn clip_sheet(doc: &mut Document, p: &P) -> Out {
+    ac_core::evaluation::check(doc, "a contact sheet of it")?;
     let path = PathBuf::from(cmd::text(p, "path").unwrap_or_default());
     if path.extension().is_none_or(|e| !e.eq_ignore_ascii_case("png")) {
         return Err(format!("{}: the file must end in .png", path.display()));

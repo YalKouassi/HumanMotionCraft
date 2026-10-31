@@ -408,6 +408,7 @@ fn project_open(doc: &mut Document, p: &P) -> Out {
     }));
     doc.clip = clip;
     doc.links = links;
+    ac_core::evaluation::mark_from_links(doc);
     doc.clip_id = None;
     doc.pins = pins;
     doc.locked = locked;

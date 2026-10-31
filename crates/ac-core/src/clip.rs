@@ -275,6 +275,9 @@ pub struct Clip {
     pub markers: Vec<crate::markers::Marker>,
     /// Hands and feet held in place (`feet.plant`), for the physics pass.
     pub contacts: Vec<Contact>,
+    /// Holds motion from the optional sample clips, whose licence limits them to evaluation
+    /// (`crate::evaluation`).
+    pub evaluation_only: bool,
 }
 
 /// A hand or foot held at one point of the world through frames `from..=to`, at any height: on the
@@ -322,6 +325,7 @@ impl Clip {
             surfaces: Vec::new(),
             markers: Vec::new(),
             contacts: Vec::new(),
+            evaluation_only: false,
         }
     }
 

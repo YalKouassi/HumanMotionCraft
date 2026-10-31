@@ -11,6 +11,12 @@ poses and makes 18 to 58 frames at 30 fps. Add it as a second optional AI engine
 text, so people can fill between keys, save the result to their library, and we can generate
 training clips. It doesn't replace the text engine, and `ai.fill` keeps using our own model.
 
+**Owner's decisions, 2026-10-31:** the AI panel offers this model beside ours, and our model stays the
+default (163000); the sample clips are an off-by-default download by the person, marked
+evaluation-only (165000). The model is still downloaded at install and never shipped. For us the rule
+below stands: the clips are never shipped, trained on, or used for anything we keep, so this item's
+training clips still take their poses only from the free sets.
+
 ### Licences (read 2026-10-30, through a page summariser)
 
 | Part | Licence | Rule for us |
@@ -96,7 +102,8 @@ Packaging (124000) must ship `tools/posefill` and the rig modules, as it must fo
 - Without the install, the panel and every `posefill.*` command say how to install it, and the app
   otherwise behaves as before. `ai.fill` and its goldens don't change.
 - On a machine without it, Install runs with step progress and Stop, and resumes after Stop. The
-  install folder has no `assets/motions/` afterwards, and no sample clip is ever read.
+  install folder has no `assets/motions/` afterwards, and the install reads no sample clip (the
+  person's own optional download is 165000).
 - `fixtures/pose-fill.json` and `crates/ac-posefill/tests` pass on the fake engine: a fill, one undo
   step, the tag, each refused gap with its reason, the short-context note, and non-finite or wrong-shape
   helper output refused.

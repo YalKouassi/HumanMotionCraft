@@ -282,6 +282,7 @@ pub fn open(doc: &mut Document, clip: Clip, id: Option<String>) -> Result<(), St
     };
     doc.clip = clip;
     doc.clip_id = id;
+    ac_core::evaluation::mark_from_links(doc);
     doc.mark_saved();
     doc.pins.clear();
     doc.go_to(0.0)
@@ -332,17 +333,24 @@ fn clip_new(doc: &mut Document, p: &P) -> Out {
         Some(_) => Some(anims(doc)?.free_id(&group, name)?),
         None => None,
     };
+    // what the new animation starts from may carry the mark
+    let evaluation_only;
     let start = match cmd::text(p, "pose") {
         Some(pid) => {
             let pf = clipfile::load_pose(&poses(doc)?.read(pid)?)?;
+            evaluation_only = pf.evaluation_only;
             Pose {
                 rotations: pf.rotations,
                 root: pf.root,
             }
         }
-        None => doc.pose.clone(),
+        None => {
+            evaluation_only = ac_core::evaluation::holds(doc);
+            doc.pose.clone()
+        }
     };
     let mut clip = Clip::new(doc.skeleton.names.clone(), fps);
+    clip.evaluation_only = evaluation_only;
     clip.name = id
         .as_deref()
         .and_then(|i| i.split_once('/'))
@@ -352,6 +360,7 @@ fn clip_new(doc: &mut Document, p: &P) -> Out {
     let mut start = start;
     if let Some(link) = &link {
         let src = clipfile::load_clip(&anims(doc)?.read(link)?)?;
+        clip.evaluation_only |= src.evaluation_only;
         let (r, o) = src.sample(&[0.0])?;
         start = Pose {
             rotations: r.into_iter().next().unwrap_or_default(),
@@ -381,6 +390,7 @@ fn clip_new(doc: &mut Document, p: &P) -> Out {
         doc.clip.layers.push(mine);
         doc.clip.edit = 2;
         doc.links = load_links(&anims(doc)?, &doc.clip)?;
+        ac_core::evaluation::mark_from_links(doc);
         doc.go_to(0.0)?;
     }
     if let Some(id) = &id {
@@ -531,6 +541,7 @@ fn clip_import(doc: &mut Document, p: &P) -> Out {
 }
 
 fn clip_write(doc: &mut Document, p: &P) -> Out {
+    ac_core::evaluation::check(doc, "writing it to a file")?;
     let path = cmd::text(p, "path").unwrap_or_default();
     craft_atomic::atomic_write(Path::new(path), clipfile::save_clip(&doc.clip).as_bytes())
         .map_err(|e| format!("can't write {path}: {e}"))?;
@@ -549,6 +560,7 @@ fn pose_save(doc: &mut Document, p: &P) -> Out {
         rotations: doc.pose.rotations.clone(),
         root: doc.pose.root,
         only,
+        evaluation_only: ac_core::evaluation::holds(doc),
     };
     lib.write(&id, &clipfile::save_pose(&pf))?;
     Ok(json!({ "id": id }))
@@ -567,6 +579,7 @@ fn pose_apply(doc: &mut Document, p: &P) -> Out {
             Some(o) => o.into_iter().filter(|b| ask.contains(b)).collect(),
         });
     }
+    doc.clip.evaluation_only |= pf.evaluation_only;
     // the pose lands where the character stands
     doc.paste_part(
         &Pose {

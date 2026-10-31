@@ -28,6 +28,7 @@ pub mod ease;
 pub mod editor;
 pub mod edits;
 pub mod error;
+pub mod evaluation;
 pub mod filldiag;
 pub mod footroll;
 pub mod fullbody;
