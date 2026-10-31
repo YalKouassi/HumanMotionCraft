@@ -26,7 +26,7 @@ The folder (default `%LOCALAPPDATA%/<product>/posefill`, or `AC_POSEFILL_DIR`) g
   .venv/           Python 3.12 with TensorRT, Warp, OpenUSD, numpy and scipy
   trt-cache/       the TensorRT plan the first run builds for this GPU (a few minutes)
   warp-cache/      Warp's compiled kernels
-  helper.py, engine.py   copied from here
+  helper.py, engine.py, live.py   copied from here
   ac_rig/          the rig maths the helper retargets with (training/ac_train's rig, quat, retarget)
   licences.txt     the licences installing accepts, with their links
   install.json     what was installed, read by the app
@@ -81,7 +81,7 @@ PACKAGES = ["numpy==2.4.3", "scipy==1.17.1", "warp-lang==1.17.0", "usd-core==26.
 TENSORRT = "10.8.0.43"
 TENSORRT_PACKAGES = [f"tensorrt-cu12=={TENSORRT}", f"tensorrt-cu12-bindings=={TENSORRT}", f"tensorrt-cu12-libs=={TENSORRT}"]
 NVIDIA_INDEX = "https://pypi.nvidia.com"
-SCRIPTS = ["helper.py", "engine.py"]
+SCRIPTS = ["helper.py", "engine.py", "live.py"]
 RIG_MODULES = ["rig.py", "quat.py", "retarget.py"]
 INSTALL_VERSION = 1
 STEPS = 6

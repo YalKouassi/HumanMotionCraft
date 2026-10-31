@@ -5,13 +5,21 @@
     {"id": 3, "op": "fill", "rig": "<default_rig.json>", "frames": 31, "fps": 30,
      "context": [{"rotations": [[x,y,z,w], ...], "root": [x,y,z]}, ... up to 4, the last on key A],
      "targets": [{...}, ... up to 4, the first on key B]}
+    {"id": 4, "op": "live_start", "rig": "<default_rig.json>", "targets": {<a target pose set>},
+     "start": {"rotations": ..., "root": ...}}                    a live take from that pose (live.py)
+    {"id": 5, "op": "live_step", "session": 1, "shown": 19, "velocity": [x, y], "facing": [x, y],
+     "style": null, "tokens": [8, ..., 14]}                        the next stretch of the take
 
 Replies carry the request's id: {"id", "progress": "..."} while it works (the first load's plan
 build reports its phases this way), then {"id", "result": {...}} or {"id", "error": "..."}. A fill
 result is {"rotations": frames x bones x 4, "roots": frames x 3, "notes": [...], "model_frames",
 "tokens", "seconds", "stages_ms", "gpu", "contacts": frames x 4}, in the rig's pose space (root
-offsets in hip heights), its first frame on key A and its last on key B. Everything the model
-prints goes to stderr, so stdout carries only replies. The process ends when stdin closes.
+offsets in hip heights), its first frame on key A and its last on key B. A live step's result is
+{"rotations", "roots", "contacts", "frames", "transition" (the frame at which to ask again),
+"target" (what was aimed at), "position" (the hips on the ground, rig metres), "seconds",
+"stages_ms", "convert_ms": {in, out}, "wall_ms", "notes"}; its frame 0 is the last pose shown.
+Everything the model prints goes to stderr, so stdout carries only replies. The process ends when
+stdin closes.
 
 `AC_POSEFILL_ENGINE=<file.py>` loads another engine module (the tests' fake) in place of engine.py.
 """
@@ -29,8 +37,8 @@ import traceback
 # run isolated (python -I): the install's own folder is the one place modules come from
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-PROTOCOL = 1
-OPS = ("info", "load", "fill")
+PROTOCOL = 2
+OPS = ("info", "load", "fill", "live_start", "live_step")
 
 
 def engine_module():
@@ -87,6 +95,24 @@ def check_result(res: dict, frames: int, bones: int) -> dict:
     return out
 
 
+def number_list(v, n: int, what: str) -> list[float]:
+    if not isinstance(v, list) or len(v) != n or not all(isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x) for x in v):
+        raise ValueError(f"{what}: {n} finite numbers")
+    return [float(x) for x in v]
+
+
+def check_live(res: dict, bones: int) -> dict:
+    """A live step's result, refused unless its frames are finite and of the right shape."""
+    frames = res.get("frames")
+    if not isinstance(frames, int) or frames < 2:
+        raise ValueError("the engine returned a stretch of fewer than 2 frames")
+    out = check_result(res, frames, bones)
+    t = res.get("transition")
+    if not isinstance(t, int) or not 1 <= t <= frames - 1:
+        raise ValueError(f"the engine's transition frame {t!r} is not inside 1 to {frames - 1}")
+    return out
+
+
 def _rows(x):
     """A nested list from a list or an array (``tolist``); None for anything else."""
     if x is None:
@@ -129,13 +155,43 @@ def serve(lines, reply, make_engine, describe) -> None:
             if op == "load":
                 reply({"id": rid, "result": {"loaded": True, **eng.info()}})
                 continue
+            rig = req.get("rig")
+            if op == "live_start":
+                if not isinstance(rig, str) or not rig:
+                    raise ValueError("rig: the path of the rig file")
+                bones = len(eng.rig(rig).names)
+                targets = req.get("targets")
+                if not isinstance(targets, dict):
+                    raise ValueError("targets: a target pose set document")
+                start = pose(req.get("start"), bones, "start")
+                reply({"id": rid, "result": eng.live_start(rig, targets, start, say=say)})
+                continue
+            if op == "live_step":
+                session, shown = req.get("session"), req.get("shown", 0)
+                if not isinstance(session, int) or isinstance(session, bool):
+                    raise ValueError("session: the number live_start gave")
+                if not isinstance(shown, int) or isinstance(shown, bool) or shown < 0:
+                    raise ValueError("shown: how many frames of the last stretch were shown, 0 or more")
+                velocity = number_list(req.get("velocity"), 2, "velocity")
+                facing = number_list(req.get("facing"), 2, "facing")
+                if math.hypot(*facing) < 1e-9:
+                    raise ValueError("facing: a direction on the ground, not zero")
+                style = req.get("style")
+                if style is not None and not isinstance(style, str):
+                    raise ValueError("style: the name of a target, or null")
+                tokens = req.get("tokens")
+                if tokens is not None and (not isinstance(tokens, list) or not tokens
+                                           or not all(isinstance(t, int) and 6 <= t <= 16 for t in tokens)):
+                    raise ValueError("tokens: a list of token counts from 6 to 16, or null for the default")
+                res = eng.live_step(session, shown, velocity, facing, style, tokens, say=say)
+                reply({"id": rid, "result": check_live(res, len(eng.rig(eng.live_rig()).names))})
+                continue
             frames = req.get("frames")
             if not isinstance(frames, int) or isinstance(frames, bool) or frames < 2:
                 raise ValueError("frames: a whole number of at least 2 (the first frame on key A, the last on key B)")
             fps = req.get("fps", 30.0)
             if not isinstance(fps, (int, float)) or not math.isfinite(fps) or not 1.0 <= fps <= 1000.0:
                 raise ValueError("fps: a number from 1 to 1000")
-            rig = req.get("rig")
             if not isinstance(rig, str) or not rig:
                 raise ValueError("rig: the path of the rig file")
             skel = eng.rig(rig)

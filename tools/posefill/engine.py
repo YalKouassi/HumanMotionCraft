@@ -17,7 +17,8 @@ context pose and end on the first target. Poses cross over in both directions:
 
 Axes: the model is Y up, metres; the rig is Z up and faces -Y, so a model point (x, y, z) is the
 rig's (x, -z, y). The functions marked "shared with tools/textmotion/engine.py" are copies for
-now; the roadmap lists them for factoring out.
+now; the roadmap lists them for factoring out. Live motion control (`live_start`, `live_step`,
+roadmap 158000) keeps its session in `live.py` and uses `generate` and the conversions here.
 """
 
 from __future__ import annotations
@@ -369,6 +370,71 @@ class Engine:
     def rig(self, path: str) -> Skeleton:
         return self.body.rig(path)[0]
 
+    @staticmethod
+    def leg_of(skel: Skeleton) -> float:
+        return _leg(skel)
+
+    def generate(self, ctx: np.ndarray, tgt: np.ndarray, tokens: tuple, say=print):
+        """One generation: context poses (4, J, 7) and target poses (1-4, J, 7) in the model's layout
+        and metres -> (poses (F, J, 7), foot contacts (F, 4), GPU seconds, stage milliseconds). The
+        model picks its length from ``tokens`` (frames = 4 x tokens - 6); the first pose is the last
+        context pose and the last the first target."""
+        wp = self.wp
+        from motionbricks.model.config import MotionBricksInferenceConfig
+
+        t0 = time.perf_counter()
+        with wp.ScopedStream(self.engine.stream):
+            ctx_wp = wp.array(np.asarray(ctx, dtype=np.float32), dtype=wp.transform, device=self.device)
+            tgt_wp = wp.array(np.asarray(tgt, dtype=np.float32), dtype=wp.transform, device=self.device)
+            self.context.update_from_poses(ctx_wp, stream=self.engine.stream)
+            self.target.update_from_poses(tgt_wp, stream=self.engine.stream)
+            self.engine.generate_animation(self.context, self.target, self.output,
+                                           config=MotionBricksInferenceConfig(allowed_token_counts=tuple(tokens)))
+            self.engine.synchronize()
+            m = int(self.output.num_frames)
+            poses = self.output.poses[:m].numpy().astype(np.float64)
+            contacts = self.output.foot_contacts[:m].numpy().astype(np.float64)
+        seconds = time.perf_counter() - t0
+        stages = {k: round(float(v), 3) for k, v in self.engine.timer.milliseconds.items()}
+        if poses.ndim != 3 or poses.shape[1:] != (self.body.J, 7) or m < 2:
+            raise ValueError(f"the engine returned {poses.shape} transforms; (frames, {self.body.J}, 7) were expected")
+        if not np.isfinite(poses).all():
+            raise ValueError("the engine returned non-finite values")
+        return poses, contacts, seconds, stages
+
+    # -- live motion control (roadmap 158000) --------------------------------------------------
+
+    def live_start(self, rig: str, targets: dict, start, say=print) -> dict:
+        """A new live session from the rig pose ``start`` (rotations, root) aiming at ``targets``
+        (a target pose set document). One session at a time: starting again ends the last."""
+        from live import Session
+
+        self.live = Session(self, rig, targets, start)
+        self.live_id = getattr(self, "live_id", 0) + 1
+        say(f"live session {self.live_id}: targets {', '.join(self.live.targets.names)}")
+        return {"session": self.live_id, "targets": self.live.targets.names, "max_speed": self.live.targets.max_speed,
+                "position": [round(float(x), 4) for x in self.live.position()]}
+
+    def live_rig(self) -> str:
+        """The rig the live session was started with (for the helper's check of a step's frames)."""
+        live = getattr(self, "live", None)
+        if live is None:
+            raise ValueError("no live session (start one with live_start)")
+        return live.rig
+
+    def live_step(self, session: int, shown: int, velocity, facing, style, tokens, say=print) -> dict:
+        """The next stretch of the live session: frames 1..``shown`` of the last stretch join the
+        history, the target set is blended for ``velocity`` (x, y m/s on the ground), placed ahead
+        and turned to ``facing``, and the model's answer comes back on the rig."""
+        from live import TOKENS
+
+        live = getattr(self, "live", None)
+        if live is None or session != getattr(self, "live_id", 0):
+            raise ValueError(f"no live session {session} (start one with live_start)")
+        live.shown(int(shown))
+        return live.step(np.asarray(velocity, dtype=np.float64), np.asarray(facing, dtype=np.float64), style,
+                         tokens or TOKENS, say=say)
+
     def info(self) -> dict:
         return {"gpu": self.gpu, "load_seconds": round(self.load_seconds, 2), "plan_was_built": self.plan_was_built,
                 "joints": self.body.J}
@@ -377,7 +443,6 @@ class Engine:
         """Rig rotations (frames, B, 4) and root offsets (frames, 3) at ``fps`` from the last context
         pose to the first target: ``context`` 1 to 4 (rotations, root) poses ending on key A (fewer
         than 4: the first is repeated, and said), ``targets`` 1 to 4 starting on key B."""
-        wp = self.wp
         skel, table = self.body.rig(rig)
         frames = int(frames)
         n = int(round((frames - 1) * FPS / fps)) + 1
@@ -399,27 +464,10 @@ class Engine:
         ctx = np.stack([self.body.from_rig(skel, table, r, o, scale) for r, o in context]).astype(np.float32)
         tgt = np.stack([self.body.from_rig(skel, table, r, o, scale) for r, o in targets]).astype(np.float32)
 
-        from motionbricks.model.config import MotionBricksInferenceConfig
-
         say(f"generating {valid} model frames ({tokens} tokens)")
-        t0 = time.perf_counter()
-        with wp.ScopedStream(self.engine.stream):
-            ctx_wp = wp.array(ctx, dtype=wp.transform, device=self.device)
-            tgt_wp = wp.array(tgt, dtype=wp.transform, device=self.device)
-            self.context.update_from_poses(ctx_wp, stream=self.engine.stream)
-            self.target.update_from_poses(tgt_wp, stream=self.engine.stream)
-            self.engine.generate_animation(self.context, self.target, self.output,
-                                           config=MotionBricksInferenceConfig(allowed_token_counts=(tokens,)))
-            self.engine.synchronize()
-            m = int(self.output.num_frames)
-            poses = self.output.poses[:m].numpy().astype(np.float64)
-            contacts = self.output.foot_contacts[:m].numpy().astype(np.float64)
-        seconds = time.perf_counter() - t0
-        stages = {k: round(float(v), 3) for k, v in self.engine.timer.milliseconds.items()}
+        poses, contacts, seconds, stages = self.generate(ctx, tgt, (tokens,), say=say)
         if poses.shape != (valid, self.body.J, 7):
             raise ValueError(f"the engine returned {poses.shape} transforms; {(valid, self.body.J, 7)} were expected")
-        if not np.isfinite(poses).all():
-            raise ValueError("the engine returned non-finite values")
 
         src = self.body.landmarks(poses)
         src = scale_to(skel, src)

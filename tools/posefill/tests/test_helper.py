@@ -46,7 +46,7 @@ def errors(replies: list[dict], rid: int):
 def test_info_before_and_after_a_load():
     replies = ask([{"id": 1, "op": "info"}, {"id": 2, "op": "load"}, {"id": 3, "op": "info"}])
     first = results(replies, 1)[0]["result"]
-    assert first["protocol"] == helper.PROTOCOL and first["loaded"] is False and first["ops"] == ["info", "load", "fill"]
+    assert first["protocol"] == helper.PROTOCOL and first["loaded"] is False and first["ops"] == ["info", "load", "fill", "live_start", "live_step"]
     assert first["min_frames"] == 18 and first["max_frames"] == 58 and first["context"] == 4
     assert results(replies, 2)[0]["result"]["loaded"] is True
     assert results(replies, 3)[0]["result"]["loaded"] is True
@@ -130,3 +130,56 @@ def test_the_process_speaks_json_lines_on_stdout_only():
     assert results(replies, 1)[0]["result"]["model"] == "fake"
     assert results(replies, 2)[0]["result"]["roots"][-1] == [0.0, 0.0, 1.94]
     assert "fake engine ready" in [r.get("progress") for r in replies]
+
+
+TARGETS = {"format": "humanmotioncraft.posetargets", "version": 1, "fps": 30.0, "bones": BONES,
+           "targets": [{"name": "stand", "speed": 0.0, "poses": [REST] * 4, "from": {}},
+                       {"name": "walk", "speed": 1.3, "poses": [REST] * 4, "from": {}}]}
+
+
+def test_a_live_take_steps_from_its_start_pose_and_keeps_what_was_shown():
+    replies = ask([
+        {"id": 1, "op": "live_start", "rig": RIG, "targets": TARGETS, "start": REST},
+        {"id": 2, "op": "live_step", "session": 1, "shown": 0, "velocity": [0.0, -1.2], "facing": [0.0, -1.0]},
+        {"id": 3, "op": "live_step", "session": 1, "shown": 19, "velocity": [0.0, -1.2], "facing": [0.0, -1.0]},
+        {"id": 4, "op": "live_step", "session": 1, "shown": 5, "velocity": [0.0, 0.0], "facing": [0.0, -1.0], "style": "stand"},
+    ])
+    start = results(replies, 1)[0]["result"]
+    assert start["session"] == 1 and start["targets"] == ["stand", "walk"] and start["max_speed"] == 1.3
+    one = results(replies, 2)[0]["result"]
+    assert one["frames"] == 30 and one["transition"] == 19 and len(one["rotations"]) == 30 and len(one["roots"]) == 30
+    # the fake moves the root 1.2 / 30 a frame along -y: frame 19 is 0.76 on
+    assert one["roots"][0] == [0.0, 0.0, 0.94] and abs(one["roots"][19][1] + 0.76) < 1e-6
+    two = results(replies, 3)[0]["result"]
+    assert abs(two["roots"][0][1] + 0.76) < 1e-6, "the next stretch starts from the last frame shown"
+    three = results(replies, 4)[0]["result"]
+    assert abs(three["roots"][0][1] + 0.96) < 1e-6 and three["roots"][-1] == three["roots"][0]
+    assert three["target"] == "stand"
+    assert any(r.get("id") == 1 and "progress" in r for r in replies)
+
+
+def test_bad_live_requests_are_refused_and_the_take_goes_on():
+    bad = [
+        {"id": 2, "op": "live_step", "session": 1, "shown": 0, "velocity": [0.0, -1.2], "facing": [0.0, -1.0]},  # before a start
+        {"id": 3, "op": "live_start", "rig": RIG, "targets": TARGETS, "start": {"rotations": [], "root": [0, 0, 1]}},
+        {"id": 4, "op": "live_start", "rig": RIG, "targets": [], "start": REST},
+    ]
+    after = [
+        {"id": 5, "op": "live_start", "rig": RIG, "targets": TARGETS, "start": REST},
+        {"id": 6, "op": "live_step", "session": 9, "shown": 0, "velocity": [0.0, -1.2], "facing": [0.0, -1.0]},
+        {"id": 7, "op": "live_step", "session": 1, "shown": 0, "velocity": [1.0], "facing": [0.0, -1.0]},
+        {"id": 8, "op": "live_step", "session": 1, "shown": 0, "velocity": [0.0, 1.0], "facing": [0.0, 0.0]},
+        {"id": 9, "op": "live_step", "session": 1, "shown": 0, "velocity": [0.0, 1.0], "facing": [0.0, -1.0], "tokens": [3]},
+        {"id": 10, "op": "live_step", "session": 1, "shown": 0, "velocity": [0.0, 1.0], "facing": [0.0, -1.0], "style": "moonwalk"},
+        {"id": 11, "op": "live_step", "session": 1, "shown": 0, "velocity": [7.0, 7.0], "facing": [0.0, -1.0]},
+        {"id": 12, "op": "live_step", "session": 1, "shown": 40, "velocity": [0.0, 1.0], "facing": [0.0, -1.0]},
+        {"id": 13, "op": "live_step", "session": 1, "shown": 0, "velocity": [0.0, 1.0], "facing": [0.0, -1.0]},
+    ]
+    replies = ask(bad + after)
+    for req in bad + after[1:-1]:
+        assert errors(replies, req["id"]), req
+    assert "no live session" in errors(replies, 2)[0] and "no live session 9" in errors(replies, 6)[0]
+    assert "2 finite numbers" in errors(replies, 7)[0] and "not zero" in errors(replies, 8)[0]
+    assert "6 to 16" in errors(replies, 9)[0] and "moonwalk" in errors(replies, 10)[0]
+    assert "wrong shape" in errors(replies, 11)[0] and "shown" in errors(replies, 12)[0]
+    assert results(replies, 13), "the take goes on after a refusal"
