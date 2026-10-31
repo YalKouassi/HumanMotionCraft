@@ -349,6 +349,9 @@ pub struct Layout {
     pub dock_json: String,
     #[serde(default)]
     pub ui_mode: UiMode,
+    /// The panels Simple mode closed (`DockPanel::id_str`), which Advanced mode opens again.
+    #[serde(default)]
+    pub simple_closed: Vec<String>,
 }
 
 impl Default for Layout {
@@ -363,6 +366,7 @@ impl Default for Layout {
             show_timeline: true,
             dock_json: String::new(),
             ui_mode: UiMode::default(),
+            simple_closed: Vec::new(),
         }
     }
 }

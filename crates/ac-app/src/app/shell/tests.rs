@@ -6,7 +6,7 @@
 use craft_keymap::{Active, Chord, ConflictKind, Keymap, Lookup, Overrides, Platform};
 
 use super::actions::{self, ACTIONS};
-use super::{keys, menus, palette, scoped};
+use super::{keys, layout, menus, palette, scoped};
 
 /// A session with every command the app registers.
 fn session() -> ac_core::Session {
@@ -277,4 +277,108 @@ fn exported_shortcuts_import_back() {
         .options(&options)
         .import_json(&mut state, "{\"format\": \"other\"}");
     assert!(bad.is_err());
+}
+
+/// A dock with `panels` open, as the person arranged it.
+fn dock_with(panels: &[layout::DockPanel]) -> craft_ui::docking::Workspace<layout::DockPanel> {
+    let mut dock = layout::default_dock_workspace();
+    for &p in panels {
+        dock.set_visible(p, true, None, layout::dock_permissions)
+            .expect("opens");
+    }
+    dock
+}
+
+#[test]
+fn simple_then_advanced_gives_the_panels_back() {
+    use layout::DockPanel::{Layers, Physics, Picker, Range};
+    let mut dock = dock_with(&[Range, Layers, Picker]);
+    let (closed, kept) = layout::close_for_simple(&mut dock, &[]);
+    assert!(kept.is_empty(), "{kept:?}");
+    assert_eq!(closed, ["layers", "range"], "only what was open, in Simple's order");
+    assert!(!dock.layout.contains(&Range) && !dock.layout.contains(&Layers));
+    assert!(dock.layout.contains(&Picker), "Simple keeps the picker");
+
+    let failed = layout::reopen_after_simple(&mut dock, &closed);
+    assert!(failed.is_empty(), "{failed:?}");
+    assert!(dock.layout.contains(&Range) && dock.layout.contains(&Layers));
+    assert!(dock.layout.contains(&Picker));
+    assert!(!dock.layout.contains(&Physics), "never open, so not opened");
+}
+
+#[test]
+fn simple_twice_and_a_panel_opened_in_simple() {
+    use layout::DockPanel::{Layers, Range};
+    let mut dock = dock_with(&[Range]);
+    let (closed, _) = layout::close_for_simple(&mut dock, &[]);
+    // opened by hand in Simple, then Simple again: both are remembered, neither twice
+    dock.set_visible(Layers, true, None, layout::dock_permissions)
+        .expect("opens");
+    let (closed, _) = layout::close_for_simple(&mut dock, &closed);
+    assert_eq!(closed, ["range", "layers"]);
+    let (again, _) = layout::close_for_simple(&mut dock, &closed);
+    assert_eq!(again, closed);
+
+    // already open when Advanced comes: left as it is
+    dock.set_visible(Range, true, None, layout::dock_permissions)
+        .expect("opens");
+    assert!(layout::reopen_after_simple(&mut dock, &closed).is_empty());
+    assert!(dock.layout.contains(&Range) && dock.layout.contains(&Layers));
+}
+
+/// The mode, the list and the closed dock go through what a restart reads.
+#[test]
+fn the_choice_and_the_panels_survive_a_restart() {
+    use crate::app::prefs::{Layout, UiMode};
+    use layout::DockPanel::Range;
+    let mut dock = dock_with(&[Range]);
+    let (closed, _) = layout::close_for_simple(&mut dock, &[]);
+    let saved = Layout {
+        ui_mode: UiMode::Simple,
+        simple_closed: closed,
+        dock_json: serde_json::to_string(&dock).expect("dock"),
+        ..Layout::default()
+    };
+    let text = serde_json::to_string(&saved).expect("layout");
+
+    let read: Layout = serde_json::from_str(&text).expect("reads");
+    assert_eq!(read.ui_mode, UiMode::Simple);
+    assert_eq!(read.simple_closed, ["range"]);
+    let mut dock = layout::load_dock_workspace(&read.dock_json);
+    assert!(!dock.layout.contains(&Range));
+    assert!(layout::reopen_after_simple(&mut dock, &read.simple_closed).is_empty());
+    assert!(dock.layout.contains(&Range));
+
+    // a file from before this field: nothing to give back
+    let old: Layout = serde_json::from_str(r#"{"ui_mode":"simple"}"#).expect("reads");
+    assert_eq!(old.ui_mode, UiMode::Simple);
+    assert!(old.simple_closed.is_empty());
+}
+
+#[test]
+fn reset_layout_means_advanced_and_the_header_says_so() {
+    use crate::app::prefs::{Layout, UiMode};
+    // reset_layout stores this whole value
+    let reset = Layout::default();
+    assert_eq!(reset.ui_mode, UiMode::Advanced);
+    assert!(reset.simple_closed.is_empty(), "nothing left to reopen later");
+    assert_eq!(menus::mode_label(reset.ui_mode), "Mode: Advanced");
+    assert_eq!(menus::mode_label(UiMode::Simple), "Mode: Simple");
+}
+
+#[test]
+fn a_panel_that_cannot_come_back_is_said() {
+    let mut dock = layout::default_dock_workspace();
+    let failed = layout::reopen_after_simple(&mut dock, &["gone".to_string()]);
+    assert_eq!(failed, ["gone (no such panel)"]);
+    assert_eq!(
+        layout::advanced_status(0, &failed),
+        "switched to advanced mode; 0 back, could not reopen: gone (no such panel)"
+    );
+    assert_eq!(
+        layout::advanced_status(0, &[]),
+        "switched to advanced mode; Simple had closed no panels"
+    );
+    assert_eq!(layout::advanced_status(1, &[]), "switched to advanced mode; 1 panel back");
+    assert_eq!(layout::advanced_status(3, &[]), "switched to advanced mode; 3 panels back");
 }
