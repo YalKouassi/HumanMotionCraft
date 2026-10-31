@@ -308,6 +308,22 @@ fn bad_input_is_refused_with_a_reason() {
         .unwrap_err()
         .to_string();
     assert!(e.contains("not a landmark"), "{e}");
+    // one node for two landmarks: the mapping is kept but not ready, and the reason is said
+    let r = session
+        .run("retarget.map", &json!({ "joints": { "l_knee": "L_Foot" } }))
+        .unwrap();
+    assert_eq!(r["ready"], false, "{r}");
+    assert!(
+        r["notes"].as_array().unwrap().iter().any(|n| n
+            .as_str()
+            .unwrap_or_default()
+            .contains("both name the node \"L_Foot\"")),
+        "{r}"
+    );
+    let r = session
+        .run("retarget.map", &json!({ "joints": { "l_knee": "L_Calf" } }))
+        .unwrap();
+    assert_eq!(r["ready"], true, "{r}");
     // unmapping a required landmark leaves the character loaded but not ready
     let r = session
         .run("retarget.map", &json!({ "joints": { "l_hip": "none" } }))

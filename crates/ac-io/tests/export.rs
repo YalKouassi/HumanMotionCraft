@@ -23,7 +23,9 @@ fn c4() -> DMat4 {
 }
 
 /// `physics`: export through the physics pass (the file must then move as the pass does).
-fn check(profile: &str, physics: bool) {
+/// `root`: `hips`, or `ground` (the ground bone in front of the kept joints; every joint's world
+/// pose must still be the rig's, so the hips' local under the ground absorbs the ground's path).
+fn check(profile: &str, physics: bool, root: &str) {
     let sk =
         Skeleton::from_json(&std::fs::read_to_string(repo().join("assets/rig/default_rig.json")).unwrap())
             .unwrap();
@@ -39,13 +41,18 @@ fn check(profile: &str, physics: bool) {
         clip: &clip,
         links: &ac_core::clip::NoLinks,
     }];
-    let (bytes, summary) = export(&sk, &mannequin, &items, &keep, None, "hips").unwrap();
-    assert_eq!(summary["joints"], keep.len());
+    let (bytes, summary) = export(&sk, &mannequin, &items, &keep, None, root).unwrap();
+    // with a ground bone the skin's first joint is the ground; the kept joints follow it
+    let off = usize::from(root != "hips");
+    assert_eq!(summary["joints"], keep.len() + off);
 
     let (doc, buffers, _) = gltf::import_slice(&bytes).unwrap();
     let skin = doc.skins().next().unwrap();
     let joints: Vec<usize> = skin.joints().map(|n| n.index()).collect();
-    assert_eq!(joints.len(), keep.len());
+    assert_eq!(joints.len(), keep.len() + off);
+    if off == 1 {
+        assert_eq!(doc.nodes().nth(joints[0]).unwrap().name(), Some("ground"));
+    }
     let ibm: Vec<DMat4> = skin
         .reader(|b| buffers.get(b.index()).map(|d| &d.0[..]))
         .read_inverse_bind_matrices()
@@ -102,7 +109,7 @@ fn check(profile: &str, physics: bool) {
         }
         let (wr, wp) = sk.fk(&rots[0], roots[0]).unwrap();
         for (n, &j) in keep.iter().enumerate() {
-            let got = world(joints[n]) * ibm[n];
+            let got = world(joints[n + off]) * ibm[n + off];
             let rm = DMat3::from_cols_array_2d(&wr[j]).transpose();
             let rig = DMat4::from_translation(DVec3::from(wp[j]))
                 * DMat4::from_mat3(rm)
@@ -120,17 +127,25 @@ fn check(profile: &str, physics: bool) {
 
 #[test]
 fn full_profile_moves_as_the_rig() {
-    check("full", false);
+    check("full", false, "hips");
 }
 
 #[test]
 fn physics_export_moves_as_the_pass() {
-    check("full", true);
+    check("full", true, "hips");
 }
 
 #[test]
 fn game_profile_keeps_its_joints_moving_as_the_rig() {
-    check("game", false);
+    check("game", false, "hips");
+}
+
+/// 122500's acceptance: with `ground`, every joint's world pose equals the `hips` export's (the
+/// rig's own), the ground bone's path and yaw being absorbed by the hips' local under it.
+#[test]
+fn ground_root_export_keeps_every_world_pose_the_rigs() {
+    check("game", false, "ground");
+    check("full", true, "ground");
 }
 
 #[test]

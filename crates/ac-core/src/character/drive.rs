@@ -3,7 +3,8 @@
 //! bone's world turn through its alignment; the rest follow their parents at rest. Then, with a
 //! weight per foot, each leg is solved by two-bone IK so the ankle lands where the rig's ankle is
 //! (scaled), the knee bending the way the rig's knee does, the foot keeping its orientation. A
-//! target out of reach is reached as far as the leg goes and the gap is reported. With
+//! target out of reach is reached as far as the leg goes and the gap is reported; a limb that
+//! can't be solved at all stays where forward kinematics put it and its whole gap is reported. With
 //! `Plan::hands`, the arms are solved the same way onto the wrists.
 
 use crate::quat::{self, Mat3, Vec3};
@@ -39,6 +40,9 @@ pub struct Posed {
     /// The same for the hands (0 when hands are not solved).
     pub hands_unreached: [f64; 2],
 }
+
+/// A limb segment shorter than this (m) can't be solved: it has no direction to aim.
+const MIN_SEGMENT: f64 = 1e-6;
 
 fn unit(v: Vec3) -> Vec3 {
     let l = quat::len3(v);
@@ -96,16 +100,22 @@ fn two_bone(worlds: &[World], limb: &Limb, target: Vec3, pole: Vec3) -> Option<(
     let b = worlds.get(limb.lower)?.p;
     let c = worlds.get(limb.end)?.p;
     let (la, lb) = (quat::len3(quat::sub3(b, a)), quat::len3(quat::sub3(c, b)));
-    if la < 1e-9 || lb < 1e-9 {
+    // a segment under a micrometre has no direction to aim, and the clamp below would have its
+    // low end above its high end (a panic): such a limb is not solved, and the caller says so
+    if la < MIN_SEGMENT || lb < MIN_SEGMENT {
         return None;
     }
     let to = quat::sub3(target, a);
     let dist = quat::len3(to);
-    if dist < 1e-9 {
+    if !dist.is_finite() || dist < 1e-9 {
         return None;
     }
     let reach = la + lb;
-    let d = dist.clamp((la - lb).abs() + 1e-6, reach - 1e-6);
+    let (lo, hi) = ((la - lb).abs() + 1e-6, reach - 1e-6);
+    if lo > hi {
+        return None;
+    }
+    let d = dist.clamp(lo, hi);
     let short = (dist - reach).max(0.0);
     let u = unit(to);
     // the bend direction: the pole across u; falling back on the current bend, then any side
@@ -189,9 +199,14 @@ pub fn drive(
         let axis = unit(quat::sub3(hc, ha));
         let bend = quat::sub3(hb, ha);
         let pole = quat::sub3(bend, quat::scale3(axis, dot(bend, axis)));
-        if let Some((rs, gap)) = two_bone(&fk, &limb, target, pole) {
-            over.extend(rs);
-            *short = gap * w;
+        match two_bone(&fk, &limb, target, pole) {
+            Some((rs, gap)) => {
+                over.extend(rs);
+                *short = gap * w;
+            }
+            // a limb that can't be solved (a segment with no length, a target on the hip) stays
+            // where forward kinematics put it: the whole gap to the target is reported (Rule 1)
+            None => *short = quat::len3(quat::sub3(target, fk_end)),
         }
     }
     let worlds = if over.is_empty() {
@@ -257,5 +272,29 @@ mod tests {
         assert!(knee[1] < -0.1, "the knee bends towards the pole (-Y): {knee:?}");
         let (_, gap) = two_bone(&worlds, &limb, [0.0, 0.0, -0.5], [0.0, -1.0, 0.0]).unwrap();
         assert!((gap - 0.5).abs() < 1e-9, "{gap}");
+    }
+
+    #[test]
+    fn a_limb_with_a_near_zero_segment_is_not_solved_and_does_not_panic() {
+        // the knee a tenth of a micrometre below the hip: the clamp's low end would be above
+        // its high end
+        let nodes = vec![
+            node("hip", None, [0.0, 0.0, 1.0]),
+            node("knee", Some(0), [0.0, 0.0, -1e-7]),
+            node("ankle", Some(1), [0.0, 0.0, -0.5]),
+        ];
+        let c = Character::new(nodes, vec![], vec![], false).unwrap();
+        let worlds = c.rest_worlds();
+        let limb = Limb {
+            upper: 0,
+            lower: 1,
+            end: 2,
+            upper_bone: 0,
+            lower_bone: 0,
+            end_bone: 0,
+        };
+        assert!(two_bone(&worlds, &limb, [0.0, 0.0, 0.2], [0.0, -1.0, 0.0]).is_none());
+        // a target that is not a number is refused the same way
+        assert!(two_bone(&worlds, &limb, [f64::NAN, 0.0, 0.2], [0.0, -1.0, 0.0]).is_none());
     }
 }

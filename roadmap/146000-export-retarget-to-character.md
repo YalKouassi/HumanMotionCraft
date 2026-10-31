@@ -114,3 +114,70 @@ nodes; `retarget.check` over the 90 frames takes 1.2 ms in release.
 - Not tried on a character from another tool (only the generated one and Blender's reading of
   the result); a real character's twist bones and extra chains should be looked at when one is
   to hand. Unity is not installed (as in 122000).
+
+## Review (2026-10-31)
+A code review of the built item (an agent, not the owner; the decisions above stand). The code
+checked: `crates/ac-core/src/character/` (`mod.rs`, `plan.rs`, `drive.rs`, `check.rs`),
+`crates/ac-core/src/jointmap.rs`, `crates/ac-io/src/character/` (`read.rs`, `mod.rs`,
+`commands.rs`, `export.rs`), `crates/ac-io/src/export.rs` (the container code the reader shares),
+`fixtures/retarget-character.json`, `crates/ac-io/tests/retarget.rs`.
+
+Read through and found right (no change):
+- Hostile skeletons: a parent that is not a node, a node that is its own parent, a loop, a non-finite
+  transform, a zero or negative scale, more than `MAX_NODES` nodes, a skin naming a joint that is not a
+  node, a count of inverse bind matrices that differs from the joints, a non-uniform scale, a shearing
+  or mirroring matrix, a zero rotation and a buffer the accessors run past are all refused with the
+  reason (`crates/ac-core/src/character/mod.rs:111` to `:193`, `crates/ac-io/src/character/read.rs`).
+  A mapping file naming a node the character lacks is refused with the node list
+  (`crates/ac-io/src/character/mod.rs:200` to `:204`), as is one with a key that is not a landmark, no
+  version, or a newer version. An empty clip is refused by `retarget.check` and the open-animation
+  export; a library clip with no keys exports one rest frame.
+- The mapping file round-trips byte for byte: a `BTreeMap` at both levels, pretty-printed, one
+  trailing newline, the character path stored as given (`mod.rs:42` to `:53`); the test
+  `the_mapping_file_round_trips_byte_for_byte` covers an absolute and a relative character path.
+- Undriven nodes are listed in `retarget.load`, `retarget.check`, the export summary, the file's
+  `extras` and a timeline mark; an unreachable target is counted and marked (`check.rs:218` to `:233`).
+- The feet: IK targets the ankle at the scaled rig ankle through `Plan::map_point`, so a straight
+  leg stands exactly on the character's floor; the check measures drift from where the foot came
+  down (`slide`), travel, the lowest point against the floor and the frames the leg fell short. Every
+  output key of the five `retarget.*` commands and `clip.export`'s `target` is declared in
+  `returns.rs`.
+
+Findings:
+1. **High, fixed (commit 3f207ef).** A crash on a near-zero limb segment. `two_bone` returned early
+   only under 1e-9 m and then called `f64::clamp` with a low end of `|la - lb| + 1e-6` and a high end
+   of `la + lb - 1e-6`; for a segment under a micrometre the low end is above the high end and `clamp`
+   panics (`crates/ac-core/src/character/drive.rs:118`, before the fix). `Plan::new` only checks the
+   two legs' lengths averaged (`plan.rs:429`), so a character whose knee node sits within a micrometre
+   of its hip or ankle passed the plan and crashed in `retarget.check`, `clip.export {target}` (caught
+   by the session, the command failing) and the live preview (`character_frame` calls `drive`
+   directly, outside the session). Such a segment, and a target that is not a number, now return
+   `None`. Regression test `a_limb_with_a_near_zero_segment_is_not_solved_and_does_not_panic`.
+2. **Medium, fixed (commit 18adfcc).** A silent IK failure. When `two_bone` returned `None` the drive
+   left the foot where forward kinematics put it and `unreached` stayed 0, so the check, the export
+   summary and the `unreached` timeline mark never said so (Rule 1). The whole distance from the foot
+   to its target is now reported (`drive.rs:209`).
+3. **Medium, fixed (commit d596a61).** One node for two landmarks was accepted. `Builder::add`
+   returns without a word when a node is already driven, so `joints: {"l_knee": "L_Foot"}` left the
+   ankle driven as the knee, the real knee undriven and unlisted, and a leg the IK can't solve.
+   `Plan::new` now refuses it naming both landmarks (`plan.rs:244`); `retarget.load` and
+   `retarget.map` report `ready: false` with that reason. Session test added to
+   `bad_input_is_refused_with_a_reason`.
+4. **Medium, fixed (commit 1bcb326).** Unchecked arithmetic on a hostile file's accessor numbers.
+   `locate`, `read` and `write_in_place` in `crates/ac-io/src/export.rs` added `byteOffset`s and
+   multiplied `count` by the element size as plain `usize` arithmetic, which the character reader now
+   feeds from any `.glb`: a count near 2^60 panicked on the overflow in debug builds and wrapped in
+   release ones, where the slice bounds then lied. Checked arithmetic with a reason (`export.rs:191`,
+   `:206`); two hostile files added to `read.rs`'s `lies_are_refused`.
+5. **Low, fixed (commit ce4fb0b).** A mapping file was read whole with no size cap, unlike the `.glb`
+   (256 MB). `MAX_MAPPING_BYTES` (1 MB) now refuses a larger one before reading
+   (`crates/ac-io/src/character/mod.rs:41`, `:167`).
+6. **Low, not changed (the owner's acceptance line).** "Stay above the floor" is measured with a 1 cm
+   allowance: `holds` passes a foot up to `BELOW_LIMIT` (1 cm) under the floor
+   (`crates/ac-core/src/character/check.rs:24`, `crates/ac-io/src/character/commands.rs:194`), and
+   the export test allows `lowest_cm > -1.0` (`crates/ac-io/tests/retarget.rs:169`, `:261`). The
+   measured number in The numbers above (lowest point 5.0 cm above the floor) meets the words; the
+   test tolerance is looser than them. Tightening it is a tuning the owner may want.
+7. **Low, not changed.** A node's segment with no length falls back to the parent's alignment with a
+   note (`plan.rs:164`, `:181` to `:201`); the note is in the plan's notes and the command results,
+   so it is announced. Noted here only because the fallback is where finding 1 came from.

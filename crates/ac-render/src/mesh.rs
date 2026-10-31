@@ -47,6 +47,8 @@ impl Mesh {
             .filter(|n| n.skin().is_some_and(|s| s.index() == skin.index()))
             .filter_map(|n| n.mesh().map(|m| m.index()))
             .collect();
+        // one mesh shared by several skinned nodes is taken once (dedup needs them sorted)
+        mesh_indices.sort_unstable();
         mesh_indices.dedup();
         if mesh_indices.is_empty() {
             mesh_indices.push(doc.meshes().next().ok_or("the file has no mesh")?.index());
