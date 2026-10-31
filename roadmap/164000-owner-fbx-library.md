@@ -250,3 +250,15 @@ row, when it asks, the status line). All expected numbers are worked by hand in 
 
 ## Bulk run (2026-10-31)
 All 6,489 sources have one outcome: 5,297 imported (6,433 clips, 4.9 GB, outside the repo), 116 duplicates, 1,076 refused. Largest refused groups: 321 no joint found for neck, 186 not humanoid by name with no bone map, 56 floor below z = 0, 14 `.meta` naming a head the file lacks, 12 feet swapped. `library.list` opens the folder; timing in the panel at this size isn't measured. The owner deletes bad clips as they go. The acceptance's agreement of every refused group is still to do.
+
+## Refused groups, what the importer now reads (2026-10-31)
+Built from generated files only: this worktree built and ran nothing, and no real file was read, so how many of the 1,076 this frees isn't known.
+- **A stale take.** A clip naming a take the file doesn't have, in a file of exactly one take, reads that take with the clip's frame range and a note naming the stale take. With several takes it is still refused.
+- **No neck.** With every landmark but the neck, from the bone map or the guess, the head's parent is read as the neck, with a note. If a landmark already has that joint, it is still refused.
+- **Loose bone names.** A `.meta` bone not found exactly matches a joint ignoring spaces and case, with a note, only if one joint matches. Several matches refuse, as do two of the map's bones landing on one joint.
+- **`clip.port {retry_refused: true}`.** Sources whose latest outcome is `refused` are tried again, and a changed outcome is a new line; the last line of a source is its outcome. Imported and duplicate stay skipped. A refusal that comes out the same adds no line, so a repeat changes nothing. A refused source wrote no clip, so a retry can't bring a deleted clip back.
+
+**For the retry to show:**
+- An imported source isn't tried again, so clips it left out (a stale take among them) stay left out. Getting those needs a clip-level retry, not built.
+- A head hanging directly from a chest no landmark has reads that chest as the neck. The rule allows it, and how those clips look is the owner's to see.
+- A duplicate of a refused source stays a duplicate; if the first is imported, its clips stand for both.
