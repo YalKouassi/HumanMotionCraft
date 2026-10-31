@@ -23,6 +23,9 @@ pub const MAX_FRAMES: usize = ac_core::retarget::MAX_FRAMES;
 pub const MAX_MODELS: usize = 100_000;
 /// Most keys one curve may hold.
 pub const MAX_KEYS: usize = 10_000_000;
+/// Most joint positions one import samples (frames times models): the sampled scene is kept in
+/// memory, so a long take of a scene with many nodes is refused rather than swapped to death.
+pub const MAX_SAMPLES: usize = 20_000_000;
 /// Frame rates by the `TimeMode` enum; a rate of 0 means the mode does not fix one.
 const TIME_MODES: [f64; 19] = [
     0.0, 120.0, 100.0, 60.0, 50.0, 48.0, 30.0, 30.0, 29.97, 29.97, 25.0, 24.0, 1000.0, 23.976, 0.0, 96.0,
@@ -676,6 +679,13 @@ pub fn motion(doc: &Document) -> R<Motion> {
         ));
     }
     let frames = span as usize + 1;
+    let samples = frames.saturating_mul(models.len());
+    if samples > MAX_SAMPLES {
+        return Err(format!(
+            "{frames} frames of {} models is {samples} joint positions, more than {MAX_SAMPLES}: cut the take into shorter ones, or strip the scene's extra models",
+            models.len()
+        ));
+    }
     let off_grid = models
         .iter()
         .flat_map(|m| [&m.translation, &m.rotation, &m.scaling])
@@ -1003,6 +1013,20 @@ mod tests {
         curve.children[0].props[0] = Prop::I64s(vec![i64::MIN, i64::MAX]);
         let m = motion(&d).unwrap();
         assert_eq!(m.frames, 11);
+    }
+
+    #[test]
+    fn too_many_joint_positions_are_refused() {
+        let ticks = (TICKS_PER_SECOND / 30.0) as i64;
+        // 1001 models over 20,000 frames is more than MAX_SAMPLES; the frame count alone is fine
+        let e = motion(&scene(1001, 0, (MAX_FRAMES as i64 - 1) * ticks)).unwrap_err();
+        assert!(e.contains("joint positions") && e.contains("more than"), "{e}");
+        assert_eq!(
+            motion(&scene(1, 0, (MAX_FRAMES as i64 - 1) * ticks))
+                .unwrap()
+                .frames,
+            MAX_FRAMES
+        );
     }
 
     #[test]
