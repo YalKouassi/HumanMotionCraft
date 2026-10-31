@@ -1,6 +1,6 @@
 # Packaging
 
-- **Status:** in progress (the check is built; the owner's run in Windows Sandbox or on a clean machine is still to do)
+- **Status:** done (2026-10-31)
 - **Requires:** 114000
 - **Source:** old `ROADMAP.md` row 5
 
@@ -95,3 +95,6 @@ from outside, as a person would. The manifest duplicates the staging list by han
 listed file missing from the zip; the comment on both says to change them together). The development
 fallback path for ffmpeg stays in the app. No `.wsb` for the integration worktree: the config names the
 owner's checkout.
+
+## Closed (2026-10-31)
+Closed by the owner. The scripted zip check passes; the owner's run in Windows Sandbox or on a clean machine was not made.

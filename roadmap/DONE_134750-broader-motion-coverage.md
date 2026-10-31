@@ -1,6 +1,6 @@
 # Broader motion coverage, where evaluation finds gaps
 
-- **Status:** in progress: analysis done, retrain waits for the owner (2026-10-30)
+- **Status:** done (2026-10-31)
 - **Requires:** 126500, 134500
 - **Source:** 115100
 
@@ -174,3 +174,6 @@ settle the small slices with an aimed draw or `--windows 2400`, then add data fo
 transitions only: first the Cologne database's jump and start/stop takes if its list has them
 (CC BY 4.0, a row in `ATTRIBUTION.md` and the manifest), then Kimodo prompts for starts and stops.
 A retrain is the owner's call (134500 is still open on the long gaps).
+
+## Closed (2026-10-31)
+Closed by the owner. The analysis stands; the retrain, new data and the held-out comparison in the acceptance were not done.

@@ -1,6 +1,6 @@
 # Experiment: train on natural motion only
 
-- **Status:** trained; the owner takes `parts-natural` as the base for 154000; not exported (2026-10-31)
+- **Status:** done (2026-10-31)
 - **Requires:** none (it was 134500; the owner chose to train this first, and it has trained)
 - **Source:** owner request (2026-10-30)
 
@@ -229,3 +229,6 @@ because the plan is a natural base with the styles as add-on models (154000), no
 the style menu and the sit, ground and combat losses above are what the add-ons must win back, and they
 don't count against it as a base. It stays out of `assets/models` until 154000 and 155000 exist: exporting
 it now would take 41 of the 48 styles out of the app with nothing to replace them.
+
+## Closed (2026-10-31)
+Closed by the owner. parts-natural is the base for 154000; it is not exported.

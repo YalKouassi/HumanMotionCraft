@@ -1,6 +1,6 @@
 # Several keys in one window
 
-- **Status:** built (2026-10-30); its acceptance is measured by the next retrain
+- **Status:** done (2026-10-31)
 - **Requires:** 129000
 - **Source:** 115000 (review 2 §5, corrected)
 
@@ -74,3 +74,6 @@ uv run python -m ac_train.export parts-multikey --checkpoint best --as parts    
 To read the acceptance: with the exported model, key a walk on frames 0, 12, 24 (two gaps that fit
 one window), `ai.fill_all` (one pass), and compare `clip.metrics`' speed change at frame 12 with
 the same fill made one gap at a time with the ease off.
+
+## Closed (2026-10-31)
+Closed by the owner. Built as a model-card option; no measuring retrain was made, so the acceptance is unmeasured.

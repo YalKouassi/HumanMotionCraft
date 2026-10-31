@@ -22,7 +22,7 @@ The checks:
   8. posefill.install  the same for pose fill
 
 Runs on Windows PowerShell 5.1 (what Windows Sandbox has) and PowerShell 7, with nothing installed.
-For a truly clean machine run it in Windows Sandbox: tools/release_check.wsb, see roadmap/124000-packaging.md.
+For a truly clean machine run it in Windows Sandbox: tools/release_check.wsb, see roadmap/DONE_124000-packaging.md.
 
     pwsh -NoProfile -File tools/release_check.ps1 -Zip dist/humanmotioncraft-0.2.0-windows-x64-portable.zip -Scratch target/release-check
 

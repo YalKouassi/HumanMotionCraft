@@ -1,6 +1,6 @@
 # Context after key B
 
-- **Status:** built (2026-10-30); its acceptance is measured by the next retrain
+- **Status:** done (2026-10-31)
 - **Requires:** 134000
 - **Source:** 115000 (review 1 §2A)
 
@@ -66,3 +66,6 @@ uv run python -m ac_train.export parts-after4 --checkpoint best --as parts    # 
 
 The acceptance is read from the evaluation: `seam_b_ms` down and `joint_m` no worse than
 `training/data/models/parts-lowweights/model.json` (`evaluation_best`), gap bin by gap bin.
+
+## Closed (2026-10-31)
+Closed by the owner. Built as a model-card option; no measuring retrain was made, so the acceptance is unmeasured.

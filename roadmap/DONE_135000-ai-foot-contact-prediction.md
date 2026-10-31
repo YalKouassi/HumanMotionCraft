@@ -1,6 +1,6 @@
 # Predict foot contacts in the fill
 
-- **Status:** built (2026-10-30); its acceptance is measured by the 134000 retrain
+- **Status:** done (2026-10-31)
 - **Requires:** 126000, 132000
 - **Source:** 115000 (review 2 §1, corrected; review 1 contact loss)
 
@@ -35,3 +35,6 @@ Models without the head fill as before. Export writes the contact logits into th
 
 Still to do with the retrained model: the fixture that fills a real walk gap with a step inside
 through `ai.fill` (it needs a model with the head), and the slide numbers.
+
+## Closed (2026-10-31)
+Closed by the owner. Built; the acceptance's foot-slide drop was not confirmed by this close.
