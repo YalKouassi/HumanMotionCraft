@@ -92,6 +92,54 @@ fn the_installed_folder_comes_first_and_is_the_default() {
     std::fs::remove_dir_all(&dir).ok();
 }
 
+#[test]
+fn the_persons_main_model_is_the_default_and_a_choice_that_cant_be_followed_says_so() {
+    use ac_ai::MainModel;
+    let dir = std::env::temp_dir().join(format!("ac-ai-main-{}", std::process::id()));
+    std::fs::remove_dir_all(&dir).ok();
+    for tag in ["alpha", "beta"] {
+        std::fs::create_dir_all(dir.join(tag)).unwrap();
+        for f in ["weights.json", "weights.bin"] {
+            std::fs::copy(test_models().join("tiny").join(f), dir.join(tag).join(f)).unwrap();
+        }
+    }
+    let main = dir.join("main.json");
+
+    // no choice: as it always was, the first by name
+    assert_eq!(ac_ai::main_model(&dir), Ok(MainModel::Unset));
+    assert_eq!(ac_ai::default_dir(&dir).unwrap(), dir.join("alpha"));
+
+    // a tag: that model, in the listing's default too
+    std::fs::write(&main, r#"{"tag":"beta"}"#).unwrap();
+    assert_eq!(ac_ai::main_model(&dir), Ok(MainModel::Tag("beta".into())));
+    assert_eq!(ac_ai::default_dir(&dir).unwrap(), dir.join("beta"));
+    assert!(ac_ai::gives_the_default(&dir));
+
+    // null: the bundled one, though the folder still holds both
+    std::fs::write(&main, r#"{"tag":null}"#).unwrap();
+    assert_eq!(ac_ai::main_model(&dir), Ok(MainModel::Bundled));
+    assert!(!ac_ai::gives_the_default(&dir));
+    let src = Models::with_installed(&repo().join("assets"), &dir);
+    let cards = src.cards(&skeleton(), &[]);
+    assert!(cards.iter().any(|c| c.default && c.source == "bundled"));
+
+    // what can't be followed says why, and the folder's usual choice stands
+    for (text, says) in [
+        (r#"{"tag":"gone"}"#, "isn't in"),
+        (r#"{"tag":"../alpha"}"#, "no model's tag"),
+        (r#"{"tag":""}"#, "no model's tag"),
+        (r#"{"tag":3}"#, "needs a tag"),
+        ("not json", "main.json"),
+    ] {
+        std::fs::write(&main, text).unwrap();
+        let e = ac_ai::main_model(&dir).unwrap_err();
+        assert!(e.contains(says), "{text}: {e}");
+        assert!(ac_ai::gives_the_default(&dir));
+        assert_eq!(ac_ai::default_dir(&dir).unwrap(), dir.join("alpha"));
+    }
+    std::fs::remove_dir_all(&dir).ok();
+}
+
 /// A weights file is hostile input: each of these must be refused with a message, not a panic.
 #[test]
 fn hostile_weights_files_are_refused() {

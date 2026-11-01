@@ -2,7 +2,7 @@
 //!
 //! ```text
 //! ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>]
-//!           [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery|styles] [--style <name>]
+//!           [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery|styles|models] [--style <name>]
 //!           [--screenshot <png>]
 //! ac-review run <command> [<json>] [--data <dir>] [--decisions <file>] [--library <dir>]
 //!           [--sets <dir>] [--set <name>]
@@ -36,7 +36,7 @@ use std::path::{Path, PathBuf};
 use ac_review::remembered::{Launch, Remembered};
 use ac_review::review::Review;
 
-const USAGE: &str = "ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>] [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery|styles] [--style <name>] [--screenshot <png>]\n\
+const USAGE: &str = "ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>] [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery|styles|models] [--style <name>] [--screenshot <png>]\n\
                      ac-review run <command> [<json>] [--data <dir>] [--decisions <file>] [--library <dir>] [--sets <dir>] [--set <name>]\n\
                      ac-review unpack [<set> ...] [--data <dir>]";
 
@@ -168,6 +168,7 @@ pub fn open_review(a: &Args, p: &Paths) -> Result<Review, String> {
         let rig = ac_core::rig::Skeleton::from_json(&text).map_err(|e| e.to_string())?;
         review.add_library(root, &rig.names);
     }
+    review.places.manifest = Some(p.assets.join("models/MANIFEST.json"));
     review.training.folder = Some(a.sets.clone().unwrap_or_else(default_sets));
     if let Some(name) = &a.set {
         review.open_set(Some(name))?;

@@ -389,6 +389,14 @@ uv run python -m ac_train.train --minutes 180 --noncommercial --tag parts-own   
 A run never writes over a model: a `--tag` whose folder holds anything is refused, and a default tag
 takes the next free number (`set-walk-2`). Name each run, or move the old folder away first.
 
+The review app's **Models** tab starts all this without a terminal (`ac-review`, roadmap 196000): it
+runs `ac_train.train --set <name>` with its log in the window, and adds no training logic of its own.
+**Stop** makes `training/data/models/<tag>.stop`: the run finishes its step, evaluates and saves, and
+its card says `"stopped": true`. **Set as main** runs `ac_train.export <tag> --checkpoint best --out
+<app data>/models/<tag> --golden <temp> --main`, and `main.json` beside it says which model the app
+opens with. Neither touches `assets/models`: what everyone gets is a release. A set built by
+**Combine sets** has `<name>.combine.json` beside it and is rebuilt when a run of it starts.
+
 By default training reads only the sets whose licence allows commercial use (`commercial=True` in
 `ac_train/datasets.py`: every set the repo supplies), so the model in `assets/models`, and what
 people make with it, carries no non-commercial terms. `--noncommercial` also reads non-commercial

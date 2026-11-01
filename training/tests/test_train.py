@@ -23,6 +23,10 @@ def test_a_run_never_writes_over_a_model(tmp_path):
     assert train.run_tag(None, "base", tmp_path) == "base-3"
 
 
+def test_a_run_is_stopped_by_a_file_beside_its_folder(tmp_path):
+    assert train.stop_file("base", tmp_path) == tmp_path / "base.stop"
+
+
 def test_part_masks_are_what_a_part_layer_sends():
     """A row is no mask, a part group, or everything but a part group (a left-arm layer: 16 bones
     given, the arm's 3 free), the last most often."""

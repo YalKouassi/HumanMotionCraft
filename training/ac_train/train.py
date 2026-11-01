@@ -20,7 +20,8 @@ named set's (``--set <name>``, :mod:`ac_train.trainset`: it may hold private lib
 ``--library``; the card records it, and its default tag is ``set-<name>``); the minutes that survive,
 by type and set, are printed before the first step, and ``--dry-run`` stops there. A run never
 writes over a model (:func:`run_tag`): a ``--tag`` that is taken is refused, and a default tag takes
-the next free number.
+the next free number. The file ``<tag>.stop`` beside the models folder ends a run early, keeping
+what it has (:func:`stop_file`).
 
 What a training window looks like, to match what the app sends:
 
@@ -142,7 +143,7 @@ class Sets:
             else:
                 d = np.load(path)
             rot, root, starts, takes = d["rotations"][:, idx].astype(np.float32), d["roots"], d["starts"], d["takes"]
-            plan, recs = selection.records(n, d, decisions, select, scanned)
+            plan, recs = selection.records(n, d, decisions, select, scanned, WINDOW)
             self.plans.append(plan)
             self.records += recs
             self.held.update(split.holdout({n: [str(t) for t in takes]}))
@@ -375,6 +376,11 @@ def run_tag(named: str | None, default: str, models: pathlib.Path = MODELS) -> s
     return tag
 
 
+def stop_file(tag: str, models: pathlib.Path = MODELS) -> pathlib.Path:
+    """Made by the review app to end a run: it finishes the step, evaluates and saves, as at the end."""
+    return models / f"{tag}.stop"
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Train the in-betweener")
     ap.add_argument("--sets", default=None, help="comma list of training/data/rig sets (default: every set allowed)")
@@ -453,7 +459,7 @@ def main(argv=None):
     if args.unscanned:
         print("--unscanned: no set's scan is read; every frame of every take is used, glitches and all", flush=True)
     if args.dry_run:
-        recs = selection.plan_sets(names, decisions, select, not args.unscanned, progress=lambda s: print(s, flush=True), extra=extra)
+        recs = selection.plan_sets(names, decisions, select, not args.unscanned, progress=lambda s: print(s, flush=True), extra=extra, window=WINDOW)
         if named:
             named.check(recs)
             print(named.listing(recs), flush=True)
@@ -493,6 +499,11 @@ def main(argv=None):
     if lost:
         print(f"mirrored windows drop {lost}: their other side isn't a style", flush=True)
 
+    stop = stop_file(tag)
+    if stop.exists():
+        stop.unlink()
+        print("asked to stop before the first step: nothing was written", flush=True)
+        return
     out = MODELS / tag
     out.mkdir(parents=True, exist_ok=True)
     net_args = dict(styles=len(styles), given=True, contacts=contacts, path=True,
@@ -503,7 +514,7 @@ def main(argv=None):
     best = {"step": None, "score": None}
     total = args.minutes * 60
     running: Counter = Counter()
-    while time.time() - t0 < total and (args.steps is None or step < args.steps):
+    while time.time() - t0 < total and (args.steps is None or step < args.steps) and not stop.exists():
         frac = (time.time() - t0) / total
         if args.steps:
             frac = max(frac, step / args.steps)
@@ -550,6 +561,10 @@ def main(argv=None):
                 best = {"step": step, "score": ev["score"]}
                 torch.save(model.state_dict(), out / "best.pt")
 
+    stopped = stop.exists()
+    if stopped:
+        stop.unlink()
+        print(f"asked to stop at step {step}: evaluating and saving what there is", flush=True)
     torch.save(model.state_dict(), out / "model.pt")
     if best["step"] is None:
         torch.save(model.state_dict(), out / "best.pt")
@@ -567,7 +582,7 @@ def main(argv=None):
         {"name": n, "title": REGISTRY[n].title, "licence": REGISTRY[n].licence, "commercial": REGISTRY[n].commercial} for n in train.used]
     commercial = all(r["commercial"] for r in set_rows)
     card = {
-        "tag": tag, "steps": step, "minutes": round((time.time() - t0) / 60, 1), "bones": list(BONES),
+        "tag": tag, "steps": step, "minutes": round((time.time() - t0) / 60, 1), "stopped": stopped, "bones": list(BONES),
         "context": CONTEXT - args.context_after, "context_after": args.context_after, "max_gap": MAX_GAP,
         "multi_key": args.multi_key, "styles": styles, "style_frames": style_frames,
         "styles_left_out": rare, "min_style_minutes": args.min_style_minutes,

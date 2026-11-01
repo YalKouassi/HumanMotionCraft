@@ -35,6 +35,8 @@ use crate::scrub::{Bar, Change};
 use crate::viewer::Viewer;
 use crate::{Args, Paths};
 
+mod models_view;
+
 const SPEEDS: [f32; 5] = [0.25, 0.5, 1.0, 2.0, 4.0];
 const CELL: egui::Vec2 = egui::vec2(120.0, 150.0);
 const ROW: f32 = 58.0;
@@ -48,6 +50,8 @@ enum View {
     Groups,
     Gallery,
     Styles,
+    /// Start training, see every model, choose the main one (no clip is shown).
+    Models,
 }
 
 pub struct App {
@@ -94,6 +98,9 @@ pub struct App {
     shown_for: f64,
     style_rows: Vec<StyleRow>,
     usages: Usages,
+    /// What the open set is made from, when it is a combined one.
+    combined_from: Option<String>,
+    models: models_view::Page,
     /// The queue scrolls the take shown into view (once, after it changes).
     scroll_to: bool,
     status: String,
@@ -163,6 +170,7 @@ impl App {
                 Some("groups") => View::Groups,
                 Some("gallery") => View::Gallery,
                 Some("styles") => View::Styles,
+                Some("models") => View::Models,
                 _ => View::List,
             },
             totals: None,
@@ -178,6 +186,8 @@ impl App {
             shown_for: 0.0,
             style_rows: Vec::new(),
             usages: Usages::default(),
+            combined_from: None,
+            models: models_view::Page::default(),
             scroll_to: true,
             status: args.notes.join("; "),
             remembered: args.screenshot.is_none().then(|| Remembered {
@@ -260,6 +270,13 @@ impl App {
             .active
             .is_some()
             .then(|| self.review.set_totals());
+        self.combined_from = self.review.open_recipe().map(|r| {
+            let free = if r.free { " and the free clips" } else { "" };
+            format!(
+                "Made from {}{free}, and rebuilt when a run of it starts: reject clips in those sets, as a change here is lost",
+                r.from.join(", ")
+            )
+        });
     }
 
     fn select(&mut self, t: (usize, usize)) {
@@ -1377,17 +1394,25 @@ impl App {
                 self.undo();
             }
         });
+        if let Some(note) = &self.combined_from {
+            ui.colored_label(Color32::YELLOW, note);
+        }
     }
 
-    fn top(&mut self, ui: &mut egui::Ui) {
-        self.sets_bar(ui);
-        self.totals_panel(ui);
+    fn view_tabs(&mut self, ui: &mut egui::Ui) {
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.view, View::List, "List");
             ui.selectable_value(&mut self.view, View::Groups, "Groups");
             ui.selectable_value(&mut self.view, View::Gallery, "Gallery");
             ui.selectable_value(&mut self.view, View::Styles, "Styles");
+            ui.selectable_value(&mut self.view, View::Models, "Models");
         });
+    }
+
+    fn top(&mut self, ui: &mut egui::Ui) {
+        self.sets_bar(ui);
+        self.totals_panel(ui);
+        self.view_tabs(ui);
         if self.view != View::Styles && self.filter.style.is_some() {
             self.close_style();
         }
@@ -1799,6 +1824,13 @@ impl eframe::App for App {
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
         self.poll_unpacking(&ctx);
+        if self.view == View::Models {
+            // no clip is shown here, so the keys that act on one are left alone
+            egui::Panel::top("tabs").show(ui, |ui| self.view_tabs(ui));
+            egui::CentralPanel::default().show(ui, |ui| self.models_page(ui));
+            self.screenshot(&ctx);
+            return;
+        }
         self.keys(&ctx);
         self.play(&ctx);
         self.clamp_frame();

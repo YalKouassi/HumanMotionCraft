@@ -2,6 +2,7 @@
 
     python -m ac_train.export parts
     python -m ac_train.export parts-lowweights --checkpoint best --as parts   # a training run shipped under the app's tag
+    python -m ac_train.export my-run --checkpoint best --out <app data>/models/my-run --golden <temp> --main   # this machine's main model
 
 Writes, under the repo:
 - assets/models/<tag>/weights.bin   every tensor of the state dict, float32 little-endian, in order;
@@ -164,8 +165,19 @@ def main(argv=None):
                     help="model.pt (the last step) or best.pt (the best evaluation score; the card says which step)")
     ap.add_argument("--as", dest="as_tag", metavar="TAG",
                     help="ship under this tag (the card, assets/models/<TAG>, the goldens' names); default: the training tag")
+    ap.add_argument("--main", action="store_true",
+                    help="once written, make it the main model of the models folder --out is in (main.json beside it): the app opens with it")
     args = ap.parse_args(argv)
+    shown = args.as_tag or args.tag
+    if args.main and (args.out is None or args.out.name != shown):
+        ap.error(f"--main needs --out <models folder>/{shown}")
     export(args.tag, args.out, args.golden, args.checkpoint, args.as_tag)
+    if args.main:
+        main_file = args.out.parent / "main.json"
+        partial = main_file.with_suffix(".json.partial")
+        partial.write_text(json.dumps({"tag": shown}) + "\n", encoding="utf-8")
+        partial.replace(main_file)
+        print(f"{shown} is the main model of {args.out.parent}", flush=True)
 
 
 if __name__ == "__main__":

@@ -183,7 +183,7 @@ impl App {
         // your own model (the app's models folder: one trained on data that isn't shipped) wins
         // over the bundled one, and says so; automated runs keep the bundled one (reproducible)
         let own = ac_io::library::app_models_dir();
-        let own_model = !automated && ac_ai::has_model(&own);
+        let own_model = !automated && ac_ai::gives_the_default(&own);
         let model = if own_model {
             ac_ai::shared_in(&own)
         } else {
@@ -232,6 +232,14 @@ impl App {
         }
         if own_model {
             let note = format!("AI fill uses your own model from {}", own.display());
+            status = if status.is_empty() {
+                note
+            } else {
+                format!("{status}; {note}")
+            };
+        }
+        if !automated && let Err(e) = ac_ai::main_model(&own) {
+            let note = format!("your main model can't be used, so the usual one is: {e}");
             status = if status.is_empty() {
                 note
             } else {

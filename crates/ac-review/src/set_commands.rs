@@ -84,6 +84,7 @@ impl Review {
     /// Add a person's library (`<root>/animations/<group>/<name>.clip.json`): each group reads as
     /// a set named `library:<group>`, so its clips' ids are `library:<group>/<name>`.
     pub fn add_library(&mut self, root: &Path, rig: &[String]) {
+        self.places.library = Some(root.to_path_buf());
         let (sets, problems) = store::open_library(root, rig);
         if !sets.is_empty() {
             self.problems.retain(|p| !p.starts_with(store::NO_RIG_TAKES));
@@ -135,6 +136,15 @@ impl Review {
         };
         self.training.undo = name.map(|n| load_undo(&folder, n)).unwrap_or_default();
         Ok(self.describe_set())
+    }
+
+    /// A set was written whole from elsewhere: if it is the one open, this is now what is open, and
+    /// the steps that undid the old one are gone.
+    pub(crate) fn replaced_set(&mut self, set: &TrainingSet) {
+        if self.training.active.as_ref().is_some_and(|a| a.name == set.name) {
+            self.training.active = Some(set.clone());
+            self.training.undo.clear();
+        }
     }
 
     fn fresh(&mut self, set: TrainingSet) -> R<Value> {

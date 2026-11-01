@@ -213,8 +213,10 @@ def from_args(args) -> Selection:
                      include, exclude, name)
 
 
-def records(set_name: str, npz, decisions, select: Selection | None = None, scanned: bool = True) -> tuple[review.Plan, list[Record]]:
-    """The set's plan and each take's :class:`Record`, in the set's order."""
+def records(set_name: str, npz, decisions, select: Selection | None = None, scanned: bool = True,
+            window: int | None = None) -> tuple[review.Plan, list[Record]]:
+    """The set's plan and each take's :class:`Record`, in the set's order. ``window``: training's
+    window, so a take with no clean run of that many frames counts as out, as training leaves it."""
     starts, takes = npz["starts"], npz["takes"]
     own = npz["labels"] if "labels" in npz.files else takes
     plan = review.plan_set(set_name, len(npz["roots"]), starts, takes, decisions, scanned, npz=npz, scan=getattr(npz, "scan", None))
@@ -232,6 +234,8 @@ def records(set_name: str, npz, decisions, select: Selection | None = None, scan
             rec.why = f"left out: {t.drop}"
         elif select is not None:
             rec.why = select.why_out(rec.id, kind, styles)
+        if not rec.why and window is not None and not len(review.starts(t, window)):
+            rec.why = f"too short: no {window} clean frames in a row"
         out.append(rec)
     return plan, out
 
@@ -255,7 +259,8 @@ def check_listed(select: Selection, recs: list[Record], sets) -> None:
               f"{' ...' if len(out) > 3 else ''}", flush=True)
 
 
-def plan_sets(names, decisions, select: Selection | None = None, scanned: bool = True, progress=None, extra=None) -> list[Record]:
+def plan_sets(names, decisions, select: Selection | None = None, scanned: bool = True, progress=None, extra=None,
+              window: int | None = None) -> list[Record]:
     """Every take of ``names`` (sets in ``data/rig``, or made in memory: ``extra``, by name), without
     loading any rotation."""
     recs: list[Record] = []
@@ -270,7 +275,7 @@ def plan_sets(names, decisions, select: Selection | None = None, scanned: bool =
             continue
         else:
             d = np.load(path)
-        plan, r = records(n, d, decisions, select, scanned)
+        plan, r = records(n, d, decisions, select, scanned, window)
         if progress:
             progress(plan.summary())
             for note in plan.notes:

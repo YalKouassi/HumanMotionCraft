@@ -15,6 +15,7 @@ path = "src/main.rs"
 path = "src/lib.rs"
 
 [dependencies]
+ac-ai.workspace = true
 ac-core.workspace = true
 ac-io.workspace = true
 ac-render.workspace = true

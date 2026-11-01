@@ -21,6 +21,36 @@ MODEL = ASSETS / "models" / "parts"
 GOLDEN = REPO / "crates" / "ac-ai" / "tests" / "golden" / "parts-net.json"
 
 
+def test_main_is_written_only_after_the_export_and_only_beside_it(tmp_path, monkeypatch):
+    from ac_train import export as module
+
+    done = []
+    monkeypatch.setattr(module, "export", lambda *a: done.append(a))
+    out = tmp_path / "models" / "my-run"
+    out.mkdir(parents=True)
+    module.main(["my-run", "--checkpoint", "best", "--out", str(out), "--golden", str(tmp_path / "g"), "--main"])
+    assert len(done) == 1
+    assert json.loads((out.parent / "main.json").read_text(encoding="utf-8")) == {"tag": "my-run"}
+    assert sorted(p.name for p in out.parent.iterdir()) == ["main.json", "my-run"]
+
+    # a failed export chooses nothing
+    (out.parent / "main.json").unlink()
+
+    def fail(*a):
+        raise SystemExit("refused")
+
+    monkeypatch.setattr(module, "export", fail)
+    with pytest.raises(SystemExit, match="refused"):
+        module.main(["my-run", "--out", str(out), "--golden", str(tmp_path / "g"), "--main"])
+    assert not (out.parent / "main.json").exists()
+
+    # the choice names the folder the app looks in: never the repo's assets by default
+    for args in (["my-run", "--main"], ["my-run", "--out", str(tmp_path / "elsewhere"), "--main"]):
+        with pytest.raises(SystemExit):
+            module.main(args)
+        assert not (tmp_path / "main.json").exists()
+
+
 def test_weights_round_trip(tmp_path):
     torch.manual_seed(0)
     net = Inbetweener(styles=3, given=True)

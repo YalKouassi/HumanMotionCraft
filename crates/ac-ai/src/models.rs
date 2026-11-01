@@ -90,7 +90,7 @@ impl Models {
     fn default_dir(&self, folders: &[PathBuf]) -> Option<PathBuf> {
         self.roots(folders)
             .into_iter()
-            .filter(|(root, _)| crate::has_model(root))
+            .filter(|(root, _)| crate::gives_the_default(root))
             .find_map(|(root, _)| crate::default_dir(root).ok())
     }
 

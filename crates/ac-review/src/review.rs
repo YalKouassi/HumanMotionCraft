@@ -110,6 +110,8 @@ pub struct Review {
     /// What failed to load (a set, a scan, stale flags): said in the window and by `review.summary`.
     pub problems: Vec<String>,
     pub training: Training,
+    /// Where the models and the trainer are (the models page).
+    pub places: crate::models::Places,
 }
 
 static NO_SCAN: ScanTake = ScanTake {
@@ -220,6 +222,7 @@ impl Review {
             flags,
             problems,
             training: Training::default(),
+            places: crate::models::Places::of_data(data),
         })
     }
 
@@ -471,8 +474,10 @@ impl Review {
     /// The commands and their parameters (`review.commands`).
     pub fn commands() -> Value {
         let mut all = Review::take_commands();
-        if let (Some(a), Value::Array(b)) = (all.as_array_mut(), Review::set_commands()) {
-            a.extend(b);
+        for more in [Review::set_commands(), Review::model_commands()] {
+            if let (Some(a), Value::Array(b)) = (all.as_array_mut(), more) {
+                a.extend(b);
+            }
         }
         all
     }
@@ -491,6 +496,7 @@ impl Review {
         match command {
             "review.commands" => Ok(Review::commands()),
             c if Review::SET_IDS.contains(&c) => self.run_set(c, p),
+            c if Review::MODEL_IDS.contains(&c) => self.run_models(c, p),
             "review.list" => {
                 let f = Review::filter_of(p)?;
                 let limit = p

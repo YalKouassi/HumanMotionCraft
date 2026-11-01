@@ -145,6 +145,7 @@ dependencies = [
 name = "ac-review"
 version = "0.3.0"
 dependencies = [
+ "ac-ai",
  "ac-core",
  "ac-io",
  "ac-render",

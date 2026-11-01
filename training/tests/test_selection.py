@@ -128,6 +128,25 @@ def test_records_say_what_each_take_is_and_why_it_is_out(monkeypatch):
     assert by["walk_s_01"].why == "list: not included"
 
 
+def test_a_take_too_short_to_train_on_is_not_counted_as_kept(monkeypatch):
+    """The dry run's totals are what training reads: no run of the window's length, no training."""
+    from ac_train import review, stamp
+
+    npz, scan = fake_set()
+    monkeypatch.setattr(review, "load_scan", lambda name, rig=None: scan)
+    monkeypatch.setattr(stamp, "check", lambda name, d: [])
+    listed = S.Selection(include=frozenset({"100style/walk_s_01", "100style/walk_s_02"}))
+    _, recs = S.records("100style", npz, {}, listed, window=70)
+    by = {r.take: r for r in recs}
+    assert by["walk_s_01"].kept, "100 frames, 90 of them clean in a row"
+    assert not by["walk_s_02"].kept and by["walk_s_02"].why == "too short: no 70 clean frames in a row"
+    # the reason a take is out already stays the reason
+    assert by["walk_s_04"].why.startswith("left out")
+    # no window: as before
+    _, recs = S.records("100style", npz, {}, listed)
+    assert {r.take: r for r in recs}["walk_s_02"].kept
+
+
 def test_a_listed_take_no_set_has_is_an_error(capsys):
     recs = [S.Record("s", "a", "", "walk", [], "", [], 10, 10, False, ""),
             S.Record("s", "b", "", "walk", [], "", [], 10, 0, False, "left out: scan: float")]

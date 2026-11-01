@@ -683,9 +683,57 @@ pub fn shared(assets: &Path) -> R<Option<std::sync::Arc<dyn Inbetweener>>> {
     shared_in(&assets.join("models"))
 }
 
-/// The default model's folder in a models folder: `<root>/parts` ([`DEFAULT_TAG`]) when it
-/// holds a `weights.json`, else the first folder by name that does.
+/// The person's choice in a models folder, its `main.json` (the review app writes it).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MainModel {
+    /// No choice made.
+    Unset,
+    /// `{"tag": null}`: the bundled model, whatever else this folder holds.
+    Bundled,
+    /// `{"tag": "<tag>"}`: `<root>/<tag>`.
+    Tag(String),
+}
+
+/// What `<root>/main.json` says; `Err` says why it can't be followed (it is then as if unset).
+pub fn main_model(root: &Path) -> R<MainModel> {
+    let path = root.join("main.json");
+    let text = match std::fs::read_to_string(&path) {
+        Ok(t) => t,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(MainModel::Unset),
+        Err(e) => return Err(format!("{}: {e}", path.display())),
+    };
+    let v: Value = serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))?;
+    match v.get("tag") {
+        Some(Value::Null) => Ok(MainModel::Bundled),
+        Some(Value::String(tag)) => {
+            // a file's word is hostile: one folder name, nothing that climbs out
+            let plain = !tag.is_empty() && Path::new(tag).file_name().is_some_and(|n| n == tag.as_str());
+            if !plain {
+                return Err(format!("{}: {tag:?} is no model's tag", path.display()));
+            }
+            if root.join(tag).join("weights.json").is_file() {
+                Ok(MainModel::Tag(tag.clone()))
+            } else {
+                Err(format!("the main model {tag} isn't in {}", root.display()))
+            }
+        }
+        _ => Err(format!("{}: needs a tag", path.display())),
+    }
+}
+
+/// Whether a models folder gets to give the app its model: it holds one, and the person hasn't
+/// chosen the bundled one. Without a choice, a folder holding a model gives it, as it always has.
+pub fn gives_the_default(root: &Path) -> bool {
+    has_model(root) && main_model(root) != Ok(MainModel::Bundled)
+}
+
+/// The default model's folder in a models folder: the one its `main.json` chose, else
+/// `<root>/parts` ([`DEFAULT_TAG`]) when it holds a `weights.json`, else the first folder by name
+/// that does.
 pub fn default_dir(root: &Path) -> R<PathBuf> {
+    if let Ok(MainModel::Tag(tag)) = main_model(root) {
+        return Ok(root.join(tag));
+    }
     if root.join(DEFAULT_TAG).join("weights.json").is_file() {
         return Ok(root.join(DEFAULT_TAG));
     }

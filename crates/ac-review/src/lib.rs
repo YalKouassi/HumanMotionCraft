@@ -12,9 +12,11 @@
     clippy::unreachable
 )]
 
+pub mod combine;
 pub mod decisions;
 pub mod flags;
 pub mod groups;
+pub mod models;
 pub mod npz;
 pub mod remembered;
 pub mod review;
@@ -24,4 +26,5 @@ pub mod store;
 pub mod styles;
 pub mod thumbs;
 pub mod totals;
+pub mod train_run;
 pub mod training_set;
