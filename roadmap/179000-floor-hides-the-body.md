@@ -2,7 +2,7 @@
 
 - **Status:** not started
 - **Requires:** none
-- **Source:** owner's bug report (2026-11-01); reproduced the same day
+- **Source:** owner's bug report (2026-11-01); reproduced the same day; the owner agreed the acceptance (2026-11-01)
 
 ## What
 The body vanishes while its joints and bones still show. The floor is the cause: it is a solid,
