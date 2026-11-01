@@ -247,11 +247,13 @@ impl Review {
             {"id": "review.set_copy_labels", "params": "from", "returns": "{matched, changed, not_in_source}: clips in both take from's labels"},
             {"id": "review.set_clip", "params": "id or ids, status? (keep|reject), labels? (replace), add_labels?, remove_labels?, cuts?", "returns": "{changed}: one undo step; a clip not in the set is added as keep"},
             {"id": "review.set_remove", "params": "id or ids", "returns": "{changed}: one undo step"},
+            {"id": "review.groups", "params": "show? (default all), set?, reason?, search?", "returns": "{groups: [{group, pack, name, clips, minutes, keep, reject}]}: takes differing by a trailing number are a group"},
+            {"id": "review.set_group", "params": "group, status? (keep|reject), labels?, add_labels?, remove_labels?", "returns": "{changed}: every clip of the group, one undo step; a single clip can then be overridden"},
             {"id": "review.undo", "params": "", "returns": "{undone, left}: the active set's last change, in this process"},
         ])
     }
 
-    pub const SET_IDS: [&'static str; 9] = [
+    pub const SET_IDS: [&'static str; 11] = [
         "review.sets",
         "review.set_new",
         "review.set_duplicate",
@@ -260,6 +262,8 @@ impl Review {
         "review.set_copy_labels",
         "review.set_clip",
         "review.set_remove",
+        "review.groups",
+        "review.set_group",
         "review.undo",
     ];
 
@@ -319,6 +323,34 @@ impl Review {
             "review.set_remove" => {
                 let changes = Review::ids_of(p)?.into_iter().map(|id| (id, None)).collect();
                 Ok(json!({ "changed": self.apply(changes, true)? }))
+            }
+            "review.groups" => {
+                let mut with_show = p.clone();
+                with_show.entry("show").or_insert_with(|| json!("all"));
+                let f = Review::filter_of(&with_show)?;
+                let rows: Vec<Value> = self
+                    .groups(&self.queue(&f))
+                    .into_iter()
+                    .map(|g| {
+                        json!({
+                            "group": g.key, "pack": g.pack, "name": g.name, "clips": g.takes.len(),
+                            "minutes": g.minutes, "keep": g.keep, "reject": g.reject,
+                        })
+                    })
+                    .collect();
+                Ok(json!({ "groups": rows }))
+            }
+            "review.set_group" => {
+                let key = word(p, "group")?;
+                let ids: Vec<String> = self
+                    .group_takes(&key)
+                    .into_iter()
+                    .map(|(s, t)| self.id(s, t))
+                    .collect();
+                if ids.is_empty() {
+                    return Err(format!("no group {key:?}"));
+                }
+                Ok(json!({ "changed": self.set_clips(&ids, p)? }))
             }
             "review.undo" => {
                 let Some(step) = self.training.undo.pop() else {

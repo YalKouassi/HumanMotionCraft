@@ -77,6 +77,8 @@ pub struct Filter {
     pub set: Option<String>,
     pub reason: Option<String>,
     pub search: String,
+    /// One group's takes only (`groups::group_key`).
+    pub group: Option<String>,
 }
 
 impl Default for Filter {
@@ -86,6 +88,7 @@ impl Default for Filter {
             set: None,
             reason: None,
             search: String::new(),
+            group: None,
         }
     }
 }
@@ -298,6 +301,12 @@ impl Review {
                 continue;
             }
             for (ti, t) in s.takes.iter().enumerate() {
+                if f.group
+                    .as_ref()
+                    .is_some_and(|g| *g != crate::groups::group_key(&s.name, &t.name))
+                {
+                    continue;
+                }
                 let decided = self.status_of(si, ti).is_some();
                 let keep = match f.show {
                     Show::Open => self.flagged(si, ti) && !decided,
@@ -433,6 +442,16 @@ impl Review {
         })
     }
 
+    pub(crate) fn filter_of(p: &P) -> R<Filter> {
+        Ok(Filter {
+            show: Show::parse(&text(p, "show").unwrap_or_else(|| "open".into()))?,
+            set: text(p, "set"),
+            reason: text(p, "reason"),
+            search: text(p, "search").unwrap_or_default(),
+            group: text(p, "group"),
+        })
+    }
+
     /// The commands and their parameters (`review.commands`).
     pub fn commands() -> Value {
         let mut all = Review::take_commands();
@@ -444,7 +463,7 @@ impl Review {
 
     fn take_commands() -> Value {
         json!([
-            {"id": "review.list", "params": "show? (open|flagged|decided|all|model|set, default open; model: the takes the model fails on, flags.json; set: the open training set's clips), set?, reason?, search?, limit? (default 100)", "returns": "{total, takes: [{id, label, frames, scan_cut, scan_reject, reasons, decision, model: {rank, loss, worst, worst_at, windows} | null}]}, worst first"},
+            {"id": "review.list", "params": "show? (open|flagged|decided|all|model|set, default open; model: the takes the model fails on, flags.json; set: the open training set's clips), set?, reason?, search?, group?, limit? (default 100)", "returns": "{total, takes: [{id, label, frames, scan_cut, scan_reject, reasons, decision, model: {rank, loss, worst, worst_at, windows} | null}]}, worst first"},
             {"id": "review.take", "params": "id (<set>/<take>)", "returns": "the take, the scan's numbers and cuts, the model's flag (why, the weighted loss terms) or null, the decision"},
             {"id": "review.decide", "params": "id, status (ok|cut|reject), cuts? ([[first, last]], default the scan's for cut), type?, tags?, note?, by? (default person)", "returns": "the decision as saved"},
             {"id": "review.clear", "params": "id", "returns": "{cleared}"},
@@ -457,12 +476,7 @@ impl Review {
             "review.commands" => Ok(Review::commands()),
             c if Review::SET_IDS.contains(&c) => self.run_set(c, p),
             "review.list" => {
-                let f = Filter {
-                    show: Show::parse(&text(p, "show").unwrap_or_else(|| "open".into()))?,
-                    set: text(p, "set"),
-                    reason: text(p, "reason"),
-                    search: text(p, "search").unwrap_or_default(),
-                };
+                let f = Review::filter_of(p)?;
                 let limit = p
                     .get("limit")
                     .and_then(Value::as_u64)

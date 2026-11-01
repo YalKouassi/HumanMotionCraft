@@ -134,6 +134,46 @@ fn stamp_of(npz: &Path) -> R<String> {
     Ok(format!("{} {t}", m.len()))
 }
 
+/// Reading a take's middle pose on another thread, for its thumbnail.
+pub enum PoseJob {
+    Cache {
+        path: PathBuf,
+        at: u64,
+        len: usize,
+        root: [f32; 3],
+    },
+    Clip {
+        path: PathBuf,
+        rig: Arc<Vec<String>>,
+        frame: f64,
+    },
+}
+
+impl PoseJob {
+    pub fn run(self) -> R<(Vec<Quat>, Vec3)> {
+        match self {
+            PoseJob::Cache { path, at, len, root } => {
+                let say = |e: std::io::Error| format!("{}: {e}", path.display());
+                let mut f = File::open(&path).map_err(say)?;
+                f.seek(SeekFrom::Start(at)).map_err(say)?;
+                let mut raw = vec![0u8; len];
+                f.read_exact(&mut raw).map_err(say)?;
+                Ok((
+                    decode_frame(&raw),
+                    [root[0] as f64, root[1] as f64, root[2] as f64],
+                ))
+            }
+            PoseJob::Clip { path, rig, frame } => {
+                let m = clip_frames(&path, &rig, Some(&[frame]))?;
+                let rots = m.rotations.into_iter().next();
+                let root = m.roots.into_iter().next();
+                rots.zip(root)
+                    .ok_or_else(|| format!("{}: no frames", path.display()))
+            }
+        }
+    }
+}
+
 impl Set {
     /// Read a set's takes and root offsets (the rotations stay in the npz until [`Set::unpack`]).
     pub fn open(npz_path: &Path) -> R<Set> {
@@ -250,6 +290,29 @@ impl Set {
 
     pub fn find(&self, name: &str) -> Option<usize> {
         self.takes.iter().position(|t| t.name == name)
+    }
+
+    /// How to read take `i`'s middle pose (from the cache: [`Set::unpacked`] first).
+    pub fn pose_job(&self, i: usize) -> R<PoseJob> {
+        let t = self.take(i)?;
+        if let Some(g) = &self.library {
+            return Ok(PoseJob::Clip {
+                path: g.dir.join(format!("{}{}", t.name, Kind::Animations.ext())),
+                rig: g.rig.clone(),
+                frame: (t.frames / 2) as f64,
+            });
+        }
+        let stride = self.bones * 4 * 2;
+        let frame = t.start + t.frames / 2;
+        Ok(PoseJob::Cache {
+            path: self.cache.clone(),
+            at: (frame * stride) as u64,
+            len: stride,
+            root: *self
+                .roots
+                .get(frame)
+                .ok_or_else(|| format!("{}: roots end early", t.name))?,
+        })
     }
 
     /// Every frame of take `i` (from the cache: [`Set::unpacked`] first).

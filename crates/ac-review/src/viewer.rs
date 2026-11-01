@@ -2,6 +2,7 @@
 //! it will in the app. The camera follows the hips; right-drag turns it, the wheel zooms.
 
 use std::path::Path;
+use std::sync::Arc;
 
 use ac_core::quat::{Quat, Vec3 as V3};
 use ac_core::rig::Skeleton;
@@ -12,7 +13,7 @@ use egui::{Color32, Pos2, Rect, Sense};
 const BODY: [f32; 4] = [0.72, 0.74, 0.78, 1.0];
 
 pub struct Viewer {
-    pub skeleton: Skeleton,
+    pub skeleton: Arc<Skeleton>,
     renderer: Renderer,
     skin_to_bone: Vec<usize>,
     texture: Option<egui::TextureId>,
@@ -46,7 +47,7 @@ impl Viewer {
             .ok_or("the wgpu renderer is not available")?;
         Ok(Viewer {
             renderer: Renderer::new(&rs.device, rs.target_format, &mesh),
-            skeleton,
+            skeleton: Arc::new(skeleton),
             skin_to_bone,
             texture: None,
             camera: Camera {

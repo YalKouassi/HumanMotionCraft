@@ -1,22 +1,28 @@
 //! The review window: the queue (left), the body (middle), the take and the decision (right), the
 //! scrub bar and transport (bottom). Every decision goes through [`Review::run`], as headless.
 //!
+//! Three views of the clips: the list; groups (K and R the whole group, Enter opens it to override
+//! single clips, Esc closes it); the gallery of thumbnails (click, Ctrl-click and Shift-click pick,
+//! K and R all picked, double-click opens). Both act on the training set open.
+//!
 //! Keys (when no text field has the keyboard): Space play, Left/Right a frame (Shift: 10),
 //! Up/Down the take before/after, F the next flag, I/O the selection's start/end, Esc no selection,
 //! K ok (keep it all), C cut (the cuts shown plus the selection), X uncut the selection, R reject,
 //! Backspace forget the decision, Ctrl+Z undo a training set's last change. With a training set open
 //! K C R and Backspace act on that set; with none, on the decisions file.
 
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU8, Ordering};
 use std::sync::mpsc::{Receiver, TryRecvError, channel};
 
 use ac_review::decisions::Status;
+use ac_review::groups::Group;
 use ac_review::review::{Filter, Review, Show};
 use ac_review::training_set::{ClipStatus, SetClip};
 use ac_review::store::Motion;
+use ac_review::thumbs::{Figure, Job, Thumbs, figure};
 use egui::{Color32, Key, RichText};
 use serde_json::{Value, json};
 
@@ -25,6 +31,15 @@ use crate::viewer::Viewer;
 use crate::{Args, Paths};
 
 const SPEEDS: [f32; 5] = [0.25, 0.5, 1.0, 2.0, 4.0];
+const CELL: egui::Vec2 = egui::vec2(120.0, 150.0);
+const ROW: f32 = 58.0;
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum View {
+    List,
+    Groups,
+    Gallery,
+}
 
 pub struct App {
     review: Review,
@@ -49,6 +64,17 @@ pub struct App {
     /// The training sets in the folder, and the name for New and Duplicate.
     set_names: Vec<String>,
     new_set: String,
+    view: View,
+    groups: Vec<Group>,
+    /// The group row with the keyboard.
+    group_at: usize,
+    /// The gallery's picked clips, the last one clicked, and the labels to give them.
+    picked: BTreeSet<(usize, usize)>,
+    last_pick: Option<(usize, usize)>,
+    mass_labels: String,
+    thumbs: Thumbs,
+    /// Sets known to be unpacked, so that a thumbnail needn't ask the disk each frame.
+    ready: HashSet<usize>,
     /// After a decision, go on to the next take.
     advance: bool,
     /// The queue scrolls the take shown into view (once, after it changes).
@@ -114,6 +140,18 @@ impl App {
             labels: String::new(),
             set_names,
             new_set: String::new(),
+            view: match args.view.as_deref() {
+                Some("groups") => View::Groups,
+                Some("gallery") => View::Gallery,
+                _ => View::List,
+            },
+            groups: Vec::new(),
+            group_at: 0,
+            picked: BTreeSet::new(),
+            last_pick: None,
+            mass_labels: String::new(),
+            thumbs: Thumbs::new(),
+            ready: HashSet::new(),
             advance: true,
             scroll_to: true,
             status: String::new(),
@@ -144,6 +182,8 @@ impl App {
 
     fn refresh(&mut self) {
         self.queue = self.review.queue(&self.filter);
+        self.groups = self.review.groups(&self.queue);
+        self.group_at = self.group_at.min(self.groups.len().saturating_sub(1));
     }
 
     fn select(&mut self, t: (usize, usize)) {
@@ -264,24 +304,109 @@ impl App {
     /// The take's frames, or start unpacking its set (once).
     fn load_motion(&mut self) {
         let Some((s, t)) = self.current else { return };
+        if !self.ensure_unpacked(s) {
+            return;
+        }
         let Some(set) = self.review.sets.get(s) else {
             return;
         };
-        if !set.unpacked() {
-            if !self.unpacking.contains_key(&s) && !self.unpack_failed.contains_key(&s) {
-                let job = set.unpack_job();
-                let (tx, rx) = channel();
-                std::thread::spawn(move || {
-                    // the window may have closed; nothing to tell then
-                    tx.send(job.run()).ok();
-                });
-                self.unpacking.insert(s, rx);
-            }
-            return;
-        }
         match set.motion(t) {
             Ok(m) => self.motion = Some(m),
             Err(e) => self.motion_error = Some(e),
+        }
+    }
+
+    /// Whether a set's rotations are ready; if not, start unpacking them (once).
+    fn ensure_unpacked(&mut self, s: usize) -> bool {
+        if self.unpacking.contains_key(&s) || self.unpack_failed.contains_key(&s) {
+            return false;
+        }
+        let Some(set) = self.review.sets.get(s) else {
+            return false;
+        };
+        if set.unpacked() {
+            return true;
+        }
+        let job = set.unpack_job();
+        let (tx, rx) = channel();
+        std::thread::spawn(move || {
+            // the window may have closed; nothing to tell then
+            tx.send(job.run()).ok();
+        });
+        self.unpacking.insert(s, rx);
+        false
+    }
+
+    /// Queue the figures of the clips on screen, and only those.
+    fn ask_thumbs(&mut self, on_screen: &[(usize, usize)], ctx: &egui::Context) {
+        let sets: BTreeSet<usize> = on_screen.iter().map(|k| k.0).collect();
+        for s in sets {
+            if !self.ready.contains(&s) && self.ensure_unpacked(s) {
+                self.ready.insert(s);
+            }
+        }
+        let (review, ready, skeleton) = (&self.review, &self.ready, self.viewer.skeleton.clone());
+        self.thumbs.show(on_screen, |(s, t)| {
+            if !ready.contains(&s) {
+                return None;
+            }
+            let pose = review.sets.get(s)?.pose_job(t).ok()?;
+            let sk = skeleton.clone();
+            let job: Job = Box::new(move || {
+                let (rots, root) = pose.run()?;
+                figure(&sk, &rots, root)
+            });
+            Some(job)
+        });
+        if self.thumbs.busy() {
+            ctx.request_repaint();
+        }
+    }
+
+    /// K or R on the gallery's picked clips: one undo step.
+    fn decide_picked(&mut self, status: &str) {
+        if self.picked.is_empty() {
+            self.status = "pick clips first".into();
+            return;
+        }
+        let ids = self.picked_ids();
+        if let Some(v) = self.set_command("review.set_clip", json!({ "ids": ids, "status": status })) {
+            self.status = format!("{} clips: {status}", v["changed"]);
+            self.reselect();
+        }
+    }
+
+    fn picked_ids(&self) -> Vec<String> {
+        self.picked.iter().map(|&(s, t)| self.review.id(s, t)).collect()
+    }
+
+    /// K or R on the group row with the keyboard: one undo step.
+    fn decide_group(&mut self, status: &str) {
+        let Some(key) = self.groups.get(self.group_at).map(|g| g.key.clone()) else {
+            return;
+        };
+        let p = json!({ "group": key, "status": status });
+        if let Some(v) = self.set_command("review.set_group", p) {
+            self.status = format!("{key}: {} clips {status}", v["changed"]);
+            self.reselect();
+        }
+    }
+
+    fn open_group(&mut self, at: usize) {
+        let Some(g) = self.groups.get(at) else { return };
+        self.group_at = at;
+        self.filter.group = Some(g.key.clone());
+        self.refresh();
+        if let Some(&t) = self.queue.first() {
+            self.select(t);
+        }
+    }
+
+    fn close_group(&mut self) {
+        let was = self.filter.group.take();
+        self.refresh();
+        if let Some(i) = self.groups.iter().position(|g| Some(&g.key) == was.as_ref()) {
+            self.group_at = i;
         }
     }
 
@@ -458,6 +583,7 @@ impl App {
                 Key::R,
                 Key::Backspace,
                 Key::Z,
+                Key::Enter,
             ];
             (
                 keys.into_iter().filter(|k| i.key_pressed(*k)).collect::<Vec<_>>(),
@@ -466,8 +592,25 @@ impl App {
             )
         });
         let step = if shift { 10 } else { 1 };
+        let rows = self.view == View::Groups && self.filter.group.is_none();
+        let gallery = self.view == View::Gallery;
+        let opened = self.view == View::Groups && self.filter.group.is_some();
         for k in pressed {
             match k {
+                Key::K if rows => self.decide_group("keep"),
+                Key::R if rows => self.decide_group("reject"),
+                Key::ArrowUp if rows => self.group_at = self.group_at.saturating_sub(1),
+                Key::ArrowDown if rows => {
+                    self.group_at = (self.group_at + 1).min(self.groups.len().saturating_sub(1))
+                }
+                Key::Enter if rows => self.open_group(self.group_at),
+                Key::Escape if opened && self.selection.is_none() => self.close_group(),
+                Key::K if gallery => self.decide_picked("keep"),
+                Key::R if gallery => self.decide_picked("reject"),
+                Key::Escape if gallery => self.picked.clear(),
+                Key::C | Key::X | Key::Backspace if rows || gallery => {
+                    self.status = "open a single clip for that".into()
+                }
                 Key::Space => self.playing = !self.playing,
                 Key::ArrowLeft => {
                     self.frame = self.frame.saturating_sub(step);
@@ -494,7 +637,7 @@ impl App {
                 }
                 Key::Escape => self.selection = None,
                 Key::K => self.decide(Status::Ok),
-                Key::C => self.decide(Status::Cut),
+                Key::C if !command => self.decide(Status::Cut),
                 Key::X => self.uncut_selection(),
                 Key::R => self.decide(Status::Reject),
                 Key::Backspace => self.clear(),
@@ -540,6 +683,227 @@ impl App {
         }
         self.frame = (self.clock as usize).min(n - 1);
         ctx.request_repaint();
+    }
+
+    /// A clip's figure in `rect`: 2 m of height fill it, the feet on its floor.
+    fn paint_figure(painter: &egui::Painter, rect: egui::Rect, fig: &Figure) {
+        let m = rect.height() / 2.1;
+        let at = |p: [f32; 2]| egui::pos2(rect.center().x + p[0] * m, rect.bottom() - p[1] * m);
+        for [a, b] in fig {
+            painter.line_segment([at(*a), at(*b)], egui::Stroke::new(1.5, Color32::LIGHT_GRAY));
+        }
+    }
+
+    fn thumb(&self, painter: &egui::Painter, rect: egui::Rect, k: (usize, usize)) {
+        match self.thumbs.get(k) {
+            Some(Ok(fig)) => App::paint_figure(painter, rect, fig),
+            // the viewer says why when the clip is opened
+            Some(Err(_)) => {
+                painter.text(
+                    rect.center(),
+                    egui::Align2::CENTER_CENTER,
+                    "can't read",
+                    egui::FontId::proportional(11.0),
+                    Color32::LIGHT_RED,
+                );
+            }
+            None => {
+                painter.rect_filled(rect.shrink(rect.height() / 3.0), 2.0, Color32::from_gray(45));
+            }
+        }
+    }
+
+    fn groups_panel(&mut self, ui: &mut egui::Ui) {
+        ui.label(
+            RichText::new("K keep · R reject the whole group · Enter opens it · Ctrl+Z undo")
+                .weak()
+                .small(),
+        );
+        let (mut pick, mut open) = (None, None);
+        let mut on_screen = Vec::new();
+        egui::ScrollArea::vertical().auto_shrink([false, false]).show_rows(
+            ui,
+            ROW,
+            self.groups.len(),
+            |ui, range| {
+                for i in range {
+                    let Some(g) = self.groups.get(i) else { continue };
+                    let width = ui.available_width();
+                    let (rect, resp) =
+                        ui.allocate_exact_size(egui::vec2(width, ROW), egui::Sense::click());
+                    let p = ui.painter_at(rect);
+                    if i == self.group_at {
+                        p.rect_filled(rect, 2.0, ui.visuals().selection.bg_fill);
+                    }
+                    if let Some(&k) = g.takes.first() {
+                        on_screen.push(k);
+                        let box_ = egui::Rect::from_min_size(rect.min, egui::vec2(ROW, ROW));
+                        self.thumb(&p, box_, k);
+                    }
+                    let x = rect.left() + ROW + 6.0;
+                    let text = Color32::LIGHT_GRAY;
+                    p.text(
+                        egui::pos2(x, rect.top() + 6.0),
+                        egui::Align2::LEFT_TOP,
+                        &g.name,
+                        egui::FontId::proportional(14.0),
+                        text,
+                    );
+                    p.text(
+                        egui::pos2(x, rect.top() + 28.0),
+                        egui::Align2::LEFT_TOP,
+                        format!(
+                            "{} · {} clips · {:.1} min · {} kept, {} rejected",
+                            g.pack,
+                            g.takes.len(),
+                            g.minutes,
+                            g.keep,
+                            g.reject
+                        ),
+                        egui::FontId::proportional(11.0),
+                        Color32::GRAY,
+                    );
+                    if resp.double_clicked() {
+                        open = Some(i);
+                    } else if resp.clicked() {
+                        pick = Some(i);
+                    }
+                }
+            },
+        );
+        if let Some(i) = pick {
+            self.group_at = i;
+        }
+        if let Some(i) = open {
+            self.open_group(i);
+        }
+        let ctx = ui.ctx().clone();
+        self.ask_thumbs(&on_screen, &ctx);
+    }
+
+    fn gallery(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal_wrapped(|ui| {
+            ui.label(format!("{} of {} picked", self.picked.len(), self.queue.len()));
+            if ui.button("All").clicked() {
+                self.picked = self.queue.iter().copied().collect();
+            }
+            if ui.button("None").clicked() {
+                self.picked.clear();
+            }
+            if ui.button("Keep (K)").clicked() {
+                self.decide_picked("keep");
+            }
+            if ui.button("Reject (R)").clicked() {
+                self.decide_picked("reject");
+            }
+            ui.add(
+                egui::TextEdit::singleline(&mut self.mass_labels)
+                    .hint_text("labels")
+                    .desired_width(160.0),
+            );
+            for (button, key) in [("Add labels", "add_labels"), ("Remove labels", "remove_labels")] {
+                if ui.button(button).clicked() {
+                    let labels: Vec<String> = self
+                        .mass_labels
+                        .split(',')
+                        .map(|l| l.trim().to_string())
+                        .filter(|l| !l.is_empty())
+                        .collect();
+                    let p = json!({ "ids": self.picked_ids(), key: labels });
+                    if let Some(v) = self.set_command("review.set_clip", p) {
+                        self.status = format!("labels changed on {} clips", v["changed"]);
+                        self.reselect();
+                    }
+                }
+            }
+        });
+        let gap = ui.spacing().item_spacing;
+        let cols = ((ui.available_width() / (CELL.x + gap.x)) as usize).max(1);
+        let rows = self.queue.len().div_ceil(cols);
+        let mut click = None;
+        let mut open = None;
+        let mut on_screen = Vec::new();
+        let mods = ui.input(|i| i.modifiers);
+        egui::ScrollArea::vertical().auto_shrink([false, false]).show_rows(
+            ui,
+            CELL.y,
+            rows,
+            |ui, range| {
+                for r in range {
+                    ui.horizontal(|ui| {
+                        for c in 0..cols {
+                            let Some(&k) = self.queue.get(r * cols + c) else {
+                                break;
+                            };
+                            on_screen.push(k);
+                            let (rect, resp) = ui.allocate_exact_size(CELL, egui::Sense::click());
+                            let p = ui.painter_at(rect);
+                            if self.picked.contains(&k) {
+                                p.rect_filled(rect, 3.0, ui.visuals().selection.bg_fill);
+                            } else {
+                                p.rect_filled(rect, 3.0, Color32::from_gray(30));
+                            }
+                            let pic = egui::Rect::from_min_size(
+                                rect.min,
+                                egui::vec2(CELL.x, CELL.y - 22.0),
+                            );
+                            self.thumb(&p, pic, k);
+                            let colour = match self.review.status_of(k.0, k.1) {
+                                Some(Status::Ok) => Color32::from_rgb(90, 200, 110),
+                                Some(Status::Cut) => Color32::from_rgb(230, 150, 60),
+                                Some(Status::Reject) => Color32::from_rgb(230, 80, 80),
+                                None => Color32::from_gray(90),
+                            };
+                            p.circle_filled(rect.min + egui::vec2(9.0, 9.0), 4.0, colour);
+                            let name = self.review.sets.get(k.0).and_then(|s| s.takes.get(k.1));
+                            p.text(
+                                egui::pos2(rect.left() + 3.0, rect.bottom() - 18.0),
+                                egui::Align2::LEFT_TOP,
+                                name.map_or("", |t| t.name.as_str()),
+                                egui::FontId::proportional(10.0),
+                                Color32::LIGHT_GRAY,
+                            );
+                            if resp.double_clicked() {
+                                open = Some(k);
+                            } else if resp.clicked() {
+                                click = Some(k);
+                            }
+                        }
+                    });
+                }
+            },
+        );
+        if let Some(k) = click {
+            self.pick(k, mods);
+            self.select(k);
+        }
+        if let Some(k) = open {
+            self.view = View::List;
+            self.select(k);
+        }
+        let ctx = ui.ctx().clone();
+        self.ask_thumbs(&on_screen, &ctx);
+    }
+
+    /// A click in the gallery: alone, Ctrl toggles, Shift takes the run from the last click.
+    fn pick(&mut self, k: (usize, usize), mods: egui::Modifiers) {
+        if mods.shift
+            && let Some(from) = self.last_pick
+        {
+            let at = |x| self.queue.iter().position(|q| *q == x);
+            if let (Some(a), Some(b)) = (at(from), at(k)) {
+                let run: Vec<(usize, usize)> = self.queue[a.min(b)..=a.max(b)].to_vec();
+                self.picked.extend(run);
+            }
+        } else if mods.command {
+            if !self.picked.remove(&k) {
+                self.picked.insert(k);
+            }
+        } else {
+            self.picked.clear();
+            self.picked.insert(k);
+        }
+        self.last_pick = Some(k);
     }
 
     /// The dropdown of training sets, with New, Duplicate, Copy labels from, public and undo.
@@ -615,6 +979,11 @@ impl App {
 
     fn top(&mut self, ui: &mut egui::Ui) {
         self.sets_bar(ui);
+        ui.horizontal(|ui| {
+            ui.selectable_value(&mut self.view, View::List, "List");
+            ui.selectable_value(&mut self.view, View::Groups, "Groups");
+            ui.selectable_value(&mut self.view, View::Gallery, "Gallery");
+        });
         ui.horizontal_wrapped(|ui| {
             let before = self.filter.clone();
             egui::ComboBox::from_id_salt("show")
@@ -977,7 +1346,9 @@ impl App {
         };
         self.frames_drawn += 1;
         match state.load(Ordering::SeqCst) {
-            0 if self.frames_drawn > 5 && (self.unpacking.is_empty() || self.frames_drawn > 3000) => {
+            0 if self.frames_drawn > 5
+                && ((self.unpacking.is_empty() && !self.thumbs.busy()) || self.frames_drawn > 3000) =>
+            {
                 state.store(1, Ordering::SeqCst);
                 let (path, state) = (path.clone(), state.clone());
                 ctx.request_screenshot(move |img| {
@@ -1012,10 +1383,21 @@ impl eframe::App for App {
             });
         }
         egui::Panel::bottom("transport").show(ui, |ui| self.transport(ui));
-        egui::Panel::left("queue")
-            .resizable(true)
-            .default_size(430.0)
-            .show(ui, |ui| self.queue_panel(ui));
+        if self.view != View::Gallery {
+            egui::Panel::left("queue")
+                .resizable(true)
+                .default_size(430.0)
+                .show(ui, |ui| {
+                    if self.view == View::Groups && self.filter.group.is_none() {
+                        self.groups_panel(ui);
+                        return;
+                    }
+                    if self.view == View::Groups && ui.button("Back to the groups (Esc)").clicked() {
+                        self.close_group();
+                    }
+                    self.queue_panel(ui);
+                });
+        }
         egui::Panel::right("details")
             .resizable(true)
             .default_size(380.0)
@@ -1036,6 +1418,11 @@ impl eframe::App for App {
             }
             Some(_) => self.motion_error.clone().unwrap_or_else(|| "loadingâ€¦".into()),
         };
+        if self.view == View::Gallery {
+            egui::CentralPanel::default().show(ui, |ui| self.gallery(ui));
+            self.screenshot(&ctx);
+            return;
+        }
         let frame_no = self.frame;
         let pose = self
             .motion

@@ -14,9 +14,11 @@
 
 pub mod decisions;
 pub mod flags;
+pub mod groups;
 pub mod npz;
 pub mod review;
 pub mod scan;
 pub mod set_commands;
 pub mod store;
+pub mod thumbs;
 pub mod training_set;

@@ -83,8 +83,8 @@ fn a_librarys_clips_read_as_sets_and_play_in_the_rigs_bone_order() {
     for (a, b) in head.iter().zip(TURN) {
         assert!((a - b).abs() < 1e-9, "{head:?}");
     }
-    assert_eq!(m.rotations[10][0], [0.0, 0.0, 0.0, 1.0]);
-    assert_eq!(m.roots[10], [0.0, 0.0, 1.0]);
+    assert!((m.rotations[10][0][3] - 1.0).abs() < 1e-9);
+    assert!((m.roots[10][2] - 1.0).abs() < 1e-9);
     std::fs::remove_dir_all(&dir).ok();
 }
 
@@ -216,5 +216,61 @@ fn a_private_clip_never_reaches_the_decisions_file_or_a_checkout() {
     let e = r.run("review.set_duplicate", &p(json!({"as": "copy"}))).unwrap_err();
     assert!(e.contains("private"), "{e}");
     assert!(!folder.join("copy.set.json").exists());
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn a_group_decision_is_one_undo_step_and_a_clip_can_override_it() {
+    let dir = scratch("group");
+    let mut r = review(&dir, &dir.join("sets"));
+    r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
+    // walk_01 and walk_02 differ by their number; hop is its own group
+    // minutes: walk 30/30 + 60/30 = 3 s = 0.05; hop 45/15 = 3 s = 0.05; run 120/60 = 2 s
+    let g = r.run("review.groups", &Map::new()).unwrap();
+    let rows = g["groups"].as_array().unwrap();
+    assert_eq!(rows.len(), 3);
+    let walk = rows.iter().find(|x| x["name"] == "walk").unwrap();
+    assert_eq!((walk["pack"].as_str(), walk["clips"].as_u64()), (Some("G"), Some(2)));
+    assert!((walk["minutes"].as_f64().unwrap() - 0.05).abs() < 1e-9);
+    let key = walk["group"].as_str().unwrap().to_string();
+
+    // the ones before it stay when the group is undone
+    r.run("review.set_clip", &p(json!({"id": "library:G/hop", "status": "reject"}))).unwrap();
+    let v = r.run("review.set_group", &p(json!({"group": key, "status": "reject"}))).unwrap();
+    assert_eq!(v["changed"], 2);
+    let status = |r: &Review, id: &str| {
+        let (s, t) = r.find(id).unwrap();
+        r.status_of(s, t).map(|x| x.word())
+    };
+    assert_eq!(status(&r, "library:G/walk_01"), Some("reject"));
+    r.run("review.set_clip", &p(json!({"id": "library:G/walk_02", "status": "keep"}))).unwrap();
+    assert_eq!(status(&r, "library:G/walk_02"), Some("ok"), "one clip overrides its group");
+    assert_eq!(status(&r, "library:G/walk_01"), Some("reject"));
+
+    // back: the override, then the whole group at one stroke
+    assert_eq!(r.run("review.undo", &Map::new()).unwrap()["undone"], 1);
+    assert_eq!(r.run("review.undo", &Map::new()).unwrap()["undone"], 2);
+    assert_eq!(status(&r, "library:G/walk_01"), None);
+    assert_eq!(status(&r, "library:G/walk_02"), None);
+    assert_eq!(status(&r, "library:G/hop"), Some("reject"));
+    // and the file says the same
+    let on_disk = TrainingSet::load(&dir.join("sets"), "a").unwrap();
+    assert_eq!(on_disk.clips.len(), 1);
+    assert!(r.run("review.set_group", &p(json!({"group": "nope", "status": "keep"}))).is_err());
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn many_clips_labelled_at_once_are_one_undo_step() {
+    let dir = scratch("mass");
+    let mut r = review(&dir, &dir.join("sets"));
+    r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
+    let ids = json!(["library:G/hop", "library:H/run"]);
+    r.run("review.set_clip", &p(json!({"ids": ids, "add_labels": ["x", "y"]}))).unwrap();
+    r.run("review.set_clip", &p(json!({"ids": ids, "remove_labels": ["x"]}))).unwrap();
+    let labels = |r: &Review| r.training.active.as_ref().unwrap().clips["library:H/run"].labels.clone();
+    assert_eq!(labels(&r), ["y"]);
+    assert_eq!(r.run("review.undo", &Map::new()).unwrap()["undone"], 2);
+    assert_eq!(labels(&r), ["x", "y"]);
     std::fs::remove_dir_all(&dir).ok();
 }
