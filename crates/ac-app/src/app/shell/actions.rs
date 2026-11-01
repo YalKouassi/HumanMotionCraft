@@ -307,6 +307,9 @@ pub static ACTIONS: &[Action] = &[
     a("app.picker", "Picker panel", "View", &[])
         .check()
         .doc("pick joints and body parts on a small figure"),
+    a("app.controller", "Controller panel", "View", &[])
+        .check()
+        .doc("W A S D and a controller, shown live and pressable with the mouse"),
     a("app.library", "Library panel", "View", &[]).check(),
     a("app.inspector", "Inspector panel", "View", &[]).check(),
     a("app.timeline", "Timeline panel", "View", &[]).check(),
@@ -514,6 +517,7 @@ impl App {
             "app.dope" => self.timeline.dope,
             "app.range" => self.is_dock_panel_open(super::DockPanel::Range),
             "app.picker" => self.is_dock_panel_open(super::DockPanel::Picker),
+            "app.controller" => self.is_dock_panel_open(super::DockPanel::Controller),
             "app.library" => p.layout.show_library,
             "app.inspector" => p.layout.show_inspector,
             "app.timeline" => p.layout.show_timeline,
@@ -586,6 +590,10 @@ impl App {
             "app.picker" => {
                 let on = self.is_dock_panel_open(super::DockPanel::Picker);
                 self.set_dock_panel(super::DockPanel::Picker, !on);
+            }
+            "app.controller" => {
+                let on = self.is_dock_panel_open(super::DockPanel::Controller);
+                self.set_dock_panel(super::DockPanel::Controller, !on);
             }
             "app.library" => {
                 self.shell

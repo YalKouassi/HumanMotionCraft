@@ -128,7 +128,9 @@ time and no unseeded randomness in them. Maths is `f64` in the core (the GPU get
   or assets (`cargo xtask names` checks; credits for assets we use live in
   `ATTRIBUTION.md`/`NOTICE`). One exception (owner's decision, 2026-10-31): the export presets
   (`crates/ac-app/src/app/files/export.rs`) name the engines and tools they suit, because people
-  need to see which fits theirs.
+  need to see which fits theirs. A second (owner's decision, 2026-11-01): the Controller panel
+  (`crates/ac-app/src/app/panels/controller.rs`) names the controllers it draws, as plain input
+  labels; the drawings are our own.
 - **Our own name lives in one place.** Code never spells the product name: it uses
   `ac_core::product::NAME` / `ID` (or `product_name!()` / `product_id!()` inside `concat!`), and
   file formats go through `product::is_format`. `docs/naming.md` lists what can't read the

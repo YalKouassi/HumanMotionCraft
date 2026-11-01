@@ -1,7 +1,7 @@
 //! The panels around the viewport: library and inspector at the sides (either way round), the
 //! timeline below, and `craft_ui::docking` hosting the 3D viewport canvas alongside any dockable
 //! or pop-out tool panels (`Range`, `Picker`, `Joint`, `Layers`, `Physics`, `Review`, `Scene`, `AI`,
-//! `Text`, `Pins`). With `craft-ui`'s `native-windows` feature, any floating panel opens in its
+//! `Text`, `Controller`, `Pins`). With `craft-ui`'s `native-windows` feature, any floating panel opens in its
 //! own native OS window so it can be dragged onto a separate monitor and docked back by dragging
 //! its title bar into the main window (or clicking its header button).
 
@@ -31,6 +31,7 @@ pub enum DockPanel {
     Ai,
     Text,
     PoseFill,
+    Controller,
     Pins,
 }
 
@@ -47,6 +48,7 @@ impl DockPanel {
         DockPanel::Ai,
         DockPanel::Text,
         DockPanel::PoseFill,
+        DockPanel::Controller,
         DockPanel::Pins,
     ];
 
@@ -63,6 +65,7 @@ impl DockPanel {
             DockPanel::Ai => "ai",
             DockPanel::Text => "text",
             DockPanel::PoseFill => "posefill",
+            DockPanel::Controller => "controller",
             DockPanel::Pins => "pins",
         }
     }
@@ -80,6 +83,7 @@ impl DockPanel {
             DockPanel::Ai => "AI in-between",
             DockPanel::Text => "Motion from text",
             DockPanel::PoseFill => "Pose fill",
+            DockPanel::Controller => "Controller",
             DockPanel::Pins => "Pins",
         }
     }
@@ -122,6 +126,7 @@ impl DockPanel {
             DockPanel::Ai => "AI in-between".into(),
             DockPanel::Text => "Motion from text".into(),
             DockPanel::PoseFill => "Pose fill".into(),
+            DockPanel::Controller => "Controller".into(),
             DockPanel::Pins => "Pins".into(),
         }
     }
@@ -160,6 +165,7 @@ pub fn default_dock_workspace() -> Workspace<DockPanel> {
                         DockPanel::Ai,
                         DockPanel::Text,
                         DockPanel::PoseFill,
+                        DockPanel::Controller,
                         DockPanel::Pins,
                     ],
                     0,
@@ -207,6 +213,7 @@ const SIMPLE_CLOSES: &[DockPanel] = &[
     DockPanel::Ai,
     DockPanel::Text,
     DockPanel::PoseFill,
+    DockPanel::Controller,
     DockPanel::Pins,
     DockPanel::Range,
 ];
@@ -343,6 +350,12 @@ impl DockContent<DockPanel> for DockAdapter<'_> {
                     .id_salt("dock-posefill")
                     .auto_shrink([false, false])
                     .show(ui, |ui| self.app.posefill_panel(ui));
+            }
+            DockPanel::Controller => {
+                egui::ScrollArea::vertical()
+                    .id_salt("dock-controller")
+                    .auto_shrink([false, false])
+                    .show(ui, |ui| self.app.controller_panel(ui));
             }
             DockPanel::Pins => {
                 egui::ScrollArea::vertical()
@@ -498,6 +511,7 @@ impl App {
         self.ai_poll();
         self.text_poll(ui.ctx());
         self.posefill_poll(ui.ctx());
+        self.controller_frame();
         self.live_frame(ui.ctx());
         self.community_poll(ui.ctx());
         self.community_window(ui.ctx());

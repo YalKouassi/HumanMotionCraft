@@ -12,8 +12,6 @@ use crate::app::App;
 use crate::app::shell::Level;
 use crate::app::ui_ids::Tag;
 
-use super::gamepad::Pad;
-
 /// Stick speeds in m/s: walking on the keys, and running with Shift (held to the set's top speed).
 const WALK: f64 = 1.3;
 const RUN: f64 = 3.6;
@@ -24,27 +22,26 @@ const MOST: f64 = 10.0;
 const SLOW_STICK: f32 = 0.15;
 
 /// Keys held.
-#[derive(Default)]
-struct Held {
-    w: bool,
-    a: bool,
-    s: bool,
-    d: bool,
-    shift: bool,
+#[derive(Clone, Copy, Default)]
+pub(super) struct Held {
+    pub w: bool,
+    pub a: bool,
+    pub s: bool,
+    pub d: bool,
+    pub shift: bool,
 }
 
 /// The panel's window state.
 #[derive(Default)]
 pub struct LiveState {
-    running: bool,
-    keys: Held,
+    pub(super) running: bool,
+    pub(super) keys: Held,
     /// Time not yet turned into frames.
     owed: f64,
     /// The top speed the set gave.
     top: f64,
     /// Whether the camera followed the body before the take.
     followed: bool,
-    pad: Option<Pad>,
     /// What `live.stop` said; the range chosen; the frame looked at.
     stopped: Option<Value>,
     from: i64,
@@ -130,15 +127,6 @@ impl App {
         st.stopped = None;
         st.frames = 1;
         st.target.clear();
-        if st.pad.is_none() {
-            match Pad::new() {
-                Ok(p) => st.pad = Some(p),
-                Err(e) => self
-                    .shell
-                    .messages
-                    .push(Level::Info, format!("Controller: {e}. W A S D still steer.")),
-            }
-        }
     }
 
     fn live_stop(&mut self) {
@@ -174,11 +162,16 @@ impl App {
         let yaw = self.camera.yaw;
         // the time really passed: `owed` caps a stall, and the take must keep to the clock at any refresh rate
         let dt = f64::from(ctx.input(|i| i.unstable_dt));
+        let [mut right, mut forward] = self.panels.controller.steer();
+        let by_mouse = self.panels.controller.mouse_keys();
         let st = &mut self.panels.live;
-        let pad = st.pad.as_mut().map(Pad::poll).unwrap_or_default();
-        let [mut right, mut forward] = pad.stick;
-        let lost = pad.lost;
-        let k = &st.keys;
+        let k = Held {
+            w: st.keys.w || by_mouse.w,
+            a: st.keys.a || by_mouse.a,
+            s: st.keys.s || by_mouse.s,
+            d: st.keys.d || by_mouse.d,
+            shift: st.keys.shift || by_mouse.shift,
+        };
         let on_keys = k.w || k.a || k.s || k.d;
         let speed = if on_keys {
             right = f32::from(u8::from(k.d)) - f32::from(u8::from(k.a));
@@ -204,13 +197,6 @@ impl App {
         let params = json!({
             "heading": heading(right, forward, yaw), "speed": speed, "frames": frames as i64, "wait": false,
         });
-        if let Some(name) = lost {
-            let text = format!(
-                "Controller {name} was unplugged: the character stops. Plug it back in, or use W A S D."
-            );
-            self.shell.messages.push(Level::Error, text.clone());
-            self.status = text;
-        }
         // not through `run`: thirty a second would fill the history of messages and timings
         match self.session.run("live.input", &params) {
             Ok(v) => {

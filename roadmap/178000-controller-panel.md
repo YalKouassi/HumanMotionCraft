@@ -1,6 +1,6 @@
 # Controller panel: see the inputs, and press them with the mouse
 
-- **Status:** owner's decision first (the acceptance below, and the naming question)
+- **Status:** built, waiting for the owner
 - **Requires:** none (158000, which it drives, is done)
 - **Source:** owner request (2026-11-01)
 
@@ -33,12 +33,11 @@ Decided, for the owner to overrule:
 - **Rule 1:** the panel says when the chosen controller is unplugged, falls back to simulated, and
   says "controllers work on Windows only" elsewhere.
 
-## Question
-`AGENTS.md` keeps other products' names out of code and docs (`cargo xtask names`), with one exception:
-the export presets. "Xbox" and "PlayStation" need a second exception limited to this panel's labels.
-Recommendation: allow it, for the same reason as the presets (people need to recognise theirs), with
-the buttons' letters and shapes drawn by us. The alternative is neutral labels: "A B X Y layout" and
-"Shapes layout". The gate changes only on the owner's word.
+## Decision
+The owner agreed the acceptance and allowed the Xbox and PlayStation names as plain input labels
+(2026-11-01; recorded in `AGENTS.md`). The owner also asked for a made-up standard controller (two
+sticks and four buttons) and a "no controller" choice, so the dropdown has both. No controller ignores
+real sticks too.
 
 ## Acceptance
 - With the panel on and no controller plugged in, in the release app: a take steered by holding the
@@ -54,3 +53,20 @@ the buttons' letters and shapes drawn by us. The alternative is neutral labels: 
   control lights the right one on screen. 158000 never read a real stick and an agent can't test this,
   so it stays open until then. Any controller the library can't read gets written here.
 - `cargo xtask check` passes, and the owner plays it and approves.
+
+## Result
+**Built (2026-11-01):** `panels/controller.rs` (drawing, mouse, dropdown), `panels/gamepad.rs` (every
+control, a list, choosing one), `app.controller` in the View menu, `--ui controller=none|standard|xbox|playstation|off`.
+The panel opens as a dock tab, and Simple mode closes it. The dropdown choice isn't saved.
+
+Proof in `target/shots/2026-11-01/controller-panel/`, release app, no controller plugged in:
+- `take-mouse-stick.mp4`: on-screen left stick held from 1 s to 6 s. The body travels 18 hip heights
+  and settles within about 2 s of letting go (the model's usual stop). `take-mouse-key.mp4`: on-screen W, 6 hip heights, then stops likewise.
+- `layout-*.png`, `drive-log.txt`: all 41 controls across the four choices change when pressed with the mouse and return exactly when
+  released. Driven by `drive.py`, through the control port.
+- Tests in `controller.rs`: stick drag clamped, hostile numbers, larger tilt wins, no controller ignores sticks, trigger, parts fit with no overlap, name to layout.
+
+**Not done or not tested:**
+- No real controller has been read: **the owner's check with an Xbox and a PlayStation pad is open**, and so is unplugging one mid-take. That path is written, not run.
+- The mouse has one pointer, so it presses one on-screen key at a time: W and A together need the keyboard (or the stick, for a diagonal). A take was steered with W only; A lights up but wasn't steered with.
+- Takes in the first drive runs were disturbed: the window was resized and a take started from outside the script, and once it closed, with no crash record found. Clean runs didn't reproduce it. One of those shots showed the joints standing with the mesh flat on the floor, physics on, not seen again; reason unknown.

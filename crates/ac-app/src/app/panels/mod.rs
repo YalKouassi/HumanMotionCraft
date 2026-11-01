@@ -5,6 +5,7 @@
 
 pub mod ai;
 pub mod ai_worker;
+pub mod controller;
 pub mod gamepad;
 pub mod joint;
 pub mod layers;
@@ -30,12 +31,14 @@ pub struct Panels {
     pub text: text::TextState,
     pub posefill: posefill::PoseFillState,
     pub live: live::LiveState,
+    pub controller: controller::ControllerState,
 }
 
 impl super::App {
     /// The panels' window state for `--ui` and the control port: `joint=<bone>` selects a joint,
     /// `box=<n>` picks a scene box, `layer=<n>` picks a layer, `prompt=<text>` fills in motion from
-    /// text's prompt, `export_dir=<folder>` is where the Export dialog starts.
+    /// text's prompt, `export_dir=<folder>` is where the Export dialog starts, `controller=none|standard|xbox|playstation|off`
+    /// sets the Controller panel.
     pub(in crate::app) fn set_panel_ui(&mut self, name: &str, value: &str) -> Result<(), String> {
         let index = || value.parse::<usize>().map_err(|e| format!("{value:?}: {e}"));
         match name {
@@ -54,6 +57,7 @@ impl super::App {
                 }
                 self.panels.layers.pick(i);
             }
+            "controller" => self.set_controller_ui(value)?,
             "prompt" => self.panels.text.prompt = value.to_string(),
             "export_dir" => self.files.state.export_dir = Some(value.to_string()),
             "range_pair" => {
