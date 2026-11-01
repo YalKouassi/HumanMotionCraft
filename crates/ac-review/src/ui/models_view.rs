@@ -406,7 +406,8 @@ impl App {
                     .stick_to_bottom(true)
                     .show(ui, |ui| {
                         for l in &s.tail {
-                            ui.label(RichText::new(l).monospace().small());
+                            // a size, as .small() would take away the fixed width the tables need
+                            ui.label(RichText::new(l).monospace().size(11.0));
                         }
                     });
             });
