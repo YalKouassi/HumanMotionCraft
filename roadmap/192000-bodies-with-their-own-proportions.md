@@ -5,7 +5,7 @@
 - **Source:** owner's request (2026-11-01): a character creator, and other meshes on the same rig
 
 ## What
-Only if 189000 allows each body its own bone lengths.
+189000 decided that each body may have its own bone lengths.
 
 Editing, AI Fill, physics and ranges stay on the built-in rig (144000). A body with other lengths is shown
 and exported by applying the same rotations to its own rest positions (`crates/ac-core/src/rig.rs:3-10`).
@@ -23,7 +23,8 @@ Export onto such a body uses the same corrected motion the viewport shows.
 
 ## Acceptance
 - A tall and a short fixture body each play a walk with planted feet moving under 1 cm and staying above the
-  floor (146000's line).
+  floor (146000's line). The short one is about 1.2 m, so nothing here assumes adult size if small bodies come
+  later (189000).
 - Hand-on-hip and arms-crossed poses report any contact lost or clash gained, per body.
 - The viewport shows the body and marks at 60 fps on the walk clip.
 - An exported `.glb` moves as the viewport does.

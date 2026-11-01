@@ -12,6 +12,8 @@ Replace these with one loader that returns the chosen body, with the mannequin a
 
 - Commands: `body.list`, `body.use`, `body.current`. The choice is a setting and isn't saved in a clip, so
   the same clip plays on any body.
+- Bodies are local files (189000). `body.list` reads a folder, and `body.use` also takes a path, which is how
+  a body from the creator, a separate app, gets here.
 - The viewport, `ac video`, renders, the review app and exports all use the chosen body.
 - If the chosen body is missing or fails the check, the app falls back to the mannequin and says so
   (Rule 1).
