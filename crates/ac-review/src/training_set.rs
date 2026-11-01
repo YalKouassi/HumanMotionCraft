@@ -331,8 +331,7 @@ mod tests {
         // the free clips may live in a repository
         s.clips.insert("cmu/a".into(), SetClip::new("cmu/a"));
         s.save(&inside).unwrap();
-        s.clips
-            .insert("library:G/n".into(), SetClip::new("library:G/n"));
+        s.clips.insert("library:G/n".into(), SetClip::new("library:G/n"));
         for at in [&inside, &round] {
             let e = s.save(at).unwrap_err();
             assert!(e.contains("private"), "{e}");
@@ -346,7 +345,11 @@ mod tests {
         let outside = scratch("outside");
         s.save(&outside).unwrap();
         std::fs::copy(outside.join("mine.set.json"), inside.join("mine.set.json")).unwrap();
-        assert!(TrainingSet::load(&inside, "mine").unwrap_err().contains("private"));
+        assert!(
+            TrainingSet::load(&inside, "mine")
+                .unwrap_err()
+                .contains("private")
+        );
         for d in [repo, tree, outside] {
             std::fs::remove_dir_all(&d).ok();
         }

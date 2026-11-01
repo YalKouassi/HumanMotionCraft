@@ -61,6 +61,22 @@ pub fn pack_of(id: &str) -> &str {
     id.split_once('/').map_or(id, |(pack, _)| pack)
 }
 
+/// A clip's pack as `sources` names it, the same rule as `ac_train.trainset.pack_of`: a library
+/// group, or the longest mark it starts with, or its start before ` - ` (a port writes
+/// `<pack> - <action>`).
+pub fn marked_pack<'a>(id: &'a str, sources: &'a Sources) -> &'a str {
+    let group = pack_of(id);
+    if !id.starts_with(training_set::LIBRARY) {
+        return group;
+    }
+    sources
+        .0
+        .keys()
+        .filter(|k| group == k.as_str() || group.starts_with(&format!("{k} - ")))
+        .max_by_key(|k| k.len())
+        .map_or_else(|| group.split(" - ").next().unwrap_or(group), String::as_str)
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Serialize)]
 pub struct Count {
     pub clips: usize,
@@ -81,6 +97,9 @@ pub struct Totals {
     pub mine: Count,
     /// Unmarked ones included.
     pub purchased: Count,
+    /// Unmarked takes of the training sets (`<set>/<take>`): their licences are the registry's,
+    /// and `ac_train` refuses a non-commercial one in a public set.
+    pub free: Count,
     /// Of `purchased`, those whose pack isn't marked.
     pub unmarked: Count,
     pub rejected: usize,
@@ -96,17 +115,20 @@ pub fn totals(set: &TrainingSet, sources: &Sources, length: impl Fn(&str) -> Opt
     let mut out = Totals::default();
     let (mut held_purchased, mut held_unmarked) = (0, 0);
     for (id, c) in &set.clips {
-        let pack = pack_of(id);
+        let pack = marked_pack(id, sources);
         let source = sources.0.get(pack).copied();
+        let free = source.is_none() && !id.starts_with(training_set::LIBRARY);
         let word = match source {
             Some(Source::Mine) => "mine",
             Some(Source::Purchased) => "purchased",
+            None if free => "free",
             None => "unmarked",
         };
         out.packs.insert(pack.to_string(), word.to_string());
         match source {
             Some(Source::Mine) => {}
             Some(Source::Purchased) => held_purchased += 1,
+            None if free => {}
             None => held_unmarked += 1,
         }
         if c.status == ClipStatus::Reject {
@@ -132,6 +154,7 @@ pub fn totals(set: &TrainingSet, sources: &Sources, length: impl Fn(&str) -> Opt
         match source {
             Some(Source::Mine) => out.mine.add(minutes),
             Some(Source::Purchased) => out.purchased.add(minutes),
+            None if free => out.free.add(minutes),
             None => {
                 out.purchased.add(minutes);
                 out.unmarked.add(minutes);
@@ -177,14 +200,20 @@ mod tests {
 
     fn sources() -> Sources {
         Sources(
-            [("G".to_string(), Source::Mine), ("cmu".to_string(), Source::Purchased)]
-                .into_iter()
-                .collect(),
+            [
+                ("G".to_string(), Source::Mine),
+                ("cmu".to_string(), Source::Purchased),
+            ]
+            .into_iter()
+            .collect(),
         )
     }
 
     fn near(a: f64, seconds: f64) {
-        assert!((a - seconds / 60.0).abs() < 1e-12, "{a} minutes, wanted {seconds} s");
+        assert!(
+            (a - seconds / 60.0).abs() < 1e-12,
+            "{a} minutes, wanted {seconds} s"
+        );
     }
 
     #[test]

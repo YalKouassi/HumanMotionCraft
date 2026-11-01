@@ -208,7 +208,10 @@ mod tests {
         held.wait();
         wait(&mut t, &first);
         assert!(!t.busy());
-        assert!(queued.iter().all(|k| t.get(*k).is_none()), "made after leaving the screen");
+        assert!(
+            queued.iter().all(|k| t.get(*k).is_none()),
+            "made after leaving the screen"
+        );
         // back on screen, it is asked for again
         t.show(&queued[..1], |_| Some(line()));
         wait(&mut t, &queued[..1]);

@@ -20,10 +20,10 @@ use std::sync::mpsc::{Receiver, TryRecvError, channel};
 use ac_review::decisions::Status;
 use ac_review::groups::Group;
 use ac_review::review::{Filter, Review, Show};
-use ac_review::training_set::{ClipStatus, SetClip};
 use ac_review::store::Motion;
 use ac_review::thumbs::{Figure, Job, Thumbs, figure};
 use ac_review::totals::Totals;
+use ac_review::training_set::{ClipStatus, SetClip};
 use egui::{Color32, Key, RichText};
 use serde_json::{Value, json};
 
@@ -192,7 +192,12 @@ impl App {
         self.queue = self.review.queue(&self.filter);
         self.groups = self.review.groups(&self.queue);
         self.group_at = self.group_at.min(self.groups.len().saturating_sub(1));
-        self.totals = self.review.training.active.is_some().then(|| self.review.set_totals());
+        self.totals = self
+            .review
+            .training
+            .active
+            .is_some()
+            .then(|| self.review.set_totals());
     }
 
     fn select(&mut self, t: (usize, usize)) {
@@ -730,16 +735,13 @@ impl App {
         );
         let (mut pick, mut open) = (None, None);
         let mut on_screen = Vec::new();
-        egui::ScrollArea::vertical().auto_shrink([false, false]).show_rows(
-            ui,
-            ROW,
-            self.groups.len(),
-            |ui, range| {
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show_rows(ui, ROW, self.groups.len(), |ui, range| {
                 for i in range {
                     let Some(g) = self.groups.get(i) else { continue };
                     let width = ui.available_width();
-                    let (rect, resp) =
-                        ui.allocate_exact_size(egui::vec2(width, ROW), egui::Sense::click());
+                    let (rect, resp) = ui.allocate_exact_size(egui::vec2(width, ROW), egui::Sense::click());
                     let p = ui.painter_at(rect);
                     if i == self.group_at {
                         p.rect_filled(rect, 2.0, ui.visuals().selection.bg_fill);
@@ -778,8 +780,7 @@ impl App {
                         pick = Some(i);
                     }
                 }
-            },
-        );
+            });
         if let Some(i) = pick {
             self.group_at = i;
         }
@@ -833,11 +834,9 @@ impl App {
         let mut open = None;
         let mut on_screen = Vec::new();
         let mods = ui.input(|i| i.modifiers);
-        egui::ScrollArea::vertical().auto_shrink([false, false]).show_rows(
-            ui,
-            CELL.y,
-            rows,
-            |ui, range| {
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show_rows(ui, CELL.y, rows, |ui, range| {
                 for r in range {
                     ui.horizontal(|ui| {
                         for c in 0..cols {
@@ -852,10 +851,7 @@ impl App {
                             } else {
                                 p.rect_filled(rect, 3.0, Color32::from_gray(30));
                             }
-                            let pic = egui::Rect::from_min_size(
-                                rect.min,
-                                egui::vec2(CELL.x, CELL.y - 22.0),
-                            );
+                            let pic = egui::Rect::from_min_size(rect.min, egui::vec2(CELL.x, CELL.y - 22.0));
                             self.thumb(&p, pic, k);
                             let colour = match self.review.status_of(k.0, k.1) {
                                 Some(Status::Ok) => Color32::from_rgb(90, 200, 110),
@@ -880,8 +876,7 @@ impl App {
                         }
                     });
                 }
-            },
-        );
+            });
         if let Some(k) = click {
             self.pick(k, mods);
             self.select(k);
@@ -938,7 +933,10 @@ impl App {
             if t.missing > 0 {
                 ui.colored_label(
                     Color32::YELLOW,
-                    format!("{} clips aren't here (give --library), so have no minutes", t.missing),
+                    format!(
+                        "{} clips aren't here (give --library), so have no minutes",
+                        t.missing
+                    ),
                 );
             }
         });
@@ -985,7 +983,9 @@ impl App {
                     }
                 });
             if pick != open
-                && self.set_command("review.set_open", json!({ "name": pick })).is_some()
+                && self
+                    .set_command("review.set_open", json!({ "name": pick }))
+                    .is_some()
             {
                 self.reselect();
             }
@@ -996,14 +996,23 @@ impl App {
             );
             if ui.button("New").clicked() {
                 let name = self.new_set.clone();
-                if self.set_command("review.set_new", json!({ "name": name })).is_some() {
+                if self
+                    .set_command("review.set_new", json!({ "name": name }))
+                    .is_some()
+                {
                     self.new_set.clear();
                     self.reselect();
                 }
             }
-            if ui.add_enabled(open.is_some(), egui::Button::new("Duplicate")).clicked() {
+            if ui
+                .add_enabled(open.is_some(), egui::Button::new("Duplicate"))
+                .clicked()
+            {
                 let name = self.new_set.clone();
-                if self.set_command("review.set_duplicate", json!({ "as": name })).is_some() {
+                if self
+                    .set_command("review.set_duplicate", json!({ "as": name }))
+                    .is_some()
+                {
                     self.new_set.clear();
                     self.reselect();
                 }
@@ -1035,7 +1044,10 @@ impl App {
             {
                 self.set_command("review.set_public", json!({ "public": p }));
             }
-            if ui.add_enabled(open.is_some(), egui::Button::new("Undo")).clicked() {
+            if ui
+                .add_enabled(open.is_some(), egui::Button::new("Undo"))
+                .clicked()
+            {
                 self.undo();
             }
         });

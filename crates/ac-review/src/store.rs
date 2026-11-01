@@ -322,7 +322,11 @@ impl Set {
             return Err(format!("{} is {} frames: too long to show", t.name, t.frames));
         }
         if let Some(g) = &self.library {
-            return clip_frames(&g.dir.join(format!("{}{}", t.name, Kind::Animations.ext())), &g.rig, None);
+            return clip_frames(
+                &g.dir.join(format!("{}{}", t.name, Kind::Animations.ext())),
+                &g.rig,
+                None,
+            );
         }
         let stride = self.bones * 4 * 2;
         let mut f = File::open(&self.cache).map_err(|e| format!("{}: {e}", self.cache.display()))?;
@@ -374,7 +378,12 @@ pub fn open_library(root: &Path, rig: &[String]) -> (Vec<Set>, Vec<String>) {
     let (mut evaluation, mut empty) = (0, 0);
     let mut groups: Vec<(String, Vec<Take>)> = Vec::new();
     for item in lib.listed() {
-        let word = |k: &str| item.get(k).and_then(Value::as_str).unwrap_or_default().to_string();
+        let word = |k: &str| {
+            item.get(k)
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_string()
+        };
         let (group, name) = (word("group"), word("name"));
         if let Some(e) = item.get("error").and_then(Value::as_str) {
             problems.push(format!("library clip {group}/{name}: {e}"));

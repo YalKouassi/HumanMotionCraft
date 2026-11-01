@@ -105,12 +105,19 @@ fn sets_are_made_duplicated_and_labels_copied() {
     let folder = dir.join("sets");
     let mut r = review(&dir, &folder);
     let v = r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
-    assert_eq!((v["name"].as_str(), v["set_version"].as_u64()), (Some("a"), Some(1)));
-    assert!(r.run("review.set_new", &p(json!({"name": "a"}))).is_err(), "no overwriting");
+    assert_eq!(
+        (v["name"].as_str(), v["set_version"].as_u64()),
+        (Some("a"), Some(1))
+    );
+    assert!(
+        r.run("review.set_new", &p(json!({"name": "a"}))).is_err(),
+        "no overwriting"
+    );
     assert!(r.run("review.set_new", &p(json!({"name": "../a"}))).is_err());
 
     let saved = |id: &str, labels: Value, r: &mut Review| {
-        r.run("review.set_clip", &p(json!({"id": id, "labels": labels}))).unwrap()
+        r.run("review.set_clip", &p(json!({"id": id, "labels": labels})))
+            .unwrap()
     };
     saved("library:G/walk_01", json!(["walk"]), &mut r);
     saved("library:G/hop", json!(["hop"]), &mut r);
@@ -120,10 +127,17 @@ fn sets_are_made_duplicated_and_labels_copied() {
     assert_eq!(on_disk.clips.len(), 2);
 
     let v = r.run("review.set_duplicate", &p(json!({"as": "b"}))).unwrap();
-    assert_eq!((v["name"].as_str(), v["clips"].as_u64(), v["set_version"].as_u64()), (Some("b"), Some(2), Some(1)));
+    assert_eq!(
+        (v["name"].as_str(), v["clips"].as_u64(), v["set_version"].as_u64()),
+        (Some("b"), Some(2), Some(1))
+    );
     saved("library:G/walk_01", json!(["changed"]), &mut r);
     saved("library:H/run", json!(["run"]), &mut r);
-    assert_eq!(TrainingSet::load(&folder, "a").unwrap(), on_disk, "the copy is its own");
+    assert_eq!(
+        TrainingSet::load(&folder, "a").unwrap(),
+        on_disk,
+        "the copy is its own"
+    );
 
     // copied: walk_01 and hop are in both, run is only in b; hop's label is the same already
     let v = r.run("review.set_copy_labels", &p(json!({"from": "a"}))).unwrap();
@@ -137,10 +151,19 @@ fn sets_are_made_duplicated_and_labels_copied() {
     assert_eq!(listed["active"]["name"], "b");
 
     // with the set open the queue and the status come from it; closed, from the decisions file
-    let q = r.queue(&Filter { show: Show::InSet, ..Filter::default() });
+    let q = r.queue(&Filter {
+        show: Show::InSet,
+        ..Filter::default()
+    });
     assert_eq!(q.len(), 3);
     r.run("review.set_open", &p(json!({"name": null}))).unwrap();
-    assert!(r.queue(&Filter { show: Show::InSet, ..Filter::default() }).is_empty());
+    assert!(
+        r.queue(&Filter {
+            show: Show::InSet,
+            ..Filter::default()
+        })
+        .is_empty()
+    );
     std::fs::remove_dir_all(&dir).ok();
 }
 
@@ -149,7 +172,11 @@ fn clips_are_kept_rejected_cut_and_removed_and_nonsense_refused() {
     let dir = scratch("clips");
     let mut r = review(&dir, &dir.join("sets"));
     assert!(
-        r.run("review.set_clip", &p(json!({"id": "library:G/hop", "status": "keep"}))).is_err(),
+        r.run(
+            "review.set_clip",
+            &p(json!({"id": "library:G/hop", "status": "keep"}))
+        )
+        .is_err(),
         "no set open"
     );
     r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
@@ -163,12 +190,17 @@ fn clips_are_kept_rejected_cut_and_removed_and_nonsense_refused() {
         assert!(r.run("review.set_clip", &p(bad.clone())).is_err(), "{bad}");
     }
     assert!(r.training.active.as_ref().unwrap().clips.is_empty());
-    r.run("review.set_clip", &p(json!({"id": id, "cuts": [[5, 9], [8, 12]]}))).unwrap();
+    r.run(
+        "review.set_clip",
+        &p(json!({"id": id, "cuts": [[5, 9], [8, 12]]})),
+    )
+    .unwrap();
     let (s, t) = r.find(id).unwrap();
     assert_eq!(r.status_of(s, t).map(|x| x.word()), Some("cut"));
     let c = &r.training.active.as_ref().unwrap().clips[id];
     assert_eq!(c.cuts, [[5, 12]]);
-    r.run("review.set_clip", &p(json!({"id": id, "status": "reject"}))).unwrap();
+    r.run("review.set_clip", &p(json!({"id": id, "status": "reject"})))
+        .unwrap();
     assert_eq!(r.status_of(s, t).map(|x| x.word()), Some("reject"));
     let v = r.run("review.set_remove", &p(json!({"id": id}))).unwrap();
     assert_eq!(v["changed"], 1);
@@ -185,7 +217,10 @@ fn a_private_clip_never_reaches_the_decisions_file_or_a_checkout() {
     let mut r = review(&dir, &folder);
 
     let e = r
-        .run("review.decide", &p(json!({"id": "library:G/hop", "status": "ok"})))
+        .run(
+            "review.decide",
+            &p(json!({"id": "library:G/hop", "status": "ok"})),
+        )
         .unwrap_err();
     assert!(e.contains("training set"), "{e}");
     assert!(!dir.join("decisions.json").exists());
@@ -194,13 +229,19 @@ fn a_private_clip_never_reaches_the_decisions_file_or_a_checkout() {
     r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
     let before = std::fs::read_to_string(folder.join("a.set.json")).unwrap();
     let e = r
-        .run("review.set_clip", &p(json!({"id": "library:G/hop", "status": "keep"})))
+        .run(
+            "review.set_clip",
+            &p(json!({"id": "library:G/hop", "status": "keep"})),
+        )
         .unwrap_err();
     assert!(e.contains("private"), "{e}");
     let a = r.training.active.as_ref().unwrap();
     assert!(a.clips.is_empty());
     assert_eq!(a.set_version, 1);
-    assert_eq!(std::fs::read_to_string(folder.join("a.set.json")).unwrap(), before);
+    assert_eq!(
+        std::fs::read_to_string(folder.join("a.set.json")).unwrap(),
+        before
+    );
 
     // nor can a duplicate carry one in
     let outside = dir.join("outside");
@@ -213,7 +254,9 @@ fn a_private_clip_never_reaches_the_decisions_file_or_a_checkout() {
     r.training.folder = Some(outside);
     r.open_set(Some("held")).unwrap();
     r.training.folder = Some(folder.clone());
-    let e = r.run("review.set_duplicate", &p(json!({"as": "copy"}))).unwrap_err();
+    let e = r
+        .run("review.set_duplicate", &p(json!({"as": "copy"})))
+        .unwrap_err();
     assert!(e.contains("private"), "{e}");
     assert!(!folder.join("copy.set.json").exists());
     std::fs::remove_dir_all(&dir).ok();
@@ -230,21 +273,38 @@ fn a_group_decision_is_one_undo_step_and_a_clip_can_override_it() {
     let rows = g["groups"].as_array().unwrap();
     assert_eq!(rows.len(), 3);
     let walk = rows.iter().find(|x| x["name"] == "walk").unwrap();
-    assert_eq!((walk["pack"].as_str(), walk["clips"].as_u64()), (Some("G"), Some(2)));
+    assert_eq!(
+        (walk["pack"].as_str(), walk["clips"].as_u64()),
+        (Some("G"), Some(2))
+    );
     assert!((walk["minutes"].as_f64().unwrap() - 0.05).abs() < 1e-9);
     let key = walk["group"].as_str().unwrap().to_string();
 
     // the ones before it stay when the group is undone
-    r.run("review.set_clip", &p(json!({"id": "library:G/hop", "status": "reject"}))).unwrap();
-    let v = r.run("review.set_group", &p(json!({"group": key, "status": "reject"}))).unwrap();
+    r.run(
+        "review.set_clip",
+        &p(json!({"id": "library:G/hop", "status": "reject"})),
+    )
+    .unwrap();
+    let v = r
+        .run("review.set_group", &p(json!({"group": key, "status": "reject"})))
+        .unwrap();
     assert_eq!(v["changed"], 2);
     let status = |r: &Review, id: &str| {
         let (s, t) = r.find(id).unwrap();
         r.status_of(s, t).map(|x| x.word())
     };
     assert_eq!(status(&r, "library:G/walk_01"), Some("reject"));
-    r.run("review.set_clip", &p(json!({"id": "library:G/walk_02", "status": "keep"}))).unwrap();
-    assert_eq!(status(&r, "library:G/walk_02"), Some("ok"), "one clip overrides its group");
+    r.run(
+        "review.set_clip",
+        &p(json!({"id": "library:G/walk_02", "status": "keep"})),
+    )
+    .unwrap();
+    assert_eq!(
+        status(&r, "library:G/walk_02"),
+        Some("ok"),
+        "one clip overrides its group"
+    );
     assert_eq!(status(&r, "library:G/walk_01"), Some("reject"));
 
     // back: the override, then the whole group at one stroke
@@ -256,7 +316,10 @@ fn a_group_decision_is_one_undo_step_and_a_clip_can_override_it() {
     // and the file says the same
     let on_disk = TrainingSet::load(&dir.join("sets"), "a").unwrap();
     assert_eq!(on_disk.clips.len(), 1);
-    assert!(r.run("review.set_group", &p(json!({"group": "nope", "status": "keep"}))).is_err());
+    assert!(
+        r.run("review.set_group", &p(json!({"group": "nope", "status": "keep"})))
+            .is_err()
+    );
     std::fs::remove_dir_all(&dir).ok();
 }
 
@@ -266,9 +329,18 @@ fn many_clips_labelled_at_once_are_one_undo_step() {
     let mut r = review(&dir, &dir.join("sets"));
     r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
     let ids = json!(["library:G/hop", "library:H/run"]);
-    r.run("review.set_clip", &p(json!({"ids": ids, "add_labels": ["x", "y"]}))).unwrap();
-    r.run("review.set_clip", &p(json!({"ids": ids, "remove_labels": ["x"]}))).unwrap();
-    let labels = |r: &Review| r.training.active.as_ref().unwrap().clips["library:H/run"].labels.clone();
+    r.run(
+        "review.set_clip",
+        &p(json!({"ids": ids, "add_labels": ["x", "y"]})),
+    )
+    .unwrap();
+    r.run("review.set_clip", &p(json!({"ids": ids, "remove_labels": ["x"]})))
+        .unwrap();
+    let labels = |r: &Review| {
+        r.training.active.as_ref().unwrap().clips["library:H/run"]
+            .labels
+            .clone()
+    };
     assert_eq!(labels(&r), ["y"]);
     assert_eq!(r.run("review.undo", &Map::new()).unwrap()["undone"], 2);
     assert_eq!(labels(&r), ["x", "y"]);
@@ -280,11 +352,17 @@ fn totals_and_the_source_warning_through_the_commands() {
     let dir = scratch("totals");
     let folder = dir.join("sets");
     let mut r = review(&dir, &folder);
-    r.run("review.set_new", &p(json!({"name": "a", "public": true}))).unwrap();
+    r.run("review.set_new", &p(json!({"name": "a", "public": true})))
+        .unwrap();
     // walk_01 1 s, run 2 s, hop rejected
     let ids = json!(["library:G/walk_01", "library:H/run"]);
-    r.run("review.set_clip", &p(json!({"ids": ids, "labels": ["move"]}))).unwrap();
-    r.run("review.set_clip", &p(json!({"id": "library:G/hop", "status": "reject"}))).unwrap();
+    r.run("review.set_clip", &p(json!({"ids": ids, "labels": ["move"]})))
+        .unwrap();
+    r.run(
+        "review.set_clip",
+        &p(json!({"id": "library:G/hop", "status": "reject"})),
+    )
+    .unwrap();
 
     // nothing marked: all unmarked, so warned
     let t = r.run("review.totals", &Map::new()).unwrap();
@@ -295,14 +373,16 @@ fn totals_and_the_source_warning_through_the_commands() {
     assert!(w.contains("0 purchased and 3 unmarked"), "{w}");
 
     // H purchased, G still unmarked
-    r.run("review.source", &p(json!({"pack": "H", "source": "purchased"}))).unwrap();
+    r.run("review.source", &p(json!({"pack": "H", "source": "purchased"})))
+        .unwrap();
     let t = r.run("review.totals", &Map::new()).unwrap();
     let w = t["warnings"][0].as_str().unwrap();
     assert!(w.contains("1 purchased and 2 unmarked"), "{w}");
 
     // both mine: nothing to warn of, and the minutes are the owner's
     for pack in ["G", "H"] {
-        r.run("review.source", &p(json!({"pack": pack, "source": "mine"}))).unwrap();
+        r.run("review.source", &p(json!({"pack": pack, "source": "mine"})))
+            .unwrap();
     }
     let t = r.run("review.totals", &Map::new()).unwrap();
     assert_eq!(t["warnings"], json!([]));
@@ -310,16 +390,26 @@ fn totals_and_the_source_warning_through_the_commands() {
     assert_eq!(t["purchased"]["clips"], 0);
 
     // no longer public, purchased: no warning
-    r.run("review.source", &p(json!({"pack": "H", "source": "purchased"}))).unwrap();
+    r.run("review.source", &p(json!({"pack": "H", "source": "purchased"})))
+        .unwrap();
     r.run("review.set_public", &p(json!({"public": false}))).unwrap();
-    assert_eq!(r.run("review.totals", &Map::new()).unwrap()["warnings"], json!([]));
+    assert_eq!(
+        r.run("review.totals", &Map::new()).unwrap()["warnings"],
+        json!([])
+    );
 
     // a sources file that won't read is said, and nothing counts as mine
     std::fs::write(folder.join("sources.json"), "not json").unwrap();
     let t = r.run("review.totals", &Map::new()).unwrap();
     assert_eq!(t["mine"]["clips"], 0);
     assert_eq!(t["warnings"].as_array().unwrap().len(), 1);
-    assert!(r.run("review.source", &p(json!({"pack": "H", "source": "mine"}))).is_err());
-    assert_eq!(std::fs::read_to_string(folder.join("sources.json")).unwrap(), "not json");
+    assert!(
+        r.run("review.source", &p(json!({"pack": "H", "source": "mine"})))
+            .is_err()
+    );
+    assert_eq!(
+        std::fs::read_to_string(folder.join("sources.json")).unwrap(),
+        "not json"
+    );
     std::fs::remove_dir_all(&dir).ok();
 }

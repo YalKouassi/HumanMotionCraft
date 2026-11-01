@@ -55,7 +55,11 @@ impl Review {
             });
             g.takes.push((s, t));
             g.minutes += take.frames as f64 / take.fps / 60.0;
-            let clip = self.training.active.as_ref().and_then(|a| a.clips.get(&self.id(s, t)));
+            let clip = self
+                .training
+                .active
+                .as_ref()
+                .and_then(|a| a.clips.get(&self.id(s, t)));
             match clip.map(|c| c.status) {
                 Some(ClipStatus::Keep) => g.keep += 1,
                 Some(ClipStatus::Reject) => g.reject += 1,

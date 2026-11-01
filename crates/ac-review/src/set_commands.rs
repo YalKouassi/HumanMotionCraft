@@ -165,7 +165,11 @@ impl Review {
     /// yet is added as `keep`.
     fn set_clips(&mut self, ids: &[String], p: &P) -> R<usize> {
         if ids.len() > training_set::MAX_CLIPS {
-            return Err(format!("{} clips: at most {}", ids.len(), training_set::MAX_CLIPS));
+            return Err(format!(
+                "{} clips: at most {}",
+                ids.len(),
+                training_set::MAX_CLIPS
+            ));
         }
         let set = self.training.active.as_ref().ok_or("no training set is open")?;
         let status = match p.get("status").and_then(Value::as_str) {
@@ -175,7 +179,8 @@ impl Review {
         let cuts: Option<Vec<[usize; 2]>> = match p.get("cuts") {
             None | Some(Value::Null) => None,
             Some(v) => Some(
-                serde_json::from_value(v.clone()).map_err(|e| format!("cuts are [[first, last], ...]: {e}"))?,
+                serde_json::from_value(v.clone())
+                    .map_err(|e| format!("cuts are [[first, last], ...]: {e}"))?,
             ),
         };
         let labels = words(p, "labels")?;
