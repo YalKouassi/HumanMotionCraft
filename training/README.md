@@ -386,6 +386,9 @@ uv run python -m ac_train.train --minutes 180 --tag parts                       
 uv run python -m ac_train.train --minutes 180 --noncommercial --tag parts-own    # with non-commercial sets you added: never shipped
 ```
 
+A run never writes over a model: a `--tag` whose folder holds anything is refused, and a default tag
+takes the next free number (`set-walk-2`). Name each run, or move the old folder away first.
+
 By default training reads only the sets whose licence allows commercial use (`commercial=True` in
 `ac_train/datasets.py`: every set the repo supplies), so the model in `assets/models`, and what
 people make with it, carries no non-commercial terms. `--noncommercial` also reads non-commercial

@@ -8,6 +8,21 @@ from ac_train import train  # noqa: E402
 from ac_train.model import BONES, PART_GROUPS  # noqa: E402
 
 
+def test_a_run_never_writes_over_a_model(tmp_path):
+    (tmp_path / "base").mkdir()
+    (tmp_path / "base" / "model.pt").write_bytes(b"weights")
+    (tmp_path / "empty").mkdir()
+    with pytest.raises(SystemExit, match="already holds a model"):
+        train.run_tag("base", "any", tmp_path)
+    assert train.run_tag("new", "any", tmp_path) == "new"
+    assert train.run_tag("empty", "any", tmp_path) == "empty"
+    assert train.run_tag(None, "new", tmp_path) == "new"
+    assert train.run_tag(None, "base", tmp_path) == "base-2"
+    (tmp_path / "base-2").mkdir()
+    (tmp_path / "base-2" / "best.pt").write_bytes(b"weights")
+    assert train.run_tag(None, "base", tmp_path) == "base-3"
+
+
 def test_part_masks_are_what_a_part_layer_sends():
     """A row is no mask, a part group, or everything but a part group (a left-arm layer: 16 bones
     given, the arm's 3 free), the last most often."""

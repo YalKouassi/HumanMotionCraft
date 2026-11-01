@@ -18,7 +18,9 @@ first (``python -m ac_train.quality``), unless ``--unscanned``. Which takes are 
 :mod:`ac_train.selection`'s (``--types``, ``--styles``, ``--natural``, ``--takes <json>``), or a
 named set's (``--set <name>``, :mod:`ac_train.trainset`: it may hold private library clips,
 ``--library``; the card records it, and its default tag is ``set-<name>``); the minutes that survive,
-by type and set, are printed before the first step, and ``--dry-run`` stops there.
+by type and set, are printed before the first step, and ``--dry-run`` stops there. A run never
+writes over a model (:func:`run_tag`): a ``--tag`` that is taken is refused, and a default tag takes
+the next free number.
 
 What a training window looks like, to match what the app sends:
 
@@ -356,6 +358,23 @@ def _named(text: str, known, what: str) -> dict[str, float]:
     return out
 
 
+def run_tag(named: str | None, default: str, models: pathlib.Path = MODELS) -> str:
+    """The folder a run writes to; a run never writes over a model. A tag you name that is taken is
+    refused; a default that is taken gets the next free number (``set-walk-2``)."""
+    def taken(tag: str) -> bool:
+        return (models / tag).is_dir() and any((models / tag).iterdir())
+
+    if named:
+        if taken(named):
+            raise SystemExit(f"{models / named} already holds a model, and a run never writes over one: give another --tag")
+        return named
+    tag, n = default, 1
+    while taken(tag):
+        n += 1
+        tag = f"{default}-{n}"
+    return tag
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Train the in-betweener")
     ap.add_argument("--sets", default=None, help="comma list of training/data/rig sets (default: every set allowed)")
@@ -411,6 +430,8 @@ def main(argv=None):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     named = trainset.prepare(args.set, args.set_folder, args.library, args.noncommercial, not args.unscanned) if args.set else None
     extra = named.extra if named else None
+    # asked first, so a taken --tag stops before the sets are read
+    tag = None if args.dry_run else run_tag(args.tag, f"set-{named.set.name}" if named else "parts-own" if args.noncommercial else "parts")
     if named:
         names = named.names
     elif args.sets:
@@ -472,7 +493,6 @@ def main(argv=None):
     if lost:
         print(f"mirrored windows drop {lost}: their other side isn't a style", flush=True)
 
-    tag = args.tag or (f"set-{named.set.name}" if named else "parts-own" if args.noncommercial else "parts")
     out = MODELS / tag
     out.mkdir(parents=True, exist_ok=True)
     net_args = dict(styles=len(styles), given=True, contacts=contacts, path=True,
