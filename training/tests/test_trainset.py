@@ -93,38 +93,44 @@ def test_a_library_clip_is_refused_inside_a_checkout(tmp_path):
     with pytest.raises(SystemExit, match="inside a git checkout"):
         T.load(write_set(folder, [keep("library:Pack - Act/Clip")]))
     assert T.load(write_set(folder, [keep("cmu/a")])).name == "s"  # a rig take is no secret
-    (folder / "sources.json").write_text(json.dumps({"Pack": "mine"}), encoding="utf-8")
+    (folder / "usage.json").write_text(json.dumps({"packs": {"Pack": "train-only"}}), encoding="utf-8")
     with pytest.raises(SystemExit, match="inside a git checkout"):
         T.load(write_set(folder, [keep("cmu/a")]))
-    (folder / "sources.json").write_text(json.dumps({"cmu": "mine"}), encoding="utf-8")
-    assert T.load(write_set(folder, [keep("cmu/a")])).sources == {"cmu": "mine"}
+    (folder / "usage.json").write_text(json.dumps({"clips": {"library:Pack - Act/Clip": "just-me"}}), encoding="utf-8")
+    with pytest.raises(SystemExit, match="inside a git checkout"):
+        T.load(write_set(folder, [keep("cmu/a")]))
+    (folder / "usage.json").write_text(json.dumps({"packs": {"cmu": "train-only"}}), encoding="utf-8")
+    assert T.load(write_set(folder, [keep("cmu/a")])).usage == {"packs": {"cmu": "train-only"}}
 
 
-def test_sources_unmarked_counts_as_purchased():
-    marks = {"Pack": "mine", "Long - Name": "mine", "Bought": "purchased"}
-    assert T.source_of("library:Pack - Walk/a", marks) == "mine"
-    assert T.source_of("library:Long - Name - Walk/a", marks) == "mine"  # the longest mark
+def test_no_label_is_just_me_and_a_clips_own_label_wins():
+    marks = {"packs": {"Pack": "train-only", "Long - Name": "train-only", "Bought": "just-me"},
+             "clips": {"library:Pack - Walk/b": "just-me"}}
+    assert T.source_of("library:Pack - Walk/a", marks) == "train-only"
+    assert T.source_of("library:Pack - Walk/b", marks) == "just-me"
+    assert T.source_of("library:Long - Name - Walk/a", marks) == "train-only"  # the longest mark
     assert T.pack_of("library:Long - Name - Walk/a") == "Long"  # no marks to go by
-    assert T.source_of("library:Bought - Run/a", marks) == "purchased"
-    assert T.source_of("library:Other - Run/a", marks) == "purchased"
-    assert T.source_of("cmu/a", {}) == "free"
-    assert T.source_of("myclips/a", {}) == "purchased"
-    assert T.source_of("myclips/a", {"myclips": "mine"}) == "mine"
+    assert T.source_of("library:Bought - Run/a", marks) == "just-me"
+    assert T.source_of("library:Other - Run/a", marks) == "just-me"
+    assert T.source_of("cmu/a", {}) == "share-freely"
+    assert T.source_of("myclips/a", {}) == "just-me"
+    assert T.source_of("myclips/a", {"packs": {"myclips": "train-only"}}) == "train-only"
 
 
-@pytest.mark.parametrize("marks", [{}, {"Pack": "purchased"}], ids=["unmarked", "purchased"])
-def test_a_public_set_with_a_purchased_or_unmarked_clip_is_refused(tmp_path, marks):
+@pytest.mark.parametrize("marks", [{}, {"packs": {"Pack": "just-me"}}, {"clips": {"library:Pack - Act/Clip": "just-me"}}],
+                         ids=["unlabelled", "pack", "clip"])
+def test_a_public_set_with_a_just_me_clip_is_refused(tmp_path, marks):
     write_set(tmp_path, [keep("library:Pack - Act/Clip")], public=True)
-    (tmp_path / "sources.json").write_text(json.dumps(marks), encoding="utf-8")
+    (tmp_path / "usage.json").write_text(json.dumps(marks), encoding="utf-8")
     with pytest.raises(SystemExit, match="is public and keeps 1 clips"):
         T.prepare("s", tmp_path)
 
 
-def test_a_public_set_passes_on_free_and_mine_and_a_rejected_clip_does_not_count(tmp_path):
+def test_a_public_set_passes_on_share_and_train_only_and_a_rejected_clip_does_not_count(tmp_path):
     library = tmp_path / "lib"
     write_clip(library, "Pack - Act", "Clip", 90)
     write_set(tmp_path, [keep("cmu/a"), keep("library:Pack - Act/Clip"), {"id": "library:Other - X/Y", "status": "reject"}], public=True)
-    (tmp_path / "sources.json").write_text(json.dumps({"Pack": "mine"}), encoding="utf-8")
+    (tmp_path / "usage.json").write_text(json.dumps({"packs": {"Pack": "train-only"}}), encoding="utf-8")
     named = T.prepare("s", tmp_path, library, scanned=False)
     assert named.names == ["cmu", "library"]
     assert named.select.include == {"cmu/a", "library:Pack - Act/Clip"}
@@ -144,7 +150,7 @@ def test_a_noncommercial_set_needs_its_flag_and_is_never_public(tmp_path, monkey
         T.prepare("s", tmp_path)
     assert T.prepare("s", tmp_path, noncommercial=True).names == ["nc"]
     write_set(tmp_path, [keep("nc/a")], public=True)
-    (tmp_path / "sources.json").write_text(json.dumps({"nc": "mine"}), encoding="utf-8")
+    (tmp_path / "usage.json").write_text(json.dumps({"packs": {"nc": "train-only"}}), encoding="utf-8")
     with pytest.raises(SystemExit, match="is public"):
         T.prepare("s", tmp_path, noncommercial=True)
 
@@ -209,14 +215,14 @@ def test_the_takes_and_minutes_of_a_mixed_set(tmp_path, monkeypatch):
     assert by_id["library:Lib/Long"].type == "jump" and by_id["library:Lib/Long"].styles == ["heavy"]
     assert by_id["rigset/walk_b"].why == "list: excluded" and by_id["rigset/walk_c"].why == "list: not included"
     text = named.listing(recs)
-    assert "library:Lib/Long  1.00 min  purchased  [jump, heavy]  kept" in text
+    assert "library:Lib/Long  1.00 min  just-me  [jump, heavy]  kept" in text
     assert "library:Lib/Cut  0.25 min" in text and "rigset/walk_a  0.50 min" in text
     assert "3 of 4 clips read, 1.75 min" in text
 
     card = named.card(recs)
     assert card["name"] == "s" and card["set_version"] == 2 and card["hash"] == named.set.hash and card["public"] is False
     assert (card["clips"], card["clips_read"], card["minutes"], card["library_clips"]) == (4, 3, 1.75, 2)
-    assert card["sources"] == {"purchased": 3}  # rigset is no registry set and unmarked
+    assert card["sources"] == {"just-me": 3}  # rigset is no registry set and unmarked
     assert "Lib" not in json.dumps(card), "a card may be exported: it names no clip or pack"
     rows = {c["id"]: c for c in named.clips(recs)["clips"]}
     assert rows["library:Lib/Cut"]["minutes"] == 0.25 and rows["rigset/walk_b"]["minutes"] == 0.0
@@ -239,18 +245,18 @@ def test_library_clips_are_held_out_by_pack_and_the_card_does_not_name_them():
     assert T.public_held({"cmu": ["02"], "library": ["Pack"]}) == {"cmu": ["02"]}
 
 
-def test_a_model_of_a_private_or_purchased_set_stays_out_of_the_repo():
+def test_a_model_of_a_private_or_just_me_set_stays_out_of_the_repo():
     assert T.repo_refusal({"commercial": True}) == ""
-    assert T.repo_refusal({"training_set": {"name": "s", "public": True, "sources": {"free": 3, "mine": 1}}}) == ""
-    assert "private set s" in T.repo_refusal({"training_set": {"name": "s", "public": False, "sources": {"free": 3}}})
-    assert "1 purchased" in T.repo_refusal({"training_set": {"name": "s", "public": True, "sources": {"purchased": 1}}})
+    assert T.repo_refusal({"training_set": {"name": "s", "public": True, "sources": {"share-freely": 3, "train-only": 1}}}) == ""
+    assert "private set s" in T.repo_refusal({"training_set": {"name": "s", "public": False, "sources": {"share-freely": 3}}})
+    assert "1 Just me" in T.repo_refusal({"training_set": {"name": "s", "public": True, "sources": {"just-me": 1}}})
 
 
 def test_export_refuses_such_a_model_before_writing(tmp_path, monkeypatch):
     pytest.importorskip("torch")
     from ac_train import REPO, export
 
-    card = {"commercial": False, "training_set": {"name": "s", "public": False, "sources": {"purchased": 1}}}
+    card = {"commercial": False, "training_set": {"name": "s", "public": False, "sources": {"just-me": 1}}}
     monkeypatch.setattr(export.infer, "load", lambda tag, checkpoint: (None, card))
     with pytest.raises(SystemExit, match="stays out of the repo"):
         export.export("t", tmp_path / "w", REPO / "target" / "never")
@@ -270,7 +276,7 @@ def test_train_dry_run_prints_the_set_and_trains_nothing(tmp_path, monkeypatch, 
             "--decisions", str(tmp_path / "none.json")]
     train.main(args)
     out = capsys.readouterr().out
-    assert "library:Pack - Act/Clip  1.00 min  purchased  [walk]  kept" in out
+    assert "library:Pack - Act/Clip  1.00 min  just-me  [walk]  kept" in out
     assert "1 of 1 clips read, 1.00 min" in out and "--dry-run: nothing trained" in out
     assert not (tmp_path / "models").exists()
     write_set(tmp_path, [keep("library:Pack - Act/Clip")], public=True)

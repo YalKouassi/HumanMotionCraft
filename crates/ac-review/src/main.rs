@@ -2,7 +2,7 @@
 //!
 //! ```text
 //! ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>]
-//!           [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery]
+//!           [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery|styles] [--style <name>]
 //!           [--screenshot <png>]
 //! ac-review run <command> [<json>] [--data <dir>] [--decisions <file>] [--library <dir>]
 //!           [--sets <dir>] [--set <name>]
@@ -33,7 +33,7 @@ use std::path::{Path, PathBuf};
 
 use ac_review::review::Review;
 
-const USAGE: &str = "ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>] [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery] [--screenshot <png>]\n\
+const USAGE: &str = "ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>] [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery|styles] [--style <name>] [--screenshot <png>]\n\
                      ac-review run <command> [<json>] [--data <dir>] [--decisions <file>] [--library <dir>] [--sets <dir>] [--set <name>]\n\
                      ac-review unpack [<set> ...] [--data <dir>]";
 
@@ -48,6 +48,8 @@ pub struct Args {
     pub open: Option<String>,
     pub frame: Option<usize>,
     pub view: Option<String>,
+    /// Open the Styles view on this style, playing it through.
+    pub style: Option<String>,
     pub screenshot: Option<PathBuf>,
     /// `run` / `unpack` and their words.
     pub verb: Option<String>,
@@ -69,6 +71,7 @@ fn parse_args() -> Result<Args, String> {
             "--open" => a.open = Some(value()?),
             "--frame" => a.frame = Some(value()?.parse().map_err(|e| format!("--frame: {e}"))?),
             "--view" => a.view = Some(value()?),
+            "--style" => a.style = Some(value()?),
             "--screenshot" => a.screenshot = Some(value()?.into()),
             "--help" | "-h" => return Err(USAGE.into()),
             flag if flag.starts_with("--") => return Err(format!("unknown argument {flag:?}\n{USAGE}")),

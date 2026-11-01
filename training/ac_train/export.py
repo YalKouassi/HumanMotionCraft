@@ -14,7 +14,7 @@ The goldens pin the port to PyTorch numerically; nothing here runs at app time.
 A model trained on a non-commercial set you added (``train --noncommercial``) is never written into the repo:
 give ``--out`` outside it (your app's own models folder, ``<app data>/models/<tag>``) and
 ``--golden`` somewhere temporary. So is a model of a private named set, or of one that read a
-purchased clip (:func:`ac_train.trainset.repo_refusal`).
+Just me clip (:func:`ac_train.trainset.repo_refusal`).
 """
 
 from __future__ import annotations

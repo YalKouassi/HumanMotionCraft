@@ -364,53 +364,120 @@ fn totals_and_the_source_warning_through_the_commands() {
     )
     .unwrap();
 
-    // nothing marked: all unmarked, so warned
+    // nothing labelled: all Just me, so warned
     let t = r.run("review.totals", &Map::new()).unwrap();
     assert_eq!(t["unmarked"]["clips"], 2);
     assert_eq!(t["rejected"], 1);
     assert!((t["labels"]["move"]["minutes"].as_f64().unwrap() - 3.0 / 60.0).abs() < 1e-12);
     let w = t["warnings"][0].as_str().unwrap();
-    assert!(w.contains("0 purchased and 3 unmarked"), "{w}");
+    assert!(w.contains("3 Just me clips (3 not labelled"), "{w}");
 
-    // H purchased, G still unmarked
-    r.run("review.source", &p(json!({"pack": "H", "source": "purchased"})))
+    // H chosen as Just me, G still unlabelled
+    r.run("review.usage", &p(json!({"pack": "H", "usage": "just-me"})))
         .unwrap();
     let t = r.run("review.totals", &Map::new()).unwrap();
     let w = t["warnings"][0].as_str().unwrap();
-    assert!(w.contains("1 purchased and 2 unmarked"), "{w}");
+    assert!(w.contains("3 Just me clips (2 not labelled"), "{w}");
 
-    // both mine: nothing to warn of, and the minutes are the owner's
+    // both train only: nothing to warn of
     for pack in ["G", "H"] {
-        r.run("review.source", &p(json!({"pack": pack, "source": "mine"})))
+        r.run("review.usage", &p(json!({"pack": pack, "usage": "train-only"})))
             .unwrap();
     }
     let t = r.run("review.totals", &Map::new()).unwrap();
     assert_eq!(t["warnings"], json!([]));
-    assert_eq!(t["mine"]["clips"], 2);
-    assert_eq!(t["purchased"]["clips"], 0);
+    assert_eq!(t["train_only"]["clips"], 2);
+    assert_eq!(t["just_me"]["clips"], 0);
 
-    // no longer public, purchased: no warning
-    r.run("review.source", &p(json!({"pack": "H", "source": "purchased"})))
-        .unwrap();
+    // one clip's own label wins over its pack's
+    r.run(
+        "review.usage",
+        &p(json!({"id": "library:H/run", "usage": "just-me"})),
+    )
+    .unwrap();
+    let t = r.run("review.totals", &Map::new()).unwrap();
+    assert_eq!(t["just_me"]["clips"], 1);
+    assert_eq!(t["warnings"].as_array().unwrap().len(), 1);
+
+    // no longer public: no warning
     r.run("review.set_public", &p(json!({"public": false}))).unwrap();
     assert_eq!(
         r.run("review.totals", &Map::new()).unwrap()["warnings"],
         json!([])
     );
 
-    // a sources file that won't read is said, and nothing counts as mine
-    std::fs::write(folder.join("sources.json"), "not json").unwrap();
+    // a usage file that won't read is said, and nothing leaves Just me
+    std::fs::write(folder.join("usage.json"), "not json").unwrap();
     let t = r.run("review.totals", &Map::new()).unwrap();
-    assert_eq!(t["mine"]["clips"], 0);
+    assert_eq!(t["train_only"]["clips"], 0);
     assert_eq!(t["warnings"].as_array().unwrap().len(), 1);
     assert!(
-        r.run("review.source", &p(json!({"pack": "H", "source": "mine"})))
+        r.run("review.usage", &p(json!({"pack": "H", "usage": "train-only"})))
             .is_err()
     );
     assert_eq!(
-        std::fs::read_to_string(folder.join("sources.json")).unwrap(),
+        std::fs::read_to_string(folder.join("usage.json")).unwrap(),
         "not json"
     );
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
+fn a_styles_list_plays_what_its_name_suggests_and_rejected_clips_leave_it() {
+    let dir = scratch("styles");
+    let sets = dir.join("sets");
+    let mut r = review(&dir, &sets);
+    r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
+    let list = |r: &mut Review| {
+        let v = r
+            .run("review.list", &p(json!({"show": "all", "style": "walk"})))
+            .unwrap();
+        v["takes"].as_array().unwrap().len()
+    };
+    // walk_01 and walk_02 are suggested; hop and run aren't
+    assert_eq!(list(&mut r), 2);
+    let rows = r.run("review.styles", &Map::new()).unwrap();
+    let walk = rows["styles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|s| s["name"] == "walk")
+        .unwrap()
+        .clone();
+    assert_eq!(
+        (walk["clips"].as_u64(), walk["labelled"].as_u64()),
+        (Some(2), Some(0))
+    );
+    assert!(walk["includes"].to_string().contains("side steps"));
+
+    r.run(
+        "review.set_clip",
+        &p(json!({"id": "library:G/walk_02", "status": "reject"})),
+    )
+    .unwrap();
+    assert_eq!(list(&mut r), 1);
+
+    // Keep the rest: what is left is kept and labelled, rejects stay rejected, one undo step
+    assert_eq!(
+        r.run("review.style_keep", &p(json!({"style": "walk"}))).unwrap()["changed"],
+        1
+    );
+    let set = r.training.active.as_ref().unwrap();
+    assert_eq!(set.clips["library:G/walk_01"].labels, ["walk"]);
+    assert_eq!(
+        set.clips["library:G/walk_02"].status,
+        ac_review::training_set::ClipStatus::Reject
+    );
+    assert_eq!(r.run("review.undo", &Map::new()).unwrap()["undone"], 1);
+
+    // a clip a person labelled otherwise is no longer suggested
+    r.run(
+        "review.set_clip",
+        &p(json!({"id": "library:G/walk_01", "labels": ["run"]})),
+    )
+    .unwrap();
+    assert_eq!(list(&mut r), 0);
+    assert!(r.run("review.style_keep", &p(json!({"style": "nope"}))).is_err());
     std::fs::remove_dir_all(&dir).ok();
 }
 

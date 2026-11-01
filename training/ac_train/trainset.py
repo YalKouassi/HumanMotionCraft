@@ -19,12 +19,14 @@
   type, and all of them are the take's labels. ``cuts`` (first and last frame included, as in the
   review's decisions) are added to the take's cuts.
 
-``sources.json`` beside the set file says what each pack is: ``{"<pack>": "mine" | "purchased"}``.
-A library clip's pack starts its group (``<pack> - <action>``, the port's folders); a rig take's is
-its set. Unmarked counts as purchased, except a set of the registry, whose licence is known: a
-free-licence one is ``free``, a non-commercial one always ``noncommercial``. A public set may only
-keep ``free`` and ``mine`` clips, and a model of a private one can't be exported into the repo
-(:func:`repo_refusal`).
+``usage.json`` beside the set file says what may leave the machine, for a pack or one clip:
+``{"packs": {"<pack>": label}, "clips": {"<id>": label}}``, a label being ``share-freely`` (the clip
+and models of it), ``train-only`` (models of it, never the clip) or ``just-me`` (neither). A clip's
+own label wins. A library clip's pack starts its group (``<pack> - <action>``, the port's folders);
+a rig take's is its set. With no label a clip is ``just-me``, except a set of the registry, whose
+licence is known: a free-licence one is ``share-freely``, a non-commercial one always
+``noncommercial``. A public set may not keep ``just-me`` or ``noncommercial`` clips, and a model of
+a private one can't be exported into the repo (:func:`repo_refusal`).
 
 The model card gets ``training_set`` (the name, version, hash and totals, no clip or pack name, as a
 card may be exported); ``clips.json`` beside it lists every clip and is never exported.
@@ -50,10 +52,12 @@ from .selection import LIBRARY, Overlay
 
 SETS = REPO / "training" / "review" / "sets"
 SUFFIX = ".set.json"
-SOURCES = "sources.json"
+USAGE = "usage.json"
 VERSION = 1
 STATUSES = ("keep", "reject")
-MARKS = ("mine", "purchased")
+MARKS = ("share-freely", "train-only", "just-me")
+#: what no public model may hold
+PRIVATE = ("just-me", "noncommercial")
 PREFIX = LIBRARY + ":"
 #: the file beside a model's card that names its clips
 CLIPS_FILE = "clips.json"
@@ -69,25 +73,28 @@ def is_library(clip_id: str) -> bool:
     return clip_id.startswith(PREFIX)
 
 
-def pack_of(clip_id: str, sources: dict[str, str] | None = None) -> str:
+def pack_of(clip_id: str, packs: dict[str, str] | None = None) -> str:
     """A clip's pack: a rig take's set; a library clip's group, or its start before `` - `` (a mark
-    in ``sources`` for the group or the longest start of it wins, as a pack's name may hold `` - ``)."""
+    in ``packs`` for the group or the longest start of it wins, as a pack's name may hold `` - ``)."""
     if not is_library(clip_id):
         return clip_id.split("/", 1)[0]
     group = clip_id[len(PREFIX):].split("/", 1)[0]
-    marked = [k for k in (sources or {}) if group == k or group.startswith(k + " - ")]
+    marked = [k for k in (packs or {}) if group == k or group.startswith(k + " - ")]
     return max(marked, key=len) if marked else group.split(" - ", 1)[0]
 
 
-def source_of(clip_id: str, sources: dict[str, str]) -> str:
-    """``free``, ``mine``, ``purchased`` or ``noncommercial`` (see the module doc)."""
-    pack = pack_of(clip_id, sources)
+def source_of(clip_id: str, usage: dict) -> str:
+    """A clip's label, or ``noncommercial`` (see the module doc)."""
+    packs, clips = usage.get("packs", {}), usage.get("clips", {})
+    pack = pack_of(clip_id, packs)
     known = REGISTRY.get(pack) if not is_library(clip_id) else None
     if known is not None and not known.commercial:
         return "noncommercial"
-    if pack in sources:
-        return sources[pack]
-    return "free" if known is not None else "purchased"
+    if clip_id in clips:
+        return clips[clip_id]
+    if pack in packs:
+        return packs[pack]
+    return "share-freely" if known is not None else "just-me"
 
 
 @dataclass(frozen=True)
@@ -106,7 +113,7 @@ class TrainingSet:
     clips: list[SetClip]
     #: sha-256 of the file's JSON with sorted keys: line endings and key order don't change it
     hash: str
-    sources: dict[str, str] = field(default_factory=dict)
+    usage: dict = field(default_factory=dict)
 
     def kept(self) -> list[SetClip]:
         return [c for c in self.clips if c.status == "keep"]
@@ -133,24 +140,26 @@ def _clip(path, raw) -> SetClip:
     return SetClip(cid, raw["status"], tuple(words), tuple((a, b) for a, b in cuts))
 
 
-def load_sources(path: pathlib.Path) -> dict[str, str]:
-    """The marks beside a set file: none when there is no file. A pack's name is private, so a file
-    naming a pack that isn't a set of the registry is refused inside a checkout."""
+def load_usage(path: pathlib.Path) -> dict:
+    """The labels beside a set file: none when there is no file. A pack's name is private, so a file
+    naming a pack that isn't a set of the registry, or a library clip, is refused inside a checkout."""
     if not path.exists():
         return {}
     try:
         d = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as e:
         raise SystemExit(f"{path}: {e}") from e
-    if not isinstance(d, dict) or not all(isinstance(k, str) and v in MARKS for k, v in d.items()):
-        raise SystemExit(f"{path}: sources are {{pack: {' | '.join(MARKS)}}}")
-    if inside_checkout(path) and any(k not in REGISTRY for k in d):
+    good = isinstance(d, dict) and set(d) <= {"packs", "clips"} and all(
+        isinstance(m, dict) and all(isinstance(k, str) and v in MARKS for k, v in m.items()) for m in d.values())
+    if not good:
+        raise SystemExit(f"{path}: usage is {{packs: {{pack: label}}, clips: {{id: label}}}}, a label one of {' | '.join(MARKS)}")
+    if inside_checkout(path) and (any(k not in REGISTRY for k in d.get("packs", {})) or any(is_library(k) for k in d.get("clips", {}))):
         raise SystemExit(f"{path}: names packs and lies inside a git checkout: move it out, with its set")
     return d
 
 
 def load(path: pathlib.Path) -> TrainingSet:
-    """A set file and the sources beside it; anything wrong with it stops here."""
+    """A set file and the labels beside it; anything wrong with it stops here."""
     try:
         d = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as e:
@@ -173,7 +182,7 @@ def load(path: pathlib.Path) -> TrainingSet:
         raise SystemExit(f"{path}: holds private library clips and lies inside a git checkout: move it out")
     canon = json.dumps(d, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     return TrainingSet(name, d["set_version"], d["public"], clips, hashlib.sha256(canon.encode()).hexdigest(),
-                       load_sources(path.parent / SOURCES))
+                       load_usage(path.parent / USAGE))
 
 
 def find(name: str, folder: pathlib.Path = SETS) -> pathlib.Path:
@@ -191,11 +200,11 @@ def check_public(ts: TrainingSet) -> None:
     """A public set keeps only clips anyone may have a model of."""
     if not ts.public:
         return
-    bad = [(c.id, source_of(c.id, ts.sources)) for c in ts.kept()]
-    bad = [(i, s) for i, s in bad if s in ("purchased", "noncommercial")]
+    bad = [(c.id, source_of(c.id, ts.usage)) for c in ts.kept()]
+    bad = [(i, s) for i, s in bad if s in PRIVATE]
     if bad:
-        raise SystemExit(f"{ts.name} is public and keeps {len(bad)} clips that are purchased, unmarked or non-commercial, "
-                         f"e.g. {bad[0][0]} ({bad[0][1]}): reject them, mark their pack in {SOURCES}, or make the set private")
+        raise SystemExit(f"{ts.name} is public and keeps {len(bad)} clips marked Just me, not labelled or non-commercial, "
+                         f"e.g. {bad[0][0]} ({bad[0][1]}): reject them, label them in {USAGE}, or make the set private")
 
 
 class Arrays(dict):
@@ -288,7 +297,7 @@ class Named:
         by_id = {r.id: r for r in recs}
         lines = [f"set {self.set.name} v{self.set.version} ({'public' if self.set.public else 'private'}), hash {self.set.hash}"]
         for c in self.set.clips:
-            src = source_of(c.id, self.set.sources)
+            src = source_of(c.id, self.set.usage)
             r = by_id.get(c.id)
             if r is None:
                 lines.append(f"  {c.id}  {src}  out: rejected by the set")
@@ -305,7 +314,7 @@ class Named:
         return {"name": self.set.name, "set_version": self.set.version, "hash": self.set.hash, "public": self.set.public,
                 "clips": len(self.set.clips), "clips_read": len(kept),
                 "minutes": round(sum(r.used for r in kept) / FPS / 60, 2),
-                "sources": dict(Counter(source_of(r.id, self.set.sources) for r in kept)),
+                "sources": dict(Counter(source_of(r.id, self.set.usage) for r in kept)),
                 "library_clips": sum(r.set == LIBRARY for r in kept)}
 
     def clips(self, recs) -> dict:
@@ -314,7 +323,7 @@ class Named:
         rows = []
         for c in self.set.clips:
             r = by_id.get(c.id)
-            rows.append({"id": c.id, "status": c.status, "source": source_of(c.id, self.set.sources),
+            rows.append({"id": c.id, "status": c.status, "source": source_of(c.id, self.set.usage),
                          "labels": labels.of(r.set, r.take, r.label, r.kind, r.tags) if r else list(c.labels),
                          "minutes": round(r.used / FPS / 60, 3) if r and r.kept else 0.0, "held_out": bool(r and r.held),
                          "out": (r.why if r else "rejected by the set")})
@@ -329,7 +338,7 @@ class Named:
                 d = REGISTRY[n]
                 rows.append({"name": n, "title": d.title, "licence": d.licence, "commercial": d.commercial})
                 continue
-            mine = all(source_of(r.id, self.set.sources) == "mine" for r in recs if r.set == n and r.kept)
+            mine = all(source_of(r.id, self.set.usage) not in PRIVATE for r in recs if r.set == n and r.kept)
             rows.append({"name": n if n == LIBRARY else "own clips", "title": "clips the training set names",
                          "licence": "see training_set", "commercial": self.set.public and mine})
         return rows
@@ -344,7 +353,7 @@ def prepare(name: str, folder: pathlib.Path = SETS, library: pathlib.Path | None
     kept = ts.kept()
     if not kept:
         raise SystemExit(f"{ts.name} keeps no clips")  # an empty include would mean every take
-    nc = sorted({pack_of(c.id) for c in kept if source_of(c.id, ts.sources) == "noncommercial"})
+    nc = sorted({pack_of(c.id) for c in kept if source_of(c.id, ts.usage) == "noncommercial"})
     if nc and not noncommercial:
         raise SystemExit(f"{ts.name} keeps clips of {', '.join(nc)}, which only allow non-commercial use: add --noncommercial")
     arrays, over = read_library(ts, library, scanned)
@@ -372,8 +381,8 @@ def repo_refusal(card: dict) -> str:
         return ""
     if not ts.get("public"):
         return f"it was trained on the private set {ts.get('name')}"
-    bad = sum(ts.get("sources", {}).get(s, 0) for s in ("purchased", "noncommercial"))
-    return f"its set {ts.get('name')} read {bad} purchased, unmarked or non-commercial clips" if bad else ""
+    bad = sum(ts.get("sources", {}).get(s, 0) for s in PRIVATE)
+    return f"its set {ts.get('name')} read {bad} Just me or non-commercial clips" if bad else ""
 
 
 def main(argv=None):

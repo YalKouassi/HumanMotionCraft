@@ -20,9 +20,12 @@ use std::sync::mpsc::{Receiver, TryRecvError, channel};
 use ac_review::decisions::Status;
 use ac_review::groups::Group;
 use ac_review::review::{Filter, Review, Show};
+use ac_review::set_commands::StyleRow;
 use ac_review::store::Motion;
+use ac_review::styles;
 use ac_review::thumbs::{Figure, Job, Thumbs, figure};
 use ac_review::totals::Totals;
+use ac_review::totals::{Usage, Usages};
 use ac_review::training_set::{ClipStatus, SetClip};
 use egui::{Color32, Key, RichText};
 use serde_json::{Value, json};
@@ -35,11 +38,15 @@ const SPEEDS: [f32; 5] = [0.25, 0.5, 1.0, 2.0, 4.0];
 const CELL: egui::Vec2 = egui::vec2(120.0, 150.0);
 const ROW: f32 = 58.0;
 
+/// The least time a clip stays up when the list plays through.
+const MIN_SHOWN: f64 = 1.0;
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum View {
     List,
     Groups,
     Gallery,
+    Styles,
 }
 
 pub struct App {
@@ -80,6 +87,12 @@ pub struct App {
     ready: HashSet<usize>,
     /// After a decision, go on to the next take.
     advance: bool,
+    /// Play the list through, clip after clip.
+    play_all: bool,
+    /// Seconds the current clip has been on screen in `play_all`.
+    shown_for: f64,
+    style_rows: Vec<StyleRow>,
+    usages: Usages,
     /// The queue scrolls the take shown into view (once, after it changes).
     scroll_to: bool,
     status: String,
@@ -146,6 +159,7 @@ impl App {
             view: match args.view.as_deref() {
                 Some("groups") => View::Groups,
                 Some("gallery") => View::Gallery,
+                Some("styles") => View::Styles,
                 _ => View::List,
             },
             totals: None,
@@ -157,6 +171,10 @@ impl App {
             thumbs: Thumbs::new(),
             ready: HashSet::new(),
             advance: true,
+            play_all: false,
+            shown_for: 0.0,
+            style_rows: Vec::new(),
+            usages: Usages::default(),
             scroll_to: true,
             status: String::new(),
             viewer,
@@ -185,11 +203,20 @@ impl App {
         if let Some(f) = args.frame {
             app.frame = f;
         }
+        if let Some(style) = args.style {
+            app.view = View::Styles;
+            app.open_style(style);
+        }
         Ok(app)
     }
 
     fn refresh(&mut self) {
         self.queue = self.review.queue(&self.filter);
+        self.usages = self
+            .review
+            .folder()
+            .and_then(|f| Usages::load(&f))
+            .unwrap_or_default();
         self.groups = self.review.groups(&self.queue);
         self.group_at = self.group_at.min(self.groups.len().saturating_sub(1));
         self.totals = self
@@ -205,6 +232,7 @@ impl App {
         self.scroll_to = true;
         self.frame = 0;
         self.clock = 0.0;
+        self.shown_for = 0.0;
         self.selection = None;
         self.anchor = None;
         self.motion = None;
@@ -294,6 +322,11 @@ impl App {
                 p["status"] = json!("keep");
                 p["cuts"] = json!(cuts);
             }
+        }
+        if let Some(style) = &self.filter.style
+            && status != Status::Reject
+        {
+            p["add_labels"] = json!([style]);
         }
         let before = self.queue.clone();
         if self.set_command("review.set_clip", p).is_some() {
@@ -414,6 +447,147 @@ impl App {
         if let Some(&t) = self.queue.first() {
             self.select(t);
         }
+    }
+
+    fn open_style(&mut self, name: String) {
+        self.filter.style = Some(name);
+        self.filter.show = Show::All;
+        self.advance = true;
+        self.refresh();
+        if let Some(&t) = self.queue.first() {
+            self.select(t);
+        }
+        self.play_all = true;
+        self.playing = true;
+    }
+
+    fn close_style(&mut self) {
+        self.filter.style = None;
+        self.play_all = false;
+        self.playing = false;
+        self.refresh();
+        self.style_rows = self.review.style_rows();
+    }
+
+    fn keep_style(&mut self) {
+        let Some(style) = self.filter.style.clone() else {
+            return;
+        };
+        if let Some(v) = self.set_command("review.style_keep", json!({ "style": style })) {
+            self.status = format!("{} clips kept as {style}", v["changed"]);
+            self.reselect();
+        }
+    }
+
+    fn usage_buttons(&mut self, ui: &mut egui::Ui, ids: Vec<String>, current: Option<Usage>) {
+        let mut chosen = None;
+        for u in Usage::ALL {
+            if ui
+                .selectable_label(current == Some(u), u.title())
+                .on_hover_text(u.meaning())
+                .clicked()
+            {
+                chosen = Some(u);
+            }
+        }
+        if let Some(u) = chosen
+            && self
+                .set_command("review.usage", json!({ "ids": ids, "usage": u.word() }))
+                .is_some()
+        {
+            self.status = format!("{} clips: {}", ids.len(), u.title());
+            self.refresh();
+        }
+    }
+
+    fn styles_panel(&mut self, ui: &mut egui::Ui) {
+        if self.style_rows.is_empty() {
+            self.style_rows = self.review.style_rows();
+        }
+        if self.review.training.active.is_none() {
+            ui.colored_label(
+                Color32::YELLOW,
+                "Open or make a training set first: Keep and Reject go in it.",
+            );
+        }
+        let mut open = None;
+        egui::ScrollArea::vertical()
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                for kind in ["base", "add-on"] {
+                    ui.heading(if kind == "base" { "Base styles" } else { "Add-ons" });
+                    for r in self.style_rows.iter().filter(|r| r.style.kind == kind) {
+                        ui.group(|ui| {
+                            ui.set_width(ui.available_width());
+                            ui.horizontal(|ui| {
+                                if ui
+                                    .button(RichText::new(format!("Play {}", r.style.name)).strong())
+                                    .clicked()
+                                {
+                                    open = Some(r.style.name.clone());
+                                }
+                                ui.label(
+                                    RichText::new(format!(
+                                        "{} clips · {:.1} min · {} labelled",
+                                        r.clips, r.minutes, r.labelled
+                                    ))
+                                    .weak(),
+                                );
+                            });
+                            ui.label(&r.style.about);
+                            ui.label(
+                                RichText::new(format!("Holds: {}", r.style.includes.join("; "))).small(),
+                            );
+                            ui.label(
+                                RichText::new(format!("Not: {}", r.style.leaves_out.join("; ")))
+                                    .small()
+                                    .weak(),
+                            );
+                        });
+                    }
+                }
+            });
+        if let Some(name) = open {
+            self.open_style(name);
+        }
+    }
+
+    fn style_header(&mut self, ui: &mut egui::Ui) {
+        let Some(st) = self.filter.style.as_deref().and_then(styles::named) else {
+            return;
+        };
+        ui.heading(&st.name);
+        ui.label(&st.about);
+        ui.label(RichText::new(format!("Holds: {}", st.includes.join("; "))).small());
+        ui.label(
+            RichText::new(format!("Not: {}", st.leaves_out.join("; ")))
+                .small()
+                .weak(),
+        );
+        ui.horizontal_wrapped(|ui| {
+            if ui.button("Back to the styles (Esc)").clicked() {
+                self.close_style();
+            }
+            if ui.selectable_label(self.play_all, "Play all").clicked() {
+                self.play_all = !self.play_all;
+                self.playing = self.play_all;
+            }
+            if ui
+                .button("Keep the rest")
+                .on_hover_text("Everything still in this list is kept with this label. Ctrl+Z undoes it.")
+                .clicked()
+            {
+                self.keep_style();
+            }
+        });
+        ui.label(
+            RichText::new(
+                "R rejects and moves on · I and O mark frames, C cuts them · K keeps · Up and Down skip",
+            )
+            .weak()
+            .small(),
+        );
+        ui.separator();
     }
 
     fn close_group(&mut self) {
@@ -619,6 +793,12 @@ impl App {
                 }
                 Key::Enter if rows => self.open_group(self.group_at),
                 Key::Escape if opened && self.selection.is_none() => self.close_group(),
+                Key::Escape if self.filter.style.is_some() && self.selection.is_none() => self.close_style(),
+                Key::K | Key::R | Key::C | Key::X | Key::Backspace
+                    if self.view == View::Styles && self.filter.style.is_none() =>
+                {
+                    self.status = "open a style first".into()
+                }
                 Key::K if gallery => self.decide_picked("keep"),
                 Key::R if gallery => self.decide_picked("reject"),
                 Key::Escape if gallery => self.picked.clear(),
@@ -692,8 +872,23 @@ impl App {
             .map_or(30.0, |t| t.fps);
         let dt = ctx.input(|i| i.stable_dt) as f64;
         self.clock += dt * fps * self.speed as f64;
+        self.shown_for += dt;
         if self.clock >= n as f64 {
             self.clock = 0.0;
+            // a clip of a few frames repeats until it can be seen
+            if self.play_all && self.shown_for >= MIN_SHOWN {
+                let at = self.current.and_then(|c| self.queue.iter().position(|&q| q == c));
+                match at.and_then(|i| self.queue.get(i + 1)).copied() {
+                    Some(next) => self.select(next),
+                    None => {
+                        self.play_all = false;
+                        self.playing = false;
+                        self.status = "end of the list".into();
+                    }
+                }
+                ctx.request_repaint();
+                return;
+            }
         }
         self.frame = (self.clock as usize).min(n - 1);
         ctx.request_repaint();
@@ -915,7 +1110,7 @@ impl App {
         self.last_pick = Some(k);
     }
 
-    /// Minutes per label, mine and purchased, the source warning, and each pack's mark.
+    /// Minutes per label and per usage label, the warning, and each pack's label.
     fn totals_panel(&mut self, ui: &mut egui::Ui) {
         let t = match &self.totals {
             Some(Ok(t)) => t.clone(),
@@ -929,12 +1124,6 @@ impl App {
             ui.colored_label(Color32::from_rgb(240, 170, 60), format!("Warning: {w}"));
         }
         ui.horizontal_wrapped(|ui| {
-            ui.label(format!("mine {} clips {:.1} min", t.mine.clips, t.mine.minutes));
-            ui.label(format!(
-                "purchased {} clips {:.1} min (unmarked {} clips {:.1} min)",
-                t.purchased.clips, t.purchased.minutes, t.unmarked.clips, t.unmarked.minutes
-            ));
-            ui.label(format!("{} rejected", t.rejected));
             if t.missing > 0 {
                 ui.colored_label(
                     Color32::YELLOW,
@@ -944,6 +1133,26 @@ impl App {
                     ),
                 );
             }
+        });
+        ui.horizontal_wrapped(|ui| {
+            for (u, c) in [
+                (Usage::ShareFreely, &t.share_freely),
+                (Usage::TrainOnly, &t.train_only),
+                (Usage::JustMe, &t.just_me),
+            ] {
+                ui.label(format!("{}: {} clips {:.1} min", u.title(), c.clips, c.minutes))
+                    .on_hover_text(u.meaning());
+            }
+            if t.unmarked.clips > 0 {
+                ui.label(
+                    RichText::new(format!(
+                        "({} not labelled yet, counted as Just me)",
+                        t.unmarked.clips
+                    ))
+                    .weak(),
+                );
+            }
+            ui.label(format!("{} rejected", t.rejected));
         });
         let mut mark = None;
         egui::CollapsingHeader::new(format!("{} labels, {} packs", t.labels.len(), t.packs.len()))
@@ -957,19 +1166,24 @@ impl App {
                 for (pack, source) in &t.packs {
                     ui.horizontal(|ui| {
                         ui.label(pack);
-                        for word in ["mine", "purchased"] {
-                            if ui.selectable_label(source == word, word).clicked() {
-                                mark = Some((pack.clone(), word));
+                        for u in Usage::ALL {
+                            if ui
+                                .selectable_label(source == u.word(), u.title())
+                                .on_hover_text(u.meaning())
+                                .clicked()
+                            {
+                                mark = Some((pack.clone(), u.word()));
                             }
                         }
                         if source == "unmarked" {
-                            ui.label(RichText::new("unmarked: counts as purchased").weak());
+                            ui.label(RichText::new("not labelled: counts as Just me").weak());
                         }
                     });
                 }
             });
         if let Some((pack, word)) = mark {
-            self.set_command("review.source", json!({ "pack": pack, "source": word }));
+            self.set_command("review.usage", json!({ "pack": pack, "usage": word }));
+            self.refresh();
         }
     }
 
@@ -1065,7 +1279,11 @@ impl App {
             ui.selectable_value(&mut self.view, View::List, "List");
             ui.selectable_value(&mut self.view, View::Groups, "Groups");
             ui.selectable_value(&mut self.view, View::Gallery, "Gallery");
+            ui.selectable_value(&mut self.view, View::Styles, "Styles");
         });
+        if self.view != View::Styles && self.filter.style.is_some() {
+            self.close_style();
+        }
         if self.view != View::Groups && self.filter.group.is_some() {
             self.close_group();
         }
@@ -1354,6 +1572,20 @@ impl App {
             );
             ui.end_row();
         });
+        let (usage, chosen) = self.usages.of(&id);
+        ui.horizontal_wrapped(|ui| {
+            ui.label("Usage");
+            self.usage_buttons(ui, vec![id.clone()], Some(usage));
+        });
+        ui.label(
+            RichText::new(if chosen {
+                usage.meaning().to_string()
+            } else {
+                format!("Not labelled yet. {}", usage.meaning())
+            })
+            .weak()
+            .small(),
+        );
         if in_set {
             ui.horizontal(|ui| {
                 ui.label("Labels");
@@ -1480,6 +1712,13 @@ impl eframe::App for App {
                     if self.view == View::Groups && self.filter.group.is_none() {
                         self.groups_panel(ui);
                         return;
+                    }
+                    if self.view == View::Styles && self.filter.style.is_none() {
+                        self.styles_panel(ui);
+                        return;
+                    }
+                    if self.view == View::Styles {
+                        self.style_header(ui);
                     }
                     if self.view == View::Groups && ui.button("Back to the groups (Esc)").clicked() {
                         self.close_group();

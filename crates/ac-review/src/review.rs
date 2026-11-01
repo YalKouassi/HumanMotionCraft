@@ -79,6 +79,8 @@ pub struct Filter {
     pub search: String,
     /// One group's takes only (`groups::group_key`).
     pub group: Option<String>,
+    /// The clips of one style (`Review::in_style`).
+    pub style: Option<String>,
 }
 
 impl Default for Filter {
@@ -89,6 +91,7 @@ impl Default for Filter {
             reason: None,
             search: String::new(),
             group: None,
+            style: None,
         }
     }
 }
@@ -307,6 +310,11 @@ impl Review {
                 {
                     continue;
                 }
+                if let Some(style) = &f.style
+                    && !self.in_style(si, ti, style)
+                {
+                    continue;
+                }
                 let decided = self.status_of(si, ti).is_some();
                 let keep = match f.show {
                     Show::Open => self.flagged(si, ti) && !decided,
@@ -449,6 +457,7 @@ impl Review {
             reason: text(p, "reason"),
             search: text(p, "search").unwrap_or_default(),
             group: text(p, "group"),
+            style: text(p, "style"),
         })
     }
 
@@ -463,7 +472,7 @@ impl Review {
 
     fn take_commands() -> Value {
         json!([
-            {"id": "review.list", "params": "show? (open|flagged|decided|all|model|set, default open; model: the takes the model fails on, flags.json; set: the open training set's clips), set?, reason?, search?, group?, limit? (default 100)", "returns": "{total, takes: [{id, label, frames, scan_cut, scan_reject, reasons, decision, model: {rank, loss, worst, worst_at, windows} | null}]}, worst first"},
+            {"id": "review.list", "params": "style? (one style's clips), show? (open|flagged|decided|all|model|set, default open; model: the takes the model fails on, flags.json; set: the open training set's clips), set?, reason?, search?, group?, limit? (default 100)", "returns": "{total, takes: [{id, label, frames, scan_cut, scan_reject, reasons, decision, model: {rank, loss, worst, worst_at, windows} | null}]}, worst first"},
             {"id": "review.take", "params": "id (<set>/<take>)", "returns": "the take, the scan's numbers and cuts, the model's flag (why, the weighted loss terms) or null, the decision"},
             {"id": "review.decide", "params": "id, status (ok|cut|reject), cuts? ([[first, last]], default the scan's for cut), type?, tags?, note?, by? (default person)", "returns": "the decision as saved"},
             {"id": "review.clear", "params": "id", "returns": "{cleared}"},

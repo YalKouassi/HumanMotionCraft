@@ -372,7 +372,7 @@ uv run python -m ac_train.trainset set-my-set                                   
 - The scan and the review still apply. A set's `labels` replace the review's for the run, and its
   `cuts` (first and last included, the clip's own frames) are added. A library clip is scanned as
   it is read; an in-place one is left out and listed.
-- `sources.json` beside the set marks each pack `mine` or `purchased`. Unmarked counts as purchased;
+- `usage.json` beside the set labels a pack or a clip: `share-freely` (the clip and models of it may leave), `train-only` (models of it, never the clip) or `just-me` (neither). A clip with no label is `just-me`, except a free-licence set of the registry. A public set may not keep `just-me` clips.
   the registry's free-licence sets are `free` unless marked.
 - A public set that keeps a purchased, unmarked or non-commercial clip is refused, dry run included.
   A model of a private set can't be exported into the repo.

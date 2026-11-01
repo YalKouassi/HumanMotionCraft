@@ -1,9 +1,11 @@
-//! What a training set adds up to: minutes per label, and clips and minutes that are the owner's
-//! own or purchased, from `sources.json` beside the sets (`{"<pack>": "mine|purchased"}`). A pack
-//! not marked counts as purchased. That file names packs, so it is refused inside a git checkout.
+//! What a training set adds up to: minutes per label, and per usage label, from `usage.json` beside
+//! the sets (`{"packs": {"<pack>": "<label>"}, "clips": {"<id>": "<label>"}}`). A clip's own label
+//! wins over its pack's. A library clip with neither is `just-me`, so a forgotten one can't leave;
+//! a rig take with neither is `share-freely`, its licence being the registry's. That file names
+//! packs, so it is refused inside a git checkout.
 //!
-//! Totals count the clips kept, without their cuts. A public set is warned about every purchased or
-//! unmarked clip it holds, kept or rejected, as its file names them either way.
+//! Totals count the clips kept, without their cuts. A public set is warned about every `just-me`
+//! clip it holds, kept or rejected, as its file names them either way.
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -14,30 +16,63 @@ use crate::training_set::{self, ClipStatus, TrainingSet};
 
 type R<T> = Result<T, String>;
 
-pub const FILE: &str = "sources.json";
+pub const FILE: &str = "usage.json";
 pub const NO_LABEL: &str = "(no label)";
 
+/// What may leave the machine: the clip, and a model trained on it.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Source {
-    Mine,
-    Purchased,
+#[serde(rename_all = "kebab-case")]
+pub enum Usage {
+    ShareFreely,
+    TrainOnly,
+    JustMe,
 }
 
-#[derive(Debug, Clone, Default, PartialEq)]
-pub struct Sources(pub BTreeMap<String, Source>);
+impl Usage {
+    pub const ALL: [Usage; 3] = [Usage::ShareFreely, Usage::TrainOnly, Usage::JustMe];
 
-impl Sources {
+    pub fn word(self) -> &'static str {
+        match self {
+            Usage::ShareFreely => "share-freely",
+            Usage::TrainOnly => "train-only",
+            Usage::JustMe => "just-me",
+        }
+    }
+
+    pub fn title(self) -> &'static str {
+        match self {
+            Usage::ShareFreely => "Share freely",
+            Usage::TrainOnly => "Train only",
+            Usage::JustMe => "Just me",
+        }
+    }
+
+    pub fn meaning(self) -> &'static str {
+        match self {
+            Usage::ShareFreely => "Anyone can have the clip, and models made from it can be released.",
+            Usage::TrainOnly => "Never shared, but models made from it can be released.",
+            Usage::JustMe => "The clip and any model made from it stay on this machine.",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+pub struct Usages {
+    #[serde(default)]
+    pub packs: BTreeMap<String, Usage>,
+    #[serde(default)]
+    pub clips: BTreeMap<String, Usage>,
+}
+
+impl Usages {
     /// The file beside the sets; none yet is no marks. One that won't read is an error.
-    pub fn load(folder: &Path) -> R<Sources> {
+    pub fn load(folder: &Path) -> R<Usages> {
         let path = folder.join(FILE);
         if !path.exists() {
-            return Ok(Sources::default());
+            return Ok(Usages::default());
         }
         let text = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
-        serde_json::from_str(&text)
-            .map(Sources)
-            .map_err(|e| format!("{}: {e}", path.display()))
+        serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))
     }
 
     pub fn save(&self, folder: &Path) -> R<()> {
@@ -49,9 +84,23 @@ impl Sources {
             ));
         }
         std::fs::create_dir_all(folder).map_err(|e| format!("{}: {e}", folder.display()))?;
-        let mut text = serde_json::to_string_pretty(&self.0).map_err(|e| e.to_string())?;
+        let mut text = serde_json::to_string_pretty(self).map_err(|e| e.to_string())?;
         text.push('\n');
         craft_atomic::atomic_write(&path, text.as_bytes()).map_err(|e| format!("{}: {e}", path.display()))
+    }
+
+    /// A clip's label, and whether anyone chose it.
+    pub fn of(&self, id: &str) -> (Usage, bool) {
+        let marked = self
+            .clips
+            .get(id)
+            .or_else(|| self.packs.get(marked_pack(id, self)))
+            .copied();
+        match marked {
+            Some(u) => (u, true),
+            None if id.starts_with(training_set::LIBRARY) => (Usage::JustMe, false),
+            None => (Usage::ShareFreely, false),
+        }
     }
 }
 
@@ -61,16 +110,16 @@ pub fn pack_of(id: &str) -> &str {
     id.split_once('/').map_or(id, |(pack, _)| pack)
 }
 
-/// A clip's pack as `sources` names it, the same rule as `ac_train.trainset.pack_of`: a library
+/// A clip's pack as `usages` names it, the same rule as `ac_train.trainset.pack_of`: a library
 /// group, or the longest mark it starts with, or its start before ` - ` (a port writes
 /// `<pack> - <action>`).
-pub fn marked_pack<'a>(id: &'a str, sources: &'a Sources) -> &'a str {
+pub fn marked_pack<'a>(id: &'a str, usages: &'a Usages) -> &'a str {
     let group = pack_of(id);
     if !id.starts_with(training_set::LIBRARY) {
         return group;
     }
-    sources
-        .0
+    usages
+        .packs
         .keys()
         .filter(|k| group == k.as_str() || group.starts_with(&format!("{k} - ")))
         .max_by_key(|k| k.len())
@@ -94,42 +143,38 @@ impl Count {
 pub struct Totals {
     /// Clips kept, by label; a clip with two labels counts under both.
     pub labels: BTreeMap<String, Count>,
-    pub mine: Count,
-    /// Unmarked ones included.
-    pub purchased: Count,
-    /// Unmarked takes of the training sets (`<set>/<take>`): their licences are the registry's,
-    /// and `ac_train` refuses a non-commercial one in a public set.
-    pub free: Count,
-    /// Of `purchased`, those whose pack isn't marked.
+    pub share_freely: Count,
+    pub train_only: Count,
+    /// Unmarked library clips included.
+    pub just_me: Count,
+    /// Of `just_me`, the library clips nobody has labelled.
     pub unmarked: Count,
     pub rejected: usize,
     /// Clips kept that aren't here (a library not given): counted, with no minutes.
     pub missing: usize,
-    /// Every pack the set holds: `mine`, `purchased` or `unmarked`.
+    /// Every pack the set holds: its label's word, or `unmarked`.
     pub packs: BTreeMap<String, String>,
     pub warnings: Vec<String>,
 }
 
 /// `length`: a clip's frames and frame rate, if it is here.
-pub fn totals(set: &TrainingSet, sources: &Sources, length: impl Fn(&str) -> Option<(usize, f64)>) -> Totals {
+pub fn totals(set: &TrainingSet, usages: &Usages, length: impl Fn(&str) -> Option<(usize, f64)>) -> Totals {
     let mut out = Totals::default();
-    let (mut held_purchased, mut held_unmarked) = (0, 0);
+    let (mut held, mut held_unmarked) = (0, 0);
     for (id, c) in &set.clips {
-        let pack = marked_pack(id, sources);
-        let source = sources.0.get(pack).copied();
-        let free = source.is_none() && !id.starts_with(training_set::LIBRARY);
-        let word = match source {
-            Some(Source::Mine) => "mine",
-            Some(Source::Purchased) => "purchased",
-            None if free => "free",
-            None => "unmarked",
+        let pack = marked_pack(id, usages);
+        let (usage, chosen) = usages.of(id);
+        let word = match usages.packs.get(pack) {
+            Some(u) => u.word(),
+            None if id.starts_with(training_set::LIBRARY) => "unmarked",
+            None => Usage::ShareFreely.word(),
         };
         out.packs.insert(pack.to_string(), word.to_string());
-        match source {
-            Some(Source::Mine) => {}
-            Some(Source::Purchased) => held_purchased += 1,
-            None if free => {}
-            None => held_unmarked += 1,
+        if usage == Usage::JustMe {
+            held += 1;
+            if !chosen {
+                held_unmarked += 1;
+            }
         }
         if c.status == ClipStatus::Reject {
             out.rejected += 1;
@@ -151,19 +196,20 @@ pub fn totals(set: &TrainingSet, sources: &Sources, length: impl Fn(&str) -> Opt
         for l in &c.labels {
             out.labels.entry(l.clone()).or_default().add(minutes);
         }
-        match source {
-            Some(Source::Mine) => out.mine.add(minutes),
-            Some(Source::Purchased) => out.purchased.add(minutes),
-            None if free => out.free.add(minutes),
-            None => {
-                out.purchased.add(minutes);
-                out.unmarked.add(minutes);
+        match usage {
+            Usage::ShareFreely => out.share_freely.add(minutes),
+            Usage::TrainOnly => out.train_only.add(minutes),
+            Usage::JustMe => {
+                out.just_me.add(minutes);
+                if !chosen {
+                    out.unmarked.add(minutes);
+                }
             }
         }
     }
-    if set.public && held_purchased + held_unmarked > 0 {
+    if set.public && held > 0 {
         out.warnings.push(format!(
-            "this public set holds {held_purchased} purchased and {held_unmarked} unmarked clips: only clips marked mine or free may be public"
+            "this public set holds {held} Just me clips ({held_unmarked} not labelled yet): training refuses it until they are rejected or relabelled"
         ));
     }
     out
@@ -198,15 +244,16 @@ mod tests {
         }
     }
 
-    fn sources() -> Sources {
-        Sources(
-            [
-                ("G".to_string(), Source::Mine),
-                ("cmu".to_string(), Source::Purchased),
+    fn usages() -> Usages {
+        Usages {
+            packs: [
+                ("G".to_string(), Usage::TrainOnly),
+                ("cmu".to_string(), Usage::JustMe),
             ]
             .into_iter()
             .collect(),
-        )
+            clips: BTreeMap::new(),
+        }
     }
 
     fn near(a: f64, seconds: f64) {
@@ -218,8 +265,8 @@ mod tests {
 
     #[test]
     fn a_library_clip_takes_the_longest_mark_or_its_start() {
-        let mut marks = sources();
-        marks.0.insert("G - extra".to_string(), Source::Purchased);
+        let mut marks = usages();
+        marks.packs.insert("G - extra".to_string(), Usage::JustMe);
         assert_eq!(marked_pack("library:G - extra - walk/a", &marks), "G - extra");
         assert_eq!(marked_pack("library:G - run/a", &marks), "G");
         assert_eq!(marked_pack("library:other - run/a", &marks), "other");
@@ -227,15 +274,24 @@ mod tests {
     }
 
     #[test]
-    fn an_unmarked_rig_take_is_free_and_an_unmarked_library_clip_is_not() {
+    fn an_unmarked_rig_take_is_shared_and_an_unmarked_library_clip_is_just_me() {
         let mut set = TrainingSet::new("t", false).unwrap();
         for id in ["lafan/a", "library:other/a"] {
             set.clips.insert(id.to_string(), SetClip::new(id));
         }
-        let t = totals(&set, &sources(), |_| Some((30, 60.0)));
-        assert_eq!(t.free.clips, 1);
+        let t = totals(&set, &usages(), |_| Some((30, 60.0)));
+        assert_eq!(t.share_freely.clips, 1);
         assert_eq!(t.unmarked.clips, 1);
-        assert_eq!(t.purchased.clips, 1);
+        assert_eq!(t.just_me.clips, 1);
+    }
+
+    #[test]
+    fn a_clips_own_label_wins_over_its_packs() {
+        let mut u = usages();
+        u.clips.insert("library:G/a".to_string(), Usage::JustMe);
+        assert_eq!(u.of("library:G/a"), (Usage::JustMe, true));
+        assert_eq!(u.of("library:G/b"), (Usage::TrainOnly, true));
+        assert_eq!(u.of("library:H/b"), (Usage::JustMe, false));
     }
 
     #[test]
@@ -253,7 +309,7 @@ mod tests {
             // not here: one clip with no minutes
             clip("library:Z/gone", Keep, &["walk"], &[]),
         ]);
-        let t = totals(&s, &sources(), length);
+        let t = totals(&s, &usages(), length);
         // walk: a 1 s + b 1 s + gone 0 s, 3 clips
         assert_eq!(t.labels["walk"].clips, 3);
         near(t.labels["walk"].minutes, 2.0);
@@ -261,50 +317,50 @@ mod tests {
         near(t.labels["run"].minutes, 10.0);
         near(t.labels[NO_LABEL].minutes, 2.0);
         assert!(!t.labels.contains_key("hop"));
-        // mine: G's a and b, 2 s
-        assert_eq!(t.mine.clips, 2);
-        near(t.mine.minutes, 2.0);
-        // purchased: cmu's e 10 s, unmarked H's d 2 s and Z's gone 0 s
-        assert_eq!(t.purchased.clips, 3);
-        near(t.purchased.minutes, 12.0);
+        // train only: G's a and b, 2 s
+        assert_eq!(t.train_only.clips, 2);
+        near(t.train_only.minutes, 2.0);
+        // just me: cmu's e 10 s, unmarked H's d 2 s and Z's gone 0 s
+        assert_eq!(t.just_me.clips, 3);
+        near(t.just_me.minutes, 12.0);
         assert_eq!(t.unmarked.clips, 2);
         near(t.unmarked.minutes, 2.0);
         assert_eq!((t.rejected, t.missing), (1, 1));
-        assert_eq!(t.packs["G"], "mine");
-        assert_eq!(t.packs["cmu"], "purchased");
+        assert_eq!(t.packs["G"], "train-only");
+        assert_eq!(t.packs["cmu"], "just-me");
         assert_eq!(t.packs["H"], "unmarked");
         assert!(t.warnings.is_empty(), "a private set may hold anything");
     }
 
     #[test]
-    fn a_public_set_warns_of_a_purchased_or_an_unmarked_clip_only() {
+    fn a_public_set_warns_of_a_just_me_clip_only() {
         let warned = |id: &str, status| {
             let mut s = TrainingSet::new("x", true).unwrap();
             s.clips.extend([clip(id, status, &[], &[])]);
-            totals(&s, &sources(), length).warnings
+            totals(&s, &usages(), length).warnings
         };
         let w = warned("cmu/e", ClipStatus::Keep);
-        assert!(w[0].contains("1 purchased and 0 unmarked"), "{w:?}");
+        assert!(w[0].contains("1 Just me clips (0 not labelled"), "{w:?}");
         let w = warned("library:H/d", ClipStatus::Keep);
-        assert!(w[0].contains("0 purchased and 1 unmarked"), "{w:?}");
+        assert!(w[0].contains("1 Just me clips (1 not labelled"), "{w:?}");
         // its file names it even when rejected
         assert_eq!(warned("cmu/e", ClipStatus::Reject).len(), 1);
         assert!(warned("library:G/a", ClipStatus::Keep).is_empty());
     }
 
     #[test]
-    fn the_sources_file_stays_out_of_a_checkout_and_says_when_it_is_bad() {
-        let dir = std::env::temp_dir().join(format!("ac-review-sources-{}", std::process::id()));
+    fn the_usage_file_stays_out_of_a_checkout_and_says_when_it_is_bad() {
+        let dir = std::env::temp_dir().join(format!("ac-review-usage-{}", std::process::id()));
         std::fs::remove_dir_all(&dir).ok();
         let (out, repo) = (dir.join("out"), dir.join("repo"));
         std::fs::create_dir_all(repo.join(".git")).unwrap();
-        assert_eq!(Sources::load(&out).unwrap(), Sources::default());
-        sources().save(&out).unwrap();
-        assert_eq!(Sources::load(&out).unwrap(), sources());
-        assert!(sources().save(&repo).unwrap_err().contains("names packs"));
+        assert_eq!(Usages::load(&out).unwrap(), Usages::default());
+        usages().save(&out).unwrap();
+        assert_eq!(Usages::load(&out).unwrap(), usages());
+        assert!(usages().save(&repo).unwrap_err().contains("names packs"));
         assert!(!repo.join(FILE).exists());
-        std::fs::write(out.join(FILE), r#"{"G": "stolen"}"#).unwrap();
-        assert!(Sources::load(&out).is_err());
+        std::fs::write(out.join(FILE), r#"{"packs": {"G": "stolen"}}"#).unwrap();
+        assert!(Usages::load(&out).is_err());
         std::fs::remove_dir_all(&dir).ok();
     }
 }

@@ -1,0 +1,89 @@
+{
+  "not_in_base": ["sword", "katana", "knife", "dagger", "rifle", "pistol", "gun", "shotgun", "sniper", "grenade", "rocket", "bow", "crossbow", "archer", "arrow", "axe", "hammer", "shield", "spear", "javelin", "mace", "melee", "combat", "attack", "fight", "fighter", "warrior", "brute", "berserker", "zombie", "injured", "wounded", "limp", "motorbike", "roller", "swim", "kill", "death"],
+  "styles": [
+    {
+      "name": "natural", "kind": "base",
+      "about": "Plain, relaxed movement with no character to it. The free sets' neutral takes.",
+      "includes": ["relaxed walking and running with no acted style"],
+      "leaves_out": ["anything acted: proud, tired, sneaky"],
+      "words": ["neutral"], "not_words": []
+    },
+    {
+      "name": "range-of-motion", "kind": "base",
+      "about": "A body moving each joint through its reach, so the model knows what a body can do.",
+      "includes": ["arm, leg, spine and neck sweeps", "calibration moves"],
+      "leaves_out": ["moves with a purpose: those have their own style"],
+      "words": ["rom", "range"], "not_words": ["ranged"]
+    },
+    {
+      "name": "walk", "kind": "base",
+      "about": "Upright walking with empty hands, in any direction.",
+      "includes": ["forwards and backwards", "side steps", "turning while stepping", "starting and stopping", "slow and brisk walks"],
+      "leaves_out": ["crouched walks: crouch", "carrying or pushing something", "limps and acted walks: an add-on", "a weapon in hand"],
+      "words": ["walk", "strafe", "sidestep", "turn", "step", "locomotion"], "not_words": ["crouch", "sneak", "carry", "run", "sprint"]
+    },
+    {
+      "name": "run", "kind": "base",
+      "about": "Upright jogging, running and sprinting with empty hands.",
+      "includes": ["forwards, backwards and sideways", "turning at speed", "starting and stopping a run"],
+      "leaves_out": ["running jumps: jump", "stumbles: fall", "a weapon in hand"],
+      "words": ["run", "jog", "sprint"], "not_words": ["jump", "vault", "crouch"]
+    },
+    {
+      "name": "idle", "kind": "base",
+      "about": "Standing in place, not doing anything in particular.",
+      "includes": ["shifting weight", "breathing", "looking around", "small fidgets"],
+      "leaves_out": ["talking with the hands: gesture", "sitting", "fighting stances"],
+      "words": ["idle", "stand", "wait"], "not_words": ["crouch", "sit", "talk"]
+    },
+    {
+      "name": "jump", "kind": "base",
+      "about": "Leaving the ground on purpose and landing on the feet.",
+      "includes": ["jumps on the spot and running jumps", "hops", "take-off, air and landing as separate clips", "landing from a height"],
+      "leaves_out": ["flips: acrobatic", "vaults: climb", "landing badly: fall"],
+      "words": ["jump", "hop", "leap", "land"], "not_words": ["vault", "flip"]
+    },
+    {
+      "name": "fall", "kind": "base",
+      "about": "Losing balance or going down, and getting back up.",
+      "includes": ["trips and stumbles", "falling over", "lying then standing up"],
+      "leaves_out": ["being killed in a fight", "landing from a jump on the feet: jump"],
+      "words": ["fall", "falling", "trip", "stumble", "getup"], "not_words": []
+    },
+    {
+      "name": "crouch", "kind": "base",
+      "about": "Knees bent and body low, still or moving, with empty hands.",
+      "includes": ["crouched idle", "crouched walks", "sneaking", "going down into and up out of a crouch"],
+      "leaves_out": ["crawling on the floor", "a weapon in hand, which most of these packs have"],
+      "words": ["crouch", "sneak", "stealth"], "not_words": []
+    },
+    {
+      "name": "gesture", "kind": "base",
+      "about": "Talking and everyday hand actions while standing or sitting.",
+      "includes": ["conversation", "pointing, waving and shrugging", "picking things up, pressing buttons, using a desk"],
+      "leaves_out": ["fighting moves", "dancing"],
+      "words": ["talk", "conversation", "gesture", "wave", "point", "shrug", "pick", "press", "office", "everyday"], "not_words": []
+    },
+    {
+      "name": "climb", "kind": "base",
+      "about": "Getting over or up something with hands and feet.",
+      "includes": ["ladders", "ledges and hanging", "vaulting a low wall", "rope swings"],
+      "leaves_out": ["flips on the way over: acrobatic", "a weapon in hand"],
+      "words": ["climb", "ladder", "ledge", "hang", "vault", "rope"], "not_words": []
+    },
+    {
+      "name": "zombie", "kind": "add-on",
+      "about": "A way of moving: lurching, dragging, losing control of the body.",
+      "includes": ["shambling walks and lurching runs", "crawls", "reaching and lunging", "swaying idles", "screams with the whole body"],
+      "leaves_out": ["feeding and eating, which aren't a way of moving", "attacks that need a second person"],
+      "words": ["zombie", "undead", "infected"], "not_words": ["feast", "eat", "eaten", "player"]
+    },
+    {
+      "name": "acrobatic", "kind": "add-on",
+      "about": "The body leaves its normal upright balance on purpose and comes back to it.",
+      "includes": ["flips and somersaults", "cartwheels and handsprings", "walkovers and handstands", "parkour tricks"],
+      "leaves_out": ["tricks on a motorbike or skates", "plain vaults: climb", "fighting kicks"],
+      "words": ["acrobat", "acrobatic", "flip", "backflip", "frontflip", "cartwheel", "somersault", "handspring", "handstand", "walkover", "parkour", "freerun"], "not_words": ["motorbike", "roller", "office", "page", "kick"]
+    }
+  ]
+}

@@ -10,8 +10,10 @@ use serde_json::{Map, Value, json};
 
 use crate::decisions;
 use crate::review::Review;
+use crate::review::{Filter, Show};
 use crate::store;
-use crate::totals::{self, Source, Sources, Totals};
+use crate::styles;
+use crate::totals::{self, Totals, Usage, Usages};
 use crate::training_set::{self, ClipStatus, SetClip, TrainingSet};
 
 type R<T> = Result<T, String>;
@@ -21,6 +23,14 @@ type P = Map<String, Value>;
 const MAX_UNDO: usize = 200;
 
 type Changes = Vec<(String, Option<SetClip>)>;
+
+/// A style and what its list holds now.
+pub struct StyleRow {
+    pub style: &'static styles::Style,
+    pub clips: usize,
+    pub labelled: usize,
+    pub minutes: f64,
+}
 
 /// The training sets' side of a review.
 #[derive(Default)]
@@ -271,21 +281,112 @@ impl Review {
         Ok(json!({ "matched": matched, "changed": changed, "not_in_source": unmatched }))
     }
 
-    /// The open set's totals and warnings. A sources file that won't read counts every pack as
-    /// unmarked, and is said.
+    /// Whether a clip belongs in a style's list: labelled with it, or suggested by its name and not
+    /// yet given other labels. A clip the open set rejects is out of every list.
+    pub fn in_style(&self, s: usize, t: usize, style: &str) -> bool {
+        let clip = self
+            .training
+            .active
+            .as_ref()
+            .and_then(|a| a.clips.get(&self.id(s, t)));
+        if let Some(c) = clip {
+            if c.status == ClipStatus::Reject {
+                return false;
+            }
+            if c.labels.iter().any(|l| l == style) {
+                return true;
+            }
+            if !c.labels.is_empty() {
+                return false;
+            }
+        }
+        let (Some(st), Some(set)) = (styles::named(style), self.sets.get(s)) else {
+            return false;
+        };
+        let Some(take) = set.takes.get(t) else {
+            return false;
+        };
+        styles::suggests(st, &format!("{} {} {}", set.name, take.name, take.label))
+    }
+
+    /// Each style with its description and what its list holds now.
+    pub fn style_rows(&self) -> Vec<StyleRow> {
+        styles::all()
+            .iter()
+            .map(|st| {
+                let mut row = StyleRow {
+                    style: st,
+                    clips: 0,
+                    labelled: 0,
+                    minutes: 0.0,
+                };
+                for (si, s) in self.sets.iter().enumerate() {
+                    for (ti, t) in s.takes.iter().enumerate() {
+                        if self.in_style(si, ti, &st.name) {
+                            row.clips += 1;
+                            row.minutes += t.frames as f64 / t.fps / 60.0;
+                            let labelled = self
+                                .training
+                                .active
+                                .as_ref()
+                                .and_then(|a| a.clips.get(&self.id(si, ti)))
+                                .is_some_and(|c| c.labels.contains(&st.name));
+                            row.labelled += usize::from(labelled);
+                        }
+                    }
+                }
+                row
+            })
+            .collect()
+    }
+
+    /// `review.usage`: label a pack or clips, or take the label off (`usage` null).
+    fn set_usage(&mut self, p: &P) -> R<Value> {
+        let usage: Option<Usage> = match p.get("usage") {
+            None | Some(Value::Null) => None,
+            Some(v) => Some(
+                serde_json::from_value(v.clone())
+                    .map_err(|_| "usage: share-freely, train-only, just-me or null".to_string())?,
+            ),
+        };
+        let folder = self.folder()?;
+        let mut usages = Usages::load(&folder)?;
+        let mut changed = 0;
+        if let Some(pack) = p.get("pack").and_then(Value::as_str) {
+            match usage {
+                Some(u) => usages.packs.insert(pack.to_string(), u),
+                None => usages.packs.remove(pack),
+            };
+            changed = 1;
+        } else {
+            for id in Review::ids_of(p)? {
+                match usage {
+                    Some(u) => usages.clips.insert(id, u),
+                    None => usages.clips.remove(&id),
+                };
+                changed += 1;
+            }
+        }
+        usages.save(&folder)?;
+        Ok(json!({ "changed": changed, "usage": usage }))
+    }
+
+    /// The open set's totals and warnings. A usage file that won't read leaves every library clip
+    /// Just me, and is said.
     pub fn set_totals(&self) -> R<Totals> {
         let set = self.training.active.as_ref().ok_or("no training set is open")?;
-        let (sources, bad) = match Sources::load(&self.folder()?) {
+        let (usages, bad) = match Usages::load(&self.folder()?) {
             Ok(s) => (s, None),
-            Err(e) => (Sources::default(), Some(e)),
+            Err(e) => (Usages::default(), Some(e)),
         };
-        let mut t = totals::totals(set, &sources, |id| {
+        let mut t = totals::totals(set, &usages, |id| {
             let (s, i) = self.find(id).ok()?;
             let take = self.sets.get(s)?.takes.get(i)?;
             Some((take.frames, take.fps))
         });
         if let Some(e) = bad {
-            t.warnings.push(format!("every pack counts as unmarked: {e}"));
+            t.warnings
+                .push(format!("every library clip counts as Just me: {e}"));
         }
         Ok(t)
     }
@@ -303,13 +404,15 @@ impl Review {
             {"id": "review.set_remove", "params": "id or ids", "returns": "{changed}: one undo step"},
             {"id": "review.groups", "params": "show? (default all), set?, reason?, search?", "returns": "{groups: [{group, pack, name, clips, minutes, keep, reject}]}: takes differing by a trailing number are a group"},
             {"id": "review.set_group", "params": "group, status? (keep|reject), labels?, add_labels?, remove_labels?", "returns": "{changed}: every clip of the group, one undo step; a single clip can then be overridden"},
-            {"id": "review.totals", "params": "", "returns": "the open set: labels {label: {clips, minutes}}, mine, purchased, unmarked (of purchased), rejected, missing, packs {pack: mine|purchased|unmarked}, warnings"},
-            {"id": "review.source", "params": "pack, source (mine|purchased|null: unmarked)", "returns": "{pack, source}: written to sources.json beside the sets, refused inside a git checkout"},
+            {"id": "review.totals", "params": "", "returns": "the open set: labels {label: {clips, minutes}}, share_freely, train_only, just_me, unmarked {clips, minutes}, rejected, missing, packs, warnings"},
+            {"id": "review.usage", "params": "pack, or id or ids; usage (share-freely|train-only|just-me|null: take it off)", "returns": "{changed, usage}: kept beside the sets, in no set's file"},
+            {"id": "review.styles", "params": "", "returns": "{styles: [{name, kind, about, includes, leaves_out, clips, labelled, minutes}]}: what each style should hold and what its list holds now"},
+            {"id": "review.style_keep", "params": "style, set? (one data set)", "returns": "{changed}: every clip still in the style's list is kept and labelled with it, one undo step"},
             {"id": "review.undo", "params": "", "returns": "{undone, left}: the active set's last change, in this process"},
         ])
     }
 
-    pub const SET_IDS: [&'static str; 13] = [
+    pub const SET_IDS: [&'static str; 15] = [
         "review.sets",
         "review.set_new",
         "review.set_duplicate",
@@ -321,7 +424,9 @@ impl Review {
         "review.groups",
         "review.set_group",
         "review.totals",
-        "review.source",
+        "review.usage",
+        "review.styles",
+        "review.style_keep",
         "review.undo",
     ];
 
@@ -411,23 +516,37 @@ impl Review {
                 Ok(json!({ "changed": self.set_clips(&ids, p)? }))
             }
             "review.totals" => serde_json::to_value(self.set_totals()?).map_err(|e| e.to_string()),
-            "review.source" => {
-                let pack = word(p, "pack")?;
-                let source: Option<Source> = match p.get("source") {
-                    None | Some(Value::Null) => None,
-                    Some(v) => Some(
-                        serde_json::from_value(v.clone())
-                            .map_err(|_| "source: mine, purchased or null".to_string())?,
-                    ),
+            "review.usage" => self.set_usage(p),
+            "review.styles" => {
+                let rows: Vec<Value> = self
+                    .style_rows()
+                    .into_iter()
+                    .map(|r| {
+                        json!({
+                            "name": r.style.name, "kind": r.style.kind, "about": r.style.about,
+                            "includes": r.style.includes, "leaves_out": r.style.leaves_out,
+                            "clips": r.clips, "labelled": r.labelled, "minutes": r.minutes,
+                        })
+                    })
+                    .collect();
+                Ok(json!({ "styles": rows }))
+            }
+            "review.style_keep" => {
+                let style = word(p, "style")?;
+                if styles::named(&style).is_none() {
+                    return Err(format!("no style {style:?}"));
+                }
+                let f = Filter {
+                    show: Show::All,
+                    style: Some(style.clone()),
+                    set: p.get("set").and_then(Value::as_str).map(str::to_string),
+                    ..Filter::default()
                 };
-                let folder = self.folder()?;
-                let mut sources = Sources::load(&folder)?;
-                match source {
-                    Some(s) => sources.0.insert(pack.clone(), s),
-                    None => sources.0.remove(&pack),
-                };
-                sources.save(&folder)?;
-                Ok(json!({ "pack": pack, "source": source }))
+                let ids: Vec<String> = self.queue(&f).into_iter().map(|(s, t)| self.id(s, t)).collect();
+                let mut keep = Map::new();
+                keep.insert("status".into(), json!("keep"));
+                keep.insert("add_labels".into(), json!([style]));
+                Ok(json!({ "changed": self.set_clips(&ids, &keep)? }))
             }
             "review.undo" => {
                 let Some(step) = self.training.undo.pop() else {
