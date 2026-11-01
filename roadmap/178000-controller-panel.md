@@ -62,11 +62,12 @@ The panel opens as a dock tab, and Simple mode closes it. The dropdown choice is
 Proof in `target/shots/2026-11-01/controller-panel/`, release app, no controller plugged in:
 - `take-mouse-stick.mp4`: on-screen left stick held from 1 s to 6 s. The body travels 18 hip heights
   and settles within about 2 s of letting go (the model's usual stop). `take-mouse-key.mp4`: on-screen W, 6 hip heights, then stops likewise.
-- `layout-*.png`, `drive-log.txt`: all 41 controls across the four choices change when pressed with the mouse and return exactly when
-  released. Driven by `drive.py`, through the control port.
+- `layout-*.png`: 62 presses across the four choices (5 no controller, 11 standard, 23 Xbox, 23 PlayStation), through the control port: each changed its area when pressed and
+  returned exactly on release, 0 failures. That run's log was overwritten by the later take runs, and `drive.py` no longer holds that check.
+- The videos were made before one late fix (a tooltip covered the buttons while a stick was held), so they still show it. The fix passed the gate but wasn't driven again.
 - Tests in `controller.rs`: stick drag clamped, hostile numbers, larger tilt wins, no controller ignores sticks, trigger, parts fit with no overlap, name to layout.
 
 **Not done or not tested:**
 - No real controller has been read: **the owner's check with an Xbox and a PlayStation pad is open**, and so is unplugging one mid-take. That path is written, not run.
 - The mouse has one pointer, so it presses one on-screen key at a time: W and A together need the keyboard (or the stick, for a diagonal). A take was steered with W only; A lights up but wasn't steered with.
-- Takes in the first drive runs were disturbed: the window was resized and a take started from outside the script, and once it closed, with no crash record found. Clean runs didn't reproduce it. One of those shots showed the joints standing with the mesh flat on the floor, physics on, not seen again; reason unknown.
+- Takes in the first drive runs were disturbed: the window was resized and a take started from outside the script, and once it closed. The Windows crash log wasn't checked (the query failed), so a crash isn't ruled out; four later runs stayed up. One of those shots showed the joints standing with the mesh flat on the floor, physics on, not seen again; reason unknown.
