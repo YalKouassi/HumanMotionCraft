@@ -84,6 +84,13 @@
       "includes": ["flips and somersaults", "cartwheels and handsprings", "walkovers and handstands", "parkour tricks"],
       "leaves_out": ["tricks on a motorbike or skates", "plain vaults: climb", "fighting kicks"],
       "words": ["acrobat", "acrobatic", "flip", "backflip", "frontflip", "cartwheel", "somersault", "handspring", "handstand", "walkover", "parkour", "freerun"], "not_words": ["motorbike", "roller", "office", "page", "kick"]
+    },
+    {
+      "name": "unsorted", "kind": "to-sort",
+      "about": "Your clips whose names say nothing useful. Look at each one and send it to a style, or throw it out.",
+      "includes": ["clips with no style word and no prop or weapon in their name"],
+      "leaves_out": ["clips a name or a label already places"],
+      "words": [], "not_words": []
     }
   ]
 }

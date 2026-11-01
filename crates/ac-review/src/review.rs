@@ -81,6 +81,8 @@ pub struct Filter {
     pub group: Option<String>,
     /// The clips of one style (`Review::in_style`).
     pub style: Option<String>,
+    /// Library clips only.
+    pub mine: bool,
 }
 
 impl Default for Filter {
@@ -92,6 +94,7 @@ impl Default for Filter {
             search: String::new(),
             group: None,
             style: None,
+            mine: false,
         }
     }
 }
@@ -303,6 +306,9 @@ impl Review {
             if f.set.as_ref().is_some_and(|n| *n != s.name) {
                 continue;
             }
+            if f.mine && !s.name.starts_with(crate::training_set::LIBRARY) {
+                continue;
+            }
             for (ti, t) in s.takes.iter().enumerate() {
                 if f.group
                     .as_ref()
@@ -458,6 +464,7 @@ impl Review {
             search: text(p, "search").unwrap_or_default(),
             group: text(p, "group"),
             style: text(p, "style"),
+            mine: p.get("mine").and_then(Value::as_bool).unwrap_or(false),
         })
     }
 

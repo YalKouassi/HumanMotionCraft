@@ -450,6 +450,7 @@ impl App {
     }
 
     fn open_style(&mut self, name: String) {
+        self.filter.mine = styles::named(&name).is_some_and(|s| s.kind != "add-on");
         self.filter.style = Some(name);
         self.filter.show = Show::All;
         self.advance = true;
@@ -463,6 +464,7 @@ impl App {
 
     fn close_style(&mut self) {
         self.filter.style = None;
+        self.filter.mine = false;
         self.play_all = false;
         self.playing = false;
         self.refresh();
@@ -473,9 +475,22 @@ impl App {
         let Some(style) = self.filter.style.clone() else {
             return;
         };
-        if let Some(v) = self.set_command("review.style_keep", json!({ "style": style })) {
+        let p = json!({ "style": style, "mine": self.filter.mine });
+        if let Some(v) = self.set_command("review.style_keep", p) {
             self.status = format!("{} clips kept as {style}", v["changed"]);
             self.reselect();
+        }
+    }
+
+    /// Send the clip on screen to a style, in place of any labels it had, and move on.
+    fn send_to(&mut self, style: &str) {
+        let Some(id) = self.id() else { return };
+        let before = self.queue.clone();
+        let p = json!({ "id": id, "status": "keep", "labels": [style] });
+        if self.set_command("review.set_clip", p).is_some() {
+            self.queue = before;
+            self.status = format!("sent to {style}");
+            self.after_decision();
         }
     }
 
@@ -514,8 +529,12 @@ impl App {
         egui::ScrollArea::vertical()
             .auto_shrink([false, false])
             .show(ui, |ui| {
-                for kind in ["base", "add-on"] {
-                    ui.heading(if kind == "base" { "Base styles" } else { "Add-ons" });
+                for kind in ["to-sort", "base", "add-on"] {
+                    ui.heading(match kind {
+                        "to-sort" => "To sort",
+                        "base" => "Base styles, your clips",
+                        _ => "Add-ons, your clips and the free sets",
+                    });
                     for r in self.style_rows.iter().filter(|r| r.style.kind == kind) {
                         ui.group(|ui| {
                             ui.set_width(ui.available_width());
@@ -580,9 +599,24 @@ impl App {
                 self.keep_style();
             }
         });
+        let mut send = None;
+        ui.horizontal_wrapped(|ui| {
+            ui.label("Send to:");
+            for (i, name) in styles::SEND_TO.iter().enumerate() {
+                if ui.small_button(format!("{} {name}", i + 1)).clicked() {
+                    send = Some(*name);
+                }
+            }
+        });
+        if let Some(name) = send {
+            self.send_to(name);
+        }
+        if ui.checkbox(&mut self.filter.mine, "My clips only").changed() {
+            self.refresh();
+        }
         ui.label(
             RichText::new(
-                "R rejects and moves on · I and O mark frames, C cuts them · K keeps · Up and Down skip",
+                "R rejects and moves on · 1 to 9 send it to a style · I and O mark frames, C cuts them · K keeps · Up and Down skip",
             )
             .weak()
             .small(),
@@ -772,6 +806,15 @@ impl App {
                 Key::Backspace,
                 Key::Z,
                 Key::Enter,
+                Key::Num1,
+                Key::Num2,
+                Key::Num3,
+                Key::Num4,
+                Key::Num5,
+                Key::Num6,
+                Key::Num7,
+                Key::Num8,
+                Key::Num9,
             ];
             (
                 keys.into_iter().filter(|k| i.key_pressed(*k)).collect::<Vec<_>>(),
@@ -804,6 +847,34 @@ impl App {
                 Key::Escape if gallery => self.picked.clear(),
                 Key::C | Key::X | Key::Backspace if rows || gallery => {
                     self.status = "open a single clip for that".into()
+                }
+                Key::Num1
+                | Key::Num2
+                | Key::Num3
+                | Key::Num4
+                | Key::Num5
+                | Key::Num6
+                | Key::Num7
+                | Key::Num8
+                | Key::Num9 => {
+                    let i = [
+                        Key::Num1,
+                        Key::Num2,
+                        Key::Num3,
+                        Key::Num4,
+                        Key::Num5,
+                        Key::Num6,
+                        Key::Num7,
+                        Key::Num8,
+                        Key::Num9,
+                    ]
+                    .iter()
+                    .position(|x| *x == k);
+                    if self.filter.style.is_some()
+                        && let Some(name) = i.and_then(|i| styles::SEND_TO.get(i))
+                    {
+                        self.send_to(name);
+                    }
                 }
                 Key::Space => self.playing = !self.playing,
                 Key::ArrowLeft => {

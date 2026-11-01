@@ -306,10 +306,18 @@ impl Review {
         let Some(take) = set.takes.get(t) else {
             return false;
         };
-        styles::suggests(st, &format!("{} {} {}", set.name, take.name, take.label))
+        let text = format!("{} {} {}", set.name, take.name, take.label);
+        if st.kind == "to-sort" {
+            return set.name.starts_with(training_set::LIBRARY)
+                && clip.is_none_or(|c| c.labels.is_empty())
+                && !styles::names_a_prop(&text)
+                && !styles::all().iter().any(|o| styles::suggests(o, &text));
+        }
+        styles::suggests(st, &text)
     }
 
-    /// Each style with its description and what its list holds now.
+    /// Each style with its description and what its list holds now: a base style or the unsorted
+    /// pile from the library only, an add-on from everything.
     pub fn style_rows(&self) -> Vec<StyleRow> {
         styles::all()
             .iter()
@@ -321,6 +329,9 @@ impl Review {
                     minutes: 0.0,
                 };
                 for (si, s) in self.sets.iter().enumerate() {
+                    if st.kind != "add-on" && !s.name.starts_with(training_set::LIBRARY) {
+                        continue;
+                    }
                     for (ti, t) in s.takes.iter().enumerate() {
                         if self.in_style(si, ti, &st.name) {
                             row.clips += 1;
@@ -407,7 +418,7 @@ impl Review {
             {"id": "review.totals", "params": "", "returns": "the open set: labels {label: {clips, minutes}}, share_freely, train_only, just_me, unmarked {clips, minutes}, rejected, missing, packs, warnings"},
             {"id": "review.usage", "params": "pack, or id or ids; usage (share-freely|train-only|just-me|null: take it off)", "returns": "{changed, usage}: kept beside the sets, in no set's file"},
             {"id": "review.styles", "params": "", "returns": "{styles: [{name, kind, about, includes, leaves_out, clips, labelled, minutes}]}: what each style should hold and what its list holds now"},
-            {"id": "review.style_keep", "params": "style, set? (one data set)", "returns": "{changed}: every clip still in the style's list is kept and labelled with it, one undo step"},
+            {"id": "review.style_keep", "params": "style, set? (one data set), mine? (library clips only)", "returns": "{changed}: every clip still in the style's list is kept and labelled with it, one undo step"},
             {"id": "review.undo", "params": "", "returns": "{undone, left}: the active set's last change, in this process"},
         ])
     }
@@ -540,6 +551,7 @@ impl Review {
                     show: Show::All,
                     style: Some(style.clone()),
                     set: p.get("set").and_then(Value::as_str).map(str::to_string),
+                    mine: p.get("mine").and_then(Value::as_bool).unwrap_or(false),
                     ..Filter::default()
                 };
                 let ids: Vec<String> = self.queue(&f).into_iter().map(|(s, t)| self.id(s, t)).collect();

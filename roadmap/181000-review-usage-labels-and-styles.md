@@ -11,3 +11,6 @@ Three plain labels, for a pack or a single clip, replace mine and purchased in t
 
 ## Acceptance
 The owner plays a style through, throws clips out, and agrees the labels and descriptions.
+
+## Decision (2026-11-01)
+The owner: the base uses their own clips for walk, run, gesture, idle, jump, crouch and climb; zombie and acrobatic are trained add-ons. They preview each style, throw out bad clips, and send the clips whose names say nothing to a style (the `unsorted` list, keys 1 to 9). Sets live outside the repo. Nothing trains until the owner says so.

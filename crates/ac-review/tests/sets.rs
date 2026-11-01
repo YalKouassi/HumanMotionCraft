@@ -482,6 +482,46 @@ fn a_styles_list_plays_what_its_name_suggests_and_rejected_clips_leave_it() {
 }
 
 #[test]
+fn the_unsorted_pile_is_library_clips_no_name_places() {
+    let dir = scratch("unsorted");
+    let sets = dir.join("sets");
+    write_clip(&dir.join("lib"), "G", "Take_17", 30, 30.0);
+    write_clip(&dir.join("lib"), "G", "Sword_Take", 30, 30.0);
+    let mut r = review(&dir, &sets);
+    r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
+    let names = |r: &mut Review, style: &str| -> Vec<String> {
+        let v = r
+            .run(
+                "review.list",
+                &p(json!({"show": "all", "style": style, "mine": true})),
+            )
+            .unwrap();
+        v["takes"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|t| t["id"].as_str().unwrap().to_string())
+            .collect()
+    };
+    let pile = names(&mut r, "unsorted");
+    assert!(pile.contains(&"library:G/Take_17".to_string()), "{pile:?}");
+    assert!(
+        !pile.contains(&"library:G/Sword_Take".to_string()),
+        "a prop stays out"
+    );
+
+    // sent somewhere, it leaves the pile
+    r.run(
+        "review.set_clip",
+        &p(json!({"id": "library:G/Take_17", "status": "keep", "labels": ["walk"]})),
+    )
+    .unwrap();
+    assert!(!names(&mut r, "unsorted").contains(&"library:G/Take_17".to_string()));
+    assert!(names(&mut r, "walk").contains(&"library:G/Take_17".to_string()));
+    std::fs::remove_dir_all(&dir).ok();
+}
+
+#[test]
 fn undo_outlasts_the_session_and_a_bad_file_only_loses_the_steps() {
     let dir = scratch("undo");
     let sets = dir.join("sets");

@@ -86,6 +86,28 @@ pub fn suggests(style: &Style, text: &str) -> bool {
     has(&style.words) && !has(&style.not_words) && !(style.kind == "base" && has(&file().not_in_base))
 }
 
+/// Whether a name says a prop or an acted style, so it is left out of the base and of `unsorted`.
+pub fn names_a_prop(text: &str) -> bool {
+    let words = tokens(text);
+    file()
+        .not_in_base
+        .iter()
+        .any(|w| words.iter().any(|t| t.starts_with(w.as_str())))
+}
+
+/// Keys 1 to 9 send a clip to these, in this order.
+pub const SEND_TO: [&str; 9] = [
+    "walk",
+    "run",
+    "idle",
+    "jump",
+    "crouch",
+    "gesture",
+    "climb",
+    "zombie",
+    "acrobatic",
+];
+
 #[cfg(test)]
 mod tests {
     #![allow(clippy::unwrap_used)]
@@ -100,13 +122,24 @@ mod tests {
         let file: File = serde_json::from_str(FILE).unwrap();
         assert!(file.styles.len() >= 12);
         for s in &file.styles {
-            assert!(s.kind == "base" || s.kind == "add-on", "{}", s.name);
+            assert!(
+                matches!(s.kind.as_str(), "base" | "add-on" | "to-sort"),
+                "{}",
+                s.name
+            );
             assert!(
                 !s.about.is_empty() && !s.includes.is_empty() && !s.leaves_out.is_empty(),
                 "{}",
                 s.name
             );
-            assert!(!s.words.is_empty(), "{}", s.name);
+            assert!(!s.words.is_empty() || s.kind == "to-sort", "{}", s.name);
+        }
+    }
+
+    #[test]
+    fn every_key_sends_to_a_style() {
+        for name in SEND_TO {
+            assert!(named(name).is_some(), "{name}");
         }
     }
 
