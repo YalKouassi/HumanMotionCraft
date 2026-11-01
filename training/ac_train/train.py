@@ -15,9 +15,10 @@ takes have (:mod:`ac_train.labels`: each take's motion type and style words, wit
 ``review.py``'s plan: the quality scan's cuts and rejections, with the review's decisions
 (``training/review/decisions.json``) over them; no window touches a cut. Every set must be scanned
 first (``python -m ac_train.quality``), unless ``--unscanned``. Which takes are read is
-:mod:`ac_train.selection`'s (``--types``, ``--styles``, ``--natural``, ``--takes <json>``); the
-minutes that survive, by type and set, are printed before the first step, and ``--dry-run`` stops
-there.
+:mod:`ac_train.selection`'s (``--types``, ``--styles``, ``--natural``, ``--takes <json>``), or a
+named set's (``--set <name>``, :mod:`ac_train.trainset`: it may hold private library clips,
+``--library``; the card records it, and its default tag is ``set-<name>``); the minutes that survive,
+by type and set, are printed before the first step, and ``--dry-run`` stops there.
 
 What a training window looks like, to match what the app sends:
 
@@ -60,7 +61,7 @@ from collections import Counter
 import numpy as np
 import torch
 
-from . import MODELS, context, evaluate, labels, losses, review, selection, split
+from . import MODELS, context, evaluate, labels, losses, review, selection, split, trainset
 from .datasets import REGISTRY, RIG
 from .kinematics import Body
 from .model import (
@@ -109,9 +110,10 @@ class Sets:
     """All frames of the chosen sets on the device, where a window may start, and each take's
     labels. :meth:`learn` then gives the takes their style weights over a list of styles.
     ``select`` (:class:`ac_train.selection.Selection`) says which takes are read; :attr:`records`
-    lists every take of the sets, kept or not, with the reason."""
+    lists every take of the sets, kept or not, with the reason. ``extra``: sets made in memory, by
+    name (:func:`ac_train.trainset.prepare`)."""
 
-    def __init__(self, names, device, val=False, decisions=None, scanned=True, select=None):
+    def __init__(self, names, device, val=False, decisions=None, scanned=True, select=None, extra=None):
         from .rig import Skeleton
 
         bones = list(Skeleton.load().names)
@@ -130,10 +132,13 @@ class Sets:
         offset = 0
         for n in names:
             path = RIG / f"{n}.npz"
-            if not path.exists():
+            if extra and n in extra:
+                d = extra[n]
+            elif not path.exists():
                 print(f"set {n} not built ({path} is missing): run python -m ac_train.datasets {n}", flush=True)
                 continue
-            d = np.load(path)
+            else:
+                d = np.load(path)
             rot, root, starts, takes = d["rotations"][:, idx].astype(np.float32), d["roots"], d["starts"], d["takes"]
             plan, recs = selection.records(n, d, decisions, select, scanned)
             self.plans.append(plan)
@@ -381,8 +386,16 @@ def main(argv=None):
     ap.add_argument("--no-warp", action="store_true", help="no speed change")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the sets, the takes read and the minutes that survive by type and set, then stop")
+    ap.add_argument("--set", default=None, metavar="NAME",
+                    help="a named training set: exactly the clips it keeps, with its labels and cuts (ac_train.trainset)")
+    ap.add_argument("--set-folder", type=pathlib.Path, default=trainset.SETS, help="where --set finds <name>.set.json")
+    ap.add_argument("--library", type=pathlib.Path, default=None, help="the clip library a set's library: clips are in")
     selection.add_arguments(ap)
     args = ap.parse_args(argv)
+    if args.set and (args.sets or args.types or args.styles is not None or args.natural or args.takes):
+        ap.error("--set says which takes: it doesn't go with --sets, --types, --styles, --natural or --takes")
+    if args.library and not args.set:
+        ap.error("--library is read only for a --set that names its clips")
 
     from .rig import Skeleton
 
@@ -396,7 +409,11 @@ def main(argv=None):
 
     torch.manual_seed(0)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    if args.sets:
+    named = trainset.prepare(args.set, args.set_folder, args.library, args.noncommercial, not args.unscanned) if args.set else None
+    extra = named.extra if named else None
+    if named:
+        names = named.names
+    elif args.sets:
         names = [n for n in args.sets.split(",") if n]
         unknown = [n for n in names if n not in REGISTRY]
         if unknown:
@@ -406,21 +423,26 @@ def main(argv=None):
             ap.error(f"{', '.join(nc)} only allow non-commercial use: add --noncommercial (a model for your own use)")
     else:
         names = [n for n in REGISTRY if REGISTRY[n].commercial or args.noncommercial]
-    print(f"sets: {', '.join(names)}" + ("" if args.noncommercial else " (the free-licence sets; --noncommercial adds non-commercial sets you added)"),
+    print(f"sets: {', '.join(names)}" + ("" if args.noncommercial or named else " (the free-licence sets; --noncommercial adds non-commercial sets you added)"),
           flush=True)
     skel = Skeleton.load()
     decisions = review.load_decisions(pathlib.Path(args.decisions))
-    select = selection.from_args(args)
+    select = named.select if named else selection.from_args(args)
     print(f"takes: {select.describe()}", flush=True)
     if args.unscanned:
         print("--unscanned: no set's scan is read; every frame of every take is used, glitches and all", flush=True)
     if args.dry_run:
-        recs = selection.plan_sets(names, decisions, select, not args.unscanned, progress=lambda s: print(s, flush=True))
+        recs = selection.plan_sets(names, decisions, select, not args.unscanned, progress=lambda s: print(s, flush=True), extra=extra)
+        if named:
+            named.check(recs)
+            print(named.listing(recs), flush=True)
         print(selection.table(recs, select), flush=True)
         print("--dry-run: nothing trained", flush=True)
         return
     body = Body(skel, device)
-    train = Sets(names, device, decisions=decisions, scanned=not args.unscanned, select=select)
+    train = Sets(names, device, decisions=decisions, scanned=not args.unscanned, select=select, extra=extra)
+    if named:
+        named.check(train.records)
     for plan in train.plans:
         print(plan.summary(), flush=True)
         for note in plan.notes:
@@ -428,7 +450,7 @@ def main(argv=None):
     print(selection.table(train.records, select), flush=True)
     validated_on = "held-out subjects"
     try:
-        val = Sets(names, device, val=True, decisions=decisions, scanned=not args.unscanned, select=select)
+        val = Sets(names, device, val=True, decisions=decisions, scanned=not args.unscanned, select=select, extra=extra)
     except ValueError:
         if args.steps is None:
             raise SystemExit("no validation takes: these sets hold out no subject (ac_train.split). A real run "
@@ -450,7 +472,7 @@ def main(argv=None):
     if lost:
         print(f"mirrored windows drop {lost}: their other side isn't a style", flush=True)
 
-    tag = args.tag or ("parts-own" if args.noncommercial else "parts")
+    tag = args.tag or (f"set-{named.set.name}" if named else "parts-own" if args.noncommercial else "parts")
     out = MODELS / tag
     out.mkdir(parents=True, exist_ok=True)
     net_args = dict(styles=len(styles), given=True, contacts=contacts, path=True,
@@ -518,9 +540,12 @@ def main(argv=None):
     best_model.load_state_dict(torch.load(out / "best.pt", map_location=device, weights_only=True))
     evaluation_best = evaluate.run(best_model, val, body, device, windows=args.eval_windows)
     print(evaluate.report(evaluation), flush=True)
+    held = trainset.public_held(train.held)  # a card may be exported: a library's groups are pack names
     for ev in (evaluation, evaluation_best):
-        ev.update({"checkpoint": "model" if ev is evaluation else "best", "holdout": train.held, "sets": val.used})
-    commercial = all(REGISTRY[n].commercial for n in train.used)
+        ev.update({"checkpoint": "model" if ev is evaluation else "best", "holdout": held, "sets": val.used})
+    set_rows = named.card_sets(train.used, train.records) if named else [
+        {"name": n, "title": REGISTRY[n].title, "licence": REGISTRY[n].licence, "commercial": REGISTRY[n].commercial} for n in train.used]
+    commercial = all(r["commercial"] for r in set_rows)
     card = {
         "tag": tag, "steps": step, "minutes": round((time.time() - t0) / 60, 1), "bones": list(BONES),
         "context": CONTEXT - args.context_after, "context_after": args.context_after, "max_gap": MAX_GAP,
@@ -538,19 +563,22 @@ def main(argv=None):
                     f"gaps by bin {dict(zip((evaluate.bin_name(*x) for x in evaluate.BINS), gap_mix))}",
                     "each style dropped 0.25", "rare motion types up to x3"],
         "loss_weights": weights,
-        "sets": [{"name": n, "title": REGISTRY[n].title, "licence": REGISTRY[n].licence, "commercial": REGISTRY[n].commercial} for n in train.used],
+        "sets": set_rows,
+        **({"training_set": named.card(train.records)} if named else {}),
         "commercial": commercial,
         "warning": "" if commercial else "Trained on non-commercial data: do not ship this model or its output in a commercial product.",
         "data": {"scanned": not args.unscanned, "decisions": len(decisions),
                  "plans": [p.summary() for p in train.plans],
                  "selection": select.describe(), "takes_kept": sum(r.kept for r in train.records),
                  "minutes": selection.minutes(train.records)},
-        "split": "subjects", "holdout": train.held, "validated_on": validated_on,
+        "split": "subjects", "holdout": held, "validated_on": validated_on,
         "best": best,
         "metrics": {k: {"model_m": r["model"]["joint_m"], "interp_m": r["interp"]["joint_m"]} for k, r in evaluation["bins"].items()},
         "evaluation": evaluation, "evaluation_best": evaluation_best, "log": log,
     }
     (out / "model.json").write_text(json.dumps(card, indent=1), encoding="utf-8")
+    if named:  # names the clips: never exported
+        (out / trainset.CLIPS_FILE).write_text(json.dumps(named.clips(train.records), indent=1), encoding="utf-8")
     print(json.dumps({"saved": str(out), "score": evaluation["score"], "best": best, "commercial": commercial}))
 
 

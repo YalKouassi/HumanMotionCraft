@@ -21,6 +21,9 @@ Training (``ac_train.train``), the evaluation (``ac_train.evaluate``) and the la
   list is the owner's word, from the candidate videos); ``exclude`` takes out, whatever else says.
   An id no read set has is an error, never ignored (a misspelt exclusion would silently stay in).
 
+A named set (:mod:`ac_train.trainset`, ``train --set``) is such a list, with labels and cuts of its
+own for each take (:class:`Overlay`), and may name clips of a private library (``library:<group>/<name>``).
+
 The quality scan and the review come first: a rejected take stays out however it is listed, and a
 take's cut frames stay cut. :func:`records` gives every take of a set its :class:`Record` (type,
 style words, frames, held out or not, kept or why not); :func:`table` prints the minutes that
@@ -33,7 +36,7 @@ import argparse
 import json
 import pathlib
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -47,6 +50,17 @@ NATURAL_STYLES = ("natural",)
 DATA_TAGS = ("range-of-motion", "duplicate")
 #: ``--styles none``: unstyled takes only
 NONE = "none"
+#: the set a named set's library clips are read as (:mod:`ac_train.trainset`); their ids are ``library:<group>/<name>``
+LIBRARY = "library"
+
+
+def take_id(set_name: str, take: str) -> str:
+    return f"{LIBRARY}:{take}" if set_name == LIBRARY else f"{set_name}/{take}"
+
+
+def set_of(take: str) -> str:
+    """The set an id belongs to."""
+    return LIBRARY if take.startswith(LIBRARY + ":") else take.split("/", 1)[0]
 
 
 def style_words(set_name: str, label: str = "", tags=()) -> list[str]:
@@ -79,11 +93,31 @@ class Record:
 
     @property
     def id(self) -> str:
-        return f"{self.set}/{self.take}"
+        return take_id(self.set, self.take)
 
     @property
     def kept(self) -> bool:
         return not self.why
+
+
+@dataclass(frozen=True)
+class Overlay:
+    """What a named set says of one take, over the scan and the review."""
+    labels: tuple = ()
+    #: added to the take's cuts: (first, last), both included
+    cuts: tuple = ()
+    #: why the take is out ("" when nothing here leaves it out)
+    drop: str = ""
+
+    def apply(self, t: review.Take) -> None:
+        """Labels replace the review's (the first motion type among them is the type), cuts add."""
+        if self.labels:
+            types = {name for name, _ in labels.AUTO}
+            found = [labels.ALIASES.get(labels.word(w), labels.word(w)) for w in self.labels]
+            t.kind = next((w for w in found if w in types), t.kind)
+            t.tags = list(self.labels)
+        t.cuts = [*t.cuts, *self.cuts]
+        t.drop = t.drop or self.drop
 
 
 @dataclass(frozen=True)
@@ -94,6 +128,8 @@ class Selection:
     exclude: frozenset = frozenset()
     #: where the take list came from, for the report
     takes_file: str = ""
+    #: a named set's word on each take, by id
+    clips: dict = field(default_factory=dict, compare=False)
 
     def active(self) -> bool:
         return bool(self.types is not None or self.styles is not None or self.include or self.exclude)
@@ -181,10 +217,13 @@ def records(set_name: str, npz, decisions, select: Selection | None = None, scan
     """The set's plan and each take's :class:`Record`, in the set's order."""
     starts, takes = npz["starts"], npz["takes"]
     own = npz["labels"] if "labels" in npz.files else takes
-    plan = review.plan_set(set_name, len(npz["roots"]), starts, takes, decisions, scanned, npz=npz)
+    plan = review.plan_set(set_name, len(npz["roots"]), starts, takes, decisions, scanned, npz=npz, scan=getattr(npz, "scan", None))
     out = []
     for take, label, t in zip(takes, own, plan.takes):
         take, label = str(take), str(label)
+        over = select.clips.get(take_id(set_name, take)) if select is not None else None
+        if over is not None:
+            over.apply(t)
         kind = labels.type_of(take, t.kind)
         styles = style_words(set_name, label, t.tags)
         rec = Record(set_name, take, label, kind, styles, t.kind, list(t.tags), t.frames,
@@ -203,11 +242,11 @@ def check_listed(select: Selection, recs: list[Record], sets) -> None:
     sets = set(sets)
     known = {r.id for r in recs}
     listed = select.include | select.exclude
-    missing = sorted(i for i in listed if i.split("/", 1)[0] in sets and i not in known)
+    missing = sorted(i for i in listed if set_of(i) in sets and i not in known)
     if missing:
         raise SystemExit(f"{select.takes_file or 'the take list'}: {len(missing)} takes no read set has, e.g. "
                          f"{', '.join(missing[:3])}: fix the id (set/take, as the review names it)")
-    elsewhere = sorted({i.split('/', 1)[0] for i in listed if i.split("/", 1)[0] not in sets})
+    elsewhere = sorted({set_of(i) for i in listed if set_of(i) not in sets})
     if elsewhere:
         print(f"the take list names takes of sets not read: {', '.join(elsewhere)}", flush=True)
     out = [r.id for r in recs if r.id in select.include and r.why.startswith("left out")]
@@ -216,17 +255,21 @@ def check_listed(select: Selection, recs: list[Record], sets) -> None:
               f"{' ...' if len(out) > 3 else ''}", flush=True)
 
 
-def plan_sets(names, decisions, select: Selection | None = None, scanned: bool = True, progress=None) -> list[Record]:
-    """Every take of ``names`` (sets in ``data/rig``), without loading any rotation."""
+def plan_sets(names, decisions, select: Selection | None = None, scanned: bool = True, progress=None, extra=None) -> list[Record]:
+    """Every take of ``names`` (sets in ``data/rig``, or made in memory: ``extra``, by name), without
+    loading any rotation."""
     recs: list[Record] = []
     read = []
     for n in names:
         path = RIG / f"{n}.npz"
-        if not path.exists():
+        if extra and n in extra:
+            d = extra[n]
+        elif not path.exists():
             if progress:
                 progress(f"set {n} not built ({path} is missing): run python -m ac_train.datasets {n}")
             continue
-        d = np.load(path)
+        else:
+            d = np.load(path)
         plan, r = records(n, d, decisions, select, scanned)
         if progress:
             progress(plan.summary())

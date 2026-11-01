@@ -12,6 +12,7 @@ clips. Nothing here runs at app time.
 | `ac_train.evaluate` | the evaluation suite: gap bins, pose, feet, continuity, impossible joints, realistic contexts, part layers, scenarios (starts, stops, crouches, flights, turns while stepping); writes it into the card, and contact sheets |
 | `ac_train.flag` | after training: fills every window of every take with the model and puts the worst 1 % of the takes (by loss) into the review app's queue (`data/rig/flags.json`); a person decides, never the flag |
 | `ac_train.selection` | which takes a run reads: `--types`, `--styles` (styled takes left out), `--natural` (idle, walk, run, jump with no style word or `natural`), and `--takes <json>` (an explicit include/exclude list by `set/take` id); the minutes that survive by type and set (roadmap 153000) |
+| `ac_train.trainset` | a named training set from the review app (`train --set <name>`): exactly the clips it keeps, private library clips too, what the model card records of it, and the refusals (roadmap 177000) |
 | `ac_train.candidates` | one long MP4 per motion type of the takes a filter keeps (a title card and a burnt-in id a take, chapters, an index CSV), for the owner to say which to train on |
 | `ac_train.gaitcheck` | which natural walks look odd, by the words of their description and by how they move (limp, held arms, lean, low hips), tested on 100STYLE's labelled styles; proposes a take list and never changes the owner's |
 | `ac_train.walkgroups` | cuts a type's natural takes down to a short review: too short and styled takes out, the rest one clip a group on one MP4; the owner's rejects by group number go into the take list |
@@ -354,6 +355,29 @@ one MP4 a type, every kept take once with its id burnt in and a chapter marker, 
 `evaluation[_best]_<name>` in the card, so the full evaluation stays, and
 `uv run python -m ac_train.compare --card parts-natural:best:natural --card parts-lowweights:best:natural`
 puts two cards side by side by gap bin and type.
+
+### 3g. Train a named set
+
+A named set is a file the review app keeps, `<folder>/<name>.set.json` (roadmap 174000); the default
+folder is `training/review/sets`, and a set holding library clips must live outside any git checkout.
+
+```bash
+uv run python -m ac_train.train --set base-natural --dry-run                                # every take, its minutes and source; nothing trained
+uv run python -m ac_train.train --set my-set --set-folder <folder> --library <library> --minutes 180
+uv run python -m ac_train.trainset set-my-set                                               # what is in that model
+```
+
+- The clips with status `keep` are exactly the takes read, and `--set` doesn't go with the other take
+  filters. Only library clips the set keeps are opened (`<library>/animations/<group>/<name>.clip.json`).
+- The scan and the review still apply. A set's `labels` replace the review's for the run, and its
+  `cuts` (first and last included, the clip's own frames) are added. A library clip is scanned as
+  it is read; an in-place one is left out and listed.
+- `sources.json` beside the set marks each pack `mine` or `purchased`. Unmarked counts as purchased;
+  the registry's free-licence sets are `free` unless marked.
+- A public set that keeps a purchased, unmarked or non-commercial clip is refused, dry run included.
+  A model of a private set can't be exported into the repo.
+- The tag defaults to `set-<name>`. `model.json` gets `training_set` (name, version, hash, totals), with
+  no clip or pack name; `clips.json` beside it lists every clip and is never exported.
 
 ### 4. Train
 
