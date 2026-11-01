@@ -837,6 +837,70 @@ pub fn scale_to(skel: &Skeleton, src: &Landmarks) -> Result<(Landmarks, f64), Co
     Ok((src.scaled(s), s))
 }
 
+/// A shoulder this close to the rig's place is left alone: the source is built like the rig.
+const SHOULDER_FITS_M: f64 = 0.02;
+
+/// The source with each arm moved so its shoulder sits where the rig's does on the body. The scale
+/// comes from the legs alone, and a clavicle aims at the shoulder's own position, so a source with
+/// a shorter torso or narrower shoulders would otherwise pull the rig's shoulders down and in, and
+/// the opposite push them up. What is moved is the difference from the shoulder's usual place in
+/// the chest, over the clip: a shrug stays a shrug, and elbow and wrist move with it, so the arm
+/// keeps its direction.
+pub fn fit_shoulders(skel: &Skeleton, src: &Landmarks) -> Result<Landmarks, CoreError> {
+    let f = src.frames();
+    let joint = |name: &str| -> Result<Vec3, CoreError> { Ok(head(skel, bone(skel, name)?)) };
+    let middle = |a: Vec3, b: Vec3| quat::scale3(quat::add3(a, b), 0.5);
+    let rig_hips = middle(joint("upperleg01.L")?, joint("upperleg01.R")?);
+    let (rig_l, rig_r) = (joint("upperarm01.L")?, joint("upperarm01.R")?);
+    let rig_chest = frame(quat::sub3(joint("neck01")?, rig_hips), quat::sub3(rig_l, rig_r));
+    let (lh, rh, neck) = (src.get("l_hip"), src.get("r_hip"), src.get("neck"));
+    let (ls, rs) = (src.get("l_shoulder"), src.get("r_shoulder"));
+    let hips: Vec<Vec3> = (0..f).map(|i| middle(at(lh, i), at(rh, i))).collect();
+    let chest: Vec<Mat3> = (0..f)
+        .map(|i| {
+            frame(
+                quat::sub3(at(neck, i), at(&hips, i)),
+                quat::sub3(at(ls, i), at(rs, i)),
+            )
+        })
+        .collect();
+    let mut points = src.points.clone();
+    for (shoulder, elbow, wrist, rig) in [
+        ("l_shoulder", "l_elbow", "l_wrist", rig_l),
+        ("r_shoulder", "r_elbow", "r_wrist", rig_r),
+    ] {
+        let rig_place = apply(&transpose(&rig_chest), quat::sub3(rig, rig_hips));
+        let place: Vec<Vec3> = (0..f)
+            .map(|i| {
+                apply(
+                    &transpose(&at_m(&chest, i)),
+                    quat::sub3(at(src.get(shoulder), i), at(&hips, i)),
+                )
+            })
+            .collect();
+        let usual = |c: usize| {
+            median(
+                &place
+                    .iter()
+                    .map(|p| p.get(c).copied().unwrap_or(0.0))
+                    .collect::<Vec<_>>(),
+            )
+        };
+        let shift = quat::sub3(rig_place, [usual(0), usual(1), usual(2)]);
+        if quat::len3(shift) < SHOULDER_FITS_M {
+            continue;
+        }
+        for name in [shoulder, elbow, wrist] {
+            if let Some(track) = points.get_mut(name) {
+                for (i, p) in track.iter_mut().enumerate() {
+                    *p = quat::add3(*p, apply(&at_m(&chest, i), shift));
+                }
+            }
+        }
+    }
+    Ok(Landmarks { frames: f, points })
+}
+
 /// The feet points the floor is found from: the ankles and the balls of the feet.
 const FEET: [&str; 4] = ["foot.L", "foot.R", "toe2-1.L", "toe2-1.R"];
 /// A floor further off than this is not levelled: the take is odd, and the result says so.
@@ -918,6 +982,68 @@ mod tests {
         clippy::indexing_slicing
     )]
     use super::*;
+
+    fn walker(width: f64, height: f64, shrug: f64) -> Landmarks {
+        let mut points: BTreeMap<String, Vec<Vec3>> = BTreeMap::new();
+        for f in 0..5 {
+            let up = if f == 2 { shrug } else { 0.0 };
+            let rows: [(&str, Vec3); 8] = [
+                ("hips", [0.0, 0.0, 1.0]),
+                ("neck", [0.0, 0.0, height]),
+                ("head", [0.0, 0.0, height + 0.2]),
+                ("l_hip", [0.1, 0.0, 1.0]),
+                ("r_hip", [-0.1, 0.0, 1.0]),
+                ("l_shoulder", [width, 0.0, height - 0.1 + up]),
+                ("r_shoulder", [-width, 0.0, height - 0.1 + up]),
+                ("l_elbow", [width, 0.0, height - 0.4 + up]),
+            ];
+            for (name, p) in rows {
+                points.entry(name.to_string()).or_default().push(p);
+            }
+            for (name, p) in [
+                ("r_elbow", [-width, 0.0, height - 0.4 + up]),
+                ("l_wrist", [width, 0.0, height - 0.7 + up]),
+                ("r_wrist", [-width, 0.0, height - 0.7 + up]),
+                ("l_knee", [0.1, 0.0, 0.5]),
+                ("r_knee", [-0.1, 0.0, 0.5]),
+                ("l_ankle", [0.1, 0.0, 0.1]),
+                ("r_ankle", [-0.1, 0.0, 0.1]),
+                ("l_toe", [0.1, -0.1, 0.0]),
+                ("r_toe", [-0.1, -0.1, 0.0]),
+            ] {
+                points.entry(name.to_string()).or_default().push(p);
+            }
+        }
+        Landmarks::new(points).unwrap()
+    }
+
+    fn rig() -> Skeleton {
+        let text = std::fs::read_to_string(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../assets/rig/default_rig.json"
+        ))
+        .unwrap();
+        Skeleton::from_json(&text).unwrap()
+    }
+
+    #[test]
+    fn a_narrow_low_source_shoulder_lands_where_the_rig_has_it_and_a_shrug_stays() {
+        let sk = rig();
+        let fit = fit_shoulders(&sk, &walker(0.08, 1.3, 0.05)).unwrap();
+        let width = (at(fit.get("l_shoulder"), 0)[0] - at(fit.get("r_shoulder"), 0)[0]).abs();
+        let rig_width = (head(&sk, bone(&sk, "upperarm01.L").unwrap())[0]
+            - head(&sk, bone(&sk, "upperarm01.R").unwrap())[0])
+            .abs();
+        assert!((width - rig_width).abs() < 1e-9, "{width} against {rig_width}");
+        // the shrug on frame 2 is still 5 cm
+        let z = |f: usize| at(fit.get("l_shoulder"), f)[2];
+        assert!((z(2) - z(0) - 0.05).abs() < 1e-9);
+        // the arm below keeps its length and direction
+        let arm = quat::sub3(at(fit.get("l_elbow"), 0), at(fit.get("l_shoulder"), 0));
+        assert!((arm[0].abs() + (arm[2] + 0.3).abs()) < 1e-9, "{arm:?}");
+        // nothing but the arms moves
+        assert_eq!(fit.get("neck"), walker(0.08, 1.3, 0.05).get("neck"));
+    }
 
     #[test]
     fn numpy_helpers() {

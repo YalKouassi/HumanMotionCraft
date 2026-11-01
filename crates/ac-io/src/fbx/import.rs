@@ -655,6 +655,7 @@ impl Source {
         }
 
         let (scaled, scale) = retarget::scale_to(skel, &src).map_err(|e| e.to_string())?;
+        let scaled = retarget::fit_shoulders(skel, &scaled).map_err(|e| e.to_string())?;
         let (rots, roots) = retarget::retarget(skel, &scaled).map_err(|e| e.to_string())?;
         // how far the hips landed from the source's, before the floor moves everything
         let hips_err = retarget::hip_error(skel, &rots, &roots, &scaled).map_err(|e| e.to_string())?;

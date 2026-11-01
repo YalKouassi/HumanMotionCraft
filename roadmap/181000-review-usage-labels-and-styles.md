@@ -14,3 +14,6 @@ The owner plays a style through, throws clips out, and agrees the labels and des
 
 ## Decision (2026-11-01)
 The owner: the base uses their own clips for walk, run, gesture, idle, jump, crouch and climb; zombie and acrobatic are trained add-ons. They preview each style, throw out bad clips, and send the clips whose names say nothing to a style (the `unsorted` list, keys 1 to 9). Sets live outside the repo. Nothing trains until the owner says so.
+
+## Shoulders on ported clips (2026-11-01)
+Sources are scaled by leg length and a clavicle aims at the source's shoulder position, so a source with other proportions dropped, narrowed or raised the rig's shoulders. `retarget::fit_shoulders` moves each arm so the shoulder sits where the rig's does, keeping shrugs and arm direction. The private library is re-ported once the owner approves the video.
