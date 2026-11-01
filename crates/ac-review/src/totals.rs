@@ -217,6 +217,28 @@ mod tests {
     }
 
     #[test]
+    fn a_library_clip_takes_the_longest_mark_or_its_start() {
+        let mut marks = sources();
+        marks.0.insert("G - extra".to_string(), Source::Purchased);
+        assert_eq!(marked_pack("library:G - extra - walk/a", &marks), "G - extra");
+        assert_eq!(marked_pack("library:G - run/a", &marks), "G");
+        assert_eq!(marked_pack("library:other - run/a", &marks), "other");
+        assert_eq!(marked_pack("G - run/a", &marks), "G - run");
+    }
+
+    #[test]
+    fn an_unmarked_rig_take_is_free_and_an_unmarked_library_clip_is_not() {
+        let mut set = TrainingSet::new("t", false).unwrap();
+        for id in ["lafan/a", "library:other/a"] {
+            set.clips.insert(id.to_string(), SetClip::new(id));
+        }
+        let t = totals(&set, &sources(), |_| Some((30, 60.0)));
+        assert_eq!(t.free.clips, 1);
+        assert_eq!(t.unmarked.clips, 1);
+        assert_eq!(t.purchased.clips, 1);
+    }
+
+    #[test]
     fn hand_worked_totals() {
         use ClipStatus::{Keep, Reject};
         let mut s = TrainingSet::new("x", false).unwrap();
