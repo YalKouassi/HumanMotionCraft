@@ -14,6 +14,8 @@ use super::App;
 
 /// The sets the base model is made from, ticked until they are changed.
 const BASE_SETS: [&str; 7] = ["walk", "run", "idle", "jump", "crouch", "gesture", "climb"];
+/// The set the page starts on when there is one, and what Combine sets makes.
+const DEFAULT_SET: &str = "base";
 /// How long a run lasts unless told otherwise, in minutes (the shipped model's run was 180).
 const DEFAULT_MINUTES: f64 = 180.0;
 const GOOD: Color32 = Color32::from_rgb(90, 200, 110);
@@ -56,7 +58,7 @@ impl Default for Page {
             compare_a: String::new(),
             compare_b: String::new(),
             compared: None,
-            combine_name: "base".into(),
+            combine_name: DEFAULT_SET.into(),
             combine_free: true,
             combine_ticks: Vec::new(),
         }
@@ -284,12 +286,13 @@ impl App {
         if self.models.set.is_empty()
             && let Some(first) = self.set_names.first().cloned()
         {
-            self.models.set = self
-                .review
-                .training
-                .active
-                .as_ref()
-                .map_or(first, |a| a.name.clone());
+            // the base model's set, else the one being gone through
+            let open = self.review.training.active.as_ref().map(|a| a.name.clone());
+            self.models.set = if self.set_names.iter().any(|n| n == DEFAULT_SET) {
+                DEFAULT_SET.to_string()
+            } else {
+                open.unwrap_or(first)
+            };
             self.suggest_name();
         }
         self.update_ticks();

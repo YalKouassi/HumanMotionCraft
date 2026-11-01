@@ -259,7 +259,15 @@ fn a_finished_job_says_how_it_ended_from_what_it_left() {
     assert_eq!(s["ended_well"], true, "{s}");
     job("main", "run");
     let s = r.run("review.job_status", &p(json!({}))).unwrap();
-    assert_eq!(s["ended_well"], false, "main.json doesn't name it: {s}");
+    assert_eq!(
+        s["ended_well"], false,
+        "its log doesn't say it was made main: {s}"
+    );
+    std::fs::write(&log, "=== started\nrun is the main model of a folder\n").unwrap();
+    // choosing another since doesn't make the export a failure
+    r.run("review.model_main", &p(json!({"tag": null}))).unwrap();
+    let s = r.run("review.job_status", &p(json!({}))).unwrap();
+    assert_eq!(s["ended_well"], true, "{s}");
     std::fs::remove_dir_all(&dir).ok();
 }
 

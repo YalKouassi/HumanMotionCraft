@@ -446,7 +446,7 @@ impl Review {
         json!([
             {"id": "review.models", "params": "", "returns": "{rows: [{tag, date, state, usable, set, minutes, steps, styles, score, best_score, is_main, shipped, problem}], opens_with, main_is_shipped, main_problem, everyone_gets, job}: every model, newest first"},
             {"id": "review.train_check", "params": "set", "returns": "the job: the trainer's dry run, its totals in the log"},
-            {"id": "review.train_start", "params": "set, tag, minutes (1 to 1440), steps? (stop after this many: a quick check)", "returns": "the job. A taken name is refused, and only one job runs at a time; a combined set is rebuilt first"},
+            {"id": "review.train_start", "params": "set, tag, minutes (1 to 1440), steps? (stop after this many: a quick check)", "returns": "the job. A taken name is refused, and only one job runs at a time; a combined set is rebuilt first. On Windows the run inherits a pipe this command's output goes to, so send the output to a file, not into another program, or that program waits for the run"},
             {"id": "review.train_stop", "params": "force? (end it now, saving nothing more)", "returns": "{said}: a run finishes its step, evaluates and saves, and is marked stopped"},
             {"id": "review.job_status", "params": "", "returns": "{job, running, ended, ended_well, step, minutes, minutes_left, score, best_score, tail, problem}"},
             {"id": "review.model_main", "params": "tag (null: the shipped model)", "returns": "{main, exporting}: what the app opens with from its next start, exported first if it has to be"},

@@ -24,6 +24,7 @@ const TAIL_LINES: usize = 60;
 const MARK: &str = "=== started";
 const CHECKED: &str = "--dry-run: nothing trained";
 const STOPPED_EARLY: &str = "asked to stop before the first step";
+const MADE_MAIN: &str = " is the main model of ";
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -442,8 +443,9 @@ fn how_it_ended(p: &Places, job: &Job, log: &str) -> (String, bool) {
             }
         }
         Kind::Main => {
-            if ac_ai::main_model(&p.installed) == Ok(ac_ai::MainModel::Tag(job.tag.clone())) {
-                (format!("{} is the main model", job.tag), true)
+            // what the export did, not what is main now: another may have been chosen since
+            if log.contains(MADE_MAIN) {
+                (format!("{} was exported and made the main model", job.tag), true)
             } else {
                 (
                     format!("{} didn't become the main model: see the end of its log", job.tag),
