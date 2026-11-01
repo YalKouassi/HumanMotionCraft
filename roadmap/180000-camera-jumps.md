@@ -30,9 +30,8 @@ status bar text and whether Follow is on will tell them apart.
 
 ## Decision
 The number keys stay as bare keys over the view, as the agreed acceptance has them (owner, 2026-11-01).
-They are the shortcuts documented for these views, and treat
-them as the owner's to rebind in Help > Keyboard shortcuts. Changing to a smooth move (below) makes a
-stray press easy to read and hard to mistake for a bug.
+They are the shortcuts documented for these views and can be rebound in Help > Keyboard shortcuts.
+Changing to a smooth move (below) makes a stray press easy to read and hard to mistake for a bug.
 
 ## Build
 - One pitch limit, ±1.45, shared by the views and the orbit.
