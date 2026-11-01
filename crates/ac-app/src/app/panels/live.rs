@@ -247,28 +247,22 @@ impl App {
         }
     }
 
-    /// The section under the pose fill.
+    /// Steer it live, once its model is installed.
     pub(in crate::app) fn live_panel(&mut self, ui: &mut egui::Ui) {
-        ui.separator();
-        ui.label(egui::RichText::new("Live motion").strong());
-        super::posefill::notice(ui);
-        ui.label(
-            egui::RichText::new(
-                "Steer the character and the model makes the motion: W A S D (Shift to run) or a controller, relative to the camera. Everything shown is recorded; afterwards keep the stretch you like.",
-            )
-            .small()
-            .weak(),
+        super::create::help(
+            ui,
+            "Move with W A S D, hold Shift to run, or use a controller. Then keep the part you like.",
         );
         if self.panels.live.running {
             let (seconds, target) = (
                 self.panels.live.frames as f64 / FPS,
                 self.panels.live.target.clone(),
             );
-            ui.label(format!("Recording: {seconds:.1} s. Aiming at: {target}"));
+            ui.label(format!("Recording: {seconds:.1} s, moving: {target}"));
             if ui
-                .button("Stop take")
+                .button("Stop")
                 .on_hover_text("Esc")
-                .tag("panel.live.stop", "Stop take")
+                .tag("panel.live.stop", "Stop")
                 .clicked()
             {
                 self.live_stop();
@@ -279,10 +273,10 @@ impl App {
         if ui
             .add_enabled(
                 !starting,
-                egui::Button::new(if starting { "Starting…" } else { "Start take" }),
+                egui::Button::new(if starting { "Starting…" } else { "Start" }),
             )
-            .on_hover_text("From the pose on show. A new take replaces the last recording.")
-            .tag("panel.live.start", "Start take")
+            .on_hover_text("Starts from the pose on show. Starting again replaces the last recording.")
+            .tag("panel.live.start", "Start")
             .clicked()
         {
             // the model may load first, off the UI thread (`posefill_deferred`)
@@ -297,12 +291,15 @@ impl App {
         };
         let last = stopped["frames"].as_i64().unwrap_or(1) - 1;
         if last < 1 {
-            ui.label("The take recorded nothing to keep.");
+            ui.label("Nothing was recorded to keep.");
             return;
         }
         ui.label(format!(
-            "Recorded {:.1} s; a stretch took {:.0} ms on average, {:.0} ms at most; {} frames held, {} late.",
-            last as f64 / FPS,
+            "Recorded {:.1} s. Pick the part to keep:",
+            last as f64 / FPS
+        ))
+        .on_hover_text(format!(
+            "Each stretch took {:.0} ms on average, {:.0} ms at most; {} frames held, {} late.",
             stopped["round_trip_ms"].as_f64().unwrap_or(0.0),
             stopped["round_trip_max_ms"].as_f64().unwrap_or(0.0),
             stopped["held"],

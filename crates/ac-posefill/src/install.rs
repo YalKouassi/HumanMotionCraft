@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 pub use ac_helper::install::{Install, VERSION};
 
 /// How to install it, for refusals.
-pub const HOW: &str = "install it with Install in the Pose fill panel (posefill.install), or run \
+pub const HOW: &str = "install it with Install in Settings > AI models (posefill.install), or run \
      `python tools/posefill/setup_posefill.py` from the source tree (an NVIDIA GPU is required; about 6 GB of free disk)";
 
 /// This helper, for [`ac_helper::install`] and [`ac_helper::setup`].

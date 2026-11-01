@@ -416,7 +416,7 @@ impl App {
         let what = if running {
             "A take is running: it reads W A S D, Shift and the left stick. The other controls only show for now."
         } else {
-            "Start a take under Pose fill to steer with these: W A S D, Shift and the left stick. The other controls only show for now, and outside a take the keys keep their shortcuts."
+            "Press Start under Steer it live to steer with these: W A S D, Shift and the left stick. The other controls only show for now, and outside a take the keys keep their shortcuts."
         };
         ui.label(egui::RichText::new(what).small().weak());
     }

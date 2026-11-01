@@ -212,6 +212,7 @@ impl App {
         self.history_window(ctx);
         self.messages_window(ctx);
         self.fill_report_window(ctx);
+        self.ai_models_window(ctx);
         self.physics_problems_window(ctx);
         self.shortcuts_window(ctx);
         self.about_window(ctx);
@@ -412,12 +413,13 @@ impl App {
     }
 
     /// The names [`App::shell_ui`] takes, for `--ui`'s error message.
-    pub(super) const SHELL_UI: &'static str = "perf, window (palette, settings, history, messages, shortcuts, about, form:<command>), palette (a search), theme, scale, colours, units, maximise, ui_mode, reset_layout, library, inspector, timeline, side, menu, tools, status, joints";
+    pub(super) const SHELL_UI: &'static str = "perf, window (palette, settings, ai_models, history, messages, shortcuts, about, form:<command>), palette (a search), theme, scale, colours, units, maximise, ui_mode, reset_layout, library, inspector, timeline, side, menu, tools, status, joints";
 
     fn open_window(&mut self, w: &str) -> Result<(), String> {
         match w {
             "palette" => self.open_palette(""),
             "settings" => self.shell.open.settings = true,
+            "ai_models" => self.panels.create.models_open = true,
             "history" => self.shell.open.history = true,
             "messages" => self.shell.open.messages = true,
             "about" => self.shell.open.about = true,
@@ -429,7 +431,8 @@ impl App {
                 },
                 None => {
                     return Err(
-                        "palette, settings, history, messages, shortcuts, about or form:<command>".into(),
+                        "palette, settings, ai_models, history, messages, shortcuts, about or form:<command>"
+                            .into(),
                     );
                 }
             },

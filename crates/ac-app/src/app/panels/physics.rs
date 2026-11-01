@@ -105,9 +105,9 @@ impl App {
     pub(in crate::app) fn physics_panel(&mut self, ui: &mut egui::Ui) {
         let mut physics = self.session.document.clip.physics;
         if ui
-            .checkbox(&mut physics, "Physics")
-            .on_hover_text("Play and export through the physics pass: feet on the ground, planted feet hold, still poses balance, jumps follow gravity. Off: playback shows your keys, and the numbers below are what the pass would fix")
-            .tag("panel.physics.on", "Physics")
+            .checkbox(&mut physics, "Realistic balance")
+            .on_hover_text("Keeps feet on the floor and planted, the body balanced when still, and jumps falling naturally, when playing and exporting. Off: you see exactly what you keyed")
+            .tag("panel.physics.on", "Realistic balance")
             .changed()
         {
             self.run("physics.set", json!({ "on": physics }));
@@ -120,40 +120,46 @@ impl App {
         };
         let n = |k: &str| r[k].as_u64().unwrap_or(0);
         let count = |k: &str| r[k].as_array().map_or(0, Vec::len);
-        egui::Grid::new("physics-report").num_columns(2).show(ui, |ui| {
-            for (label, v, tip) in [
-                (
-                    "Jumps",
-                    count("flights"),
-                    "Runs of frames in the air that follow gravity",
-                ),
-                (
-                    "Lifted",
-                    n("lifted") as usize,
-                    "Frames with a foot keyed into the ground, lifted onto it",
-                ),
-                (
-                    "Feet held",
-                    n("slid") as usize,
-                    "Frames where a planted foot slid and was held in place",
-                ),
-                (
-                    "Balanced",
-                    count("balanced"),
-                    "Still frames off balance: the hips moved over the feet",
-                ),
-            ] {
-                ui.label(label).on_hover_text(tip);
-                ui.label(format!("{v}"));
-                ui.end_row();
-            }
-        });
+        egui::CollapsingHeader::new("Details")
+            .id_salt("physics-details")
+            .show(ui, |ui| {
+                egui::Grid::new("physics-report").num_columns(2).show(ui, |ui| {
+                    for (label, v, tip) in [
+                        (
+                            "Jumps",
+                            count("flights"),
+                            "Runs of frames in the air that follow gravity",
+                        ),
+                        (
+                            "Lifted",
+                            n("lifted") as usize,
+                            "Frames with a foot keyed into the ground, lifted onto it",
+                        ),
+                        (
+                            "Feet held",
+                            n("slid") as usize,
+                            "Frames where a planted foot slid and was held in place",
+                        ),
+                        (
+                            "Balanced",
+                            count("balanced"),
+                            "Still frames off balance: the hips moved over the feet",
+                        ),
+                    ] {
+                        ui.label(label).on_hover_text(tip);
+                        ui.label(format!("{v}"));
+                        ui.end_row();
+                    }
+                });
+            });
         let count = self.panels.physics.marks.len();
-        let label = format!("Problems ({count})");
+        if count == 0 {
+            return;
+        }
+        let label = format!("{count} to check: Show me");
         if ui
-            .add_enabled(count > 0, egui::Button::new(&label))
-            .on_hover_text("The problem frames, in a window: a click goes to the frame")
-            .on_disabled_hover_text("No problems: feet stay on the ground and still poses balance")
+            .button(&label)
+            .on_hover_text("The frames to look at, in a window: a click goes to the frame")
             .tag("panel.physics.problems", label.as_str())
             .clicked()
         {

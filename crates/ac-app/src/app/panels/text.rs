@@ -159,27 +159,47 @@ impl App {
         }
     }
 
-    pub(in crate::app) fn text_panel(&mut self, ui: &mut egui::Ui) {
+    /// The AI models window's part: the install, or which model and how it stands.
+    pub(in crate::app) fn text_setup(&mut self, ui: &mut egui::Ui) {
         if self.panels.text.helper.is_none() {
             self.panels.text.helper = self.session.run("text.helper", &json!({})).ok();
         }
         let helper = self.panels.text.helper.clone().unwrap_or(Value::Null);
         if helper["installed"] != true {
             if self.text_install_panel(ui) {
-                // installed now: ask the helper again, and the prompt panel shows
+                // installed now: ask the helper again
                 self.panels.text.helper = None;
                 self.install_forget();
             }
             return;
         }
         let state = if helper["loaded"] == true {
-            "model loaded"
+            "ready"
         } else if helper["running"] == true {
-            "helper running"
+            "starting"
         } else {
-            "loads on first use (a minute or more)"
+            "gets ready on first use (a minute or more)"
         };
         ui.label(egui::RichText::new(format!("{} — {state}", helper["model"].as_str().unwrap_or(""))).weak());
+    }
+
+    pub(in crate::app) fn text_panel(&mut self, ui: &mut egui::Ui) {
+        if self.panels.text.helper.is_none() {
+            self.panels.text.helper = self.session.run("text.helper", &json!({})).ok();
+        }
+        let helper = self.panels.text.helper.clone().unwrap_or(Value::Null);
+        if helper["installed"] != true {
+            super::create::help(
+                ui,
+                "Type what the character should do. This needs a one-time download of about 22 GB.",
+            );
+            self.ai_models_button(ui, "panel.text.setup", "Set up Describe it…");
+            return;
+        }
+        super::create::help(
+            ui,
+            "Type what the character should do. The first time takes a minute or more while the AI gets ready.",
+        );
         let st = &mut self.panels.text;
         ui.add(
             egui::TextEdit::multiline(&mut st.prompt)
@@ -191,10 +211,10 @@ impl App {
             ui.label("Seconds");
             ui.add(egui::DragValue::new(&mut st.seconds).range(0.1..=9.9).speed(0.1))
                 .tag("panel.text.seconds", "Seconds");
-            ui.label("Take");
+            ui.label("Version");
             ui.add(egui::DragValue::new(&mut st.seed).range(0..=999_999))
-                .on_hover_text("Another number makes another take of the same prompt")
-                .tag("panel.text.seed", "Take");
+                .on_hover_text("Each number gives a different result from the same words")
+                .tag("panel.text.seed", "Version");
         });
         let busy = st.job.as_ref().map(|j| j.since);
         let (prompt, seconds, seed) = (st.prompt.clone(), st.seconds, st.seed);
@@ -205,9 +225,11 @@ impl App {
         ui.horizontal_wrapped(|ui| {
             let can = busy.is_none() && !empty;
             if ui
-                .add_enabled(can, egui::Button::new("Generate"))
-                .on_hover_text(format!("Make {seconds:.1} s of motion starting at the playhead"))
-                .tag("panel.text.generate", "Generate")
+                .add_enabled(can, egui::Button::new("Create"))
+                .on_hover_text(format!(
+                    "Create {seconds:.1} s of motion starting at the playhead"
+                ))
+                .tag("panel.text.generate", "Create")
                 .clicked()
             {
                 let p = json!({ "prompt": prompt, "seconds": seconds, "seed": seed, "at": at.max(0) });
@@ -217,10 +239,12 @@ impl App {
             }
             let fill = gap.map(|(a, b)| format!("Fill the gap {a}–{b} from the prompt, held to both keys"));
             if ui
-                .add_enabled(can && gap.is_some(), egui::Button::new("Fill gap"))
+                .add_enabled(can && gap.is_some(), egui::Button::new("Fill this gap"))
                 .on_hover_text(fill.unwrap_or_default())
-                .on_disabled_hover_text("Put the playhead between two of your keys")
-                .tag("panel.text.fill", "Fill gap")
+                .on_disabled_hover_text(
+                    "Type what should happen and put the playhead between two of your poses",
+                )
+                .tag("panel.text.fill", "Fill this gap")
                 .clicked()
                 && let Some((a, b)) = gap
             {
@@ -231,6 +255,9 @@ impl App {
                 }
             }
         });
+        if empty {
+            super::create::help(ui, "Type something above to turn on Create.");
+        }
         if let Some(since) = busy {
             ui.horizontal_wrapped(|ui| {
                 ui.spinner();

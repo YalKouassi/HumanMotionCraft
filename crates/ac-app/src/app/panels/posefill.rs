@@ -206,70 +206,72 @@ impl App {
         }
     }
 
-    pub(in crate::app) fn posefill_panel(&mut self, ui: &mut egui::Ui) {
+    /// Whether the model is installed, asking the helper when that isn't known yet.
+    pub(in crate::app) fn posefill_installed(&mut self) -> bool {
         if self.panels.posefill.helper.is_none() {
             self.panels.posefill.helper = self.session.run("posefill.helper", &json!({})).ok();
         }
-        let helper = self.panels.posefill.helper.clone().unwrap_or(Value::Null);
-        if helper["installed"] != true {
+        self.panels
+            .posefill
+            .helper
+            .as_ref()
+            .is_some_and(|h| h["installed"] == true)
+    }
+
+    /// The spinner and the helper's last word while a run is being made.
+    pub(in crate::app) fn posefill_busy_row(&mut self, ui: &mut egui::Ui) {
+        let Some(since) = self.panels.posefill.job.as_ref().map(|j| j.since) else {
+            return;
+        };
+        ui.horizontal_wrapped(|ui| {
+            ui.spinner();
+            let said = ac_posefill::engine::progress();
+            ui.label(format!(
+                "{} ({} s)",
+                if said.is_empty() {
+                    "Getting the AI ready".to_string()
+                } else {
+                    said
+                },
+                since.elapsed().as_secs()
+            ));
+        });
+    }
+
+    /// The AI models window's part: the install, or the licence notice, how the model stands,
+    /// Load and Stop, and the optional sample clips.
+    pub(in crate::app) fn posefill_setup(&mut self, ui: &mut egui::Ui) {
+        if !self.posefill_installed() {
             if self.posefill_install_panel(ui) {
-                // installed now: ask the helper again, and the fill panel shows
+                // installed now: ask the helper again
                 self.panels.posefill.helper = None;
                 self.panels.posefill.install = None;
                 self.panels.posefill.install_at = None;
             }
             return;
         }
+        let helper = self.panels.posefill.helper.clone().unwrap_or(Value::Null);
         notice(ui);
         let plan_built = helper["plan"].as_str() == Some("built");
         let state = if helper["loaded"] == true {
-            "model loaded"
+            "ready"
         } else if helper["running"] == true {
-            "helper running"
+            "starting"
         } else if plan_built {
-            "loads on first use (a few seconds)"
+            "gets ready on first use (a few seconds)"
         } else {
-            "loads on first use, and builds its plan for this GPU first (a few minutes, once)"
+            "gets ready on first use (a few minutes, once)"
         };
         ui.label(egui::RichText::new(format!("{} — {state}", helper["model"].as_str().unwrap_or(""))).weak());
         if let Some(gpu) = helper["gpu"].as_str().filter(|g| !g.is_empty()) {
             ui.label(egui::RichText::new(gpu).small().weak());
         }
-        let busy = self.panels.posefill.job.as_ref().map(|j| j.since);
-        let doc = &self.session.document;
-        let at = doc.key_frame();
-        let gap = ac_core::edits::span_around(&doc.clip, at);
-        let fps = doc.clip.fps;
-        let most = ((ac_posefill::MAX_FRAMES - 1) as f64 * fps / ac_posefill::MODEL_FPS).round() as i64;
-        let least = ((ac_posefill::MIN_FRAMES - 1) as f64 * fps / ac_posefill::MODEL_FPS).round() as i64;
-        ui.label(
-            egui::RichText::new(format!(
-                "Fills the gap between your keys around the playhead from the poses before and after it: {least} to {most} frames a gap at {fps} fps. A longer stretch goes through the keys inside it."
-            ))
-            .small()
-            .weak(),
-        );
+        let busy = self.panels.posefill.job.is_some();
         ui.horizontal_wrapped(|ui| {
-            let can = busy.is_none() && gap.is_some();
-            let hover =
-                gap.map(|(a, b)| format!("Fill the gap {a}–{b} from the poses around it, held to both keys"));
-            if ui
-                .add_enabled(can, egui::Button::new("Fill gap"))
-                .on_hover_text(hover.unwrap_or_default())
-                .on_disabled_hover_text("Put the playhead between two of your keys")
-                .tag("panel.posefill.fill", "Fill gap")
-                .clicked()
-                && let Some((a, b)) = gap
-            {
-                // the gap's keys, not the playhead: it may move while the model works
-                if let Some(out) = self.run("posefill.fill", json!({ "from": a, "to": b })) {
-                    self.posefill_done("Fill gap from poses", &out);
-                }
-            }
             if helper["running"] != true
                 && ui
-                    .add_enabled(busy.is_none(), egui::Button::new("Load"))
-                    .on_hover_text("Start the helper and load the model now, so the first fill doesn't wait")
+                    .add_enabled(!busy, egui::Button::new("Load"))
+                    .on_hover_text("Get the model ready now, so the first fill doesn't wait")
                     .tag("panel.posefill.load", "Load")
                     .clicked()
             {
@@ -277,8 +279,8 @@ impl App {
             }
             if helper["running"] == true
                 && ui
-                    .add_enabled(busy.is_none(), egui::Button::new("Stop helper"))
-                    .on_hover_text("End the helper process (the next fill starts it again)")
+                    .add_enabled(!busy, egui::Button::new("Stop helper"))
+                    .on_hover_text("Free the graphics memory (the next fill starts it again)")
                     .tag("panel.posefill.stop", "Stop helper")
                     .clicked()
             {
@@ -286,23 +288,8 @@ impl App {
                 self.panels.posefill.helper = None;
             }
         });
-        if let Some(since) = busy {
-            ui.horizontal_wrapped(|ui| {
-                ui.spinner();
-                let said = ac_posefill::engine::progress();
-                ui.label(format!(
-                    "{} ({} s)",
-                    if said.is_empty() {
-                        "working".to_string()
-                    } else {
-                        said
-                    },
-                    since.elapsed().as_secs()
-                ));
-            });
-        }
+        self.posefill_busy_row(ui);
         self.posefill_samples_panel(ui);
-        self.live_panel(ui);
     }
 
     /// The optional sample clips: off until the person accepts their licence here.
