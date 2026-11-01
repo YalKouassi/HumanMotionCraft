@@ -11,6 +11,7 @@ publish.workspace = true
 ac-core.workspace = true
 ac-helper.workspace = true
 ac-io.workspace = true
+craft-atomic.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 

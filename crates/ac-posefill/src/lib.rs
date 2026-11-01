@@ -34,6 +34,7 @@ pub mod install;
 pub mod live;
 pub mod live_commands;
 pub mod plan;
+pub mod sample_targets;
 pub mod samples;
 pub mod setup;
 pub mod stand_in;
@@ -354,7 +355,11 @@ pub fn prepare(doc: &Document, command: &str, p: &P) -> Result<(), String> {
             plan::run(doc, &plan, engine::make).map(|_| ())
         }
         "posefill.fill_all" => fill_gaps(&mut doc.clone(), engine::make).map(|_| ()),
-        "posefill.helper" | "live.start" => engine::load().map(|_| ()),
+        "live.start" => {
+            live_commands::prepare_targets(doc, p)?;
+            engine::load().map(|_| ())
+        }
+        "posefill.helper" => engine::load().map(|_| ()),
         _ => Err(format!("{command} makes no motion")),
     }
 }
@@ -381,7 +386,7 @@ pub fn waits(doc: &Document, command: &str, p: &P) -> bool {
             p.get("action").and_then(Value::as_str) == Some("load")
                 && !engine::status().is_some_and(|s| s.loaded)
         }
-        "live.start" => !engine::status().is_some_and(|s| s.loaded),
+        "live.start" => !engine::status().is_some_and(|s| s.loaded) || live_commands::targets_to_make(p),
         _ => false,
     }
 }

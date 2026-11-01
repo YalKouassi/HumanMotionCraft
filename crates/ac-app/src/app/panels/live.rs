@@ -51,6 +51,18 @@ pub struct LiveState {
     frames: i64,
     /// Asked to start and waiting for the model to load.
     starting: bool,
+    /// Aim at poses from NVIDIA's sample clips (off until the person turns it on).
+    pub(super) sample_poses: bool,
+}
+
+impl LiveState {
+    fn start_params(&self) -> Value {
+        if self.sample_poses {
+            json!({ "targets": "samples" })
+        } else {
+            json!({})
+        }
+    }
 }
 
 /// The stick (right, forward; each -1 to 1) as a heading: `yaw` is the camera's, whose right on the
@@ -148,7 +160,7 @@ impl App {
         if self.panels.live.starting && self.panels.posefill_idle() {
             // once: a load that failed has said why, and isn't tried again unasked
             self.panels.live.starting = false;
-            if let Some(v) = self.run("live.start", json!({})) {
+            if let Some(v) = self.run("live.start", self.panels.live.start_params()) {
                 self.live_begin(&v);
             }
         }
@@ -247,6 +259,30 @@ impl App {
         }
     }
 
+    /// NVIDIA's sample poses, off by default: with the person's download only, and the terms beside it.
+    fn sample_poses_row(&mut self, ui: &mut egui::Ui) {
+        if !ac_posefill::samples::downloaded() {
+            self.panels.live.sample_poses = false;
+            super::create::help(
+                ui,
+                "To try NVIDIA's own sample poses, download the sample clips in AI models.",
+            );
+            self.ai_models_button(ui, "panel.live.get_samples", "AI models…");
+            return;
+        }
+        ui.checkbox(&mut self.panels.live.sample_poses, "Use NVIDIA's sample poses")
+            .on_hover_text("Steers towards poses from the sample clips you downloaded, instead of ours")
+            .tag("panel.live.sample_poses", "Use NVIDIA's sample poses");
+        if self.panels.live.sample_poses {
+            super::create::help(
+                ui,
+                "This uses NVIDIA's sample motion, for evaluating NVIDIA's technology only. Use it within their licence terms. What you keep is marked evaluation-only: you can export it, but it can't go in the community library.",
+            );
+            let l = ac_posefill::samples::LICENCE;
+            ui.hyperlink_to(l.licence, l.url);
+        }
+    }
+
     /// Steer it live, once its model is installed.
     pub(in crate::app) fn live_panel(&mut self, ui: &mut egui::Ui) {
         super::create::help(
@@ -269,6 +305,7 @@ impl App {
             }
             return;
         }
+        self.sample_poses_row(ui);
         let starting = self.panels.live.starting;
         if ui
             .add_enabled(
@@ -280,7 +317,7 @@ impl App {
             .clicked()
         {
             // the model may load first, off the UI thread (`posefill_deferred`)
-            match self.run("live.start", json!({})) {
+            match self.run("live.start", self.panels.live.start_params()) {
                 Some(v) => self.live_begin(&v),
                 None if !self.panels.posefill_idle() => self.panels.live.starting = true,
                 None => {}

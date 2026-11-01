@@ -1,7 +1,7 @@
 //! The engine's sample clips, an optional download of their own (`posefill.samples`): off by
 //! default, behind their licence, from NVIDIA to this machine. Their licence allows evaluating
 //! NVIDIA's technology and nothing else, so what this adds to the library is marked evaluation-only
-//! ([`ac_core::evaluation`]), which blocks export and community upload.
+//! ([`ac_core::evaluation`]): it can be exported for evaluation, but not uploaded to the community library.
 //!
 //! The setup is `tools/posefill/setup_samples.py`, in `samples/` in the pose fill install, run like
 //! the install itself. It leaves one `clips/*.json` per clip on the rig; `add` turns those into
@@ -30,7 +30,7 @@ pub const GROUP: &str = "Evaluation only";
 /// A clip's `origin` while it is one of the sample clips (a copy saved under a new name loses it).
 pub const ORIGIN: &str = "nvidia-sample-clips";
 /// What the person is told before the download and wherever the clips are offered.
-pub const NOTICE: &str = "NVIDIA's sample clips are only for evaluating NVIDIA's technology. Check the NVIDIA Sample Data Evaluation License before use: you are responsible for how you use them. Anything made with them is marked evaluation-only, and this app won't export or share it.";
+pub const NOTICE: &str = "NVIDIA's sample clips are only for evaluating NVIDIA's technology. Check the NVIDIA Sample Data Evaluation License before use: you are responsible for how you use them. Anything made with them is marked evaluation-only and can't go in the community library. You can export it, within those terms.";
 /// What accepting says, in the person's own words.
 pub const ACCEPT: &str =
     "I have read the licence, I am an adult, and I'll use these clips only to evaluate NVIDIA's technology";
@@ -65,13 +65,20 @@ pub fn use_stand_in() {
     INSTALLER.use_stand_in();
 }
 
-fn stand_in() -> bool {
+pub(crate) fn stand_in() -> bool {
     STAND_IN.load(Ordering::Relaxed)
 }
 
-/// The folder: `samples/` in the pose fill install.
+/// Whether the converted clips are on this machine.
+pub fn downloaded() -> bool {
+    stand_in() || dir().is_some_and(|d| !files(&d).is_empty())
+}
+
+/// The folder: `AC_POSEFILL_SAMPLES_DIR`, else `samples/` in the pose fill install.
 pub fn dir() -> Option<PathBuf> {
-    crate::install::dir().map(|d| d.join("samples"))
+    std::env::var_os(KIND.env)
+        .map(PathBuf::from)
+        .or_else(|| crate::install::dir().map(|d| d.join("samples")))
 }
 
 pub const OUT: &[ParamSpec] = &[
@@ -166,7 +173,7 @@ struct Converted {
     root: Vec<[f64; 3]>,
 }
 
-fn files(dir: &Path) -> Vec<PathBuf> {
+pub(crate) fn files(dir: &Path) -> Vec<PathBuf> {
     let mut out: Vec<PathBuf> = std::fs::read_dir(dir.join("clips"))
         .into_iter()
         .flatten()

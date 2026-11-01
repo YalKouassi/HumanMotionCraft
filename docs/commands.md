@@ -469,6 +469,7 @@ Outputs:
 | `animations` | integer | yes |  | animations in the file |
 | `frames` | list of integers | yes |  | frames per animation |
 | `path` | text | yes |  | the file written |
+| `notes` | list of text |  |  | what to know about the file, when there is something |
 | `target` | JSON |  |  | with a target character: {character, driven, undriven: [node], scale, feet: [{clip, L: {planted_frames, slide_cm, travel_cm, lowest_cm, unreached_frames, holds}, R}], problems: [[{from, to, kind, label}]], notes} |
 
 ### `clip.export_batch`: Export each to .glb
@@ -2141,6 +2142,7 @@ Inputs:
 | Name | Kind | Required | Range | What |
 |---|---|---|---|---|
 | `max_frames` | integer |  | 2 to 18000 | the most frames to record (default ten minutes at 30 fps) |
+| `targets` | one of ours \| samples |  |  | the poses it aims at: ours (default), or samples, made from the person's download of NVIDIA's sample clips, which marks what is kept evaluation-only |
 
 Outputs:
 
@@ -2150,6 +2152,7 @@ Outputs:
 | `targets` | list of text | yes |  | the target poses of the set |
 | `max_speed` | number | yes |  | the set's top speed, m/s |
 | `max_frames` | integer | yes |  | the most frames it records |
+| `evaluation_only` | bool | yes |  | it aims at poses from NVIDIA's sample clips, so what is kept is marked |
 
 ### `live.stop`: Live motion: stop the take
 

@@ -8,7 +8,7 @@ fill panel (`posefill.samples`), and by hand it needs --accept.
 They are under the NVIDIA Sample Data Evaluation License: for evaluating and testing NVIDIA's
 technology only, not to be shared, nor anything made from them. So they come from NVIDIA to this
 machine and nowhere else: the repo and release never carry them, they are never trained on, and the
-clips the app makes from them are marked evaluation-only, which blocks export and community upload.
+clips the app makes from them are marked evaluation-only, which blocks community upload.
 
 The folder (default: `samples/` in the pose fill install) gets:
   motions/         LICENSE.txt, README.md and soma/*.bvh, checked against the hashes below
