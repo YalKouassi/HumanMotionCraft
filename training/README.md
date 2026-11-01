@@ -242,7 +242,7 @@ cost little, because only a couple of frames either side go.
 ### 3c. Review the takes
 
 ```bash
-cargo run -p ac-review --release                         # the review window (developers only)
+cargo run -p ac-review --release                         # the review window (developers only); comes back to the library, sets' folder and set it last had
 cargo run -p ac-review --release -- unpack               # unpack every set first (about 10 s, 3 GB)
 cargo run -p ac-review --release -- run review.summary   # headless, for agents: JSON out
 cargo run -p ac-review --release -- run review.list '{"show": "flagged", "limit": 20}'

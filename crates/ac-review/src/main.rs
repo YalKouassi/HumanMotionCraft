@@ -12,7 +12,9 @@
 //! review file (default `training/review/decisions.json`); both found from the checkout this runs
 //! in. `--library`: a `.clip.json` library to review beside the sets (only when given); `--sets`: the
 //! training sets' folder (default `training-sets` beside the app's library, outside any repository);
-//! `--set`: the one to open. `run` does one review command headless and prints its JSON (`review.commands` lists them).
+//! `--set`: the one to open. The window comes back to the library, the folder and the set it last
+//! had when they aren't given (`remembered`); `run` uses only what it is given.
+//! `run` does one review command headless and prints its JSON (`review.commands` lists them).
 //! `unpack` makes the sets' rotation caches ahead of time (the window makes one when it first
 //! shows a set's take). `--screenshot` draws the window once settled, writes the PNG and quits.
 
@@ -31,6 +33,7 @@ mod viewer;
 
 use std::path::{Path, PathBuf};
 
+use ac_review::remembered::{Launch, Remembered};
 use ac_review::review::Review;
 
 const USAGE: &str = "ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>] [--set <name>] [--open <set>/<take>] [--frame <n>] [--view list|groups|gallery|styles] [--style <name>] [--screenshot <png>]\n\
@@ -54,6 +57,38 @@ pub struct Args {
     /// `run` / `unpack` and their words.
     pub verb: Option<String>,
     pub words: Vec<String>,
+    /// What the window couldn't come back to; it says so when it opens.
+    pub notes: Vec<String>,
+}
+
+/// The folder a launch with no `--sets` and nothing remembered uses.
+fn default_sets() -> PathBuf {
+    ac_io::library::app_library_dir().with_file_name("training-sets")
+}
+
+/// The window's start: what the launch leaves out comes from where it last was. A set coming back
+/// opens the Styles view, where a set is gone through.
+fn come_back(a: &mut Args) {
+    let was = match Remembered::load(&Remembered::file()) {
+        Ok(was) => was,
+        Err(e) => {
+            a.notes.push(format!("where the window last was is lost: {e}"));
+            return;
+        }
+    };
+    let mut launch = Launch {
+        library: a.library.take(),
+        sets: a.sets.take(),
+        set: a.set.take(),
+    };
+    let asked_for_a_set = launch.set.is_some();
+    a.notes.extend(was.restore(&mut launch, &default_sets()));
+    if !asked_for_a_set && launch.set.is_some() && a.view.is_none() && a.open.is_none() {
+        a.view = Some("styles".into());
+    }
+    a.library = launch.library;
+    a.sets = launch.sets;
+    a.set = launch.set;
 }
 
 fn parse_args() -> Result<Args, String> {
@@ -133,11 +168,7 @@ pub fn open_review(a: &Args, p: &Paths) -> Result<Review, String> {
         let rig = ac_core::rig::Skeleton::from_json(&text).map_err(|e| e.to_string())?;
         review.add_library(root, &rig.names);
     }
-    review.training.folder = Some(
-        a.sets
-            .clone()
-            .unwrap_or_else(|| ac_io::library::app_library_dir().with_file_name("training-sets")),
-    );
+    review.training.folder = Some(a.sets.clone().unwrap_or_else(default_sets));
     if let Some(name) = &a.set {
         review.open_set(Some(name))?;
     }
@@ -179,7 +210,7 @@ fn headless(a: &Args, p: &Paths) -> Result<(), String> {
 }
 
 fn main() -> std::process::ExitCode {
-    let args = match parse_args() {
+    let mut args = match parse_args() {
         Ok(a) => a,
         Err(e) => {
             eprintln!("{e}");
@@ -202,6 +233,7 @@ fn main() -> std::process::ExitCode {
             }
         };
     }
+    come_back(&mut args);
     let title = format!("{} data review", ac_core::product::NAME);
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()

@@ -16,6 +16,7 @@ pub mod decisions;
 pub mod flags;
 pub mod groups;
 pub mod npz;
+pub mod remembered;
 pub mod review;
 pub mod scan;
 pub mod set_commands;

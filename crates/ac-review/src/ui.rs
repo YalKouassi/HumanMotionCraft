@@ -19,6 +19,7 @@ use std::sync::mpsc::{Receiver, TryRecvError, channel};
 
 use ac_review::decisions::Status;
 use ac_review::groups::Group;
+use ac_review::remembered::Remembered;
 use ac_review::review::{Filter, Review, Show};
 use ac_review::set_commands::StyleRow;
 use ac_review::store::Motion;
@@ -96,6 +97,8 @@ pub struct App {
     /// The queue scrolls the take shown into view (once, after it changes).
     scroll_to: bool,
     status: String,
+    /// Where the window is, for its next launch; `None` for a `--screenshot` run, which leaves no mark.
+    remembered: Option<Remembered>,
     viewer: Viewer,
     unpacking: HashMap<usize, Receiver<Result<(), String>>>,
     unpack_failed: HashMap<usize, String>,
@@ -176,7 +179,12 @@ impl App {
             style_rows: Vec::new(),
             usages: Usages::default(),
             scroll_to: true,
-            status: String::new(),
+            status: args.notes.join("; "),
+            remembered: args.screenshot.is_none().then(|| Remembered {
+                library: args.library.clone(),
+                sets: args.sets.clone(),
+                set: None,
+            }),
             viewer,
             unpacking: HashMap::new(),
             unpack_failed: HashMap::new(),
@@ -207,7 +215,34 @@ impl App {
             app.view = View::Styles;
             app.open_style(style);
         }
+        app.remember(true);
         Ok(app)
+    }
+
+    /// Keep where the window is for its next launch: the set open, when there is one, so a look at
+    /// the decisions file doesn't lose your place. `started`: the library and folder are new too.
+    fn remember(&mut self, started: bool) {
+        let open = self.review.training.active.as_ref().map(|a| a.name.clone());
+        let Some(now) = &mut self.remembered else { return };
+        let changed = open.is_some() && open != now.set;
+        if changed {
+            now.set = open;
+        }
+        if !started && !changed {
+            return;
+        }
+        let file = Remembered::file();
+        if started && now.set.is_none() {
+            // a launch with no set keeps the one it had, if any is still remembered for this folder
+            match Remembered::load(&file) {
+                Ok(was) if was.sets == now.sets => now.set = was.set,
+                Ok(_) => {}
+                Err(e) => self.status = e,
+            }
+        }
+        if let Err(e) = now.save(&file) {
+            self.status = format!("where the window is won't be remembered: {e}");
+        }
     }
 
     fn refresh(&mut self) {
@@ -275,6 +310,7 @@ impl App {
             Ok(v) => {
                 self.set_names = self.review.set_names();
                 self.refresh();
+                self.remember(false);
                 Some(v)
             }
             Err(e) => {
