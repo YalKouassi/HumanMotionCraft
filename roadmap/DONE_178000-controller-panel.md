@@ -1,6 +1,6 @@
 # Controller panel: see the inputs, and press them with the mouse
 
-- **Status:** built, waiting for the owner
+- **Status:** done (2026-11-01)
 - **Requires:** none (158000, which it drives, is done)
 - **Source:** owner request (2026-11-01)
 
@@ -71,3 +71,5 @@ Proof in `target/shots/2026-11-01/controller-panel/`, release app, no controller
 - No real controller has been read: **the owner's check with an Xbox and a PlayStation pad is open**, and so is unplugging one mid-take. That path is written, not run.
 - The mouse has one pointer, so it presses one on-screen key at a time: W and A together need the keyboard (or the stick, for a diagonal). A take was steered with W only; A lights up but wasn't steered with.
 - Takes in the first drive runs were disturbed: the window was resized and a take started from outside the script, and once it closed. The Windows Application log has no crash or hang event for the app in that hour, and later runs stayed up, so it was probably closed from outside; that isn't proven. One of those shots showed the joints standing with the mesh flat on the floor, physics on, not seen again; reason unknown.
+
+Accepted by the owner (2026-11-01). The owner's acceptance didn't say the real-controller check was done, so treat real controllers as still untried unless the owner says otherwise.
