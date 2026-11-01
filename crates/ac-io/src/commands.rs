@@ -564,7 +564,6 @@ fn clip_import(doc: &mut Document, p: &P) -> Out {
 }
 
 fn clip_write(doc: &mut Document, p: &P) -> Out {
-    ac_core::evaluation::check(doc, "writing it to a file")?;
     let path = cmd::text(p, "path").unwrap_or_default();
     craft_atomic::atomic_write(Path::new(path), clipfile::save_clip(&doc.clip).as_bytes())
         .map_err(|e| format!("can't write {path}: {e}"))?;

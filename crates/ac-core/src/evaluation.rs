@@ -1,9 +1,11 @@
 //! Motion from the optional sample clips (`posefill.samples`). Their licence allows evaluating
 //! NVIDIA's technology and nothing else, and forbids making them or anything derived from them
 //! available to others. So a clip made from them says so (`evaluation_only` in its file), the mark
-//! follows the motion through copy and paste, saved poses, new animations and link layers, and the
-//! commands that send motion out of the app refuse. This is honest marking, not protection: the
-//! licence is the person's to keep.
+//! follows the motion through copy and paste, saved poses, new animations and link layers. The
+//! person may export it, for evaluation (owner's decision, 2026-11-01), and is told the licence
+//! still applies; the community library, which would make it available to others from our server,
+//! refuses it, and training skips it. This is honest marking, not protection: the licence is the
+//! person's to keep.
 
 use std::collections::BTreeMap;
 
@@ -26,7 +28,10 @@ pub fn mark_from_links(doc: &mut Document) {
     doc.clip.evaluation_only |= doc.links.values().any(|c| c.evaluation_only);
 }
 
-/// The refusal for sending a marked animation out as `what`.
+/// What an export of a marked animation says: the file itself can't carry the mark.
+pub const EXPORT_NOTE: &str = "this holds motion from NVIDIA's sample clips, and the exported file doesn't carry the evaluation-only mark: their licence allows evaluating NVIDIA's technology only, and doesn't allow sharing it";
+
+/// The refusal for sharing a marked animation as `what`.
 pub fn refusal(what: &str) -> String {
     hinted(
         format!(
@@ -34,9 +39,4 @@ pub fn refusal(what: &str) -> String {
         ),
         "use an animation without them",
     )
-}
-
-/// Refuse when the open animation is marked.
-pub fn check(doc: &Document, what: &str) -> Result<(), String> {
-    if holds(doc) { Err(refusal(what)) } else { Ok(()) }
 }

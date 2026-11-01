@@ -1,0 +1,21 @@
+{
+  "$schema": "./schema.json",
+  "name": "live-sample-poses",
+  "feature": "live.start",
+  "description": "A live take aiming at poses from the optional sample clips (roadmap 182000), with the fixtures' stand-in for the download and the engine: live.start says it is evaluation-only, what is kept marks the animation with a note, and undo takes the mark off.",
+  "script": [
+    { "command": "physics.set", "params": { "on": false } },
+    { "command": "key.set", "params": {} },
+    { "command": "live.start", "params": { "targets": "samples" }, "expect": { "evaluation_only": true } },
+    { "command": "live.input", "params": { "frames": 5 } },
+    { "command": "live.stop", "params": {} },
+    { "command": "editor.state", "params": {}, "expect": { "evaluation_only": false } },
+    { "command": "live.clip", "params": { "at": 10 }, "expect": { "notes": ["made from NVIDIA's sample poses, so this animation is marked evaluation-only"] } },
+    { "command": "editor.state", "params": {}, "expect": { "evaluation_only": true } },
+    { "command": "edit.undo" },
+    { "command": "editor.state", "params": {}, "expect": { "evaluation_only": false } }
+  ],
+  "errors": [
+    { "command": "live.start", "params": { "targets": "elsewhere" } }
+  ]
+}

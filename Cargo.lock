@@ -124,6 +124,7 @@ dependencies = [
  "ac-core",
  "ac-helper",
  "ac-io",
+ "craft-atomic",
  "serde",
  "serde_json",
 ]

@@ -2,7 +2,7 @@
   "$schema": "./schema.json",
   "name": "sample-clips",
   "feature": "posefill.samples",
-  "description": "The optional evaluation-only sample clips (roadmap 165000), with one made-up clip standing in for the download. add puts it in the library marked, the mark follows a copied pose into another animation, undo takes it back off, and export, video, pictures, writing to a file and community upload all refuse. remove deletes the sample clip and lists what was made from it.",
+  "description": "The optional evaluation-only sample clips (roadmap 165000), with one made-up clip standing in for the download. add puts it in the library marked, the mark follows a copied pose into another animation, undo takes it back off, and community upload refuses (export, video and pictures are allowed: roadmap 182000). remove deletes the sample clip and lists what was made from it.",
   "script": [
     {
       "command": "posefill.samples",
@@ -35,12 +35,7 @@
   ],
   "errors": [
     { "command": "posefill.samples", "params": { "action": "start" } },
-    { "command": "clip.export", "params": { "path": "a.glb" } },
     { "command": "clip.export_batch", "params": { "ids": ["Evaluation only/Missing"], "folder": "out" } },
-    { "command": "clip.write", "params": { "path": "a.clip.json" } },
-    { "command": "clip.video", "params": { "path": "a.mp4" } },
-    { "command": "clip.picture", "params": { "path": "a.png" } },
-    { "command": "clip.sheet", "params": { "path": "a.png" } },
     { "command": "community.share", "params": { "id": "Evaluation only/Stand-in sample" } }
   ]
 }

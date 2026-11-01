@@ -724,14 +724,13 @@ pub(crate) fn clip_export(doc: &mut Document, p: &Map<String, Value>) -> R<Value
         &cmd::texts(p, "drop"),
     )?;
     let ids = cmd::texts(p, "ids");
+    let mut marked = false;
     let mut loaded: Vec<(String, Clip, BTreeMap<String, Clip>)> = Vec::new();
     for id in &ids {
         let lib = crate::commands::anims(doc)?;
         let clip = ac_core::clipfile::load_clip(&lib.read(id)?).map_err(|e| format!("{id}: {e}"))?;
         let links = crate::commands::load_links(&lib, &clip)?;
-        if ac_core::evaluation::marked(&clip, &links) {
-            return Err(ac_core::evaluation::refusal(&format!("exporting {id}")));
-        }
+        marked |= ac_core::evaluation::marked(&clip, &links);
         loaded.push((id.clone(), clip, links));
     }
     let mut items: Vec<Item> = loaded
@@ -743,7 +742,7 @@ pub(crate) fn clip_export(doc: &mut Document, p: &Map<String, Value>) -> R<Value
         })
         .collect();
     if ids.is_empty() {
-        ac_core::evaluation::check(doc, "exporting it")?;
+        marked |= ac_core::evaluation::holds(doc);
         if doc.clip.base().keys.is_empty() {
             return Err("the animation has no keys to export".into());
         }
@@ -771,5 +770,8 @@ pub(crate) fn clip_export(doc: &mut Document, p: &Map<String, Value>) -> R<Value
     }
     craft_atomic::atomic_write(&path, &bytes).map_err(|e| format!("can't write {}: {e}", path.display()))?;
     summary["path"] = json!(path.to_string_lossy());
+    if marked {
+        summary["notes"] = json!([ac_core::evaluation::EXPORT_NOTE]);
+    }
     Ok(summary)
 }

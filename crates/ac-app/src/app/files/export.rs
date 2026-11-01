@@ -361,6 +361,16 @@ impl App {
             ("clip.export", p, path)
         };
         let Some(r) = self.run(cmd, params) else { return };
+        for n in r["notes"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+        {
+            self.shell
+                .messages
+                .push(crate::app::shell::Level::Warning, format!("Export: {n}"));
+        }
         let said = match cmd {
             "clip.export_batch" => {
                 let n = r["files"].as_array().map_or(0, Vec::len);

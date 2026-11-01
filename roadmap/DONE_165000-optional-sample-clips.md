@@ -69,3 +69,5 @@ Review: `target/shots/2026-10-31/sample-clips/panel-before-download.png`, `panel
 `panel-installed.png`.
 
 Accepted by the owner (2026-10-31).
+
+**Changed by the owner (2026-11-01, 182000):** marked motion can now be exported, written and rendered. Community upload still refuses.

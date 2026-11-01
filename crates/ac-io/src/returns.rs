@@ -279,6 +279,7 @@ pub const CLIP_EXPORT: &[ParamSpec] = &[
     ParamSpec::new("animations", K::Integer, "animations in the file").required(),
     ParamSpec::new("frames", K::IntList, "frames per animation").required(),
     ParamSpec::new("path", K::Text, "the file written").required(),
+    ParamSpec::new("notes", K::TextList, "what to know about the file, when there is something"),
     ParamSpec::new(
         "target",
         K::Text,

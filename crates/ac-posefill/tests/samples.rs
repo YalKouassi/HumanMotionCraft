@@ -9,7 +9,7 @@ use ac_core::clip::{Clip, Interp, Key};
 use ac_core::clipfile;
 use ac_core::{Document, Session, Skeleton};
 use ac_io::library::{Kind, Library};
-use serde_json::{Value, json};
+use serde_json::json;
 
 fn repo() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
@@ -140,23 +140,26 @@ fn saving_under_a_new_name_keeps_the_mark() {
 }
 
 #[test]
-fn exports_refuse_and_say_why() {
+fn exports_go_and_say_what_the_licence_asks() {
     let (mut s, lib) = with_clips("export");
     let out = scratch("export-out");
     s.run("clip.open", &json!({ "id": "Mine/marked" })).unwrap();
     let glb = out.join("a.glb");
-    let mut refused: Vec<(&str, Value)> = vec![
-        ("clip.export", json!({ "path": glb })),
-        ("clip.export", json!({ "path": glb, "ids": ["Mine/marked"] })),
-        ("clip.write", json!({ "path": out.join("a.clip.json") })),
-    ];
-    for (id, params) in refused.drain(..) {
-        let e = s.run(id, &params).unwrap_err().to_string();
-        assert!(e.contains("evaluation-only"), "{id}: {e}");
+    for params in [
+        json!({ "path": glb }),
+        json!({ "path": glb, "ids": ["Mine/marked"] }),
+    ] {
+        let r = s.run("clip.export", &params).unwrap();
+        assert!(r["notes"].to_string().contains("evaluation-only"), "{r}");
+        assert!(glb.exists());
     }
+    let written = out.join("a.clip.json");
+    s.run("clip.write", &json!({ "path": written })).unwrap();
     assert!(
-        std::fs::read_dir(&out).unwrap().next().is_none(),
-        "nothing was written"
+        clipfile::load_clip(&std::fs::read_to_string(&written).unwrap())
+            .unwrap()
+            .evaluation_only,
+        "a clip file keeps the mark"
     );
     let b = s
         .run(
@@ -164,13 +167,12 @@ fn exports_refuse_and_say_why() {
             &json!({ "ids": ["Mine/marked", "Mine/clean"], "folder": out }),
         )
         .unwrap();
-    assert_eq!(b["files"].as_array().map(Vec::len), Some(1), "{b}");
-    assert!(b["failed"].to_string().contains("evaluation-only"), "{b}");
+    assert_eq!(b["files"].as_array().map(Vec::len), Some(2), "{b}");
     drop(lib);
 }
 
 #[test]
-fn a_clip_linking_a_marked_clip_cannot_leave_by_id() {
+fn a_clip_linking_a_marked_clip_is_marked_when_opened() {
     let (mut s, lib) = with_clips("link");
     let anims = Library::new(&lib, Kind::Animations);
     let mut c = clip(&s.document, false);
@@ -179,19 +181,60 @@ fn a_clip_linking_a_marked_clip_cannot_leave_by_id() {
     lay.link = "Mine/marked".into();
     c.layers.push(lay);
     anims.write("Mine/links", &clipfile::save_clip(&c)).unwrap();
-    let out = scratch("link-out");
-    let e = s
-        .run(
-            "clip.export",
-            &json!({ "path": out.join("a.glb"), "ids": ["Mine/links"] }),
-        )
-        .unwrap_err()
-        .to_string();
-    assert!(e.contains("evaluation-only"), "{e}");
     s.run("clip.open", &json!({ "id": "Mine/links" })).unwrap();
     assert!(
         marked(&mut s),
         "opening it marks it: the link could be baked into keys"
+    );
+}
+
+/// A steady walk along -Y with the left foot ahead, 40 frames at 30 fps.
+fn walking(doc: &Document) -> ac_posefill::sample_targets::Source {
+    let sk = &doc.skeleton;
+    let leg = sk.bone("upperleg01.L").unwrap();
+    let mut pose = vec![[0.0, 0.0, 0.0, 1.0]; sk.names.len()];
+    pose[leg] = [-0.2f64.sin(), 0.0, 0.0, 0.2f64.cos()];
+    ac_posefill::sample_targets::Source {
+        name: "bs_1d_linear__walk".into(),
+        fps: 30.0,
+        rotations: vec![pose; 40],
+        root: (0..40)
+            .map(|f| [0.0, -1.3 * f as f64 / 30.0 / sk.hip_height, 0.0])
+            .collect(),
+    }
+}
+
+#[test]
+fn sample_targets_pick_a_steady_gait_and_only_plain_clips() {
+    use ac_posefill::sample_targets::{pick, wanted};
+    let lib = scratch("targets");
+    let s = session(&lib);
+    assert!(wanted("bs_1d_linear__a") && wanted("idle__b"));
+    assert!(!wanted("variations__zombie_walk") && !wanted("bs_2d_directional_crouch__c"));
+    assert!(!wanted("idle__warm_up_neck_001") && !wanted("idle__crouch_idle_001"));
+    let mut still = walking(&s.document);
+    still.name = "idle__still".into();
+    still.root = vec![[0.0, 0.0, 0.0]; 40];
+    let set = pick(&s.document.skeleton, &[walking(&s.document), still]).unwrap();
+    assert_eq!(set["evaluation_only"], true);
+    assert_eq!(set["bones"], s.document.skeleton.names.len());
+    let names: Vec<&str> = set["targets"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|t| t["name"].as_str().unwrap())
+        .collect();
+    assert_eq!(names, ["stand", "walk"]);
+    let walk = &set["targets"][1];
+    assert!(
+        (walk["speed"].as_f64().unwrap() - 1.3).abs() < 1e-3,
+        "{}",
+        walk["speed"]
+    );
+    assert_eq!(walk["poses"].as_array().unwrap().len(), 4);
+    assert!(
+        pick(&s.document.skeleton, &[]).is_err(),
+        "nothing to aim at is said"
     );
 }
 

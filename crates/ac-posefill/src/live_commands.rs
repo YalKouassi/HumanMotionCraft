@@ -24,6 +24,7 @@ use crate::engine::{self, LiveStart, Pose};
 use crate::live::{MAX_FRAMES, State, StepAsk, Stick, Stretch, Take};
 use crate::plan::whole_layer;
 use crate::{MODEL_FPS, TAG};
+use crate::{sample_targets, samples};
 
 type P = Map<String, Value>;
 type Out = Result<Value, String>;
@@ -39,12 +40,19 @@ const LOOKAHEAD: usize = 2;
 pub static SPECS: &[CommandSpec] = &[
     CommandSpec::new("live.start", "Live motion: start a take", live_start)
         .icon("ai")
-        .inputs(&[ParamSpec::new(
-            "max_frames",
-            K::Integer,
-            "the most frames to record (default ten minutes at 30 fps)",
-        )
-        .range(2.0, MAX_FRAMES as f64)])
+        .inputs(&[
+            ParamSpec::new(
+                "max_frames",
+                K::Integer,
+                "the most frames to record (default ten minutes at 30 fps)",
+            )
+            .range(2.0, MAX_FRAMES as f64),
+            ParamSpec::new(
+                "targets",
+                K::Choice(&["ours", "samples"]),
+                "the poses it aims at: ours (default), or samples, made from the person's download of NVIDIA's sample clips, which marks what is kept evaluation-only",
+            ),
+        ])
         .outputs(START_OUT),
     CommandSpec::new("live.input", "Live motion: steer", live_input)
         .icon("ai")
@@ -91,6 +99,12 @@ const START_OUT: &[ParamSpec] = &[
     ParamSpec::new("targets", K::TextList, "the target poses of the set").required(),
     ParamSpec::new("max_speed", K::Number, "the set's top speed, m/s").required(),
     ParamSpec::new("max_frames", K::Integer, "the most frames it records").required(),
+    ParamSpec::new(
+        "evaluation_only",
+        K::Bool,
+        "it aims at poses from NVIDIA's sample clips, so what is kept is marked",
+    )
+    .required(),
 ];
 
 const INPUT_OUT: &[ParamSpec] = &[
@@ -146,6 +160,8 @@ const CLIP_OUT: &[ParamSpec] = &[
 #[derive(Default)]
 struct Live {
     take: Option<Take>,
+    /// The take aims at poses from the sample clips.
+    evaluation_only: bool,
     reply: Option<Receiver<Reply>>,
     /// Round trips and the model's own times, in ms.
     trips: Vec<f64>,
@@ -196,12 +212,45 @@ pub fn reset() {
     *locked() = None;
 }
 
+fn wants_samples(p: &P) -> bool {
+    p.get("targets").and_then(Value::as_str) == Some("samples")
+}
+
+/// Whether `live.start` with `p` has a target set to make from the sample clips first.
+pub fn targets_to_make(p: &P) -> bool {
+    wants_samples(p)
+        && !samples::stand_in()
+        && samples::downloaded()
+        && samples::dir().is_some_and(|d| !sample_targets::path(&d).exists())
+}
+
+/// Make the target set from the sample clips, when it's asked for and isn't there yet.
+pub fn prepare_targets(doc: &Document, p: &P) -> Result<(), String> {
+    if !targets_to_make(p) {
+        return Ok(());
+    }
+    let dir = samples::dir().ok_or("no data folder is known")?;
+    sample_targets::build(&doc.skeleton, &dir, &samples::files(&dir))
+}
+
 fn live_start(doc: &mut Document, p: &P) -> Out {
     let assets = doc
         .assets
         .as_ref()
         .ok_or("no assets folder is set (start the app with one)")?;
-    let path = assets.join(TARGETS);
+    let from_samples = wants_samples(p);
+    if from_samples && !samples::downloaded() {
+        return Err(hinted(
+            "the sample clips haven't been downloaded",
+            "download them with Sample clips in Settings > AI models (posefill.samples)",
+        ));
+    }
+    prepare_targets(doc, p)?;
+    let path = match (from_samples && !samples::stand_in(), samples::dir()) {
+        (true, Some(dir)) => sample_targets::path(&dir),
+        (true, None) => return Err("no data folder is known".into()),
+        _ => assets.join(TARGETS),
+    };
     let text = std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
     let targets: Value = serde_json::from_str(&text).map_err(|e| format!("{}: {e}", path.display()))?;
     let start = Pose {
@@ -224,12 +273,13 @@ fn live_start(doc: &mut Document, p: &P) -> Out {
     let mut guard = locked();
     let live = guard.get_or_insert_with(Live::default);
     live.take = Some(take);
+    live.evaluation_only = from_samples;
     live.reply = None;
     live.trips.clear();
     live.model.clear();
     Ok(json!({
         "session": begun.session, "targets": begun.targets, "max_speed": begun.max_speed,
-        "max_frames": cap,
+        "max_frames": cap, "evaluation_only": from_samples,
     }))
 }
 
@@ -430,8 +480,9 @@ fn resampled(frames: &[Pose], fps: f64) -> Vec<Pose> {
 
 fn live_clip(doc: &mut Document, p: &P) -> Out {
     whole_layer(&doc.clip)?;
-    let kept = {
+    let (kept, marked) = {
         let guard = locked();
+        let marked = guard.as_ref().is_some_and(|l| l.evaluation_only);
         let take = guard
             .as_ref()
             .and_then(|l| l.take.as_ref())
@@ -453,10 +504,12 @@ fn live_clip(doc: &mut Document, p: &P) -> Out {
                 "give from below to, both inside the recording",
             ));
         }
-        take.frames
+        let frames = take
+            .frames
             .get(from as usize..=to as usize)
             .ok_or("the range is not inside the recording")?
-            .to_vec()
+            .to_vec();
+        (frames, marked)
     };
     let bones = doc.skeleton.names.len();
     if kept.iter().any(|f| f.rotations.len() != bones) {
@@ -483,6 +536,11 @@ fn live_clip(doc: &mut Document, p: &P) -> Out {
         ));
     }
     let mut notes = Vec::new();
+    if marked {
+        doc.clip.evaluation_only = true;
+        notes
+            .push("made from NVIDIA's sample poses, so this animation is marked evaluation-only".to_string());
+    }
     let replaced = doc
         .clip
         .keys()

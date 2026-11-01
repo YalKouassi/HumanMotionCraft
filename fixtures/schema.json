@@ -5054,6 +5054,14 @@
                     "minimum": 2,
                     "maximum": 18000,
                     "description": "the most frames to record (default ten minutes at 30 fps)"
+                  },
+                  "targets": {
+                    "type": "string",
+                    "enum": [
+                      "ours",
+                      "samples"
+                    ],
+                    "description": "the poses it aims at: ours (default), or samples, made from the person's download of NVIDIA's sample clips, which marks what is kept evaluation-only"
                   }
                 },
                 "required": [],
