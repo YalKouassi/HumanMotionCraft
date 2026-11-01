@@ -70,7 +70,7 @@ impl Kind {
 
 /// Most items listed from one library (a folder with more is listed up to this).
 pub const MAX_ITEMS: usize = 100_000;
-const SAFE: &str = "-_ ()&,.";
+const SAFE: &str = "-_ ()&,.@![]";
 /// The index's folder in a library, and the version of its files (another version is read again).
 pub const INDEX_FOLDER: &str = ".index";
 const INDEX_VERSION: u32 = 1;
@@ -137,7 +137,7 @@ pub fn clips_outside_layout(dir: &Path) -> usize {
     n
 }
 
-/// A name made safe for a file name: letters, digits and `-_ ()&,.`; never empty.
+/// A name made safe for a file name: letters, digits and `-_ ()&,.@![]`; never empty.
 pub fn safe(name: &str) -> R<String> {
     let keep: String = name
         .chars()

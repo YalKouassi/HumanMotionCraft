@@ -486,3 +486,16 @@ fn a_port_refuses_to_write_inside_a_repository() {
     assert!(!to.join(MANIFEST).exists());
     std::fs::remove_dir_all(lib).ok();
 }
+
+/// A library the port writes opens in the app: names as store packs have them keep their
+/// characters, so the id the list gives finds the file.
+#[test]
+fn a_name_with_a_packs_characters_is_found_by_its_id() {
+    let dir = std::env::temp_dir().join(format!("ac-port-names-{}", std::process::id()));
+    let lib = ac_io::library::Library::new(&dir.join("animations"), ac_io::library::Kind::Animations);
+    let id = "!Pack [v1.2] - Action/Human@Walk (2)";
+    lib.write(id, "{}").unwrap();
+    assert!(lib.exists(id));
+    assert!(lib.path(id).unwrap().ends_with("Human@Walk (2).clip.json"));
+    std::fs::remove_dir_all(dir).unwrap();
+}
