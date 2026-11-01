@@ -1,8 +1,8 @@
 # The camera jumps while rotating
 
-- **Status:** owner's decision first (the Question below)
+- **Status:** not started
 - **Requires:** none
-- **Source:** owner's bug report (2026-11-01); measured the same day by driving the app
+- **Source:** owner's bug report (2026-11-01); measured the same day by driving the app; the owner agreed the acceptance (2026-11-01)
 
 ## What
 Orbit itself is sound: right-drags of 40 px and 60 px moved smoothly, with no jump when the drag
@@ -28,11 +28,10 @@ last frame without a cap, so a long stall could turn the view sharply, but scrip
 it. Which of these the owner has been hitting is not known; if a jump remains after this item, the
 status bar text and whether Follow is on will tell them apart.
 
-## Question
-Should the number keys stay as bare keys over the view?
-Suggested answer: keep them, since they are the shortcuts documented for these views, and treat
-them as the owner's to rebind in Help > Keyboard shortcuts. Changing to a smooth move (below) makes a
-stray press easy to read and hard to mistake for a bug.
+## Decision
+The number keys stay as bare keys over the view, as the agreed acceptance has them (owner, 2026-11-01).
+They are the shortcuts documented for these views and can be rebound in Help > Keyboard shortcuts.
+Changing to a smooth move (below) makes a stray press easy to read and hard to mistake for a bug.
 
 ## Build
 - One pitch limit, ±1.45, shared by the views and the orbit.
