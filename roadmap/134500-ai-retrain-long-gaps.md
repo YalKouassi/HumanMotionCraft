@@ -53,3 +53,7 @@ line and judges side-by-side videos before any export (`ac_train.export <tag> --
 
 ## Decision (2026-10-31)
 The owner: after 154000, so that if add-ons work this retrain is done on the new base and not the old one.
+
+## Finding (2026-11-01)
+The acceptance's "under 20.0 per 1,000 on the posed keys" comes from distorted poses (183000), so that
+number needs measuring again before it is used. The clash work for the base retrain is in 188000.

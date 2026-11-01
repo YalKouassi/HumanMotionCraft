@@ -33,4 +33,8 @@ joint error on the recordings no worse.
 2026-10-30 (134000, its Result has the table). Posed keys: 19.8 impossible frames per 1,000 against the old model's 17. **Not met**.
 
 ## Closed
-The owner's decision, 2026-10-31. The loss is in the shipped model, which the owner chose to ship (134000). The shipped `parts-lowweights` makes 20.0 impossible frames per 1,000 on the posed keys, against the old model's 17 and interpolation's 20, so no drop. `keep_possible` still corrects every fill in the app. 134500's acceptance now holds this number.
+The owner's decision, 2026-10-31. The loss is in the shipped model, which the owner chose to ship (134000). The shipped `parts-lowweights` makes 20.0 impossible frames per 1,000 on the posed keys, against the old model's 17 and interpolation's 20, so no drop. 
+
+## Correction (2026-11-01)
+The posed-key figures here (17, 19.8, 20.0 and interpolation's 20) came from distorted poses:
+`library_poses` keeps only the model's 19 bones (183000). They need measuring again on whole poses.`keep_possible` still corrects every fill in the app. 134500's acceptance now holds this number.
