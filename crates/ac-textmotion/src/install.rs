@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 pub use ac_helper::install::{Install, VERSION};
 
 /// How to install it, for refusals.
-pub const HOW: &str = "install it with Install in the Motion from text panel (text.install), or run \
+pub const HOW: &str = "install it with Install in Settings > AI models (text.install), or run \
      `python tools/textmotion/setup_textmotion.py` from the source tree (an NVIDIA GPU is best; about 35 GB of free disk)";
 
 /// This helper, for [`ac_helper::install`] and [`ac_helper::setup`].

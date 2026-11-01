@@ -1,5 +1,5 @@
 //! The right panel: a summary, then one collapsible section per panel (`panels/`): the selected
-//! joint, layers, physics report, the review, scene boxes, the AI in-between, motion from text, and pins.
+//! joint, layers, realistic balance, the review, scene boxes, Create motion, and pins.
 //! Any section (as well as `Range` and `Picker` from the viewport toolbar) can also be opened as
 //! its own dockable or pop-out native-window panel via `craft_ui::docking` (`shell/layout.rs`).
 
@@ -41,14 +41,11 @@ impl App {
             |app, ui| app.layers_panel(ui),
         );
         let physics = if problems > 0 {
-            format!(
-                "Physics ({problems} problem{})",
-                if problems == 1 { "" } else { "s" }
-            )
+            format!("Realistic balance ({problems} to check)")
         } else {
-            "Physics".into()
+            "Realistic balance".into()
         };
-        self.inspector_section(ui, DockPanel::Physics, &physics, true, |app, ui| {
+        self.inspector_section(ui, DockPanel::Physics, &physics, problems > 0, |app, ui| {
             app.physics_panel(ui)
         });
         let findings = self.panels.review.count();
@@ -57,7 +54,7 @@ impl App {
         } else {
             "Review".into()
         };
-        self.inspector_section(ui, DockPanel::Review, &review, true, |app, ui| {
+        self.inspector_section(ui, DockPanel::Review, &review, findings > 0, |app, ui| {
             app.review_panel(ui)
         });
         self.inspector_section(
@@ -67,14 +64,8 @@ impl App {
             boxes > 0,
             |app, ui| app.scene_panel(ui),
         );
-        self.inspector_section(ui, DockPanel::Ai, "AI in-between", true, |app, ui| {
-            app.ai_panel(ui)
-        });
-        self.inspector_section(ui, DockPanel::Text, "Motion from text", true, |app, ui| {
-            app.text_panel(ui)
-        });
-        self.inspector_section(ui, DockPanel::PoseFill, "Pose fill", true, |app, ui| {
-            app.posefill_panel(ui)
+        self.inspector_section(ui, DockPanel::Ai, "Create motion", true, |app, ui| {
+            app.create_panel(ui)
         });
         self.inspector_section(ui, DockPanel::Pins, "Pins", false, |app, ui| app.pins_panel(ui));
     }
@@ -90,8 +81,8 @@ impl App {
         open: bool,
         body: impl FnOnce(&mut Self, &mut egui::Ui),
     ) {
-        let id = title.split(' ').next().unwrap_or(title);
-        let tag_id = format!("panel.{}", id.to_lowercase());
+        let id = panel.id_str();
+        let tag_id = format!("panel.{id}");
         if self.is_dock_panel_open(panel) {
             ui.horizontal(|ui| {
                 ui.label(egui::RichText::new(title).strong()).tag(&tag_id, title);

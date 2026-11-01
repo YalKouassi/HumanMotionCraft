@@ -77,12 +77,12 @@ impl DockPanel {
             DockPanel::Picker => "Picker",
             DockPanel::Joint => "Joint",
             DockPanel::Layers => "Layers",
-            DockPanel::Physics => "Physics",
+            DockPanel::Physics => "Realistic balance",
             DockPanel::Review => "Review",
             DockPanel::Scene => "Scene boxes",
-            DockPanel::Ai => "AI in-between",
-            DockPanel::Text => "Motion from text",
-            DockPanel::PoseFill => "Pose fill",
+            DockPanel::Ai => "Create motion",
+            DockPanel::Text => "Describe it",
+            DockPanel::PoseFill => "Steer it live",
             DockPanel::Controller => "Controller",
             DockPanel::Pins => "Pins",
         }
@@ -107,9 +107,9 @@ impl DockPanel {
             DockPanel::Physics => {
                 let n = app.panels.physics.marks.len();
                 if n > 0 {
-                    format!("Physics ({n} problem{})", if n == 1 { "" } else { "s" })
+                    format!("Realistic balance ({n} to check)")
                 } else {
-                    "Physics".into()
+                    "Realistic balance".into()
                 }
             }
             DockPanel::Review => {
@@ -123,9 +123,9 @@ impl DockPanel {
             DockPanel::Scene => {
                 format!("Scene boxes ({})", app.session.document.clip.surfaces.len())
             }
-            DockPanel::Ai => "AI in-between".into(),
-            DockPanel::Text => "Motion from text".into(),
-            DockPanel::PoseFill => "Pose fill".into(),
+            DockPanel::Ai => "Create motion".into(),
+            DockPanel::Text => "Describe it".into(),
+            DockPanel::PoseFill => "Steer it live".into(),
             DockPanel::Controller => "Controller".into(),
             DockPanel::Pins => "Pins".into(),
         }
@@ -337,7 +337,7 @@ impl DockContent<DockPanel> for DockAdapter<'_> {
                 egui::ScrollArea::vertical()
                     .id_salt("dock-ai")
                     .auto_shrink([false, false])
-                    .show(ui, |ui| self.app.ai_panel(ui));
+                    .show(ui, |ui| self.app.create_panel(ui));
             }
             DockPanel::Text => {
                 egui::ScrollArea::vertical()
@@ -349,7 +349,7 @@ impl DockContent<DockPanel> for DockAdapter<'_> {
                 egui::ScrollArea::vertical()
                     .id_salt("dock-posefill")
                     .auto_shrink([false, false])
-                    .show(ui, |ui| self.app.posefill_panel(ui));
+                    .show(ui, |ui| self.app.steer_panel(ui));
             }
             DockPanel::Controller => {
                 egui::ScrollArea::vertical()

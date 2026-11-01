@@ -120,6 +120,14 @@ impl App {
                         .button("Keyboard shortcuts…")
                         .tag("window.settings.shortcuts", "Keyboard shortcuts…")
                         .clicked();
+                    if ui
+                        .button("AI models…")
+                        .on_hover_text("Set up, load or remove the optional AI models")
+                        .tag("window.settings.ai_models", "AI models…")
+                        .clicked()
+                    {
+                        self.panels.create.models_open = true;
+                    }
                     reset_layout = ui
                         .button("Reset layout")
                         .tag("window.settings.reset_layout", "Reset layout")

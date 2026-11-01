@@ -45,7 +45,7 @@ static KIND: Kind = Kind {
     folder: "posefill/samples",
     env: "AC_POSEFILL_SAMPLES_DIR",
     what: "the sample clips",
-    how: "download them with Sample clips in the Pose fill panel (posefill.samples)",
+    how: "download them with Sample clips in Settings > AI models (posefill.samples)",
 };
 static SPEC: Spec = Spec {
     kind: &KIND,

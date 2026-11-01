@@ -22,8 +22,8 @@ const TIPS: &[(&str, &str)] = &[
         "Pick IK in the viewport's toolbar, then drag a hand or foot: it goes where you drag it and the limb bends to reach.",
     ),
     (
-        "Preview fill",
-        "Key two poses a few frames apart, then press Preview fill in the panel on the right: the AI's in-between plays before you keep it (Accept) or drop it.",
+        "Fill between your poses",
+        "Key two poses a few frames apart, put the playhead between them, then press Preview under Create motion on the right: the AI's movement plays before you keep it or drop it.",
     ),
 ];
 

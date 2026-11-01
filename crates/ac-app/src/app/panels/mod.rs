@@ -6,6 +6,7 @@
 pub mod ai;
 pub mod ai_worker;
 pub mod controller;
+pub mod create;
 pub mod gamepad;
 pub mod joint;
 pub mod layers;
@@ -23,6 +24,7 @@ pub mod text_install;
 pub struct Panels {
     pub joint: joint::JointState,
     pub ai: ai::AiState,
+    pub create: create::CreateState,
     pub physics: physics::PhysicsState,
     pub range: range::RangeState,
     pub review: review::ReviewState,
@@ -38,7 +40,8 @@ impl super::App {
     /// The panels' window state for `--ui` and the control port: `joint=<bone>` selects a joint,
     /// `box=<n>` picks a scene box, `layer=<n>` picks a layer, `prompt=<text>` fills in motion from
     /// text's prompt, `export_dir=<folder>` is where the Export dialog starts, `controller=none|standard|xbox|playstation|off`
-    /// sets the Controller panel.
+    /// sets the Controller panel, `create=fill|describe|steer` picks the Create motion job,
+    /// `movement=ai|steps` how a fill moves.
     pub(in crate::app) fn set_panel_ui(&mut self, name: &str, value: &str) -> Result<(), String> {
         let index = || value.parse::<usize>().map_err(|e| format!("{value:?}: {e}"));
         match name {
@@ -58,6 +61,21 @@ impl super::App {
                 self.panels.layers.pick(i);
             }
             "controller" => self.set_controller_ui(value)?,
+            "create" => {
+                self.panels.create.mode = match value {
+                    "fill" => create::Mode::Fill,
+                    "describe" => create::Mode::Describe,
+                    "steer" => create::Mode::Steer,
+                    _ => return Err("fill, describe or steer".into()),
+                }
+            }
+            "movement" => {
+                self.panels.ai.walking = match value {
+                    "ai" => false,
+                    "steps" => true,
+                    _ => return Err("ai or steps".into()),
+                }
+            }
             "prompt" => self.panels.text.prompt = value.to_string(),
             "export_dir" => self.files.state.export_dir = Some(value.to_string()),
             "range_pair" => {

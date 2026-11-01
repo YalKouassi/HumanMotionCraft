@@ -36,6 +36,10 @@ pub struct AiState {
     last_ms: Option<u128>,
     /// Fill with the pose-to-pose model (roadmap 163000), once it's installed; else our own.
     pub pose_fill: bool,
+    /// Walking steps rather than AI movement.
+    pub walking: bool,
+    /// Apply fills every gap, not only the one at the playhead.
+    pub every: bool,
     /// Footsteps: the left foot steps first (else the right).
     pub steps_left: bool,
     /// Footsteps: how many (0: as many as suit the distance and time).
@@ -117,8 +121,8 @@ impl App {
                 .sum::<usize>()
         });
         let label = match flags {
-            Some(n) if n > 0 => format!("Fill report ({n})"),
-            _ => "Fill report".to_string(),
+            Some(n) if n > 0 => format!("Report ({n})"),
+            _ => "Report".to_string(),
         };
         if ui
             .add_enabled(flags.is_some(), egui::Button::new(&label))
@@ -324,115 +328,145 @@ impl App {
         }
     }
 
-    /// The learned in-betweener: preview a fill as a ghost, compare it with plain interpolation,
-    /// try styles, keep it; fill one gap or all of them.
+    /// Fill between my poses: AI movement (preview as a ghost, compare with no AI, try styles, keep
+    /// it; one gap or all of them) or walking steps, which are a separate feature and not AI.
     pub(in crate::app) fn ai_panel(&mut self, ui: &mut egui::Ui) {
+        let doc = &self.session.document;
+        let gap = ac_core::gaps::gap_at(doc, doc.key_frame());
+        super::create::help(ui, "Creates the movement between two poses you've set.");
+        let st = &mut self.panels.ai;
+        ui.horizontal(|ui| {
+            ui.label("Movement");
+            ui.radio_value(&mut st.walking, false, "AI")
+                .on_hover_text("The AI works out the movement")
+                .tag("panel.ai.movement.ai", "AI");
+            ui.radio_value(&mut st.walking, true, "Walking steps")
+                .on_hover_text("Steps from one pose to the other, each foot planted where it lands")
+                .tag("panel.ai.movement.steps", "Walking steps");
+        });
+        if self.panels.ai.walking {
+            if gap.is_none() {
+                self.gap_hint(ui);
+            }
+            self.steps_row(ui, gap.as_ref().map(|g| (g.from, g.to)));
+            return;
+        }
         let Some(info) = self.session.document.ai.as_ref().map(|m| m.info().clone()) else {
-            ui.label("No model in assets/models: AI fill is off (keys use plain interpolation).");
+            ui.label("No AI model found in assets/models, so the movement stays plain (no AI).");
             return;
         };
         let ctx = ui.ctx().clone();
-        self.fill_with_row(ui);
-        let pose = self.panels.ai.pose_fill;
+        let pose = self.fill_with_row(ui);
         let doc = &self.session.document;
-        let gap = ac_core::gaps::gap_at(doc, doc.key_frame());
         let all = ac_core::gaps::gaps(doc);
-        let max = ac_core::gaps::max_gap(doc).unwrap_or(0);
-        // why Preview and Fill can't run here (None: they can)
+        let every = self.panels.ai.every;
+        // why Preview and Apply can't run here (None: they can)
         let refusal: Option<String> = match &gap {
-            None => Some("put the playhead between two of your keys".into()),
+            None => Some("Put the playhead between two of your poses".into()),
             Some(_) if pose => ac_posefill::refusal(doc),
             Some(g) => g.refused.clone(),
         };
-        match &gap {
-            Some(g) => {
-                let text = if pose {
-                    format!("Gap {}–{}: {} frames", g.from, g.to, g.frames)
-                } else {
-                    format!("Gap {}–{}: {} frames (max {max})", g.from, g.to, g.frames)
-                };
-                let text = match g.anchors {
-                    Some(n) => format!(
-                        "{text}, split by {n} anchor pose{} from the library",
+        match (&gap, &refusal) {
+            (Some(g), None) => {
+                let anchors = g.anchors.map_or(String::new(), |n| {
+                    format!(
+                        ", with {n} library pose{} along the way",
                         if n == 1 { "" } else { "s" }
-                    ),
-                    None => text,
-                };
-                let filled = if g.filled { ", filled by the model" } else { "" };
-                // one line whatever it says: the rest is in the hover, so nothing below moves
-                let line = format!("{text}{filled}");
-                let hover = match &refusal {
-                    Some(why) => format!("{line}\nPreview and Fill are off: {why}"),
-                    None => line.clone(),
-                };
-                ui.add(
-                    egui::Label::new(egui::RichText::new(line).color(if refusal.is_some() {
-                        self.palette().error
-                    } else {
-                        ui.visuals().text_color()
-                    }))
-                    .truncate(),
-                )
-                .on_hover_text(hover);
-            }
-            None => {
-                ui.add(
-                    egui::Label::new(
-                        egui::RichText::new("The playhead is not between two of your keys.").weak(),
                     )
-                    .truncate(),
+                });
+                let filled = if g.filled { " (already filled)" } else { "" };
+                ui.add(
+                    egui::Label::new(format!("Filling frames {} to {}{anchors}{filled}", g.from, g.to))
+                        .truncate(),
                 );
             }
+            (Some(g), Some(why)) => {
+                // said in full, with the fix: a greyed button alone explains nothing
+                ui.label(
+                    egui::RichText::new(format!("Can't fill frames {} to {}: {why}", g.from, g.to))
+                        .color(self.palette().error),
+                );
+            }
+            (None, _) => self.gap_hint(ui),
         }
+        self.ai_settings_controls(ui, &info, &ctx);
+        let (open, too_long) = self.open_gaps(&all, pose);
         let pending = self.ai_pending();
         ui.horizontal_wrapped(|ui| {
-            let can = refusal.is_none();
             let why = refusal.clone().unwrap_or_default();
             if ui
-                .add_enabled(can, egui::Button::new("Preview fill"))
-                .on_hover_text(format!(
-                    "Show {}'s fill between your keys around the playhead as a green ghost, without changing the animation",
-                    info.tag
-                ))
-                .on_disabled_hover_text(&why)
-                .tag("panel.ai.preview", "Preview fill")
+                .add_enabled(refusal.is_none() && !every, egui::Button::new("Preview"))
+                .on_hover_text("Show the movement as a green ghost, without changing the animation")
+                .on_disabled_hover_text(if every {
+                    "Preview shows one gap at a time: untick Fill every gap".to_string()
+                } else {
+                    why.clone()
+                })
+                .tag("panel.ai.preview", "Preview")
                 .clicked()
             {
                 if pose {
                     self.ai_previewed = Some(Instant::now());
                     if let Some(out) = self.run("posefill.preview", json!({})) {
-                        self.posefill_done("Preview fill", &out);
+                        self.posefill_done("Preview", &out);
                     }
                 } else {
                     self.preview_fill(None, false, &ctx);
                 }
             }
-            if ui
-                .add_enabled(can, egui::Button::new("Fill now"))
-                .on_hover_text(format!("Fill between your keys around the playhead (1..{max} frames)"))
-                .on_disabled_hover_text(&why)
-                .tag("panel.ai.fill", "Fill now")
-                .clicked()
-                && let Some(r) = self.run(if pose { "posefill.fill" } else { "ai.fill" }, json!({}))
-            {
-                self.status = format!(
-                    "AI filled {}–{} ({})",
-                    r["from"].as_i64().unwrap_or(0) + 1,
-                    r["to"].as_i64().unwrap_or(0) - 1,
-                    r["model"].as_str().unwrap_or("")
+            let can = if every { open > 0 } else { refusal.is_none() };
+            let apply = ui
+                .add_enabled(can, egui::Button::new("Apply"))
+                .on_hover_text(if every {
+                    "Fill every empty gap between your poses (one undo)"
+                } else {
+                    "Fill between your poses around the playhead (one undo)"
+                })
+                .on_disabled_hover_text(if every {
+                    "Every gap the AI can take is filled already".to_string()
+                } else {
+                    why
+                })
+                .tag(
+                    if every {
+                        "panel.ai.fill_all"
+                    } else {
+                        "panel.ai.fill"
+                    },
+                    "Apply",
                 );
+            if apply.clicked() {
+                if every {
+                    self.fill_all(pose);
+                } else if let Some(r) = self.run(if pose { "posefill.fill" } else { "ai.fill" }, json!({})) {
+                    self.status = format!(
+                        "AI filled {}–{} ({})",
+                        r["from"].as_i64().unwrap_or(0) + 1,
+                        r["to"].as_i64().unwrap_or(0) - 1,
+                        r["model"].as_str().unwrap_or("")
+                    );
+                }
             }
         });
-        self.fill_all_row(ui, &all);
-        self.steps_row(ui, gap.as_ref().map(|g| (g.from, g.to)));
-        // the same height working or not, so the controls below stay where they are
-        ui.horizontal(|ui| {
-            ui.set_min_height(20.0);
-            if let Some(p) = &pending {
+        ui.horizontal_wrapped(|ui| {
+            let label = format!("Fill every gap ({open})");
+            ui.checkbox(&mut self.panels.ai.every, &label)
+                .on_hover_text(match too_long {
+                    0 => "Apply fills every empty gap, not only the one at the playhead".to_string(),
+                    n => format!("Apply fills every empty gap, not only the one at the playhead. {n} too long for the AI stay as they are"),
+                })
+                .tag("panel.ai.every", label.as_str());
+            self.fill_report_button(ui);
+        });
+        if pose {
+            self.posefill_busy_row(ui);
+        }
+        if let Some(p) = &pending {
+            ui.horizontal(|ui| {
                 ui.spinner();
                 ui.label(format!(
                     "working out the {}... {} ms",
-                    if p.plain { "plain interpolation" } else { "fill" },
+                    if p.plain { "plain movement" } else { "fill" },
                     p.since.elapsed().as_millis()
                 ));
                 if ui
@@ -445,56 +479,66 @@ impl App {
                     self.status = "AI preview cancelled".into();
                 }
                 ctx.request_repaint_after(Duration::from_millis(50));
-            } else if let Some(ms) = self.panels.ai.last_ms {
-                ui.label(
-                    egui::RichText::new(format!("last preview worked out in {ms} ms"))
-                        .small()
-                        .weak(),
-                );
-            }
-        });
+            });
+        }
         self.preview_controls(ui, &info, &ctx);
-        self.ai_settings_controls(ui, &info, &ctx);
-        ui.label(
-            egui::RichText::new("Shift+A switches the span at the playhead between AI and plain.")
-                .small()
-                .weak(),
+    }
+
+    /// The fix for a gap that isn't there.
+    fn gap_hint(&self, ui: &mut egui::Ui) {
+        ui.add(
+            egui::Label::new(
+                egui::RichText::new("Put the playhead between two of your poses to start.").weak(),
+            )
+            .truncate(),
         );
     }
 
-    /// Which model fills: shown once the pose-to-pose one is installed; ours is the default, and a
-    /// gap the one chosen can't take says why rather than going to the other.
-    fn fill_with_row(&mut self, ui: &mut egui::Ui) {
-        if self.panels.posefill.helper.is_none() {
-            self.panels.posefill.helper = self.session.run("posefill.helper", &json!({})).ok();
-        }
-        let installed = self
-            .panels
-            .posefill
-            .helper
-            .as_ref()
-            .is_some_and(|h| h["installed"] == true);
-        if !installed {
-            self.panels.ai.pose_fill = false;
-            return;
-        }
+    /// Which AI fills, returning whether it's NVIDIA's: HumanMotion AI is the default, and a gap
+    /// the one chosen can't take says why rather than going to the other. NVIDIA AI is offered
+    /// before it's installed, with the way to set it up.
+    fn fill_with_row(&mut self, ui: &mut egui::Ui) -> bool {
+        let installed = self.posefill_installed();
         let st = &mut self.panels.ai;
-        ui.horizontal(|ui| {
-            ui.label("Fill with");
-            ui.radio_value(&mut st.pose_fill, false, "Our model")
-                .tag("panel.ai.engine.ours", "Our model");
-            ui.radio_value(&mut st.pose_fill, true, "Pose fill")
-                .on_hover_text("NVIDIA's pose-to-pose model, on your GPU: gaps of 0.6 to 1.9 s a call")
-                .tag("panel.ai.engine.pose", "Pose fill");
-        });
-        if self.panels.ai.pose_fill {
-            super::posefill::notice(ui);
+        if !installed {
+            st.pose_fill = false;
         }
+        let name = |pose: bool| if pose { "NVIDIA AI" } else { "HumanMotion AI" };
+        let mut setup = false;
+        ui.horizontal(|ui| {
+            egui::ComboBox::from_label("AI model")
+                .selected_text(name(st.pose_fill))
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(&mut st.pose_fill, false, name(false))
+                        .on_hover_text("Comes with the app. Try both and keep the one you prefer")
+                        .tag("panel.ai.engine.ours", name(false));
+                    if installed {
+                        ui.selectable_value(&mut st.pose_fill, true, name(true))
+                            .on_hover_text(format!(
+                                "Needs an NVIDIA graphics card: gaps of 0.6 to 1.9 s between poses. Try both and keep the one you prefer.\n{}",
+                                ac_posefill::NOTICE
+                            ))
+                            .tag("panel.ai.engine.pose", name(true));
+                    } else if ui
+                        .selectable_label(false, "Set up NVIDIA AI…")
+                        .on_hover_text("Needs an NVIDIA graphics card and a one-time download of about 4 GB")
+                        .tag("panel.ai.engine.setup", "Set up NVIDIA AI…")
+                        .clicked()
+                    {
+                        setup = true;
+                    }
+                })
+                .response
+                .tag("panel.ai.engine", "AI model");
+        });
+        if setup {
+            self.panels.create.models_open = true;
+        }
+        self.panels.ai.pose_fill
     }
 
-    /// "Fill all gaps": every gap the model can take, one undo; the ones it can't are counted.
-    fn fill_all_row(&mut self, ui: &mut egui::Ui, all: &[ac_core::gaps::Gap]) {
-        let pose = self.panels.ai.pose_fill;
+    /// How many gaps "Fill every gap" would fill, and how many are too long for the AI.
+    fn open_gaps(&self, all: &[ac_core::gaps::Gap], pose: bool) -> (usize, usize) {
         let doc = &self.session.document;
         let open = all
             .iter()
@@ -512,42 +556,26 @@ impl App {
         } else {
             all.iter().filter(|g| g.refused.is_some() && g.frames > 0).count()
         };
-        let hover = match too_long {
-            0 => "Fill every empty gap between your keys with the model (one undo)".to_string(),
-            n => format!(
-                "Fill every empty gap between your keys with the model (one undo). {n} too long for the model stay as they are"
-            ),
-        };
-        ui.horizontal_wrapped(|ui| {
-            let why = if all.is_empty() {
-                "needs at least two keys of yours".to_string()
+        (open, too_long)
+    }
+
+    /// Every gap the AI can take, one undo; the ones it can't are said.
+    fn fill_all(&mut self, pose: bool) {
+        if let Some(r) = self.run(if pose { "posefill.fill_all" } else { "ai.fill_all" }, json!({})) {
+            let n = r["filled"].as_array().map_or(0, Vec::len);
+            let skipped: Vec<String> = r["skipped"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter(|s| s["reason"] != "filled already")
+                .map(|s| format!("{}–{} {}", s["from"], s["to"], s["reason"].as_str().unwrap_or("")))
+                .collect();
+            self.status = if skipped.is_empty() {
+                format!("AI filled {n} gaps")
             } else {
-                "every gap the model can take is filled already".to_string()
+                format!("AI filled {n} gaps; left to the spline: {}", skipped.join(", "))
             };
-            if ui
-                .add_enabled(open > 0, egui::Button::new(format!("Fill all gaps ({open})")))
-                .on_hover_text(hover)
-                .on_disabled_hover_text(why)
-                .tag("panel.ai.fill_all", format!("Fill all gaps ({open})"))
-                .clicked()
-                && let Some(r) = self.run(if pose { "posefill.fill_all" } else { "ai.fill_all" }, json!({}))
-            {
-                let n = r["filled"].as_array().map_or(0, Vec::len);
-                let skipped: Vec<String> = r["skipped"]
-                    .as_array()
-                    .into_iter()
-                    .flatten()
-                    .filter(|s| s["reason"] != "filled already")
-                    .map(|s| format!("{}–{} {}", s["from"], s["to"], s["reason"].as_str().unwrap_or("")))
-                    .collect();
-                self.status = if skipped.is_empty() {
-                    format!("AI filled {n} gaps")
-                } else {
-                    format!("AI filled {n} gaps; left to the spline: {}", skipped.join(", "))
-                };
-            }
-            self.fill_report_button(ui);
-        });
+        }
     }
 
     /// Footsteps for the gap at the playhead: which foot leads, how many steps and how it walks,
@@ -555,12 +583,12 @@ impl App {
     fn steps_row(&mut self, ui: &mut egui::Ui, gap: Option<(i64, i64)>) {
         ui.horizontal_wrapped(|ui| {
             let r = ui
-                .add_enabled(gap.is_some(), egui::Button::new("Footsteps"))
+                .add_enabled(gap.is_some(), egui::Button::new("Add steps"))
                 .on_hover_text(
-                    "Walk between your keys around the playhead, each foot planted where it lands. Put the end key where the walk should end first",
+                    "Walk between your poses around the playhead, each foot planted where it lands. Put the end key where the walk should end first",
                 )
-                .on_disabled_hover_text("put the playhead between two of your keys")
-                .tag("panel.ai.steps", "Footsteps");
+                .on_disabled_hover_text("Put the playhead between two of your poses")
+                .tag("panel.ai.steps", "Add steps");
             let st = &mut self.panels.ai;
             egui::ComboBox::from_id_salt("panel.ai.steps_lead")
                 .selected_text(if st.steps_left { "left foot first" } else { "right foot first" })
@@ -580,13 +608,13 @@ impl App {
             .on_hover_text("How many steps (auto: between one every 0.55 m and one every half second)")
             .tag("panel.ai.steps_count", "Steps");
             egui::ComboBox::from_id_salt("panel.ai.steps_fill")
-                .selected_text(if st.steps_ai { "AI walk" } else { "Walk loop" })
+                .selected_text(if st.steps_ai { "AI walk" } else { "Built-in walk" })
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut st.steps_ai, false, "Walk loop")
-                        .on_hover_text("Moves like the built-in Walk, a key every 2 frames")
-                        .tag("panel.ai.steps_fill.loop", "Walk loop");
+                    ui.selectable_value(&mut st.steps_ai, false, "Built-in walk")
+                        .on_hover_text("Moves like the library's Walk")
+                        .tag("panel.ai.steps_fill.loop", "Built-in walk");
                     ui.selectable_value(&mut st.steps_ai, true, "AI walk")
-                        .on_hover_text("A heel-down key for each step, filled by the model in the walk style")
+                        .on_hover_text("Sets where each heel lands, and the AI fills in the walking between")
                         .tag("panel.ai.steps_fill.ai", "AI walk");
                 })
                 .response
@@ -620,7 +648,7 @@ impl App {
                 r["steps"].as_i64().unwrap_or(0),
                 r["stride"].as_f64().unwrap_or(0.0),
                 if left { "left" } else { "right" },
-                if fill == "ai" { "AI walk" } else { "Walk loop" },
+                if fill == "ai" { "AI walk" } else { "Built-in walk" },
                 if notes.is_empty() {
                     String::new()
                 } else {
@@ -663,7 +691,7 @@ impl App {
         ui.horizontal_wrapped(|ui| {
             if ui
                 .button("Keep")
-                .on_hover_text("Make the previewed frames AI keys (one undo)")
+                .on_hover_text("Keep this movement (one undo)")
                 .tag("panel.ai.keep", "Keep")
                 .clicked()
                 && self.run("ai.accept", json!({})).is_some()
@@ -689,10 +717,10 @@ impl App {
                     self.preview_fill(Some((p.from, p.to)), false, ctx);
                 }
             }
-            let other = if p.plain { "Show AI" } else { "Compare plain" };
+            let other = if p.plain { "Show AI" } else { "Compare with no AI" };
             if ui
                 .button(other)
-                .on_hover_text("Switch the ghost between the model's fill and plain interpolation")
+                .on_hover_text("Switch the ghost between the AI's movement and a plain blend of your poses")
                 .tag("panel.ai.compare", other)
                 .clicked()
             {
@@ -711,7 +739,7 @@ impl App {
     /// one its checks refuse is listed greyed with the reason, and said under the menu too (Rule
     /// 1). Picking one runs `ai.model`; the model's own styles stay in the Style menu under it.
     /// With one model only there is nothing to choose, so the row stays away.
-    fn model_row(&mut self, ui: &mut egui::Ui, info: &ac_core::ai::ModelInfo) {
+    pub(in crate::app) fn model_row(&mut self, ui: &mut egui::Ui, info: &ac_core::ai::ModelInfo) {
         if self.panels.ai.models.is_none() {
             self.panels.ai.models = Some(
                 self.session
@@ -820,28 +848,28 @@ impl App {
     ) {
         let mut st = self.session.document.ai_settings.clone();
         let mut preset_chosen = None;
-        ui.horizontal(|ui| {
-            ui.label(egui::RichText::new("Preset:").weak());
-            if ui
-                .button("Preserve motion")
-                .tag("panel.ai.preset.preserve", "Preserve motion")
-                .clicked()
-            {
-                preset_chosen = Some("preserve");
-            }
-            if ui
-                .button("Natural")
-                .tag("panel.ai.preset.natural", "Natural")
-                .clicked()
-            {
-                preset_chosen = Some("natural");
-            }
-            if ui
-                .button("Follow style")
-                .tag("panel.ai.preset.follow_style", "Follow style")
-                .clicked()
-            {
-                preset_chosen = Some("follow_style");
+        ui.horizontal_wrapped(|ui| {
+            for (id, label, tip) in [
+                (
+                    "preserve",
+                    "Keep my movement",
+                    "Stays close to your poses and their route",
+                ),
+                ("natural", "Natural", "Lets the AI move the body freely"),
+                (
+                    "follow_style",
+                    "Match the style",
+                    "Leans towards the style chosen below",
+                ),
+            ] {
+                if ui
+                    .button(label)
+                    .on_hover_text(tip)
+                    .tag(format!("panel.ai.preset.{id}"), label)
+                    .clicked()
+                {
+                    preset_chosen = Some(id);
+                }
             }
         });
         if let Some(p) = preset_chosen {
@@ -852,8 +880,20 @@ impl App {
             // the sliders below show the preset's values this same frame
             st = self.session.document.ai_settings.clone();
         }
-        self.model_row(ui, info);
         let mut changed = false;
+        ui.label("Stay closer to");
+        ui.horizontal(|ui| {
+            ui.spacing_mut().slider_width = 70.0;
+            ui.label("My poses");
+            changed |= ui
+                .add(egui::Slider::new(&mut st.ai_force, 0.0..=1.5).show_value(false))
+                .on_hover_text(
+                    "How much of the AI's change to keep. All the way left is a plain blend with no AI",
+                )
+                .tag("panel.ai.ai_force", "Stay closer to")
+                .changed();
+            ui.label("AI's ideas");
+        });
         if !info.styles.is_empty() {
             // the model's styles ("any" first): a hundred or more with 100STYLE, so the list scrolls
             egui::ComboBox::from_label("Style")
@@ -869,23 +909,46 @@ impl App {
                 })
                 .response
                 .tag("panel.ai.style", "Style");
-            changed |= ui
-                .add(egui::Slider::new(&mut st.style_force, 0.0..=3.0).text("style force"))
-                .tag("panel.ai.style_force", "style force")
-                .changed();
         }
-        changed |= ui
-            .add(egui::Slider::new(&mut st.ai_force, 0.0..=1.5).text("AI force"))
-            .tag("panel.ai.ai_force", "AI force")
-            .changed();
-        changed |= ui
-            .add(egui::Slider::new(&mut st.trajectory, 0.0..=1.0).text("keep path"))
-            .tag("panel.ai.keep_path", "keep path")
-            .changed();
-        changed |= ui
-            .add(egui::Slider::new(&mut st.head, 0.0..=1.0).text("keep head"))
-            .tag("panel.ai.keep_head", "keep head")
-            .changed();
+        let last_ms = self.panels.ai.last_ms;
+        let mut models = false;
+        egui::CollapsingHeader::new("Fine-tune")
+            .id_salt("panel.ai.fine_tune")
+            .show(ui, |ui| {
+                if !info.styles.is_empty() {
+                    changed |= ui
+                        .add(egui::Slider::new(&mut st.style_force, 0.0..=3.0).text("Style strength"))
+                        .on_hover_text("How strongly the chosen style shows")
+                        .tag("panel.ai.style_force", "Style strength")
+                        .changed();
+                }
+                changed |= ui
+                    .add(egui::Slider::new(&mut st.trajectory, 0.0..=1.0).text("Stick to the route"))
+                    .on_hover_text("How closely the body follows the route of your poses")
+                    .tag("panel.ai.keep_path", "Stick to the route")
+                    .changed();
+                changed |= ui
+                    .add(egui::Slider::new(&mut st.head, 0.0..=1.0).text("Keep head as posed"))
+                    .on_hover_text("How closely the neck and head follow your poses")
+                    .tag("panel.ai.keep_head", "Keep head as posed")
+                    .changed();
+                super::create::help(
+                    ui,
+                    "Shift+A switches the movement at the playhead between AI and plain.",
+                );
+                if let Some(ms) = last_ms {
+                    super::create::help(ui, &format!("The last preview took {ms} ms."));
+                }
+                models = ui
+                    .button("AI models…")
+                    .tag("panel.ai.models", "AI models…")
+                    .clicked();
+            })
+            .header_response
+            .tag("panel.ai.fine_tune", "Fine-tune");
+        if models {
+            self.panels.create.models_open = true;
+        }
         let preview = self.session.document.ai_preview.clone();
         let live = self.session.document.live_preview().is_some();
         if changed {

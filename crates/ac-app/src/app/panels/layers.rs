@@ -165,12 +165,12 @@ impl App {
             self.panels.layers.picked = None;
         }
         if ui
-            .button("Secondary motion")
+            .button("Follow-through")
             .on_hover_text(
-                "Arm swing, shoulders, pelvis, spine, head, hands and follow-through, worked out from the \
+                "Adds natural sway after the main movement: arm swing, shoulders, pelvis, spine, head, hands and follow-through, worked out from the \
                  motion, on a layer of its own: mute it to get your animation back",
             )
-            .tag("panel.layers.secondary", "Secondary motion")
+            .tag("panel.layers.secondary", "Follow-through")
             .clicked()
             && let Some(r) = self.run("layer.secondary", json!({}))
         {
@@ -309,27 +309,29 @@ impl App {
         let after = mine.iter().any(|&k| k > f);
         let refusal = match (before, after) {
             (true, true) => None,
-            (false, false) => Some("needs a key on each side of the playhead (there are no base keys)"),
-            (false, true) => Some("needs a key on each side of the playhead (none before it)"),
-            (true, false) => Some("needs a key on each side of the playhead (none after it)"),
+            (false, false) => {
+                Some("needs one of your poses on each side of the playhead (there are none yet)")
+            }
+            (false, true) => Some("needs one of your poses on each side of the playhead (none before it)"),
+            (true, false) => Some("needs one of your poses on each side of the playhead (none after it)"),
         };
         let previewed = self.travel_preview_path().is_some();
         ui.horizontal_wrapped(|ui| {
             let why = refusal.unwrap_or_default();
             if ui
-                .add_enabled(refusal.is_none(), egui::Button::new("Preview travel"))
+                .add_enabled(refusal.is_none(), egui::Button::new("Preview route"))
                 .on_hover_text("Show where a walk between the keys around the playhead would go (orange), without adding it")
                 .on_disabled_hover_text(why)
-                .tag("panel.layers.travel_preview", "Preview travel")
+                .tag("panel.layers.travel_preview", "Preview route")
                 .clicked()
             {
                 self.preview_travel();
             }
             if ui
-                .add_enabled(refusal.is_none(), egui::Button::new("Travel between keys"))
+                .add_enabled(refusal.is_none(), egui::Button::new("Move between poses"))
                 .on_hover_text("Walk between the keys around the playhead (a travel layer, one undo)")
                 .on_disabled_hover_text(why)
-                .tag("panel.layers.travel", "Travel between keys")
+                .tag("panel.layers.travel", "Move between poses")
                 .clicked()
             {
                 match self.session.run("layer.travel", &json!({})) {
@@ -351,7 +353,11 @@ impl App {
             }
         });
         if let Some(why) = refusal {
-            ui.label(egui::RichText::new(format!("Travel {why}.")).small().weak());
+            ui.label(
+                egui::RichText::new(format!("Move between poses {why}."))
+                    .small()
+                    .weak(),
+            );
         }
         if let Some((_, a, b, path)) = &self.panels.layers.travel
             && previewed
@@ -396,11 +402,11 @@ impl App {
     /// Say why travel was refused, in words a person reads (the engine's reason after it).
     fn travel_refused(&mut self, e: &str) {
         let plain = if e.contains("playhead between two keys") {
-            "Travel needs a key on each side of the playhead.".to_string()
+            "Moving between poses needs one of your poses on each side of the playhead.".to_string()
         } else if e.contains("Locomotion") || e.contains("no animation") || e.contains("clips") {
-            format!("Travel needs the Locomotion clips in your library (Import library): {e}")
+            format!("Moving between poses needs the Locomotion clips in your library (Import library): {e}")
         } else {
-            format!("Travel couldn't be planned: {e}")
+            format!("The route couldn't be planned: {e}")
         };
         self.status = plain.clone();
         self.panels.layers.travel_note = Some(plain);
