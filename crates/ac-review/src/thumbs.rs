@@ -29,6 +29,27 @@ pub fn figure(skeleton: &Skeleton, rotations: &[Quat], root: Vec3) -> Result<Fig
         .collect())
 }
 
+/// The scale and middle that fit a figure inside a box, with a small margin: a raised arm or a
+/// body lying down stays whole. A figure never grows past a standing body's height (2 m to the
+/// box), so a crouch still looks smaller than a stand.
+pub fn fit(fig: &Figure, size: [f32; 2]) -> (f32, [f32; 2]) {
+    let (mut lo, mut hi) = ([f32::MAX; 2], [f32::MIN; 2]);
+    for p in fig.iter().flatten() {
+        for i in 0..2 {
+            lo[i] = lo[i].min(p[i]);
+            hi[i] = hi[i].max(p[i]);
+        }
+    }
+    if fig.is_empty() {
+        return (1.0, [0.0, 0.0]);
+    }
+    let room = [size[0] * 0.92, size[1] * 0.92];
+    let scale = (room[1] / 2.0)
+        .min(room[0] / (hi[0] - lo[0]).max(1e-3))
+        .min(room[1] / (hi[1] - lo[1]).max(1e-3));
+    (scale, [(lo[0] + hi[0]) / 2.0, (lo[1] + hi[1]) / 2.0])
+}
+
 #[derive(Default)]
 struct Queue {
     jobs: Vec<(Key, Job)>,
@@ -215,6 +236,17 @@ mod tests {
         // back on screen, it is asked for again
         t.show(&queued[..1], |_| Some(line()));
         wait(&mut t, &queued[..1]);
+    }
+
+    #[test]
+    fn a_wide_figure_fits_its_box() {
+        let fig: Figure = vec![[[-2.0, 0.0], [2.0, 0.5]]];
+        let (scale, centre) = fit(&fig, [100.0, 100.0]);
+        assert_eq!(centre, [0.0, 0.25]);
+        assert!(4.0 * scale <= 100.0);
+        // a short figure isn't blown up to a standing body's size
+        let (small, _) = fit(&vec![[[0.0, 0.0], [0.0, 1.0]]], [100.0, 100.0]);
+        assert_eq!(small, 46.0);
     }
 
     #[test]

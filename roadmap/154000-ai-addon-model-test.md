@@ -34,3 +34,6 @@ Try these on the owner's machine through the app's own models folder. Nothing sh
 
 ## Decision (2026-10-31)
 The next training run. Start with one or two styles and compare them by eye before training more.
+
+## Decision (2026-11-01)
+The owner: the two test add-ons are `acrobatic` and `zombie`, in place of `combat`. Which clips train them is the owner's set, tagged in the review app, and no training starts without the owner's word.

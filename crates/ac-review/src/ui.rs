@@ -701,10 +701,15 @@ impl App {
 
     /// A clip's figure in `rect`: 2 m of height fill it, the feet on its floor.
     fn paint_figure(painter: &egui::Painter, rect: egui::Rect, fig: &Figure) {
-        let m = rect.height() / 2.1;
-        let at = |p: [f32; 2]| egui::pos2(rect.center().x + p[0] * m, rect.bottom() - p[1] * m);
+        let (scale, centre) = ac_review::thumbs::fit(fig, [rect.width(), rect.height()]);
+        let at = |p: [f32; 2]| {
+            egui::pos2(
+                rect.center().x + (p[0] - centre[0]) * scale,
+                rect.center().y - (p[1] - centre[1]) * scale,
+            )
+        };
         for [a, b] in fig {
-            painter.line_segment([at(*a), at(*b)], egui::Stroke::new(1.5, Color32::LIGHT_GRAY));
+            painter.line_segment([at(*a), at(*b)], egui::Stroke::new(2.5, Color32::LIGHT_GRAY));
         }
     }
 
@@ -1115,7 +1120,11 @@ impl App {
             }
             ui.separator();
             ui.label(format!("{} takes", self.queue.len()));
-            ui.label(RichText::new(format!("{} decided", self.review.decisions.takes.len())).weak());
+            let decided = match &self.review.training.active {
+                Some(set) => format!("{} in {}", set.clips.len(), set.name),
+                None => format!("{} in the decisions file", self.review.decisions.takes.len()),
+            };
+            ui.label(RichText::new(decided).weak());
             ui.checkbox(&mut self.advance, "next take after deciding");
             if self.filter.show == Show::Model {
                 ui.label(RichText::new(&self.review.flags.note).weak());

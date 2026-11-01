@@ -413,3 +413,27 @@ fn totals_and_the_source_warning_through_the_commands() {
     );
     std::fs::remove_dir_all(&dir).ok();
 }
+
+#[test]
+fn undo_outlasts_the_session_and_a_bad_file_only_loses_the_steps() {
+    let dir = scratch("undo");
+    let sets = dir.join("sets");
+    let mut r = review(&dir, &sets);
+    r.run("review.set_new", &p(json!({"name": "a"}))).unwrap();
+    r.run(
+        "review.set_clip",
+        &p(json!({"id": "library:G/hop", "status": "reject"})),
+    )
+    .unwrap();
+
+    let mut again = review(&dir, &sets);
+    again.open_set(Some("a")).unwrap();
+    let undone = again.run("review.undo", &Map::new()).unwrap();
+    assert_eq!(undone["undone"], 1);
+    assert_eq!(again.training.active.as_ref().unwrap().clips.len(), 0);
+
+    std::fs::write(sets.join("a.undo.json"), "not json").unwrap();
+    let mut third = review(&dir, &sets);
+    third.open_set(Some("a")).unwrap();
+    assert_eq!(third.run("review.undo", &Map::new()).unwrap()["undone"], 0);
+}

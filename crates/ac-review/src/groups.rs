@@ -20,7 +20,16 @@ pub fn pack(set: &str) -> &str {
 
 /// The key of a take's group.
 pub fn group_key(set: &str, take: &str) -> String {
-    format!("{set}/{}", stem(take))
+    format!("{set}/{}", group_name(set, take))
+}
+
+/// A group's name: a library clip's `<source group> - <action>` goes by its source group, so a
+/// pack's zombie or sword clips are one row. Anything else goes by its stem.
+pub fn group_name<'a>(set: &str, take: &'a str) -> &'a str {
+    match take.split_once(" - ") {
+        Some((source, _)) if set.starts_with(LIBRARY) => stem(source),
+        _ => stem(take),
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -47,7 +56,7 @@ impl Review {
             let g = out.entry(key.clone()).or_insert_with(|| Group {
                 key,
                 pack: pack(&set.name).to_string(),
-                name: stem(&take.name).to_string(),
+                name: group_name(&set.name, &take.name).to_string(),
                 takes: Vec::new(),
                 minutes: 0.0,
                 keep: 0,
@@ -94,6 +103,17 @@ mod tests {
         assert_eq!(stem("hop"), "hop");
         assert_eq!(stem("hop2back"), "hop2back");
         assert_eq!(stem("0012"), "0012");
+    }
+
+    #[test]
+    fn a_library_clip_groups_by_its_source_and_a_rig_take_by_its_stem() {
+        assert_eq!(group_key("library:P", "Zombie - ZombieRun"), "library:P/Zombie");
+        assert_eq!(
+            group_key("library:P", "Zombie - ZombieRun (2)"),
+            "library:P/Zombie"
+        );
+        assert_eq!(group_key("library:P", "Run (2)"), "library:P/Run");
+        assert_eq!(group_key("cmu", "a - b_01"), "cmu/a - b");
     }
 
     #[test]

@@ -47,11 +47,37 @@ fn words(p: &P, k: &str) -> R<Option<Vec<String>>> {
     }
 }
 
+/// The set's undo steps, beside it so they outlast the session; the trainer reads only `.set.json`.
+fn undo_path(folder: &Path, name: &str) -> PathBuf {
+    folder.join(format!("{name}.undo.json"))
+}
+
+/// None when there is no file or it can't be read: only the undo steps are lost, never the set.
+fn load_undo(folder: &Path, name: &str) -> Vec<Changes> {
+    std::fs::read_to_string(undo_path(folder, name))
+        .ok()
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .unwrap_or_default()
+}
+
 impl Review {
+    /// Keeping the steps is a convenience, so failing to write them doesn't refuse the change.
+    fn save_undo(&self) {
+        let (Some(folder), Some(set)) = (&self.training.folder, &self.training.active) else {
+            return;
+        };
+        if let Ok(text) = serde_json::to_string(&self.training.undo) {
+            let _ = std::fs::write(undo_path(folder, &set.name), text);
+        }
+    }
+
     /// Add a person's library (`<root>/animations/<group>/<name>.clip.json`): each group reads as
     /// a set named `library:<group>`, so its clips' ids are `library:<group>/<name>`.
     pub fn add_library(&mut self, root: &Path, rig: &[String]) {
         let (sets, problems) = store::open_library(root, rig);
+        if !sets.is_empty() {
+            self.problems.retain(|p| !p.starts_with(store::NO_RIG_TAKES));
+        }
         for s in sets {
             self.push_set(s);
         }
@@ -92,11 +118,12 @@ impl Review {
     /// Make a set active (`None`: back to the decisions file). Its clips that aren't here (a
     /// library not given) stay in the file and are counted as `missing`.
     pub fn open_set(&mut self, name: Option<&str>) -> R<Value> {
-        self.training.undo.clear();
+        let folder = self.folder()?;
         self.training.active = match name {
-            Some(n) => Some(TrainingSet::load(&self.folder()?, n)?),
+            Some(n) => Some(TrainingSet::load(&folder, n)?),
             None => None,
         };
+        self.training.undo = name.map(|n| load_undo(&folder, n)).unwrap_or_default();
         Ok(self.describe_set())
     }
 
@@ -107,6 +134,7 @@ impl Review {
         }
         set.save(&folder)?;
         self.training.undo.clear();
+        self.save_undo();
         self.training.active = Some(set);
         Ok(self.describe_set())
     }
@@ -147,6 +175,7 @@ impl Review {
             if self.training.undo.len() > MAX_UNDO {
                 self.training.undo.remove(0);
             }
+            self.save_undo();
         }
         Ok(n)
     }
@@ -405,7 +434,10 @@ impl Review {
                     return Ok(json!({ "undone": 0, "left": 0 }));
                 };
                 match self.apply(step.clone(), false) {
-                    Ok(n) => Ok(json!({ "undone": n, "left": self.training.undo.len() })),
+                    Ok(n) => {
+                        self.save_undo();
+                        Ok(json!({ "undone": n, "left": self.training.undo.len() }))
+                    }
                     Err(e) => {
                         self.training.undo.push(step);
                         Err(e)

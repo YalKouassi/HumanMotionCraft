@@ -9,6 +9,9 @@ use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+/// How the problem of an empty data folder starts; a library gives the review something to show.
+pub const NO_RIG_TAKES: &str = "no rig takes";
+
 use ac_core::quat::{Quat, Vec3};
 use ac_io::library::{Kind, Library};
 use serde_json::Value;
@@ -466,7 +469,7 @@ pub fn open_all(dir: &Path) -> (Vec<Set>, Vec<String>) {
     }
     if sets.is_empty() && errors.is_empty() {
         errors.push(format!(
-            "no training sets in {} (build them: python -m ac_train.datasets)",
+            "{NO_RIG_TAKES} in {} (build them: python -m ac_train.datasets)",
             dir.display()
         ));
     }
