@@ -107,11 +107,8 @@ mod tests {
 
     #[test]
     fn a_library_clip_groups_by_its_source_and_a_rig_take_by_its_stem() {
-        assert_eq!(group_key("library:P", "Zombie - ZombieRun"), "library:P/Zombie");
-        assert_eq!(
-            group_key("library:P", "Zombie - ZombieRun (2)"),
-            "library:P/Zombie"
-        );
+        assert_eq!(group_key("library:P", "Zombie - Shamble"), "library:P/Zombie");
+        assert_eq!(group_key("library:P", "Zombie - Shamble (2)"), "library:P/Zombie");
         assert_eq!(group_key("library:P", "Run (2)"), "library:P/Run");
         assert_eq!(group_key("cmu", "a - b_01"), "cmu/a - b");
     }

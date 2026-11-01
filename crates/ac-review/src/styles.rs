@@ -52,7 +52,7 @@ pub fn named(name: &str) -> Option<&'static Style> {
     all().iter().find(|s| s.name == name)
 }
 
-/// A name's words, lower case: `ZombieWalk2Root_L` -> zombie, walk, root, l.
+/// A name's words, lower case: `LurchWalk2Back_L` -> zombie, walk, root, l.
 pub fn tokens(name: &str) -> Vec<String> {
     let mut out: Vec<String> = Vec::new();
     let mut word = String::new();
@@ -112,11 +112,8 @@ mod tests {
 
     #[test]
     fn names_split_into_words() {
-        assert_eq!(tokens("ZombieWalk2Root_L"), ["zombie", "walk", "root", "l"]);
-        assert_eq!(
-            tokens("Basic_Actions - FPS Run"),
-            ["basic", "actions", "fps", "run"]
-        );
+        assert_eq!(tokens("LurchWalk2Back_L"), ["lurch", "walk", "back", "l"]);
+        assert_eq!(tokens("Some_Group - FPS Run"), ["some", "group", "fps", "run"]);
     }
 
     #[test]
@@ -132,19 +129,13 @@ mod tests {
             "a prop stays out of the base"
         );
         assert!(!suggests(style("walk"), "P - Moves/ZombieWalk"));
-        assert!(suggests(style("zombie"), "P/ZombieWalk2Root"));
+        assert!(suggests(style("zombie"), "P/ZombieStep2"));
         assert!(
-            !suggests(style("zombie"), "P/ZombieLegEatLoop"),
+            !suggests(style("zombie"), "P/ZombieEat"),
             "feeding isn't a way of moving"
         );
         assert!(suggests(style("acrobatic"), "cmu/flip_01 cartwheel"));
-        assert!(!suggests(
-            style("acrobatic"),
-            "P - RollerBlade/RollerBladeBackFlip"
-        ));
-        assert!(!suggests(
-            style("acrobatic"),
-            "P - Office/OfficeSittingReadingPageFlip"
-        ));
+        assert!(!suggests(style("acrobatic"), "P - Roller/RollerFlip"));
+        assert!(!suggests(style("acrobatic"), "P - Office/OfficePageFlip"));
     }
 }
