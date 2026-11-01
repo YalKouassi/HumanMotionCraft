@@ -274,3 +274,52 @@ fn many_clips_labelled_at_once_are_one_undo_step() {
     assert_eq!(labels(&r), ["x", "y"]);
     std::fs::remove_dir_all(&dir).ok();
 }
+
+#[test]
+fn totals_and_the_source_warning_through_the_commands() {
+    let dir = scratch("totals");
+    let folder = dir.join("sets");
+    let mut r = review(&dir, &folder);
+    r.run("review.set_new", &p(json!({"name": "a", "public": true}))).unwrap();
+    // walk_01 1 s, run 2 s, hop rejected
+    let ids = json!(["library:G/walk_01", "library:H/run"]);
+    r.run("review.set_clip", &p(json!({"ids": ids, "labels": ["move"]}))).unwrap();
+    r.run("review.set_clip", &p(json!({"id": "library:G/hop", "status": "reject"}))).unwrap();
+
+    // nothing marked: all unmarked, so warned
+    let t = r.run("review.totals", &Map::new()).unwrap();
+    assert_eq!(t["unmarked"]["clips"], 2);
+    assert_eq!(t["rejected"], 1);
+    assert!((t["labels"]["move"]["minutes"].as_f64().unwrap() - 3.0 / 60.0).abs() < 1e-12);
+    let w = t["warnings"][0].as_str().unwrap();
+    assert!(w.contains("0 purchased and 3 unmarked"), "{w}");
+
+    // H purchased, G still unmarked
+    r.run("review.source", &p(json!({"pack": "H", "source": "purchased"}))).unwrap();
+    let t = r.run("review.totals", &Map::new()).unwrap();
+    let w = t["warnings"][0].as_str().unwrap();
+    assert!(w.contains("1 purchased and 2 unmarked"), "{w}");
+
+    // both mine: nothing to warn of, and the minutes are the owner's
+    for pack in ["G", "H"] {
+        r.run("review.source", &p(json!({"pack": pack, "source": "mine"}))).unwrap();
+    }
+    let t = r.run("review.totals", &Map::new()).unwrap();
+    assert_eq!(t["warnings"], json!([]));
+    assert_eq!(t["mine"]["clips"], 2);
+    assert_eq!(t["purchased"]["clips"], 0);
+
+    // no longer public, purchased: no warning
+    r.run("review.source", &p(json!({"pack": "H", "source": "purchased"}))).unwrap();
+    r.run("review.set_public", &p(json!({"public": false}))).unwrap();
+    assert_eq!(r.run("review.totals", &Map::new()).unwrap()["warnings"], json!([]));
+
+    // a sources file that won't read is said, and nothing counts as mine
+    std::fs::write(folder.join("sources.json"), "not json").unwrap();
+    let t = r.run("review.totals", &Map::new()).unwrap();
+    assert_eq!(t["mine"]["clips"], 0);
+    assert_eq!(t["warnings"].as_array().unwrap().len(), 1);
+    assert!(r.run("review.source", &p(json!({"pack": "H", "source": "mine"}))).is_err());
+    assert_eq!(std::fs::read_to_string(folder.join("sources.json")).unwrap(), "not json");
+    std::fs::remove_dir_all(&dir).ok();
+}

@@ -11,6 +11,7 @@ use serde_json::{Map, Value, json};
 use crate::decisions;
 use crate::review::Review;
 use crate::store;
+use crate::totals::{self, Source, Sources, Totals};
 use crate::training_set::{self, ClipStatus, SetClip, TrainingSet};
 
 type R<T> = Result<T, String>;
@@ -236,6 +237,25 @@ impl Review {
         Ok(json!({ "matched": matched, "changed": changed, "not_in_source": unmatched }))
     }
 
+    /// The open set's totals and warnings. A sources file that won't read counts every pack as
+    /// unmarked, and is said.
+    pub fn set_totals(&self) -> R<Totals> {
+        let set = self.training.active.as_ref().ok_or("no training set is open")?;
+        let (sources, bad) = match Sources::load(&self.folder()?) {
+            Ok(s) => (s, None),
+            Err(e) => (Sources::default(), Some(e)),
+        };
+        let mut t = totals::totals(set, &sources, |id| {
+            let (s, i) = self.find(id).ok()?;
+            let take = self.sets.get(s)?.takes.get(i)?;
+            Some((take.frames, take.fps))
+        });
+        if let Some(e) = bad {
+            t.warnings.push(format!("every pack counts as unmarked: {e}"));
+        }
+        Ok(t)
+    }
+
     /// The commands on training sets and their parameters.
     pub fn set_commands() -> Value {
         json!([
@@ -249,11 +269,13 @@ impl Review {
             {"id": "review.set_remove", "params": "id or ids", "returns": "{changed}: one undo step"},
             {"id": "review.groups", "params": "show? (default all), set?, reason?, search?", "returns": "{groups: [{group, pack, name, clips, minutes, keep, reject}]}: takes differing by a trailing number are a group"},
             {"id": "review.set_group", "params": "group, status? (keep|reject), labels?, add_labels?, remove_labels?", "returns": "{changed}: every clip of the group, one undo step; a single clip can then be overridden"},
+            {"id": "review.totals", "params": "", "returns": "the open set: labels {label: {clips, minutes}}, mine, purchased, unmarked (of purchased), rejected, missing, packs {pack: mine|purchased|unmarked}, warnings"},
+            {"id": "review.source", "params": "pack, source (mine|purchased|null: unmarked)", "returns": "{pack, source}: written to sources.json beside the sets, refused inside a git checkout"},
             {"id": "review.undo", "params": "", "returns": "{undone, left}: the active set's last change, in this process"},
         ])
     }
 
-    pub const SET_IDS: [&'static str; 11] = [
+    pub const SET_IDS: [&'static str; 13] = [
         "review.sets",
         "review.set_new",
         "review.set_duplicate",
@@ -264,6 +286,8 @@ impl Review {
         "review.set_remove",
         "review.groups",
         "review.set_group",
+        "review.totals",
+        "review.source",
         "review.undo",
     ];
 
@@ -351,6 +375,25 @@ impl Review {
                     return Err(format!("no group {key:?}"));
                 }
                 Ok(json!({ "changed": self.set_clips(&ids, p)? }))
+            }
+            "review.totals" => serde_json::to_value(self.set_totals()?).map_err(|e| e.to_string()),
+            "review.source" => {
+                let pack = word(p, "pack")?;
+                let source: Option<Source> = match p.get("source") {
+                    None | Some(Value::Null) => None,
+                    Some(v) => Some(
+                        serde_json::from_value(v.clone())
+                            .map_err(|_| "source: mine, purchased or null".to_string())?,
+                    ),
+                };
+                let folder = self.folder()?;
+                let mut sources = Sources::load(&folder)?;
+                match source {
+                    Some(s) => sources.0.insert(pack.clone(), s),
+                    None => sources.0.remove(&pack),
+                };
+                sources.save(&folder)?;
+                Ok(json!({ "pack": pack, "source": source }))
             }
             "review.undo" => {
                 let Some(step) = self.training.undo.pop() else {

@@ -23,6 +23,7 @@ use ac_review::review::{Filter, Review, Show};
 use ac_review::training_set::{ClipStatus, SetClip};
 use ac_review::store::Motion;
 use ac_review::thumbs::{Figure, Job, Thumbs, figure};
+use ac_review::totals::Totals;
 use egui::{Color32, Key, RichText};
 use serde_json::{Value, json};
 
@@ -65,6 +66,8 @@ pub struct App {
     set_names: Vec<String>,
     new_set: String,
     view: View,
+    /// The open set's live totals, or why not.
+    totals: Option<Result<Totals, String>>,
     groups: Vec<Group>,
     /// The group row with the keyboard.
     group_at: usize,
@@ -145,6 +148,7 @@ impl App {
                 Some("gallery") => View::Gallery,
                 _ => View::List,
             },
+            totals: None,
             groups: Vec::new(),
             group_at: 0,
             picked: BTreeSet::new(),
@@ -161,6 +165,10 @@ impl App {
             screenshot: args.screenshot.map(|p| (p, Arc::new(AtomicU8::new(0)))),
             frames_drawn: 0,
         };
+        if args.library.is_some() {
+            // a library's clips have no scan, so "to review" would show none of them
+            app.filter.show = Show::All;
+        }
         app.refresh();
         if let Some(id) = &args.open {
             match app.review.find(id) {
@@ -184,6 +192,7 @@ impl App {
         self.queue = self.review.queue(&self.filter);
         self.groups = self.review.groups(&self.queue);
         self.group_at = self.group_at.min(self.groups.len().saturating_sub(1));
+        self.totals = self.review.training.active.is_some().then(|| self.review.set_totals());
     }
 
     fn select(&mut self, t: (usize, usize)) {
@@ -715,7 +724,7 @@ impl App {
 
     fn groups_panel(&mut self, ui: &mut egui::Ui) {
         ui.label(
-            RichText::new("K keep · R reject the whole group · Enter opens it · Ctrl+Z undo")
+            RichText::new("K keep Â· R reject the whole group Â· Enter opens it Â· Ctrl+Z undo")
                 .weak()
                 .small(),
         );
@@ -753,7 +762,7 @@ impl App {
                         egui::pos2(x, rect.top() + 28.0),
                         egui::Align2::LEFT_TOP,
                         format!(
-                            "{} · {} clips · {:.1} min · {} kept, {} rejected",
+                            "{} Â· {} clips Â· {:.1} min Â· {} kept, {} rejected",
                             g.pack,
                             g.takes.len(),
                             g.minutes,
@@ -890,7 +899,7 @@ impl App {
         if mods.shift
             && let Some(from) = self.last_pick
         {
-            let at = |x| self.queue.iter().position(|q| *q == x);
+            let at = |x: (usize, usize)| self.queue.iter().position(|q| *q == x);
             if let (Some(a), Some(b)) = (at(from), at(k)) {
                 let run: Vec<(usize, usize)> = self.queue[a.min(b)..=a.max(b)].to_vec();
                 self.picked.extend(run);
@@ -904,6 +913,61 @@ impl App {
             self.picked.insert(k);
         }
         self.last_pick = Some(k);
+    }
+
+    /// Minutes per label, mine and purchased, the source warning, and each pack's mark.
+    fn totals_panel(&mut self, ui: &mut egui::Ui) {
+        let t = match &self.totals {
+            Some(Ok(t)) => t.clone(),
+            Some(Err(e)) => {
+                ui.colored_label(Color32::LIGHT_RED, e);
+                return;
+            }
+            None => return,
+        };
+        for w in &t.warnings {
+            ui.colored_label(Color32::from_rgb(240, 170, 60), format!("Warning: {w}"));
+        }
+        ui.horizontal_wrapped(|ui| {
+            ui.label(format!("mine {} clips {:.1} min", t.mine.clips, t.mine.minutes));
+            ui.label(format!(
+                "purchased {} clips {:.1} min (unmarked {} clips {:.1} min)",
+                t.purchased.clips, t.purchased.minutes, t.unmarked.clips, t.unmarked.minutes
+            ));
+            ui.label(format!("{} rejected", t.rejected));
+            if t.missing > 0 {
+                ui.colored_label(
+                    Color32::YELLOW,
+                    format!("{} clips aren't here (give --library), so have no minutes", t.missing),
+                );
+            }
+        });
+        let mut mark = None;
+        egui::CollapsingHeader::new(format!("{} labels, {} packs", t.labels.len(), t.packs.len()))
+            .id_salt("totals-detail")
+            .show(ui, |ui| {
+                ui.horizontal_wrapped(|ui| {
+                    for (label, c) in &t.labels {
+                        ui.label(format!("{label}: {:.1} min", c.minutes));
+                    }
+                });
+                for (pack, source) in &t.packs {
+                    ui.horizontal(|ui| {
+                        ui.label(pack);
+                        for word in ["mine", "purchased"] {
+                            if ui.selectable_label(source == word, word).clicked() {
+                                mark = Some((pack.clone(), word));
+                            }
+                        }
+                        if source == "unmarked" {
+                            ui.label(RichText::new("unmarked: counts as purchased").weak());
+                        }
+                    });
+                }
+            });
+        if let Some((pack, word)) = mark {
+            self.set_command("review.source", json!({ "pack": pack, "source": word }));
+        }
     }
 
     /// The dropdown of training sets, with New, Duplicate, Copy labels from, public and undo.
@@ -979,11 +1043,15 @@ impl App {
 
     fn top(&mut self, ui: &mut egui::Ui) {
         self.sets_bar(ui);
+        self.totals_panel(ui);
         ui.horizontal(|ui| {
             ui.selectable_value(&mut self.view, View::List, "List");
             ui.selectable_value(&mut self.view, View::Groups, "Groups");
             ui.selectable_value(&mut self.view, View::Gallery, "Gallery");
         });
+        if self.view != View::Groups && self.filter.group.is_some() {
+            self.close_group();
+        }
         ui.horizontal_wrapped(|ui| {
             let before = self.filter.clone();
             egui::ComboBox::from_id_salt("show")
@@ -1268,7 +1336,7 @@ impl App {
         if in_set {
             ui.horizontal(|ui| {
                 ui.label("Labels");
-                ui.add(egui::TextEdit::singleline(&mut self.labels).hint_text("walk, tired…"));
+                ui.add(egui::TextEdit::singleline(&mut self.labels).hint_text("walk, tiredâ€¦"));
                 if ui.button("Save labels").clicked() {
                     let labels = self.labels_typed();
                     self.set_command("review.set_clip", json!({ "id": id, "labels": labels }));

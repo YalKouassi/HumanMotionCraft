@@ -21,4 +21,5 @@ pub mod scan;
 pub mod set_commands;
 pub mod store;
 pub mod thumbs;
+pub mod totals;
 pub mod training_set;
