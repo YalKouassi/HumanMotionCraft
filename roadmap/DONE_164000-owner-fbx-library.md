@@ -1,6 +1,6 @@
 # Port the owner's FBX animations into a private clip library
 
-- **Status:** in progress: bulk run done, 6,433 clips; refused groups and the owner's delete pass left
+- **Status:** done (2026-11-01)
 - **Requires:** 152000
 - **Source:** owner request (2026-10-31)
 
@@ -277,3 +277,8 @@ Built from generated files and the joint lists given to this worktree: it built 
 
 ## Refused files fixed (2026-10-31)
 A stale take name on a one-take file, a neck from the head's parent, loose bone names, the B and humanoid name forms, a clip range cut to its take, and a floor below z = 0 raised. After retrying: 6332 imported (7488 clips), 116 duplicates, 41 refused. Clips read from a stale take or a head's parent as neck have only been through the automatic checks; the owner deletes bad ones as they go.
+
+## Closed (2026-11-01)
+The owner agrees the 41 refused files, the panel at full size and the rest of the acceptance. Not built, accepted by the owner: tests that these clips can't be uploaded to the community library or read by `ac_train`. 117 clips from 47 imported files stay left out.
+
+The 22 long compilation clips are kept. Each was compared frame by frame with the pack's single clips: only one reached 95 % of its moving frames, most 20 to 60 %, so they can't be called duplicates (the method may undercount). The 38 long mocap clips are 19 pairs, the same body motion with and without root travel, and are kept.
