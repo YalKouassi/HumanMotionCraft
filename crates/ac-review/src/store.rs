@@ -7,8 +7,11 @@
 use std::fs::File;
 use std::io::{Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use ac_core::quat::{Quat, Vec3};
+use ac_io::library::{Kind, Library};
+use serde_json::Value;
 
 use crate::npz;
 
@@ -27,6 +30,15 @@ pub struct Take {
     /// Its first frame in the set.
     pub start: usize,
     pub frames: usize,
+    /// Its own rate: a library's clips differ, a set's takes share the set's.
+    pub fps: f64,
+}
+
+/// Where a library group's clips are, and the rig's bones in order.
+#[derive(Debug, Clone)]
+pub struct LibraryGroup {
+    pub dir: PathBuf,
+    rig: Arc<Vec<String>>,
 }
 
 #[derive(Debug)]
@@ -40,6 +52,9 @@ pub struct Set {
     /// CRC-32 of the rig file the set was retargeted onto (`ac_train/stamp.py`); None for a set
     /// built before stamps.
     pub rig_crc32: Option<u32>,
+    /// A group of a person's library (`library:<group>`), read from its `.clip.json` files; none:
+    /// a retargeted npz.
+    pub library: Option<LibraryGroup>,
     roots: Vec<[f32; 3]>,
     cache: PathBuf,
 }
@@ -48,6 +63,65 @@ pub struct Set {
 pub struct Motion {
     pub rotations: Vec<Vec<Quat>>,
     pub roots: Vec<Vec3>,
+}
+
+/// One frame of half floats to unit rotations.
+fn decode_frame(raw: &[u8]) -> Vec<Quat> {
+    raw.as_chunks::<8>()
+        .0
+        .iter()
+        .map(|q| {
+            let h = |k: usize| npz::f16(u16::from_le_bytes([q[2 * k], q[2 * k + 1]])) as f64;
+            let v = [h(0), h(1), h(2), h(3)];
+            let n = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]).sqrt();
+            if n > 1e-9 && n.is_finite() {
+                [v[0] / n, v[1] / n, v[2] / n, v[3] / n]
+            } else {
+                [0.0, 0.0, 0.0, 1.0]
+            }
+        })
+        .collect()
+}
+
+/// A clip file's frames (`at`, or all of them), each pose's rotations in the rig's bone order. A
+/// clip whose bones aren't the rig's is refused, as it couldn't be shown.
+fn clip_frames(path: &Path, rig: &[String], at: Option<&[f64]>) -> R<Motion> {
+    let say = |e: String| format!("{}: {e}", path.display());
+    let text = std::fs::read_to_string(path).map_err(|e| say(e.to_string()))?;
+    let clip = ac_core::clipfile::load_clip(&text).map_err(say)?;
+    let frames: Vec<f64> = match at {
+        Some(f) => f.to_vec(),
+        None => {
+            let n = clip.length();
+            if n <= 0 {
+                return Err(say("no frames".into()));
+            }
+            if n as usize > MAX_TAKE {
+                return Err(say(format!("{n} frames: too long to show")));
+            }
+            (0..n).map(|f| f as f64).collect()
+        }
+    };
+    let order = rig
+        .iter()
+        .map(|b| {
+            clip.bones
+                .iter()
+                .position(|c| c == b)
+                .ok_or_else(|| say(format!("no bone {b:?}: the clip isn't on this rig")))
+        })
+        .collect::<R<Vec<usize>>>()?;
+    let (rots, roots) = clip.sample(&frames).map_err(say)?;
+    let rotations = rots
+        .iter()
+        .map(|pose| {
+            order
+                .iter()
+                .map(|&i| pose.get(i).copied().unwrap_or([0.0, 0.0, 0.0, 1.0]))
+                .collect()
+        })
+        .collect();
+    Ok(Motion { rotations, roots })
 }
 
 fn stamp_of(npz: &Path) -> R<String> {
@@ -126,6 +200,7 @@ impl Set {
                 label: l,
                 start: s as usize,
                 frames: (e - s) as usize,
+                fps,
             });
         }
         let dir = npz_path.parent().unwrap_or(Path::new(".")).join(".review-cache");
@@ -138,6 +213,7 @@ impl Set {
             frames,
             fps,
             rig_crc32,
+            library: None,
             roots,
         })
     }
@@ -148,6 +224,9 @@ impl Set {
 
     /// Whether the cache holds this npz's rotations.
     pub fn unpacked(&self) -> bool {
+        if self.library.is_some() {
+            return true; // read from its clip files, nothing to unpack
+        }
         let size = (self.frames * self.bones * 4 * 2) as u64;
         let have = std::fs::read_to_string(self.stamp_path()).unwrap_or_default();
         stamp_of(&self.npz).is_ok_and(|s| s == have.trim())
@@ -179,6 +258,9 @@ impl Set {
         if t.frames > MAX_TAKE {
             return Err(format!("{} is {} frames: too long to show", t.name, t.frames));
         }
+        if let Some(g) = &self.library {
+            return clip_frames(&g.dir.join(format!("{}{}", t.name, Kind::Animations.ext())), &g.rig, None);
+        }
         let stride = self.bones * 4 * 2;
         let mut f = File::open(&self.cache).map_err(|e| format!("{}: {e}", self.cache.display()))?;
         f.seek(SeekFrom::Start((t.start * stride) as u64))
@@ -186,25 +268,7 @@ impl Set {
         let mut raw = vec![0u8; t.frames * stride];
         f.read_exact(&mut raw)
             .map_err(|e| format!("{}: {e} (unpack the set again)", self.cache.display()))?;
-        let rotations = raw
-            .chunks_exact(stride)
-            .map(|fr| {
-                fr.as_chunks::<8>()
-                    .0
-                    .iter()
-                    .map(|q| {
-                        let h = |k: usize| npz::f16(u16::from_le_bytes([q[2 * k], q[2 * k + 1]])) as f64;
-                        let v = [h(0), h(1), h(2), h(3)];
-                        let n = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2] + v[3] * v[3]).sqrt();
-                        if n > 1e-9 && n.is_finite() {
-                            [v[0] / n, v[1] / n, v[2] / n, v[3] / n]
-                        } else {
-                            [0.0, 0.0, 0.0, 1.0]
-                        }
-                    })
-                    .collect()
-            })
-            .collect();
+        let rotations = raw.chunks_exact(stride).map(decode_frame).collect();
         let roots = self
             .roots
             .get(t.start..t.start + t.frames)
@@ -235,6 +299,80 @@ impl Unpack {
         craft_atomic::atomic_write(&self.stamp, stamp.as_bytes())
             .map_err(|e| format!("{}: {e}", self.stamp.display()))
     }
+}
+
+/// A library's groups as sets named `library:<group>`, from its index (a person's thousands of
+/// clips aren't opened again; the library's own `.index` is brought up to date, the clips are never
+/// changed). Clips that can't be read, are empty or are evaluation-only are left out and said.
+pub fn open_library(root: &Path, rig: &[String]) -> (Vec<Set>, Vec<String>) {
+    let lib = Library::new(root, Kind::Animations);
+    let rig = Arc::new(rig.to_vec());
+    let mut problems = Vec::new();
+    let (mut evaluation, mut empty) = (0, 0);
+    let mut groups: Vec<(String, Vec<Take>)> = Vec::new();
+    for item in lib.listed() {
+        let word = |k: &str| item.get(k).and_then(Value::as_str).unwrap_or_default().to_string();
+        let (group, name) = (word("group"), word("name"));
+        if let Some(e) = item.get("error").and_then(Value::as_str) {
+            problems.push(format!("library clip {group}/{name}: {e}"));
+            continue;
+        }
+        if item.get("evaluation_only").and_then(Value::as_bool) == Some(true) {
+            evaluation += 1;
+            continue;
+        }
+        let frames = item.get("frames").and_then(Value::as_i64).unwrap_or(0);
+        if frames <= 0 {
+            empty += 1;
+            continue;
+        }
+        let fps = item.get("fps").and_then(Value::as_f64).unwrap_or(30.0);
+        let take = Take {
+            label: name.clone(),
+            name,
+            start: 0,
+            frames: frames as usize,
+            fps,
+        };
+        match groups.last_mut() {
+            Some((g, takes)) if *g == group => takes.push(take),
+            _ => groups.push((group, vec![take])),
+        }
+    }
+    if evaluation > 0 {
+        problems.push(format!(
+            "{evaluation} evaluation-only library clips are left out: their licence doesn't allow training"
+        ));
+    }
+    if empty > 0 {
+        problems.push(format!("{empty} library clips have no frames and are left out"));
+    }
+    if groups.is_empty() {
+        problems.push(format!(
+            "no clips in {} (a library's clips are animations/<group>/<name>{})",
+            lib.root.display(),
+            Kind::Animations.ext()
+        ));
+    }
+    let sets = groups
+        .into_iter()
+        .map(|(group, takes)| Set {
+            name: format!("{}{group}", crate::training_set::LIBRARY),
+            npz: PathBuf::new(),
+            bones: rig.len(),
+            frames: takes.iter().map(|t| t.frames).sum(),
+            fps: 30.0,
+            rig_crc32: None,
+            library: Some(LibraryGroup {
+                dir: lib.root.join(&group),
+                rig: rig.clone(),
+            }),
+            takes,
+            roots: Vec::new(),
+            cache: PathBuf::new(),
+        })
+        .collect();
+    (sets, problems)
 }
 
 /// Every set in a folder (`*.npz`), by name; a set that won't open is said, the rest still load.

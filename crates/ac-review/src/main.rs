@@ -1,14 +1,17 @@
 //! The training data review window, for developers (never shipped with the app).
 //!
 //! ```text
-//! ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--open <set>/<take>]
-//!           [--frame <n>] [--screenshot <png>]
-//! ac-review run <command> [<json>] [--data <dir>] [--decisions <file>]
+//! ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>]
+//!           [--set <name>] [--open <set>/<take>] [--frame <n>] [--screenshot <png>]
+//! ac-review run <command> [<json>] [--data <dir>] [--decisions <file>] [--library <dir>]
+//!           [--sets <dir>] [--set <name>]
 //! ac-review unpack [<set> ...] [--data <dir>]
 //! ```
 //! `--data`: the retargeted sets and their scans (default `training/data/rig`); `--decisions`: the
 //! review file (default `training/review/decisions.json`); both found from the checkout this runs
-//! in. `run` does one review command headless and prints its JSON (`review.commands` lists them).
+//! in. `--library`: a `.clip.json` library to review beside the sets (only when given); `--sets`: the
+//! training sets' folder (default `training-sets` beside the app's library, outside any repository);
+//! `--set`: the one to open. `run` does one review command headless and prints its JSON (`review.commands` lists them).
 //! `unpack` makes the sets' rotation caches ahead of time (the window makes one when it first
 //! shows a set's take). `--screenshot` draws the window once settled, writes the PNG and quits.
 
@@ -29,8 +32,8 @@ use std::path::{Path, PathBuf};
 
 use ac_review::review::Review;
 
-const USAGE: &str = "ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--open <set>/<take>] [--frame <n>] [--screenshot <png>]\n\
-                     ac-review run <command> [<json>] [--data <dir>] [--decisions <file>]\n\
+const USAGE: &str = "ac-review [--data <dir>] [--decisions <file>] [--assets <dir>] [--library <dir>] [--sets <dir>] [--set <name>] [--open <set>/<take>] [--frame <n>] [--screenshot <png>]\n\
+                     ac-review run <command> [<json>] [--data <dir>] [--decisions <file>] [--library <dir>] [--sets <dir>] [--set <name>]\n\
                      ac-review unpack [<set> ...] [--data <dir>]";
 
 #[derive(Debug, Default)]
@@ -38,6 +41,9 @@ pub struct Args {
     pub data: Option<PathBuf>,
     pub decisions: Option<PathBuf>,
     pub assets: Option<PathBuf>,
+    pub library: Option<PathBuf>,
+    pub sets: Option<PathBuf>,
+    pub set: Option<String>,
     pub open: Option<String>,
     pub frame: Option<usize>,
     pub screenshot: Option<PathBuf>,
@@ -55,6 +61,9 @@ fn parse_args() -> Result<Args, String> {
             "--data" => a.data = Some(value()?.into()),
             "--decisions" => a.decisions = Some(value()?.into()),
             "--assets" => a.assets = Some(value()?.into()),
+            "--library" => a.library = Some(value()?.into()),
+            "--sets" => a.sets = Some(value()?.into()),
+            "--set" => a.set = Some(value()?),
             "--open" => a.open = Some(value()?),
             "--frame" => a.frame = Some(value()?.parse().map_err(|e| format!("--frame: {e}"))?),
             "--screenshot" => a.screenshot = Some(value()?.into()),
@@ -108,9 +117,29 @@ fn paths(a: &Args) -> Result<Paths, String> {
     })
 }
 
-fn headless(a: &Args, p: &Paths) -> Result<(), String> {
+/// The review both front ends use: the sets, the library if given, the training set if named.
+pub fn open_review(a: &Args, p: &Paths) -> Result<Review, String> {
     let mut review = Review::open(&p.data, &p.decisions)?;
-    review.check_rig(&p.assets.join("rig/default_rig.json"))?;
+    let rig_path = p.assets.join("rig/default_rig.json");
+    review.check_rig(&rig_path)?;
+    if let Some(root) = &a.library {
+        let text = std::fs::read_to_string(&rig_path).map_err(|e| format!("{}: {e}", rig_path.display()))?;
+        let rig = ac_core::rig::Skeleton::from_json(&text).map_err(|e| e.to_string())?;
+        review.add_library(root, &rig.names);
+    }
+    review.training.folder = Some(
+        a.sets
+            .clone()
+            .unwrap_or_else(|| ac_io::library::app_library_dir().with_file_name("training-sets")),
+    );
+    if let Some(name) = &a.set {
+        review.open_set(Some(name))?;
+    }
+    Ok(review)
+}
+
+fn headless(a: &Args, p: &Paths) -> Result<(), String> {
+    let mut review = open_review(a, p)?;
     match a.verb.as_deref() {
         Some("run") => {
             let cmd = a.words.first().ok_or("run <command> [<json>]")?;

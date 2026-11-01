@@ -17,4 +17,6 @@ pub mod flags;
 pub mod npz;
 pub mod review;
 pub mod scan;
+pub mod set_commands;
 pub mod store;
+pub mod training_set;

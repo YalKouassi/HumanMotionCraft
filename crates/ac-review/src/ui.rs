@@ -4,7 +4,8 @@
 //! Keys (when no text field has the keyboard): Space play, Left/Right a frame (Shift: 10),
 //! Up/Down the take before/after, F the next flag, I/O the selection's start/end, Esc no selection,
 //! K ok (keep it all), C cut (the cuts shown plus the selection), X uncut the selection, R reject,
-//! Backspace forget the decision.
+//! Backspace forget the decision, Ctrl+Z undo a training set's last change. With a training set open
+//! K C R and Backspace act on that set; with none, on the decisions file.
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -14,6 +15,7 @@ use std::sync::mpsc::{Receiver, TryRecvError, channel};
 
 use ac_review::decisions::Status;
 use ac_review::review::{Filter, Review, Show};
+use ac_review::training_set::{ClipStatus, SetClip};
 use ac_review::store::Motion;
 use egui::{Color32, Key, RichText};
 use serde_json::{Value, json};
@@ -42,6 +44,11 @@ pub struct App {
     kind: String,
     tags: String,
     note: String,
+    /// The labels in the training set open.
+    labels: String,
+    /// The training sets in the folder, and the name for New and Duplicate.
+    set_names: Vec<String>,
+    new_set: String,
     /// After a decision, go on to the next take.
     advance: bool,
     /// The queue scrolls the take shown into view (once, after it changes).
@@ -84,8 +91,8 @@ fn uncut(cuts: &[[usize; 2]], a: usize, b: usize) -> Vec<[usize; 2]> {
 
 impl App {
     pub fn new(cc: &eframe::CreationContext, args: Args, paths: Paths) -> Result<App, String> {
-        let mut review = Review::open(&paths.data, &paths.decisions)?;
-        review.check_rig(&paths.assets.join("rig/default_rig.json"))?;
+        let mut review = crate::open_review(&args, &paths)?;
+        let set_names = review.set_names();
         let viewer = Viewer::new(cc, &paths.assets)?;
         let mut app = App {
             review,
@@ -104,6 +111,9 @@ impl App {
             kind: String::new(),
             tags: String::new(),
             note: String::new(),
+            labels: String::new(),
+            set_names,
+            new_set: String::new(),
             advance: true,
             scroll_to: true,
             status: String::new(),
@@ -149,8 +159,13 @@ impl App {
         self.kind = d.as_ref().and_then(|d| d.kind.clone()).unwrap_or_default();
         self.tags = d.as_ref().map(|d| d.tags.join(", ")).unwrap_or_default();
         self.note = d.as_ref().map(|d| d.note.clone()).unwrap_or_default();
-        self.working = match &d {
-            Some(d) if d.status == Status::Cut => d.cuts.clone(),
+        let in_set = self.set_clip(t).cloned();
+        self.labels = in_set.as_ref().map(|c| c.labels.join(", ")).unwrap_or_default();
+        let active = self.review.training.active.is_some();
+        self.working = match (&in_set, &d) {
+            (Some(c), _) if !c.cuts.is_empty() => c.cuts.clone(),
+            (Some(c), _) if c.status == ClipStatus::Keep => Vec::new(),
+            (None, Some(d)) if !active && d.status == Status::Cut => d.cuts.clone(),
             _ => self
                 .review
                 .scan(t.0, t.1)
@@ -160,6 +175,90 @@ impl App {
                 .collect(),
         };
         self.load_motion();
+    }
+
+    fn set_clip(&self, t: (usize, usize)) -> Option<&SetClip> {
+        self.review
+            .training
+            .active
+            .as_ref()?
+            .clips
+            .get(&self.review.id(t.0, t.1))
+    }
+
+    /// A set command from the window; what it returned, or the refusal said.
+    fn set_command(&mut self, command: &str, params: Value) -> Option<Value> {
+        let Value::Object(p) = params else { return None };
+        match self.review.run(command, &p) {
+            Ok(v) => {
+                self.set_names = self.review.set_names();
+                self.refresh();
+                Some(v)
+            }
+            Err(e) => {
+                self.status = e;
+                None
+            }
+        }
+    }
+
+    /// The set open changed: the clip shown shows that set's decision.
+    fn reselect(&mut self) {
+        if let Some(t) = self.current {
+            let frame = self.frame;
+            self.select(t);
+            self.frame = frame;
+        }
+    }
+
+    fn labels_typed(&self) -> Vec<String> {
+        self.labels
+            .split(',')
+            .map(|t| t.trim().to_string())
+            .filter(|t| !t.is_empty())
+            .collect()
+    }
+
+    /// K C R with a training set open: the clip's status, cuts and labels in that set.
+    fn decide_in_set(&mut self, id: String, status: Status) {
+        let mut p = json!({ "id": id, "labels": self.labels_typed() });
+        match status {
+            Status::Ok => {
+                p["status"] = json!("keep");
+                p["cuts"] = json!([]);
+            }
+            Status::Reject => p["status"] = json!("reject"),
+            Status::Cut => {
+                let mut cuts = self.working.clone();
+                if let Some((a, b)) = self.selection {
+                    cuts.push([a, b]);
+                }
+                if cuts.is_empty() {
+                    self.status = "cut what? select frames first".into();
+                    return;
+                }
+                p["status"] = json!("keep");
+                p["cuts"] = json!(cuts);
+            }
+        }
+        let before = self.queue.clone();
+        if self.set_command("review.set_clip", p).is_some() {
+            // the next take is found from where this one was
+            self.queue = before;
+            self.selection = None;
+            self.status = format!("{id}: {} in the set", status.word());
+            self.after_decision();
+            if !self.advance {
+                self.reselect();
+            }
+        }
+    }
+
+    fn undo(&mut self) {
+        if let Some(v) = self.set_command("review.undo", json!({})) {
+            self.status = format!("undid {} clips", v["undone"]);
+            self.reselect();
+        }
     }
 
     /// The take's frames, or start unpacking its set (once).
@@ -233,6 +332,10 @@ impl App {
     /// Run a review command for the take shown; say what happened.
     fn decide(&mut self, status: Status) {
         let Some(id) = self.id() else { return };
+        if self.review.training.active.is_some() {
+            self.decide_in_set(id, status);
+            return;
+        }
         let mut p = json!({ "id": id, "status": status.word(), "note": self.note, "type": self.kind, "by": "person" });
         let tags: Vec<String> = self
             .tags
@@ -270,6 +373,12 @@ impl App {
 
     fn clear(&mut self) {
         let Some(id) = self.id() else { return };
+        if self.review.training.active.is_some() {
+            if let Some(v) = self.set_command("review.set_remove", json!({ "id": id })) {
+                self.status = format!("{id}: {} removed from the set", v["changed"]);
+            }
+            return;
+        }
         let mut p = serde_json::Map::new();
         p.insert("id".into(), json!(id));
         match self.review.run("review.clear", &p) {
@@ -332,7 +441,7 @@ impl App {
             return;
         }
         let n = self.frames();
-        let (pressed, shift) = ctx.input(|i| {
+        let (pressed, shift, command) = ctx.input(|i| {
             let keys = [
                 Key::Space,
                 Key::ArrowLeft,
@@ -348,10 +457,12 @@ impl App {
                 Key::X,
                 Key::R,
                 Key::Backspace,
+                Key::Z,
             ];
             (
                 keys.into_iter().filter(|k| i.key_pressed(*k)).collect::<Vec<_>>(),
                 i.modifiers.shift,
+                i.modifiers.command,
             )
         });
         let step = if shift { 10 } else { 1 };
@@ -387,6 +498,7 @@ impl App {
                 Key::X => self.uncut_selection(),
                 Key::R => self.decide(Status::Reject),
                 Key::Backspace => self.clear(),
+                Key::Z if command => self.undo(),
                 _ => {}
             }
         }
@@ -399,10 +511,7 @@ impl App {
         };
         self.working = uncut(&self.working, a, b);
         self.selection = None;
-        let decided = self
-            .current
-            .and_then(|(s, t)| self.review.decision(s, t))
-            .map(|d| d.status);
+        let decided = self.current.and_then(|(s, t)| self.review.status_of(s, t));
         if decided == Some(Status::Cut) {
             if self.working.is_empty() {
                 self.decide(Status::Ok);
@@ -422,8 +531,8 @@ impl App {
         }
         let fps = self
             .current
-            .and_then(|(s, _)| self.review.sets.get(s))
-            .map_or(30.0, |s| s.fps);
+            .and_then(|(s, t)| self.review.sets.get(s)?.takes.get(t))
+            .map_or(30.0, |t| t.fps);
         let dt = ctx.input(|i| i.stable_dt) as f64;
         self.clock += dt * fps * self.speed as f64;
         if self.clock >= n as f64 {
@@ -433,7 +542,79 @@ impl App {
         ctx.request_repaint();
     }
 
+    /// The dropdown of training sets, with New, Duplicate, Copy labels from, public and undo.
+    fn sets_bar(&mut self, ui: &mut egui::Ui) {
+        ui.horizontal_wrapped(|ui| {
+            ui.label("Training set");
+            let open = self.review.training.active.as_ref().map(|a| a.name.clone());
+            let mut pick = open.clone();
+            egui::ComboBox::from_id_salt("training-set")
+                .selected_text(open.clone().unwrap_or_else(|| "none (decisions file)".into()))
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(&mut pick, None, "none (decisions file)");
+                    for n in &self.set_names {
+                        ui.selectable_value(&mut pick, Some(n.clone()), n);
+                    }
+                });
+            if pick != open
+                && self.set_command("review.set_open", json!({ "name": pick })).is_some()
+            {
+                self.reselect();
+            }
+            ui.add(
+                egui::TextEdit::singleline(&mut self.new_set)
+                    .hint_text("name")
+                    .desired_width(130.0),
+            );
+            if ui.button("New").clicked() {
+                let name = self.new_set.clone();
+                if self.set_command("review.set_new", json!({ "name": name })).is_some() {
+                    self.new_set.clear();
+                    self.reselect();
+                }
+            }
+            if ui.add_enabled(open.is_some(), egui::Button::new("Duplicate")).clicked() {
+                let name = self.new_set.clone();
+                if self.set_command("review.set_duplicate", json!({ "as": name })).is_some() {
+                    self.new_set.clear();
+                    self.reselect();
+                }
+            }
+            let mut from = None;
+            ui.add_enabled_ui(open.is_some(), |ui| {
+                egui::ComboBox::from_id_salt("copy-labels")
+                    .selected_text("Copy labels from")
+                    .show_ui(ui, |ui| {
+                        for n in self.set_names.iter().filter(|n| Some(*n) != open.as_ref()) {
+                            if ui.selectable_label(false, n).clicked() {
+                                from = Some(n.clone());
+                            }
+                        }
+                    });
+            });
+            if let Some(from) = from
+                && let Some(v) = self.set_command("review.set_copy_labels", json!({ "from": from }))
+            {
+                self.status = format!(
+                    "labels from {from}: {} clips matched, {} changed, {} not in {from}",
+                    v["matched"], v["changed"], v["not_in_source"]
+                );
+                self.reselect();
+            }
+            let public = self.review.training.active.as_ref().map(|a| a.public);
+            if let Some(mut p) = public
+                && ui.checkbox(&mut p, "public").changed()
+            {
+                self.set_command("review.set_public", json!({ "public": p }));
+            }
+            if ui.add_enabled(open.is_some(), egui::Button::new("Undo")).clicked() {
+                self.undo();
+            }
+        });
+    }
+
     fn top(&mut self, ui: &mut egui::Ui) {
+        self.sets_bar(ui);
         ui.horizontal_wrapped(|ui| {
             let before = self.filter.clone();
             egui::ComboBox::from_id_salt("show")
@@ -443,6 +624,7 @@ impl App {
                     Show::Decided => "Decided",
                     Show::All => "All takes",
                     Show::Model => "Model fails",
+                    Show::InSet => "In the set",
                 })
                 .show_ui(ui, |ui| {
                     ui.selectable_value(&mut self.filter.show, Show::Open, "To review")
@@ -454,6 +636,7 @@ impl App {
                         .on_hover_text(
                             "The takes the model fails on (python -m ac_train.flag), worst loss first: look, then decide; a high loss is often just hard motion",
                         );
+                    ui.selectable_value(&mut self.filter.show, Show::InSet, "In the set");
                 });
             let sets: Vec<String> = self.review.sets.iter().map(|s| s.name.clone()).collect();
             egui::ComboBox::from_id_salt("set")
@@ -508,7 +691,7 @@ impl App {
                     continue;
                 };
                 let sc = self.review.scan(s, t);
-                let d = self.review.decision(s, t).map(|d| d.status);
+                let d = self.review.status_of(s, t);
                 let cut = 100.0 * sc.cut_frames as f64 / sc.frames.max(1) as f64;
                 let mut text = format!("{}  {cut:>3.0}%", self.review.id(s, t));
                 let mut reasons = sc.reasons();
@@ -553,7 +736,7 @@ impl App {
                 "{} · {} frames · {:.1} s",
                 set.name,
                 take.frames,
-                take.frames as f64 / set.fps
+                take.frames as f64 / take.fps
             ))
             .weak(),
         );
@@ -629,6 +812,10 @@ impl App {
         ui.separator();
         ui.strong("Your decision");
         let d = self.review.decision(s, t).cloned();
+        let in_set = self.review.training.active.is_some();
+        if in_set {
+            ui.label(badge(self.review.status_of(s, t)));
+        }
         match &d {
             Some(d) => {
                 ui.horizontal(|ui| {
@@ -709,7 +896,17 @@ impl App {
             );
             ui.end_row();
         });
-        if let Some(d) = &d
+        if in_set {
+            ui.horizontal(|ui| {
+                ui.label("Labels");
+                ui.add(egui::TextEdit::singleline(&mut self.labels).hint_text("walk, tired�"));
+                if ui.button("Save labels").clicked() {
+                    let labels = self.labels_typed();
+                    self.set_command("review.set_clip", json!({ "id": id, "labels": labels }));
+                }
+            });
+        }
+        if let Some(d) = d.as_ref().filter(|_| !in_set)
             && ui.button("Save type, style and note").clicked()
         {
             let keep_advance = std::mem::replace(&mut self.advance, false);
@@ -749,7 +946,12 @@ impl App {
             return;
         }
         let Some((s, t)) = self.current else { return };
-        let fps = self.review.sets.get(s).map_or(30.0, |x| x.fps);
+        let fps = self
+            .review
+            .sets
+            .get(s)
+            .and_then(|x| x.takes.get(t))
+            .map_or(30.0, |x| x.fps);
         let flags = self.review.scan(s, t).cuts.clone();
         let bar = Bar {
             frames: n,

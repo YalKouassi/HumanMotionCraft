@@ -16,6 +16,7 @@ path = "src/lib.rs"
 
 [dependencies]
 ac-core.workspace = true
+ac-io.workspace = true
 ac-render.workspace = true
 craft-atomic.workspace = true
 crc32fast = "1.5"

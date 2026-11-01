@@ -145,6 +145,7 @@ name = "ac-review"
 version = "0.3.0"
 dependencies = [
  "ac-core",
+ "ac-io",
  "ac-render",
  "craft-atomic",
  "crc32fast",

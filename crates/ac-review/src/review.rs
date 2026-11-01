@@ -5,7 +5,8 @@
 //! window. Commands: `review.list`, `review.take`, `review.decide`, `review.clear`,
 //! `review.summary` (`review.commands` lists them with their parameters). The model's flags
 //! (`flags.json`, `python -m ac_train.flag`, roadmap 137000) are read beside the scan's: `show:
-//! "model"` lists the takes the model fails on, worst first; nothing decides them.
+//! "model"` lists the takes the model fails on, worst first; nothing decides them. With a training
+//! set open (`set_commands.rs`) a clip's status comes from that set.
 
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -15,7 +16,9 @@ use serde_json::{Map, Value, json};
 use crate::decisions::{self, Decision, Decisions, Status};
 use crate::flags::{Flag, Flags};
 use crate::scan::{self, ScanTake};
+use crate::set_commands::Training;
 use crate::store::{self, Set};
+use crate::training_set;
 
 type R<T> = Result<T, String>;
 type P = Map<String, Value>;
@@ -34,16 +37,25 @@ pub enum Show {
     All,
     /// The takes the model fails on (`flags.json`), worst loss first.
     Model,
+    /// The clips of the training set that is open.
+    InSet,
 }
 
 impl Show {
-    pub const ALL: [Show; 5] = [Show::Open, Show::Flagged, Show::Decided, Show::All, Show::Model];
+    pub const ALL: [Show; 6] = [
+        Show::Open,
+        Show::Flagged,
+        Show::Decided,
+        Show::All,
+        Show::Model,
+        Show::InSet,
+    ];
 
     pub fn parse(s: &str) -> R<Show> {
         Show::ALL
             .into_iter()
             .find(|x| x.word() == s)
-            .ok_or_else(|| format!("show {s:?}: open, flagged, decided, all or model"))
+            .ok_or_else(|| format!("show {s:?}: open, flagged, decided, all, model or set"))
     }
 
     pub fn word(self) -> &'static str {
@@ -53,6 +65,7 @@ impl Show {
             Show::Decided => "decided",
             Show::All => "all",
             Show::Model => "model",
+            Show::InSet => "set",
         }
     }
 }
@@ -87,6 +100,7 @@ pub struct Review {
     pub flags: Flags,
     /// What failed to load (a set, a scan, stale flags): said in the window and by `review.summary`.
     pub problems: Vec<String>,
+    pub training: Training,
 }
 
 static NO_SCAN: ScanTake = ScanTake {
@@ -196,7 +210,22 @@ impl Review {
             decisions,
             flags,
             problems,
+            training: Training::default(),
         })
+    }
+
+    /// A set from elsewhere (a library group), with no scan.
+    pub(crate) fn push_set(&mut self, set: Set) {
+        self.sets.push(set);
+        self.scans.push(HashMap::new());
+    }
+
+    /// What was decided about a clip: in the training set if one is open, else the decisions file.
+    pub fn status_of(&self, set: usize, take: usize) -> Option<Status> {
+        match &self.training.active {
+            Some(a) => a.clips.get(&self.id(set, take)).map(|c| c.review_status()),
+            None => self.decision(set, take).map(|d| d.status),
+        }
     }
 
     pub fn id(&self, set: usize, take: usize) -> String {
@@ -269,13 +298,14 @@ impl Review {
                 continue;
             }
             for (ti, t) in s.takes.iter().enumerate() {
-                let decided = self.decision(si, ti).is_some();
+                let decided = self.status_of(si, ti).is_some();
                 let keep = match f.show {
                     Show::Open => self.flagged(si, ti) && !decided,
                     Show::Flagged => self.flagged(si, ti),
                     Show::Decided => decided,
                     Show::All => true,
                     Show::Model => self.flag(si, ti).is_some(),
+                    Show::InSet => self.training.active.is_some() && decided,
                 };
                 if !keep {
                     continue;
@@ -306,7 +336,7 @@ impl Review {
         out.sort_by(|a, b| {
             let key = |&(s, t): &(usize, usize)| {
                 let sc = self.scan(s, t);
-                (self.decision(s, t).is_some(), sc.reject.is_empty())
+                (self.status_of(s, t).is_some(), sc.reject.is_empty())
             };
             key(a)
                 .cmp(&key(b))
@@ -322,6 +352,10 @@ impl Review {
 
     /// Record a decision and write the file. `cuts` defaults to the scan's for `cut`.
     pub fn decide(&mut self, set: usize, take: usize, mut d: Decision) -> R<()> {
+        // the decisions file is checked in: a private clip's name must never reach it
+        if training_set::is_private(&self.id(set, take)) {
+            return Err("a library clip's decision goes in a training set: open one first".into());
+        }
         let frames = self
             .sets
             .get(set)
@@ -392,6 +426,7 @@ impl Review {
             "scan_reject": sc.reject,
             "reasons": sc.reasons(),
             "decision": self.decision(s, t).map(|d| d.status.word()),
+            "set_clip": self.training.active.as_ref().and_then(|a| a.clips.get(&self.id(s, t))),
             "model": self.flag(s, t).map(|f| json!({
                 "rank": f.rank, "loss": f.loss, "worst": f.worst, "worst_at": f.worst_at, "windows": f.windows,
             })),
@@ -400,8 +435,16 @@ impl Review {
 
     /// The commands and their parameters (`review.commands`).
     pub fn commands() -> Value {
+        let mut all = Review::take_commands();
+        if let (Some(a), Value::Array(b)) = (all.as_array_mut(), Review::set_commands()) {
+            a.extend(b);
+        }
+        all
+    }
+
+    fn take_commands() -> Value {
         json!([
-            {"id": "review.list", "params": "show? (open|flagged|decided|all|model, default open; model: the takes the model fails on, flags.json), set?, reason?, search?, limit? (default 100)", "returns": "{total, takes: [{id, label, frames, scan_cut, scan_reject, reasons, decision, model: {rank, loss, worst, worst_at, windows} | null}]}, worst first"},
+            {"id": "review.list", "params": "show? (open|flagged|decided|all|model|set, default open; model: the takes the model fails on, flags.json; set: the open training set's clips), set?, reason?, search?, limit? (default 100)", "returns": "{total, takes: [{id, label, frames, scan_cut, scan_reject, reasons, decision, model: {rank, loss, worst, worst_at, windows} | null}]}, worst first"},
             {"id": "review.take", "params": "id (<set>/<take>)", "returns": "the take, the scan's numbers and cuts, the model's flag (why, the weighted loss terms) or null, the decision"},
             {"id": "review.decide", "params": "id, status (ok|cut|reject), cuts? ([[first, last]], default the scan's for cut), type?, tags?, note?, by? (default person)", "returns": "the decision as saved"},
             {"id": "review.clear", "params": "id", "returns": "{cleared}"},
@@ -412,6 +455,7 @@ impl Review {
     pub fn run(&mut self, command: &str, p: &P) -> R<Value> {
         match command {
             "review.commands" => Ok(Review::commands()),
+            c if Review::SET_IDS.contains(&c) => self.run_set(c, p),
             "review.list" => {
                 let f = Filter {
                     show: Show::parse(&text(p, "show").unwrap_or_else(|| "open".into()))?,
@@ -519,7 +563,7 @@ impl Review {
                     "review.summary",
                     "review.commands",
                 ];
-                let near = ac_core::suggest::closest(other, ids.iter().copied());
+                let near = ac_core::suggest::closest(other, ids.iter().chain(&Review::SET_IDS).copied());
                 Err(if near.is_empty() {
                     format!("no command {other:?} (review.commands lists them)")
                 } else {
