@@ -166,13 +166,14 @@ def starts(take: Take, length: int) -> np.ndarray:
 
 
 def plan_set(set_name: str, rots_len: int, starts_arr, take_names, decisions=None, scanned=True,
-             rig: pathlib.Path | None = None, npz=None) -> Plan:
+             rig: pathlib.Path | None = None, npz=None, scan: dict | None = None) -> Plan:
     """:func:`plan` for a set as stored in its npz (``starts``, ``takes``, total frames). With the
-    ``npz``, its build stamp is checked too (:func:`ac_train.stamp.check`)."""
+    ``npz``, its build stamp is checked too (:func:`ac_train.stamp.check`). ``scan``: the record of
+    a set made in memory, which has no scan file."""
     built = stamp.check(set_name, npz) if npz is not None else []
     ends = [*list(starts_arr[1:]), rots_len]
     frames = [int(e - s) for s, e in zip(starts_arr, ends)]
-    scan = load_scan(set_name, rig) if scanned else None
+    scan = (scan if scan is not None else load_scan(set_name, rig)) if scanned else None
     p = plan(set_name, take_names, frames, decisions, scan, scanned)
     p.notes[:0] = built
     return p

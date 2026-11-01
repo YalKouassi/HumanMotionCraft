@@ -13,7 +13,8 @@ The goldens pin the port to PyTorch numerically; nothing here runs at app time.
 
 A model trained on a non-commercial set you added (``train --noncommercial``) is never written into the repo:
 give ``--out`` outside it (your app's own models folder, ``<app data>/models/<tag>``) and
-``--golden`` somewhere temporary.
+``--golden`` somewhere temporary. So is a model of a private named set, or of one that read a
+purchased clip (:func:`ac_train.trainset.repo_refusal`).
 """
 
 from __future__ import annotations
@@ -26,7 +27,7 @@ import pathlib
 import numpy as np
 import torch
 
-from . import ASSETS, REPO, infer
+from . import ASSETS, REPO, infer, trainset
 from .clip import Clip
 from .model import BONES, FEAT, PART_GROUPS, known_times
 from .rig import Skeleton
@@ -71,6 +72,10 @@ def export(tag: str, out: pathlib.Path | None = None, gold: pathlib.Path | None 
     card = {**card, "tag": shipped, "checkpoint": checkpoint}
     out = out or ASSETS / "models" / shipped
     gold = gold or REPO / "crates" / "ac-ai" / "tests" / "golden"
+    refusal = trainset.repo_refusal(card)
+    if refusal and any(p.resolve().is_relative_to(REPO.resolve()) for p in (out, gold)):
+        raise SystemExit(f"{tag}: {refusal}, so it stays out of the repo. "
+                         f"Export it with --out <app data>/models/{tag} --golden <a temporary folder>")
     if not card.get("commercial"):
         inside = [p for p in (out, gold) if p.resolve().is_relative_to(REPO.resolve())]
         if inside:

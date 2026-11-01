@@ -12,6 +12,8 @@ So each take belongs to a group (:func:`group_of`), and a group is held out or n
   kinder than the other sets'.
 - AddBiomechanics: the study and subject (``falisse2017_subject_0``, ``han2023_s001``);
 - generated clips (``kimodo``): the prompt, every seed together (``_s1``, ``_s2`` ... dropped);
+- a private library (``library``, roadmap 177000; a take is ``<group>/<name>``, a group
+  ``<pack> - <action>``): the pack, since one pack is often one performer;
 - 100STYLE is one performer and the built-in loops are hand-made: each take is its own group.
 
 A group is held out when a hash of ``<set>/<group>`` falls under :data:`SHARE` (:func:`held_out`).
@@ -47,6 +49,8 @@ def group_of(set_name: str, take: str) -> str:
         return f"{study}_{who}"
     if set_name == "kimodo":
         return re.sub(r"_s\d+$", "", t)
+    if set_name == "library":
+        return t.split("/", 1)[0].split(" - ", 1)[0]
     return t
 
 

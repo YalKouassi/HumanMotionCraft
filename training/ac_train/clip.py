@@ -452,8 +452,8 @@ class Clip:
 
     @classmethod
     def from_dict(cls, d: dict) -> "Clip":
-        if d.get("format") != FORMAT:
-            raise ValueError(f"not a {FORMAT} file")
+        if not str(d.get("format", "")).endswith(".clip"):  # the app writes "<product id>.clip", older files FORMAT
+            raise ValueError(f"not a clip file: {d.get('format')!r}")
         if d.get("version") != VERSION:
             raise ValueError(f"unsupported {FORMAT} version {d.get('version')}")
         clip = cls(bones=list(d["bones"]), fps=float(d["fps"]), loop=bool(d["loop"]), name=d.get("name", ""),
